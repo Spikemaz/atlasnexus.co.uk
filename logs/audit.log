@@ -1,0 +1,1 @@
+2025-08-16 05:00:52 | INFO     | AtlasNexus.audit | log_user_action:86 | USER_ACTION: {"timestamp": "2025-08-16T05:00:52.648579", "user_id": "SPIKEMAZ8@AOL.COM", "action": "REGISTRATION_REQUEST", "details": {"company": "tbc", "role": "Managing Director", "ip": "127.0.0.1"}, "ip_address": null, "session_id": null}
