@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results - Securitization Engine{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Page Header -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="display-6 fw-bold text-dark mb-2">
+                    <i class="fas fa-chart-bar text-primary me-3"></i>
+                    Analysis Results
+                </h1>
+                <p class="lead text-muted mb-0">
+                    {% if results %}
+                        Analysis completed at {{ results['timestamp'][:19] }}
+                    {% else %}
+                        No recent analysis results available
+                    {% endif %}
+                </p>
+            </div>
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('export_results') }}" class="btn btn-success">
+                    <i class="fas fa-download me-2"></i>Export Excel
+                </a>
+                <a href="{{ url_for('analysis') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-plus me-2"></i>New Analysis
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if results %}
+<div class="row g-4">
+    <!-- Key Metrics -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-tachometer-alt me-2"></i>Key Metrics Overview
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="metric-card border-primary">
+                            <div class="metric-value text-primary">{{ results['summary']['total_permutations'] }}</div>
+                            <div class="metric-label">Total Structures</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="metric-card border-success">
+                            <div class="metric-value text-success">{{ results['summary']['viable_permutations'] }}</div>
+                            <div class="metric-label">Viable Structures</div>
+                            <small class="text-muted">({{ results['summary']['viability_rate'] }})</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="metric-card border-warning">
+                            <div class="metric-value text-warning">{{ results['summary']['repo_eligible_count'] }}</div>
+                            <div class="metric-label">Repo Eligible</div>
+                            <small class="text-muted">({{ results['summary']['repo_eligibility_rate'] }})</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="metric-card border-info">
+                            <div class="metric-value text-info">{{ results['summary']['avg_senior_dscr'] }}</div>
+                            <div class="metric-label">Avg Senior DSCR</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="row g-3">
+                    <div class="col-lg-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">Average Total Debt:</span>
+                            <span class="text-primary fw-bold">{{ results['summary']['avg_total_debt'] }}</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">Average WACD:</span>
+                            <span class="text-success fw-bold">{{ results['summary']['avg_wacd'] }}</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">Avg Monetization:</span>
+                            <span class="text-warning fw-bold">{{ results['summary']['avg_total_monetization'] }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tier Distribution -->
+    <div class="col-lg-4">
+        <div class="chart-container">
+            <h6 class="fw-bold mb-3">
+                <i class="fas fa-medal me-2"></i>Tier Distribution
+            </h6>
+            <div id="tierChart" style="height: 400px;"></div>
+        </div>
+    </div>
+    
+    <!-- DSCR vs Debt Analysis -->
+    <div class="col-lg-8">
+        <div class="chart-container">
+            <h6 class="fw-bold mb-3">
+                <i class="fas fa-scatter-chart me-2"></i>DSCR vs Total Debt Analysis
+            </h6>
+            <div id="dscrScatterChart" style="height: 400px;"></div>
+        </div>
+    </div>
+    
+    <!-- WACD Distribution -->
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h6 class="fw-bold mb-3">
+                <i class="fas fa-chart-area me-2"></i>WACD Distribution by Tier
+            </h6>
+            <div id="wacdChart" style="height: 400px;"></div>
+        </div>
+    </div>
+    
+    <!-- Monetization Analysis -->
+    {% if 'monetization_dist' in charts %}
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h6 class="fw-bold mb-3">
+                <i class="fas fa-coins me-2"></i>Monetization Distribution
+            </h6>
+            <div id="monetizationChart" style="height: 400px;"></div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Tier Summary Table -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-table me-2"></i>Tier Summary
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tier</th>
+                                <th>Count</th>
+                                <th>Percentage</th>
+                                <th>Criteria</th>
+                                <th>Quality</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tier, count in results['summary']['tier_distribution'].items() %}
+                            <tr>
+                                <td>
+                                    <span class="tier-badge tier-{{ tier.lower().replace(' ', '-') }}">
+                                        {{ tier }}
+                                    </span>
+                                </td>
+                                <td><strong>{{ count }}</strong></td>
+                                <td>
+                                    {% set percentage = (count / results['summary']['total_permutations'] * 100) | round(1) %}
+                                    {{ percentage }}%
+                                </td>
+                                <td>
+                                    {% if tier == 'Diamond' %}
+                                        Repo eligible, DSCR ≥1.50, High monetization
+                                    {% elif tier == 'Gold' %}
+                                        Repo eligible, DSCR ≥1.40
+                                    {% elif tier == 'Silver' %}
+                                        DSCR ≥1.30, Good fundamentals
+                                    {% elif tier == 'Bronze' %}
+                                        DSCR ≥1.20, Acceptable quality
+                                    {% else %}
+                                        Below minimum thresholds
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if tier == 'Diamond' %}
+                                        <span class="badge bg-primary">Institutional Grade</span>
+                                    {% elif tier == 'Gold' %}
+                                        <span class="badge bg-warning">High Quality</span>
+                                    {% elif tier == 'Silver' %}
+                                        <span class="badge bg-success">Good Quality</span>
+                                    {% elif tier == 'Bronze' %}
+                                        <span class="badge bg-info">Acceptable</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Not Recommended</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Best Structure Highlight -->
+    {% if results['summary']['best_structure_id'] %}
+    <div class="col-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-star me-2"></i>Best Structure Identified
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="fw-bold">Structure ID: {{ results['summary']['best_structure_id'] }}</h6>
+                        <p class="mb-2">
+                            <span class="tier-badge tier-{{ results['summary']['best_structure_tier'].lower() }}">
+                                {{ results['summary']['best_structure_tier'] }}
+                            </span>
+                            <span class="ms-3">
+                                <strong>Score:</strong> {{ results['summary']['best_structure_score'] }}
+                            </span>
+                        </p>
+                        <p class="text-muted mb-0">
+                            This structure represents the optimal balance of risk, return, and regulatory compliance
+                            based on your analysis parameters.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-outline-warning" onclick="highlightStructure({{ results['summary']['best_structure_id'] }})">
+                            <i class="fas fa-search me-2"></i>View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Analysis Parameters Used -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-cog me-2"></i>Analysis Parameters Used
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <strong>Max Permutations:</strong><br>
+                        <span class="text-muted">{{ results['parameters']['max_permutations'] }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Jurisdiction:</strong><br>
+                        <span class="text-muted">{{ results['parameters']['jurisdiction'] }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Senior DSCR Range:</strong><br>
+                        <span class="text-muted">{{ results['parameters']['senior_dscr_min'] }} - {{ results['parameters']['senior_dscr_max'] }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Monetization:</strong><br>
+                        <span class="text-muted">{{ 'Enabled' if results['parameters']['include_monetization'] else 'Disabled' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- No Results State -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center p-5">
+                <div class="display-1 text-muted mb-4">
+                    <i class="fas fa-chart-bar opacity-25"></i>
+                </div>
+                <h3 class="fw-bold text-muted">No Analysis Results Available</h3>
+                <p class="lead text-muted mb-4">
+                    Run your first analysis to see comprehensive results and visualizations
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('analysis') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-calculator me-2"></i>
+                        Configure Analysis
+                    </a>
+                    <button class="btn btn-outline-secondary btn-lg" onclick="showSampleResults()">
+                        <i class="fas fa-eye me-2"></i>
+                        View Sample
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+{% if results and charts %}
+<script>
+// Render charts
+{% if 'tier_distribution' in charts %}
+var tierData = {{ charts['tier_distribution'] | safe }};
+Plotly.newPlot('tierChart', tierData.data, tierData.layout, {responsive: true});
+{% endif %}
+
+{% if 'dscr_scatter' in charts %}
+var dscrData = {{ charts['dscr_scatter'] | safe }};
+Plotly.newPlot('dscrScatterChart', dscrData.data, dscrData.layout, {responsive: true});
+{% endif %}
+
+{% if 'wacd_box' in charts %}
+var wacdData = {{ charts['wacd_box'] | safe }};
+Plotly.newPlot('wacdChart', wacdData.data, wacdData.layout, {responsive: true});
+{% endif %}
+
+{% if 'monetization_dist' in charts %}
+var monetizationData = {{ charts['monetization_dist'] | safe }};
+Plotly.newPlot('monetizationChart', monetizationData.data, monetizationData.layout, {responsive: true});
+{% endif %}
+
+// Make charts responsive
+window.addEventListener('resize', function() {
+    Plotly.Plots.resize('tierChart');
+    Plotly.Plots.resize('dscrScatterChart');
+    Plotly.Plots.resize('wacdChart');
+    {% if 'monetization_dist' in charts %}
+    Plotly.Plots.resize('monetizationChart');
+    {% endif %}
+});
+</script>
+{% endif %}
+
+<script>
+function highlightStructure(structureId) {
+    alert(`Structure ID ${structureId} details:\n\nThis is the highest-scoring structure based on your analysis criteria.\n\nDetailed structure analysis will be available in the next update.`);
+}
+
+function showSampleResults() {
+    alert('Sample results feature will be added in the next update.\n\nRun a real analysis to see comprehensive visualizations and metrics.');
+}
+
+// Auto-refresh toggle
+let autoRefreshEnabled = false;
+function toggleAutoRefresh() {
+    autoRefreshEnabled = !autoRefreshEnabled;
+    if (autoRefreshEnabled) {
+        startAutoRefresh(60); // Refresh every minute
+        document.getElementById('autoRefreshBtn').innerHTML = '<i class="fas fa-pause me-2"></i>Stop Auto Refresh';
+        document.getElementById('autoRefreshBtn').className = 'btn btn-warning btn-sm';
+    } else {
+        stopAutoRefresh();
+        document.getElementById('autoRefreshBtn').innerHTML = '<i class="fas fa-sync me-2"></i>Auto Refresh';
+        document.getElementById('autoRefreshBtn').className = 'btn btn-outline-info btn-sm';
+    }
+}
+
+// Add auto refresh button to page header
+document.addEventListener('DOMContentLoaded', function() {
+    const headerDiv = document.querySelector('.d-flex.gap-3');
+    if (headerDiv) {
+        const autoRefreshBtn = document.createElement('button');
+        autoRefreshBtn.id = 'autoRefreshBtn';
+        autoRefreshBtn.className = 'btn btn-outline-info btn-sm';
+        autoRefreshBtn.innerHTML = '<i class="fas fa-sync me-2"></i>Auto Refresh';
+        autoRefreshBtn.onclick = toggleAutoRefresh;
+        headerDiv.appendChild(autoRefreshBtn);
+    }
+});
+
+// Print functionality
+function printResults() {
+    window.print();
+}
+
+// Add print button
+document.addEventListener('DOMContentLoaded', function() {
+    const headerDiv = document.querySelector('.d-flex.gap-3');
+    if (headerDiv) {
+        const printBtn = document.createElement('button');
+        printBtn.className = 'btn btn-outline-secondary';
+        printBtn.innerHTML = '<i class="fas fa-print me-2"></i>Print';
+        printBtn.onclick = printResults;
+        headerDiv.appendChild(printBtn);
+    }
+});
+</script>
+{% endblock %}

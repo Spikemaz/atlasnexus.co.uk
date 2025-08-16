@@ -1,0 +1,2511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Portal</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iNyIgeT0iMTMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxNSIgcng9IjMiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iIzMzMzMzMyIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxjaXJjbGUgY3g9IjE2IiBjeT0iMjAuNSIgcj0iMiIgZmlsbD0iIzMzMzMzMyIvPgo8cGF0aCBkPSJNMTEgOSBDMTEgNS4xMyAxMy4xMyAzIDE3IDMgQzIwLjg3IDMgMjMgNS4xMyAyMyA5IFYxMyBIMjAgVjkgQzIwIDYuNzkgMTguMjEgNSAxNiA1IEMxMy43OSA1IDEyIDYuNzkgMTIgOSBWMTMgSDkgVjkgWiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzMzMzIiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8L3N2Zz4K" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+Pro:wght@400;600&display=swap" rel="stylesheet">
+    <script>
+        // CRITICAL SECURITY CHECK - Must run IMMEDIATELY in HEAD to prevent flash
+        (function() {
+            const isPermanentlyLocked = localStorage.getItem('permanentLockout');
+            if (isPermanentlyLocked === 'true') {
+                // Prevent multiple executions
+                if (window.blackScreenInitialized) return;
+                window.blackScreenInitialized = true;
+                
+                // Immediately hide body content and set black screen
+                document.documentElement.style.cssText = 'margin:0;padding:0;background:#000;color:#dc2626;font-family:"Source Serif Pro",serif;height:100vh;overflow:hidden;';
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.body.style.display = 'none';
+                    document.head.innerHTML = '<title>Access Terminated</title>';
+                    document.body.innerHTML = `
+                        <div style="position:fixed;top:30px;left:50%;transform:translateX(-50%);text-align:center;font-size:1.4rem;font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.9),0 0 3px rgba(220,38,38,0.8),1px 1px 0 rgba(255,255,255,0.3);line-height:1.5;z-index:10000;">
+                            SECURITY VIOLATION DETECTED<br>
+                            Your IP Address: TRACKED & LOGGED<br>
+                            ACCESS PERMANENTLY TERMINATED
+                        </div>
+                        <div id="secretArea" style="position:fixed;bottom:10px;left:10px;width:30px;height:30px;background:transparent;cursor:pointer;z-index:10001;"></div>
+                        <div id="secretMenu" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,20,25,0.95);border:2px solid #dc2626;border-radius:8px;padding:30px;display:none;z-index:10002;text-align:center;">
+                            <div style="color:#faf9f7;font-family:'Source Serif Pro',serif;margin-bottom:15px;font-size:1.2rem;">Global Access Override</div>
+                            <input type="password" id="globalPassword" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.3);border-radius:4px;padding:10px;color:#faf9f7;font-family:'Source Serif Pro',serif;font-size:1rem;text-align:center;margin:10px 0;outline:none;" placeholder="Enter global password" maxlength="20" autocomplete="off">
+                            <div style="color:rgba(255,255,255,0.6);font-size:1rem;margin-top:10px;">Press Enter to submit</div>
+                        </div>
+                    `;
+                    document.body.style.display = 'flex';
+                    document.body.style.flexDirection = 'column';
+                    document.body.style.alignItems = 'center';
+                    document.body.style.justifyContent = 'flex-start';
+                    document.body.style.height = '100vh';
+                    document.body.style.margin = '0';
+                    document.body.style.background = '#000000';
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Initialize secret unlock
+                    let clickCount = 0;
+                    let clickTimer;
+                    document.getElementById('secretArea').addEventListener('click', function() {
+                        clickCount++;
+                        if (clickCount === 1) {
+                            clickTimer = setTimeout(() => clickCount = 0, 2000);
+                        }
+                        if (clickCount === 4) {
+                            clearTimeout(clickTimer);
+                            clickCount = 0;
+                            document.getElementById('secretMenu').style.display = 'block';
+                        }
+                    });
+                    
+                    document.getElementById('globalPassword').addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            const password = this.value;
+                            this.value = '';
+                            if (password === 'Ronabambi') {
+                                localStorage.clear();
+                                window.location.href = '/?lockout_reset=true';
+                            } else if (password.length > 0) {
+                                // Log failed unlock attempt
+                                fetch('/api/log_password_attempt', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        password: password,
+                                        timestamp: new Date().toISOString(),
+                                        userAgent: navigator.userAgent,
+                                        context: 'black_screen_main_page_unlock_attempt'
+                                    })
+                                }).catch(err => console.log('Logging failed'));
+                                
+                                // Trigger permanent lockout - maintain URL consistency
+                                console.log('INCORRECT PASSWORD IN BLACK SCREEN MODE - Staying on main page');
+                                // No redirect needed - existing black screen logic handles display
+                            }
+                        }
+                    });
+                });
+                return;
+            }
+        })();
+    </script>
+    
+    <style>
+        :root {
+            --oxford-blue: #0f1419;
+            --charcoal: #1a1f2e;
+            --slate-grey: #2a3441;
+            --warm-cream: #faf9f7;
+            --parchment: #f4f2ed;
+            --burgundy: #722f37;
+            --deep-burgundy: #5a252a;
+            --antique-gold: #d4af37;
+            --silver-grey: #8e9aaf;
+            --ivory: #fffff0;
+            --coat-arms-red: #dc2626;
+            --coat-arms-red-light: #ef4444;
+        }
+        
+        body { 
+            background: linear-gradient(135deg, var(--oxford-blue) 0%, var(--charcoal) 50%, var(--slate-grey) 100%);
+            min-height: 100vh; 
+            font-family: 'Source Serif Pro', serif;
+            position: relative;
+        }
+        
+        body.blocked-mode {
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at var(--mouse-x, 20%) var(--mouse-y, 20%), rgba(212, 175, 55, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at var(--mouse-x-inv, 80%) var(--mouse-y-inv, 80%), rgba(220, 38, 38, 0.08) 0%, transparent 35%),
+                repeating-linear-gradient(90deg, transparent, transparent 29px, rgba(220, 38, 38, 0.02) 30px),
+                repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(220, 38, 38, 0.02) 30px);
+            background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .access-card {
+            background: var(--warm-cream);
+            border: 2px solid var(--coat-arms-red);
+            border-radius: 6px;
+            box-shadow: 
+                0 0 0 1px rgba(220, 38, 38, 0.3),
+                0 20px 60px rgba(0, 0, 0, 0.6),
+                0 8px 25px rgba(220, 38, 38, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(8px);
+            position: relative;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .access-card::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(45deg, var(--coat-arms-red), var(--antique-gold), var(--coat-arms-red));
+            border-radius: 8px;
+            z-index: -1;
+        }
+        
+        .coat-of-arms {
+            width: 190px;
+            height: 210px;
+            margin: 0 auto 20px;
+            position: relative;
+            background: linear-gradient(145deg, #ffffff 0%, #f8f6f0 100%);
+            border-radius: 18px;
+            border: 4px solid var(--coat-arms-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                0 15px 35px rgba(220, 38, 38, 0.3),
+                0 8px 22px rgba(0, 0, 0, 0.4),
+                inset 0 3px 6px rgba(255, 255, 255, 0.9),
+                inset 0 -3px 6px rgba(220, 38, 38, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .coat-of-arms:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 18px 40px rgba(220, 38, 38, 0.35),
+                0 10px 25px rgba(0, 0, 0, 0.45),
+                inset 0 3px 6px rgba(255, 255, 255, 0.9),
+                inset 0 -3px 6px rgba(220, 38, 38, 0.15);
+        }
+        
+        .coat-of-arms::before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            right: 3px;
+            bottom: 3px;
+            background: linear-gradient(145deg, rgba(220, 38, 38, 0.05) 0%, transparent 60%);
+            border-radius: 15px;
+        }
+        
+        .moorcock-heraldic {
+            font-size: 42px;
+            color: var(--oxford-blue);
+            text-shadow: 
+                1px 1px 0 var(--burgundy),
+                2px 2px 4px rgba(0, 0, 0, 0.3);
+            transform: translateY(-3px);
+            z-index: 2;
+            position: relative;
+        }
+        
+        .crest {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            color: var(--antique-gold);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .institution-title {
+            font-family: 'Playfair Display', serif;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.8),
+                0 0 2px rgba(15, 20, 25, 0.8),
+                1px 1px 0 rgba(15, 20, 25, 0.6);
+            letter-spacing: 1px;
+        }
+        
+        .access-subtitle {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 0;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.8),
+                0 0 2px rgba(15, 20, 25, 0.8),
+                1px 1px 0 rgba(15, 20, 25, 0.6);
+        }
+        
+        .form-control {
+            background: var(--ivory);
+            border: 2px solid var(--antique-gold);
+            border-radius: 6px;
+            padding: 16px 22px;
+            font-family: 'Source Serif Pro', serif;
+            font-size: 16px;
+            letter-spacing: 2px;
+            color: var(--oxford-blue);
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .form-control:focus {
+            background: #ffffff;
+            border-color: var(--antique-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
+            outline: none;
+        }
+        
+        .form-control::placeholder {
+            color: rgba(15, 20, 25, 0.6);
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        
+        .btn-authenticate {
+            background: linear-gradient(145deg, var(--charcoal) 0%, var(--slate-grey) 100%);
+            border: 2px solid var(--antique-gold);
+            border-radius: 6px;
+            padding: 16px 20px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            color: var(--antique-gold);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        .btn-authenticate::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-authenticate:hover {
+            background: linear-gradient(145deg, var(--charcoal) 0%, var(--oxford-blue) 100%);
+            border-color: var(--coat-arms-red);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+            color: var(--antique-gold);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+        }
+        
+        .btn-authenticate:hover::before {
+            left: 100%;
+        }
+        
+        @keyframes pulse {
+            0% { 
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.1);
+                transform: scale(1.02);
+            }
+            100% { 
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+                transform: scale(1);
+            }
+        }
+        
+        .btn-authenticate {
+            animation: pulse 3s infinite;
+        }
+        
+        .btn-authenticate:active {
+            transform: scale(0.98);
+            transition: transform 0.1s ease;
+        }
+        
+        .security-indicator {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(250, 249, 247, 0.98));
+            border: 2px solid var(--antique-gold);
+            border-radius: 8px;
+            padding: 16px 20px;
+            color: var(--oxford-blue);
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            backdrop-filter: blur(6px);
+            box-shadow: 
+                0 6px 16px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            text-shadow: 
+                1px 1px 2px rgba(0, 0, 0, 0.6),
+                0 0 1px rgba(255, 255, 255, 0.9);
+        }
+        
+        .security-icon {
+            color: var(--antique-gold);
+            font-size: 1.1rem;
+            margin-right: 8px;
+            text-shadow: 
+                1px 1px 2px rgba(0, 0, 0, 0.7),
+                0 0 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .footer-text {
+            color: rgba(250, 249, 247, 0.85);
+            font-size: 1rem;
+            font-family: 'Source Serif Pro', serif;
+        }
+        
+        .footer-icon {
+            color: var(--antique-gold);
+        }
+        
+        .alert-custom {
+            background: linear-gradient(145deg, rgba(220, 38, 38, 0.9), rgba(185, 28, 28, 0.9));
+            border: 1px solid var(--coat-arms-red);
+            border-radius: 4px;
+            color: var(--warm-cream);
+            font-family: 'Source Serif Pro', serif;
+        }
+        
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--antique-gold), transparent);
+            margin: 20px 0;
+        }
+        
+        .classification-banner {
+            background: linear-gradient(145deg, var(--burgundy), var(--deep-burgundy));
+            color: var(--warm-cream);
+            text-align: center;
+            padding: 8px;
+            font-family: 'Source Serif Pro', serif;
+            font-weight: 600;
+            letter-spacing: 2px;
+            font-size: 1rem;
+            border-bottom: 2px solid var(--antique-gold);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        
+        .header-info {
+            background: rgba(15, 20, 25, 0.9);
+            color: var(--warm-cream);
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            font-family: 'Source Serif Pro', serif;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            font-weight: 500;
+        }
+        
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            margin-right: 6px;
+            animation: securePulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 5px #22c55e; }
+            to { box-shadow: 0 0 10px #22c55e, 0 0 15px #22c55e; }
+        }
+        
+        @keyframes securePulse {
+            0% { 
+                background: #22c55e;
+                box-shadow: 0 0 5px #22c55e;
+            }
+            50% { 
+                background: #16a34a;
+                box-shadow: 0 0 15px #22c55e, 0 0 25px #16a34a;
+            }
+            100% { 
+                background: #22c55e;
+                box-shadow: 0 0 5px #22c55e;
+            }
+        }
+        
+        
+        .network-status {
+            position: fixed;
+            top: 40px;
+            right: 20px;
+            background: rgba(220, 38, 38, 0.95);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            color: var(--warm-cream);
+            backdrop-filter: blur(6px);
+            box-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.2),
+                0 0 0 2px rgba(0, 0, 0, 0.8);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        .session-timeout {
+            position: fixed;
+            top: 40px;
+            left: 20px;
+            background: rgba(220, 38, 38, 0.95);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            color: var(--warm-cream);
+            backdrop-filter: blur(6px);
+            box-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.2),
+                0 0 0 2px rgba(0, 0, 0, 0.8);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            text-align: center;
+            min-width: 110px;
+        }
+        
+        .timeout-display {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--warm-cream);
+            margin: 2px 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+        }
+        
+        .blocked-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--oxford-blue) 0%, var(--charcoal) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            z-index: 9999;
+            color: var(--warm-cream);
+            text-align: center;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .blocked-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 700;
+            color: #dc2626;
+            margin-bottom: 25px;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.8),
+                0 0 2px rgba(255, 255, 255, 0.3);
+        }
+        
+        .blocked-message {
+            font-family: 'Source Serif Pro', serif;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            margin-bottom: 30px;
+            max-width: 90%;
+            line-height: 1.6;
+            text-shadow: 
+                1px 1px 3px rgba(0, 0, 0, 0.9),
+                0 0 2px rgba(255, 255, 255, 0.7);
+        }
+        
+        .blocked-timer {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 6vw, 3rem);
+            font-weight: 700;
+            color: #dc2626;
+            margin: 20px 0;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.8),
+                0 0 2px rgba(255, 255, 255, 0.3);
+        }
+        
+        .warning-text {
+            font-family: 'Source Serif Pro', serif;
+            font-size: 1rem;
+            color: var(--warm-cream);
+            margin: 15px 0;
+            font-weight: 600;
+            text-shadow: 
+                1px 1px 3px rgba(0, 0, 0, 0.8),
+                0 0 1px rgba(255, 255, 255, 0.2);
+        }
+        
+        .support-info {
+            font-family: 'Source Serif Pro', serif;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            color: var(--warm-cream);
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(220, 38, 38, 0.2);
+            border: 2px solid #dc2626;
+            border-radius: 8px;
+            max-width: 90%;
+            width: 100%;
+            text-shadow: 
+                1px 1px 2px rgba(0, 0, 0, 0.9),
+                0 0 1px rgba(255, 255, 255, 0.6);
+            box-sizing: border-box;
+        }
+        
+        .email-highlight {
+            color: #fbbf24;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-shadow: 
+                1px 1px 3px rgba(0, 0, 0, 0.9),
+                0 0 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        .ip-warning {
+            font-family: 'Source Serif Pro', serif;
+            font-size: 1.1rem;
+            color: var(--warm-cream);
+            margin-top: 20px;
+            font-style: italic;
+            text-shadow: 
+                1px 1px 3px rgba(0, 0, 0, 0.8),
+                0 0 1px rgba(255, 255, 255, 0.2);
+        }
+        
+        .session-info {
+            font-family: 'Source Serif Pro', serif;
+            font-size: 1.1rem;
+            color: rgba(250, 249, 247, 0.7);
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        .email-link {
+            color: var(--warm-cream);
+            text-decoration: underline;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-shadow: 
+                1px 1px 3px rgba(0, 0, 0, 0.8),
+                0 0 1px rgba(255, 255, 255, 0.3);
+        }
+        
+        .email-link:hover {
+            color: #ffffff;
+            text-decoration: none;
+        }
+        
+        .bank-symbol {
+            position: fixed;
+            bottom: 50px;
+            left: 20px;
+            color: var(--antique-gold);
+            font-size: 1rem;
+            font-family: 'Source Serif Pro', serif;
+        }
+        
+        .main-content {
+            margin-top: 20px;
+            padding-bottom: 80px;
+            transform: translateY(-30px);
+        }
+        
+        .footer-copyright {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 20, 25, 0.95);
+            color: rgba(250, 249, 247, 0.8);
+            text-align: center;
+            padding: 12px;
+            font-size: 0.9rem;
+            font-family: 'Source Serif Pro', serif;
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .global-unlock {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+            width: 80px;
+            height: 25px;
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.3);
+            text-align: center;
+            padding: 5px;
+            outline: none;
+            font-family: monospace;
+            opacity: 0.1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .global-unlock:focus {
+            opacity: 0.8;
+            background: rgba(0, 0, 0, 0.8);
+            color: rgba(255, 255, 255, 0.9);
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+        
+        .global-unlock::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 9px;
+        }
+        
+        .copy-email-btn:hover,
+        .copy-session-btn:hover {
+            background: linear-gradient(145deg, #e6c547, var(--antique-gold)) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+        }
+        
+        @keyframes pulse {
+            0% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .secret-unlock {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 30px;
+            height: 30px;
+            background: transparent;
+            cursor: pointer;
+            z-index: 10001;
+            display: none; /* Hidden by default */
+        }
+        
+        /* Only show secret unlock when blocked page is displayed */
+        .blocked-mode .secret-unlock {
+            display: block;
+        }
+        
+        .secret-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 20, 25, 0.95);
+            border: 2px solid #dc2626;
+            border-radius: 8px;
+            padding: 30px;
+            display: none;
+            z-index: 10002;
+            text-align: center;
+        }
+        
+        /* Ensure secret menu can only appear when blocked page is shown */
+        .blocked-mode .secret-menu {
+            /* Will be shown via JavaScript when needed */
+        }
+        
+        .black-screen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            display: none;
+            z-index: 15000;
+            overflow: hidden;
+            font-family: 'Source Serif Pro', serif;
+        }
+        
+        .black-screen-overlay .ip-warning-header {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Source Serif Pro', serif;
+            font-size: 1.4rem;
+            color: #dc2626;
+            font-weight: 700;
+            text-align: center;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.9),
+                0 0 3px rgba(220, 38, 38, 0.8),
+                1px 1px 0 rgba(255, 255, 255, 0.3);
+            z-index: 15001;
+            line-height: 1.5;
+        }
+        
+        .secret-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            padding: 10px;
+            color: var(--warm-cream);
+            font-family: 'Source Serif Pro', serif;
+            font-size: 1rem;
+            text-align: center;
+            margin: 10px 0;
+            outline: none;
+        }
+        
+        .secret-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Custom Recovery Dialog */
+        .recovery-dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .recovery-dialog-overlay.show {
+            opacity: 1;
+        }
+        
+        .recovery-dialog {
+            background: linear-gradient(135deg, var(--oxford-blue) 0%, var(--charcoal) 50%, var(--slate-grey) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.6);
+            border-radius: 6px;
+            padding: 25px;
+            max-width: 550px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            text-align: center;
+            color: var(--warm-cream);
+            font-family: 'Source Serif Pro', serif;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.6),
+                0 0 30px rgba(220, 38, 38, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            backdrop-filter: blur(10px);
+            transform: scale(0.7) translateY(-20px);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .recovery-dialog-overlay.show .recovery-dialog {
+            transform: scale(1) translateY(0);
+        }
+        
+        .dialog-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            color: var(--warm-cream);
+            cursor: pointer;
+            font-weight: bold;
+            line-height: 1;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .dialog-close:hover {
+            opacity: 1;
+        }
+        
+        .recovery-dialog h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--warm-cream);
+            margin-bottom: 30px;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.9),
+                0 0 3px rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.5px;
+        }
+        
+        .recovery-dialog p {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            margin-bottom: 25px;
+            text-shadow: 
+                1px 1px 3px rgba(0, 0, 0, 0.9),
+                0 0 2px rgba(255, 255, 255, 0.4);
+            font-weight: 400;
+        }
+        
+        .recovery-option-box {
+            background: linear-gradient(145deg, 
+                rgba(220, 38, 38, 0.12), 
+                rgba(114, 47, 55, 0.15));
+            border: 1px solid rgba(220, 38, 38, 0.4);
+            border-radius: 8px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: left;
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .recovery-option-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--warm-cream);
+            text-align: center;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.9),
+                0 0 3px rgba(255, 255, 255, 0.3),
+                1px 1px 0 rgba(0, 0, 0, 1);
+        }
+        
+        .recovery-warning-text {
+            font-size: 1.05rem;
+            color: var(--warm-cream);
+            font-style: italic;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            text-align: center;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.9),
+                0 0 3px rgba(255, 255, 255, 0.3),
+                1px 1px 0 rgba(0, 0, 0, 1);
+        }
+        
+        .recovery-contact-section {
+            background: linear-gradient(145deg, 
+                rgba(15, 20, 25, 0.8), 
+                rgba(26, 31, 46, 0.6));
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .recovery-contact-item {
+            margin-bottom: 18px;
+            padding: 12px 0;
+        }
+        
+        .recovery-contact-label {
+            display: block;
+            font-size: 1rem;
+            color: rgba(250, 249, 247, 0.8);
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        .recovery-contact-value {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--antique-gold);
+            margin-bottom: 10px;
+            text-shadow: 
+                1px 1px 3px rgba(0, 0, 0, 0.8),
+                0 0 2px rgba(212, 175, 55, 0.4);
+        }
+        
+        .recovery-copy-btn {
+            background: linear-gradient(145deg, var(--antique-gold), #b8941f);
+            color: var(--oxford-blue);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 3px 8px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            text-shadow: none;
+            min-width: 80px;
+        }
+        
+        .recovery-copy-btn:hover {
+            background: linear-gradient(145deg, #e6c547, var(--antique-gold));
+            transform: translateY(-1px);
+            box-shadow: 
+                0 5px 15px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+        
+        .recovery-id-box {
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid var(--antique-gold);
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fbbf24;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+        }
+        
+        .dialog-buttons {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .dialog-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Source Serif Pro', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .dialog-btn-proceed {
+            background: #dc2626;
+            color: white;
+            border: 2px solid #dc2626;
+        }
+        
+        .dialog-btn-proceed:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+        }
+        
+        .dialog-btn-cancel {
+            background: transparent;
+            color: var(--warm-cream);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .dialog-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Information -->
+    <div class="header-info">
+        <div>
+            <i class="fas fa-clock me-1"></i>
+            <span id="current-datetime"></span>
+        </div>
+        <div>
+            <i class="fas fa-sync-alt me-1"></i>
+            Last Updated: <span id="last-updated"></span>
+        </div>
+    </div>
+    
+    <div class="container main-content">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-11 col-sm-10 col-md-8 col-lg-7 col-xl-6">
+                <div class="access-card p-5">
+                    <div class="text-center mb-4">
+                        <div class="coat-of-arms">
+                            <img src="../My Core Files/Coat of arms2.png" 
+                                 alt="Moore Coat of Arms" 
+                                 style="width: 92%; height: 92%; object-fit: contain; z-index: 2; position: relative;">
+                        </div>
+                        <h1 class="institution-title">SECURE ACCESS</h1>
+                        <p class="access-subtitle">Authorised Personnel Only</p>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-custom mb-4">
+                                    Access Denied
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <!-- Access Denied Attempts Warning -->
+                    <div id="accessDeniedWarning" class="alert alert-custom mb-4" style="display: none; text-align: center;">
+                        <span id="accessDeniedText" style="color: var(--warm-cream); font-weight: 700; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 3px rgba(255, 255, 255, 0.3), 1px 1px 0 rgba(0, 0, 0, 1);">Access Denied: <span id="attemptsRemainingDisplay">3</span> attempts remaining</span>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('site_auth') }}" class="needs-validation" novalidate>
+                        <div class="mb-4">
+                            <input type="password" class="form-control form-control-lg" 
+                                   id="site_password" name="site_password" required
+                                   placeholder="Enter Access Code"
+                                   autofocus>
+                        </div>
+                        <button type="submit" class="btn btn-authenticate btn-lg w-100">
+                            <i class="fas fa-key me-2"></i>AUTHENTICATE
+                        </button>
+                    </form>
+                    
+                    <div class="divider"></div>
+                    
+                    
+                    
+                    <div class="security-indicator text-center">
+                        <i class="fas fa-lock security-icon me-2"></i>
+                        Encrypted Connection
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Network Status (separate from main window) -->
+    <div class="network-status">
+        <span class="status-dot"></span>
+        <strong>SECURE</strong><br>
+        <small>Network Status</small>
+    </div>
+    
+    <!-- Session Timeout (separate from main window) -->
+    <div class="session-timeout">
+        <div class="timeout-display" id="session-timer">15:00</div>
+        <small>Session Timeout</small>
+    </div>
+    
+    <!-- Blocked Page (hidden by default) -->
+    <div id="blocked-page" class="blocked-page" style="display: none;">
+        <div class="ip-warning-header" style="font-family: 'Source Serif Pro', serif; font-size: 1.1rem; color: #fbbf24; margin-bottom: 20px; font-weight: 600; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);">
+            Your IP Address: <span id="userIpAddress">Detecting...</span>
+        </div>
+        <div class="blocked-title">
+            <i class="fas fa-ban me-3"></i>
+            ACCESS BLOCKED
+        </div>
+        <div class="blocked-message">
+            <strong>SECURITY BREACH DETECTED</strong><br>
+            Unauthorized access attempt has triggered permanent security protocols.
+        </div>
+        
+        <div class="blocked-timer" id="block-timer">44:59</div>
+        
+        <div class="warning-text">
+            PERMANENT REGION LOCKOUT IMMINENT
+        </div>
+        
+        <div class="support-info">
+            <div style="font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; color: #dc2626; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(255, 255, 255, 0.3);">
+                IMMEDIATE ACTION REQUIRED
+            </div>
+            <div style="margin-bottom: 10px;">
+                Contact support IMMEDIATELY to prevent permanent lockout:
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                <a href="" class="email-link" id="supportEmail">Support@AtlasNexus.co.uk</a>
+                <button onclick="copyBlockedEmail()" class="copy-email-btn" style="background: linear-gradient(145deg, var(--antique-gold), #b8941f); color: var(--oxford-blue); border: none; padding: 8px 16px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3); text-shadow: none; min-width: 80px;">Copy Email</button>
+            </div>
+            <div style="margin-top: 15px; font-size: 1.1rem;">
+                Include the following information in your message:
+            </div>
+            
+            <!-- Session Information Inside Support Box -->
+            <div style="margin: 15px auto 0 auto; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1); text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); font-size: 1rem; text-align: center; max-width: 400px; display: inline-block;">
+                <div style="margin-bottom: 8px;"><strong>Session ID:</strong><br><span id="sessionId" style="font-family: monospace; color: var(--antique-gold); font-size: 0.95rem;"></span></div>
+                <div style="margin-bottom: 8px;"><strong>Timestamp:</strong><br><span id="timestamp" style="font-family: monospace; color: var(--antique-gold); font-size: 0.95rem;"></span></div>
+                <div style="margin-bottom: 15px;"><strong>Security Event:</strong><br><span style="font-family: monospace; color: #dc2626; font-size: 0.95rem; font-weight: 600;">UNAUTHORIZED_ACCESS_ATTEMPT</span></div>
+                
+                <!-- Copy Session Info Button -->
+                <button onclick="copySessionInfo()" class="copy-session-btn" style="background: linear-gradient(145deg, var(--antique-gold), #b8941f); color: var(--oxford-blue); border: none; padding: 8px 20px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3); text-shadow: none;">Copy Session Info</button>
+            </div>
+        </div>
+        
+        <div class="session-info" style="display: none;">
+            <!-- This section is now hidden as info moved to support box -->
+        </div>
+        
+        <div class="ip-warning">
+            Your IP address and geolocation have been logged and disclosed to our security host.<br>
+            Law enforcement protocols may be initiated for repeated violations.
+        </div>
+        
+        <!-- Secret Unlock Area -->
+        <div id="blockedSecretArea" class="secret-unlock"></div>
+        
+        <!-- Secret Menu -->
+        <div id="blockedSecretMenu" class="secret-menu">
+            <div style="color: var(--warm-cream); font-family: 'Source Serif Pro', serif; margin-bottom: 15px; font-size: 1.2rem;">
+                Global Access Override
+            </div>
+            <input type="password" id="blockedSecretInput" class="secret-input" placeholder="Enter global password" maxlength="20" autocomplete="off">
+            <div style="color: rgba(255, 255, 255, 0.6); font-size: 1rem; margin-top: 10px;">
+                Press Enter to submit
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bank Symbol -->
+    <div class="bank-symbol">
+        <i class="fas fa-university me-2"></i>
+        Global Access Portal
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer-copyright">
+        <i class="fas fa-copyright me-1"></i>
+        Copyright © 2022 - All Rights Reserved
+    </div>
+    
+    <!-- Permanent Lockout Page -->
+    <div id="permanentLockout" class="permanent-lockout"></div>
+    
+    <!-- Black Screen Overlay -->
+    <div id="blackScreenOverlay" class="black-screen-overlay">
+        <!-- IP Warning Header -->
+        <div class="ip-warning-header">
+            SECURITY VIOLATION DETECTED<br>
+            Your IP Address: <span id="mainBlackScreenIpAddress">Detecting...</span><br>
+            ACCESS PERMANENTLY TERMINATED
+        </div>
+        
+        <!-- Secret Unlock Area -->
+        <div id="mainBlackSecretArea" class="secret-unlock"></div>
+        
+        <!-- Secret Menu -->
+        <div id="mainBlackSecretMenu" class="secret-menu">
+            <div style="color: var(--warm-cream); font-family: 'Source Serif Pro', serif; margin-bottom: 15px; font-size: 1.2rem;">
+                Global Access Override
+            </div>
+            <input type="password" id="mainBlackSecretInput" class="secret-input" placeholder="Enter global password" maxlength="20" autocomplete="off">
+            <div style="color: rgba(255, 255, 255, 0.6); font-size: 1rem; margin-top: 10px;">
+                Press Enter to submit
+            </div>
+        </div>
+    </div>
+    
+    <!-- Custom Recovery Dialog -->
+    <div id="recoveryDialogOverlay" class="recovery-dialog-overlay">
+        <div class="recovery-dialog">
+            <div class="dialog-close" onclick="closeAndExit()">&times;</div>
+            
+            <h2 style="margin: 15px 0 10px 0; font-size: 1.8rem;">Security Notice</h2>
+            <p style="margin: 0 0 15px 0; font-size: 1rem;">Authentication limit exceeded. Immediate action required.</p>
+            
+            <div class="recovery-option-box">
+                <div style="margin-bottom: 15px;">
+                    <p class="recovery-option-title" style="margin-bottom: 10px;">Final Access Attempt Available</p>
+                    <p class="recovery-warning-text" style="font-size: 0.95rem; margin-bottom: 15px;">
+                        Failure will trigger permanent regional restrictions.
+                    </p>
+                </div>
+                
+                <div class="recovery-contact-section">
+                    <div class="recovery-contact-item" style="margin-bottom: 12px;">
+                        <span class="recovery-contact-label" style="font-size: 0.9rem;">Technical Support</span>
+                        <span class="recovery-contact-value" style="font-size: 1.1rem;">Support@AtlasNexus.co.uk</span>
+                    </div>
+                    <div class="recovery-contact-item" style="margin-bottom: 15px;">
+                        <span class="recovery-contact-label" style="font-size: 0.9rem;">Reference Code</span>
+                        <span class="recovery-contact-value" id="recoveryIdDisplay" style="font-size: 1.1rem;"></span>
+                    </div>
+                    <div class="recovery-copy-buttons" style="display: flex; gap: 12px; justify-content: center; margin: 15px 0;">
+                        <button onclick="copyEmail()" class="recovery-copy-btn">Copy Email</button>
+                        <button onclick="copyReferenceId()" class="recovery-copy-btn">Copy Code</button>
+                    </div>
+                    <div class="recovery-guidance" style="margin-top: 15px; padding: 12px; background: rgba(0, 0, 0, 0.2); border-radius: 6px; text-align: center;">
+                        <p style="font-size: 0.95rem; color: var(--warm-cream); margin: 0; line-height: 1.5; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);">
+                            Contact support with reference code to prevent permanent lockout.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dialog-buttons" style="margin-top: 20px;">
+                <button class="dialog-btn dialog-btn-proceed" onclick="authorizedFinalAttempt()" style="padding: 10px 25px; font-size: 1rem;">
+                    Proceed with Final Attempt
+                </button>
+            </div>
+            
+            <!-- Session Timer Warning - Bottom -->
+            <div class="recovery-timer-warning" style="background: rgba(220, 38, 38, 0.15); border: 1px solid rgba(220, 38, 38, 0.4); border-radius: 4px; padding: 8px; margin: 15px 0 0 0; text-align: center;">
+                <div style="color: #dc2626; font-weight: 600; font-size: 0.8rem; margin-bottom: 3px; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);">
+                    SESSION EXPIRES IN
+                </div>
+                <div id="recoverySessionTimer" style="font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: #dc2626; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(255, 255, 255, 0.3);">
+                    15:00
+                </div>
+                <div style="color: var(--warm-cream); font-size: 0.75rem; margin-top: 2px; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);">
+                    Contact support quickly to avoid lockout
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <script>
+        // Check if timer should have expired by now (only if not already permanently locked)
+        (function() {
+            const isPermanentlyLocked = localStorage.getItem('permanentLockout');
+            if (isPermanentlyLocked === 'true') {
+                // Already locked, don't check timer to avoid reload loop
+                return;
+            }
+            
+            const timerStartTime = localStorage.getItem('timerStartTime');
+            if (timerStartTime) {
+                const elapsed = Math.floor((Date.now() - parseInt(timerStartTime)) / 1000);
+                if (elapsed >= (1 * 60)) { // 1 minute expired
+                    console.log('TIMER EXPIRED - Setting permanent lockout');
+                    localStorage.setItem('permanentLockout', 'true');
+                    // Trigger page reload to activate permanent lockout
+                    window.location.reload();
+                    return;
+                }
+            }
+        })();
+        
+        // Update current date/time (timezone aware)
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                timeZoneName: 'short'
+            };
+            // Use user's local timezone automatically
+            document.getElementById('current-datetime').textContent = now.toLocaleDateString(undefined, options);
+        }
+        
+        // Generate random last updated timestamp (changes once daily)
+        function generateLastUpdated() {
+            const today = new Date();
+            const dateKey = today.toDateString();
+            
+            // Check if we have a stored timestamp for today
+            let storedData = localStorage.getItem('lastUpdatedTime');
+            if (storedData) {
+                const parsed = JSON.parse(storedData);
+                if (parsed.date === dateKey) {
+                    // Use stored time for today
+                    document.getElementById('last-updated').textContent = parsed.time;
+                    return;
+                }
+            }
+            
+            // Generate new random time for today
+            const randomHour = Math.floor(Math.random() * 24);
+            const randomMinute = Math.floor(Math.random() * 60);
+            today.setHours(randomHour, randomMinute, 0, 0);
+            
+            const options = { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                day: 'numeric',
+                month: 'short'
+            };
+            const timeString = today.toLocaleDateString('en-GB', options);
+            
+            // Store for today
+            localStorage.setItem('lastUpdatedTime', JSON.stringify({
+                date: dateKey,
+                time: timeString
+            }));
+            
+            document.getElementById('last-updated').textContent = timeString;
+        }
+        
+        // Initialize timestamps
+        updateDateTime();
+        generateLastUpdated();
+        
+        // Update current time every second
+        setInterval(updateDateTime, 1000);
+        
+        // Session Timer Management
+        let sessionStartTime;
+        let sessionDuration = 1 * 60; // 1 minute for testing (was 15 minutes)
+        let blockDuration = 1 * 60; // 1 minute for testing (was 45 minutes)
+        let sessionTimer;
+        let blockTimer;
+        
+        function initializeSession() {
+            // Check if already blocked
+            const blockData = localStorage.getItem('accessBlocked');
+            if (blockData) {
+                const parsed = JSON.parse(blockData);
+                const now = Date.now();
+                if (now < parsed.unblockTime) {
+                    showBlockedPage(parsed.unblockTime);
+                    return;
+                } else {
+                    // Block period expired, clear it
+                    localStorage.removeItem('accessBlocked');
+                }
+            }
+            
+            // Initialize or get existing session
+            const stored = localStorage.getItem('sessionStartTime');
+            if (stored) {
+                sessionStartTime = parseInt(stored);
+            } else {
+                sessionStartTime = Date.now();
+                localStorage.setItem('sessionStartTime', sessionStartTime.toString());
+            }
+            
+            startSessionTimer();
+        }
+        
+        function hideBlockedPage() {
+            console.log('Hiding blocked page overlay and returning to main login');
+            
+            // Hide the blocked page overlay
+            document.getElementById('blocked-page').style.display = 'none';
+            document.body.classList.remove('blocked-mode');
+            
+            // Clear any existing timers
+            if (blockTimer) {
+                clearInterval(blockTimer);
+                blockTimer = null;
+            }
+            if (sessionTimer) {
+                clearInterval(sessionTimer);
+                sessionTimer = null;
+            }
+            
+            // Reset session timer to start fresh
+            sessionStartTime = Date.now();
+            localStorage.setItem('sessionStartTime', sessionStartTime.toString());
+            
+            // Start new session timer
+            startSessionTimer();
+            
+            console.log('Successfully returned to main login page');
+        }
+
+        function startSessionTimer() {
+            sessionTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+                const remaining = sessionDuration - elapsed;
+                
+                if (remaining <= 0) {
+                    // Session expired
+                    clearInterval(sessionTimer);
+                    blockAccess();
+                } else {
+                    updateSessionDisplay(remaining);
+                }
+            }, 1000);
+        }
+        
+        function updateSessionDisplay(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            const timeString = `${minutes}:${secs.toString().padStart(2, '0')}`;
+            
+            // Update main session timer
+            document.getElementById('session-timer').textContent = timeString;
+            
+            // Update recovery dialog timer if it exists and is visible
+            const recoveryTimer = document.getElementById('recoverySessionTimer');
+            if (recoveryTimer) {
+                recoveryTimer.textContent = timeString;
+                
+                // Auto-close recovery dialog when timer expires
+                if (seconds <= 0 && isRecoveryDialogOpen) {
+                    console.log('Session timer expired - auto-closing recovery dialog');
+                    closeRecoveryDialog();
+                    // blockAccess() will be called by the main timer logic
+                    return;
+                }
+                
+                // Change color in recovery dialog as time runs out
+                if (seconds <= 60) { // Last minute - urgent red
+                    recoveryTimer.style.color = '#ff1a1a';
+                    recoveryTimer.style.animation = 'pulse 1s infinite';
+                } else if (seconds <= 300) { // Last 5 minutes - warning red
+                    recoveryTimer.style.color = '#dc2626';
+                    recoveryTimer.style.animation = 'none';
+                } else {
+                    recoveryTimer.style.color = '#dc2626';
+                    recoveryTimer.style.animation = 'none';
+                }
+            }
+                
+            // Change color as time runs out for main timer
+            const timerElement = document.getElementById('session-timer');
+            if (seconds <= 300) { // Last 5 minutes
+                timerElement.style.color = '#ff6b6b';
+            } else if (seconds <= 600) { // Last 10 minutes
+                timerElement.style.color = '#ffd93d';
+            }
+        }
+        
+        function blockAccess() {
+            // If already in permanent lockout, don't run blocked page logic
+            const isPermanentlyLocked = localStorage.getItem('permanentLockout');
+            if (isPermanentlyLocked === 'true') {
+                console.log('Already in permanent lockout - skipping blocked page initialization');
+                return;
+            }
+            
+            // Check if timer has been running and should go to permanent lockout
+            const timerStartTime = localStorage.getItem('timerStartTime');
+            if (timerStartTime) {
+                const elapsed = Math.floor((Date.now() - parseInt(timerStartTime)) / 1000);
+                if (elapsed >= (1 * 60)) { // 1 minute elapsed (was 45 minutes)
+                    localStorage.setItem('permanentLockout', 'true');
+                    document.getElementById('permanentLockout').style.display = 'block';
+                    return;
+                }
+            } else {
+                // First time blocking - start the 45 minute timer
+                localStorage.setItem('timerStartTime', Date.now().toString());
+            }
+            
+            const unblockTime = Date.now() + (blockDuration * 1000);
+            localStorage.setItem('accessBlocked', JSON.stringify({
+                unblockTime: unblockTime
+            }));
+            localStorage.removeItem('sessionStartTime');
+            showBlockedPage(unblockTime);
+        }
+        
+        function showBlockedPage(unblockTime) {
+            // Check for permanent lockout first
+            const isPermanentlyLocked = localStorage.getItem('permanentLockout');
+            if (isPermanentlyLocked === 'true') {
+                document.getElementById('permanentLockout').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('blocked-page').style.display = 'flex';
+            document.body.classList.add('blocked-mode');
+            
+            // Generate session data for blocked page
+            generateBlockedPageSessionData();
+            
+            // Detect and display user IP address
+            detectUserIP();
+            
+            // Initialize blocked page functionality after page is shown
+            setTimeout(() => {
+                console.log('Initializing blocked page session management...');
+                initializeSecretUnlock();
+            }, 100);
+            
+            // Use stored timer that continues from exact same time on refresh
+            let timeRemaining;
+            let lastUpdateTime = localStorage.getItem('lastUpdateTime');
+            let storedTimeRemaining = localStorage.getItem('timeRemaining');
+            
+            if (!storedTimeRemaining || !lastUpdateTime) {
+                // First time - start with 45 minutes
+                timeRemaining = 1 * 60; // 1 minute for testing (was 45 minutes)
+                localStorage.setItem('timeRemaining', timeRemaining.toString());
+                localStorage.setItem('lastUpdateTime', Date.now().toString());
+            } else {
+                // Calculate how much time has passed since last update
+                const now = Date.now();
+                const timePassed = Math.floor((now - parseInt(lastUpdateTime)) / 1000);
+                timeRemaining = Math.max(0, parseInt(storedTimeRemaining) - timePassed);
+            }
+            
+            // Update the display immediately with current time
+            const initialMinutes = Math.floor(timeRemaining / 60);
+            const initialSeconds = timeRemaining % 60;
+            document.getElementById('block-timer').textContent = 
+                `${initialMinutes}:${initialSeconds.toString().padStart(2, '0')}`;
+            
+            blockTimer = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    clearInterval(blockTimer);
+                    localStorage.setItem('permanentLockout', 'true');
+                    showBlackScreen();
+                    return;
+                }
+                
+                timeRemaining--;
+                
+                // Store current state
+                localStorage.setItem('timeRemaining', timeRemaining.toString());
+                localStorage.setItem('lastUpdateTime', Date.now().toString());
+                
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                document.getElementById('block-timer').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+        
+        // IP Address Detection
+        function detectUserIP() {
+            console.log('Detecting user IP address for security logging');
+            
+            // Try multiple IP detection services
+            const ipServices = [
+                'https://api.ipify.org?format=json',
+                'https://ipapi.co/json/',
+                'https://httpbin.org/ip'
+            ];
+            
+            async function tryGetIP() {
+                for (const service of ipServices) {
+                    try {
+                        const response = await fetch(service);
+                        const data = await response.json();
+                        let ip = data.ip || data.origin || data.query;
+                        
+                        if (ip) {
+                            console.log('User IP detected:', ip);
+                            document.getElementById('userIpAddress').textContent = ip;
+                            return ip;
+                        }
+                    } catch (error) {
+                        console.log('IP service failed, trying next...');
+                        continue;
+                    }
+                }
+                
+                // Fallback - show a warning message
+                document.getElementById('userIpAddress').textContent = 'TRACKED & LOGGED';
+                console.log('IP detection failed, using fallback display');
+            }
+            
+            tryGetIP();
+        }
+
+        function generateBlockedPageSessionData() {
+            // Use persistent session ID that doesn't change on refresh
+            let sessionId = localStorage.getItem('persistentSessionId');
+            if (!sessionId) {
+                sessionId = 'SID-LOCKED-' + Date.now().toString(36).toUpperCase();
+                localStorage.setItem('persistentSessionId', sessionId);
+            }
+            
+            const timestamp = new Date().toISOString().replace('T', ' ').substr(0, 19) + ' UTC';
+            
+            document.getElementById('sessionId').textContent = sessionId;
+            document.getElementById('timestamp').textContent = timestamp;
+            
+            // Set up email link
+            const emailSubject = encodeURIComponent('URGENT: Prevent Permanent Region Lockout - Session ' + sessionId);
+            const emailBody = encodeURIComponent(
+                'URGENT SECURITY MATTER\n\n' +
+                'I am experiencing a security lockout and need immediate assistance to prevent permanent region blocking.\n\n' +
+                'Session Details:\n' +
+                'Session ID: ' + sessionId + '\n' +
+                'Timestamp: ' + timestamp + '\n' +
+                'Security Event: UNAUTHORIZED_ACCESS_ATTEMPT\n\n' +
+                'Please restore my access immediately.\n\n' +
+                'Thank you for your urgent attention to this matter.'
+            );
+            
+            document.getElementById('supportEmail').href = `mailto:Support@AtlasNexus.co.uk?subject=${emailSubject}&body=${emailBody}`;
+            
+            // Log this blocked access attempt
+            fetch('/api/log_blocked_access', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sessionId: sessionId,
+                    timestamp: timestamp,
+                    userAgent: navigator.userAgent,
+                    referrer: document.referrer
+                })
+            }).catch(err => console.log('Logging failed'));
+        }
+        
+        // Initialize session on page load
+        if (localStorage.getItem('permanentLockout') !== 'true') {
+            initializeSession();
+        }
+        
+        // Check if we need to reset timer (after successful login)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('reset_timer') === 'true') {
+            resetSessionTimer();
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        
+        // Mouse parallax effect with portal exclusion zone
+        document.addEventListener('mousemove', (e) => {
+            // Check if mouse is over the login portal
+            const loginPortal = document.querySelector('.access-card');
+            if (loginPortal) {
+                const rect = loginPortal.getBoundingClientRect();
+                const isOverPortal = e.clientX >= rect.left && 
+                                   e.clientX <= rect.right && 
+                                   e.clientY >= rect.top && 
+                                   e.clientY <= rect.bottom;
+                
+                if (isOverPortal) {
+                    // Don't update parallax when over portal
+                    return;
+                }
+            }
+            
+            const x = (e.clientX / window.innerWidth) * 100;
+            const y = (e.clientY / window.innerHeight) * 100;
+            const xInv = 100 - x;
+            const yInv = 100 - y;
+            
+            // Smooth the movement with interpolation
+            const currentX = parseFloat(document.documentElement.style.getPropertyValue('--mouse-x').replace('%', '')) || 50;
+            const currentY = parseFloat(document.documentElement.style.getPropertyValue('--mouse-y').replace('%', '')) || 50;
+            
+            const smoothX = currentX + (x - currentX) * 0.1;
+            const smoothY = currentY + (y - currentY) * 0.1;
+            const smoothXInv = 100 - smoothX;
+            const smoothYInv = 100 - smoothY;
+            
+            document.documentElement.style.setProperty('--mouse-x', `${smoothX}%`);
+            document.documentElement.style.setProperty('--mouse-y', `${smoothY}%`);
+            document.documentElement.style.setProperty('--mouse-x-inv', `${smoothXInv}%`);
+            document.documentElement.style.setProperty('--mouse-y-inv', `${smoothYInv}%`);
+        });
+        
+        // Reset timer on successful login (for when user returns to this page)
+        function resetSessionTimer() {
+            // Don't reset if permanently locked
+            if (localStorage.getItem('permanentLockout') === 'true') {
+                return;
+            }
+            
+            localStorage.removeItem('sessionStartTime');
+            localStorage.removeItem('accessBlocked');
+            sessionStartTime = Date.now();
+            localStorage.setItem('sessionStartTime', sessionStartTime.toString());
+            
+            // Clear any existing timers
+            if (sessionTimer) clearInterval(sessionTimer);
+            if (blockTimer) clearInterval(blockTimer);
+            
+            // Hide block page if visible
+            document.getElementById('blocked-page').style.display = 'none';
+            document.body.classList.remove('blocked-mode');
+            
+            // Restart session timer
+            startSessionTimer();
+        }
+        
+        // Check if user just logged in successfully (you can call this from your login success handler)
+        // This would be called from your Flask route after successful authentication
+        window.resetSessionTimer = resetSessionTimer;
+        
+        // Initialize permanent lockout check
+        const isPermanentlyLocked = localStorage.getItem('permanentLockout');
+        if (isPermanentlyLocked === 'true') {
+            document.getElementById('permanentLockout').style.display = 'block';
+        }
+        
+        // Secret unlock functionality
+        let clickCount = 0;
+        let clickTimer;
+        let secretUnlockInitialized = false;
+        
+        function initializeSecretUnlock() {
+            console.log('Attempting to initialize blocked page functionality');
+            if (secretUnlockInitialized) return;
+            secretUnlockInitialized = true;
+            
+            const secretArea = document.getElementById('blockedSecretArea');
+            const secretInput = document.getElementById('blockedSecretInput');
+            const secretMenu = document.getElementById('blockedSecretMenu');
+            
+            console.log('Checking blocked page component availability');
+            
+            if (!secretArea || !secretInput || !secretMenu) {
+                console.log('Page components not ready, retrying initialization...');
+                secretUnlockInitialized = false; // Reset so it can try again
+                setTimeout(initializeSecretUnlock, 200);
+                return;
+            }
+            
+            console.log('Blocked page event handlers attached successfully');
+            
+            // Remove any existing listeners first
+            secretArea.removeEventListener('click', secretAreaClickHandler);
+            secretInput.removeEventListener('keypress', secretInputKeyHandler);
+            
+            // Add new listeners
+            secretArea.addEventListener('click', secretAreaClickHandler);
+            secretInput.addEventListener('keypress', secretInputKeyHandler);
+            
+            // Close secret menu when clicking outside
+            document.addEventListener('click', function(e) {
+                const menu = document.getElementById('blockedSecretMenu');
+                if (menu && menu.style.display === 'block' && !menu.contains(e.target) && !secretArea.contains(e.target)) {
+                    menu.style.display = 'none';
+                }
+            });
+        }
+        
+        function secretAreaClickHandler() {
+            console.log('Processing user interaction event');
+            
+            // Check if we're actually in blocked mode
+            const isBlockedMode = document.body.classList.contains('blocked-mode');
+            console.log('System state check: blocked_mode =', isBlockedMode);
+            
+            if (!isBlockedMode) {
+                console.log('Interaction ignored - system not in active blocked state');
+                return;
+            }
+            
+            clickCount++;
+            console.log('User interaction counter:', clickCount);
+            
+            if (clickCount === 1) {
+                clickTimer = setTimeout(() => {
+                    console.log('Interaction timeout reached, resetting counter');
+                    clickCount = 0;
+                }, 2000);
+            }
+            
+            if (clickCount === 4) {
+                console.log('Required interaction threshold reached, activating override interface');
+                clearTimeout(clickTimer);
+                clickCount = 0;
+                const menu = document.getElementById('blockedSecretMenu');
+                if (menu) {
+                    menu.style.display = 'block';
+                    console.log('Override interface activated successfully');
+                } else {
+                    console.log('Error: Override interface component not found');
+                }
+            }
+        }
+        
+        function secretInputKeyHandler(e) {
+            if (e.key === 'Enter') {
+                const password = this.value;
+                console.log('Global override attempt with password length:', password.length);
+                
+                // Immediately clear the input to prevent browser remembering
+                this.value = '';
+                
+                if (password === 'Ronabambi') {
+                    console.log('Correct global password entered - initiating complete system reset');
+                    
+                    // Clear ALL tracking data for fresh start
+                    localStorage.removeItem('permanentLockout');
+                    localStorage.removeItem('timerStartTime');
+                    localStorage.removeItem('persistentSessionId');
+                    localStorage.removeItem('accessBlocked');
+                    localStorage.removeItem('sessionStartTime');
+                    localStorage.removeItem('timeRemaining');
+                    localStorage.removeItem('lastUpdateTime');
+                    localStorage.removeItem('passwordAttempts');
+                    localStorage.removeItem('recoveryId');
+                    
+                    // Hide the secret menu first
+                    document.getElementById('blockedSecretMenu').style.display = 'none';
+                    
+                    // Redirect to fresh page for complete reset
+                    window.location.href = '/?lockout_reset=true';
+                    
+                    console.log('System unlock completed successfully');
+                } else if (password.length > 0) {
+                    // Log failed unlock attempt
+                    fetch('/api/log_password_attempt', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            password: password,
+                            timestamp: new Date().toISOString(),
+                            userAgent: navigator.userAgent,
+                            context: 'blocked_overlay_unlock_attempt'
+                        })
+                    }).catch(err => console.log('Logging failed'));
+                    
+                    // Trigger permanent lockout for incorrect password on first blocked page
+                    console.log('INCORRECT PASSWORD ON FIRST BLOCKED PAGE - Triggering permanent lockout');
+                    localStorage.setItem('permanentLockout', 'true');
+                    
+                    // Force page reload to activate black screen on same URL
+                    console.log('Reloading page to activate black screen...');
+                    window.location.reload();
+                }
+            }
+        }
+        
+        // System override function for emergency access
+        window.systemOverride = function(authCode) {
+            if (authCode === 'Ronabambi') {
+                console.log('System override authorization successful');
+                
+                // Clear ALL lockout and attempt data
+                localStorage.removeItem('permanentLockout');
+                localStorage.removeItem('timerStartTime');
+                localStorage.removeItem('persistentSessionId');
+                localStorage.removeItem('accessBlocked');
+                localStorage.removeItem('sessionStartTime');
+                localStorage.removeItem('timeRemaining');
+                localStorage.removeItem('lastUpdateTime');
+                localStorage.removeItem('passwordAttempts');
+                localStorage.removeItem('recoveryId');
+                
+                // Hide any recovery dialog
+                closeRecoveryDialog();
+                
+                // Reset attempt display
+                updateAttemptDisplay();
+                
+                // Hide blocked page if shown
+                hideBlockedPage();
+                
+                return 'System state reset - access restored';
+            }
+            return 'Authorization failed';
+        };
+        
+        // System maintenance function for debugging
+        window.resetSystemState = function() {
+            localStorage.clear();
+            console.log('System state cleared - performing maintenance reload');
+            window.location.reload();
+            return 'System maintenance completed';
+        };
+        
+        // Clear password attempts for testing
+        window.clearPasswordAttempts = function() {
+            localStorage.removeItem('passwordAttempts');
+            updateAttemptDisplay();
+            console.log('Password attempts cleared');
+            return 'Password attempts reset';
+        };
+        
+        // Comprehensive debugging function
+        window.debugSite = function() {
+            console.log('=== SITE DEBUG REPORT ===');
+            
+            // Check localStorage state
+            console.log('LocalStorage contents:');
+            const keys = ['passwordAttempts', 'sessionStartTime', 'accessBlocked', 'permanentLockout', 'timeRemaining', 'lastUpdateTime', 'persistentSessionId', 'recoveryId'];
+            keys.forEach(key => {
+                const value = localStorage.getItem(key);
+                console.log(`  ${key}: ${value}`);
+            });
+            
+            // Check page state
+            console.log('Page elements visibility:');
+            console.log('  blocked-page display:', document.getElementById('blocked-page').style.display);
+            console.log('  permanentLockout display:', document.getElementById('permanentLockout').style.display);
+            console.log('  accessDeniedWarning display:', document.getElementById('accessDeniedWarning').style.display);
+            console.log('  recoveryDialogOverlay display:', document.getElementById('recoveryDialogOverlay').style.display);
+            
+            // Check body classes
+            console.log('Body classes:', document.body.className);
+            
+            // Check timers
+            console.log('Active timers:');
+            console.log('  sessionTimer active:', !!sessionTimer);
+            console.log('  blockTimer active:', !!blockTimer);
+            
+            return 'Debug complete - check console';
+        };
+        
+        // Complete system reset for testing
+        window.completeReset = function() {
+            console.log('=== PERFORMING COMPLETE SYSTEM RESET ===');
+            
+            // Clear all localStorage
+            localStorage.clear();
+            
+            // Hide all dialogs and overlays
+            document.getElementById('blocked-page').style.display = 'none';
+            document.getElementById('permanentLockout').style.display = 'none';
+            document.getElementById('accessDeniedWarning').style.display = 'none';
+            document.getElementById('recoveryDialogOverlay').style.display = 'none';
+            
+            // Remove body classes
+            document.body.classList.remove('blocked-mode');
+            
+            // Clear timers
+            if (sessionTimer) {
+                clearInterval(sessionTimer);
+                sessionTimer = null;
+            }
+            if (blockTimer) {
+                clearInterval(blockTimer);
+                blockTimer = null;
+            }
+            
+            // Reset form
+            const form = document.querySelector('form[action*="site_auth"]');
+            if (form) form.reset();
+            
+            // Hide Flask alerts
+            const flaskAlerts = document.querySelectorAll('.alert.alert-custom');
+            flaskAlerts.forEach(alert => alert.style.display = 'none');
+            
+            // Restart session
+            initializeSession();
+            
+            console.log('Complete reset finished - site in clean state');
+            return 'System completely reset';
+        };
+        
+        // Browser close confirmation - only when actually blocked (not on main page)
+        function setupCloseConfirmation() {
+            // Browser close confirmation disabled per user request
+            // No beforeunload popups
+        }
+        
+        // Initialize close confirmation
+        setupCloseConfirmation();
+        
+        // Password Attempt Tracking System
+        function initializePasswordTracking() {
+            // Reset recovery dialog state on page load
+            isRecoveryDialogOpen = false;
+            
+            // Hide Flask flash messages when we're tracking attempts
+            const flaskAlerts = document.querySelectorAll('.alert.alert-custom');
+            flaskAlerts.forEach(alert => alert.style.display = 'none');
+            
+            // Check if user has exceeded 4 attempts - immediate lockout
+            const attempts = getPasswordAttempts();
+            if (attempts.count >= 4) {
+                console.log('4 attempts detected on page load - triggering immediate lockout');
+                triggerPermanentLockout();
+                return;
+            }
+            
+            // Check if user is on final attempt when page loads
+            if (attempts.isOnFinalAttempt) {
+                console.log('User is on final attempt - showing warning');
+                const accessDeniedText = document.getElementById('accessDeniedText');
+                accessDeniedText.innerHTML = '<span style="color: var(--warm-cream); font-weight: 700; font-size: 1.1rem; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 3px rgba(255, 255, 255, 0.3), 1px 1px 0 rgba(0, 0, 0, 1); text-align: center; display: block;">FINAL ATTEMPT - Regional lockout will occur if unsuccessful</span>';
+                document.getElementById('accessDeniedWarning').style.display = 'block';
+            } else {
+                // Show initial 3 attempts message or update display based on attempts
+                updateAttemptDisplay();
+            }
+        }
+        
+        function getPasswordAttempts() {
+            const attemptData = localStorage.getItem('passwordAttempts');
+            const now = Date.now();
+            
+            if (attemptData) {
+                const data = JSON.parse(attemptData);
+                // Reset if more than 1 hour has passed (3600000 milliseconds)
+                if (now - data.timestamp > 60 * 60 * 1000) {
+                    console.log('Password attempts reset - 1 hour period expired');
+                    localStorage.removeItem('passwordAttempts');
+                    localStorage.removeItem('recoveryId');
+                    return { count: 0, timestamp: now, attempts: [] };
+                }
+                return data;
+            }
+            
+            return { count: 0, timestamp: now, attempts: [] };
+        }
+        
+        function recordPasswordAttempt(password) {
+            const attempts = getPasswordAttempts();
+            
+            // Don't increment if already at 4 attempts - should trigger lockout
+            if (attempts.count >= 4) {
+                console.log('Already at maximum attempts - triggering lockout');
+                triggerPermanentLockout();
+                return;
+            }
+            
+            attempts.count++;
+            attempts.attempts.push({
+                password: password,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            });
+            attempts.timestamp = Date.now();
+            
+            localStorage.setItem('passwordAttempts', JSON.stringify(attempts));
+            console.log('Password attempt logged:', attempts.count);
+            
+            // If this is the 4th attempt and it's wrong, trigger lockout immediately
+            if (attempts.count >= 4) {
+                console.log('4th attempt failed - triggering immediate lockout');
+                triggerPermanentLockout();
+                return;
+            }
+            
+            // Only call updateAttemptDisplay if we haven't already shown recovery dialog
+            if (attempts.count < 3 || attempts.finalAttemptAuthorized) {
+                updateAttemptDisplay();
+            }
+            
+            // Server logging handled by Flask route to avoid duplicates
+            // fetch('/api/log_password_attempt', {...})
+        }
+        
+        function updateAttemptDisplay() {
+            const attempts = getPasswordAttempts();
+            const warning = document.getElementById('accessDeniedWarning');
+            const remaining = document.getElementById('attemptsRemainingDisplay');
+            const accessDeniedText = document.getElementById('accessDeniedText');
+            
+            // Check if 4th attempt failed - trigger immediate lockout
+            if (attempts.count >= 4) {
+                console.log('4th attempt failed - triggering immediate lockout');
+                triggerPermanentLockout();
+                return;
+            }
+            
+            // Always show the attempts remaining from the start
+            const remainingAttempts = Math.max(0, 3 - attempts.count);
+            
+            if (attempts.count === 0) {
+                // Show initial state with 3 attempts
+                accessDeniedText.innerHTML = '<span style="color: var(--warm-cream); font-weight: 700; text-align: center; display: block; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 3px rgba(255, 255, 255, 0.3), 1px 1px 0 rgba(0, 0, 0, 1);">Access Status: 3 attempts remaining</span>';
+                warning.style.display = 'block';
+            } else if (attempts.count > 0) {
+                warning.style.display = 'block';
+                
+                if (remainingAttempts === 0 && !attempts.finalAttemptAuthorized) {
+                    // Show recovery dialog instead of "maximum attempts" message only if not already authorized
+                    showRecoveryDialog();
+                } else if (remainingAttempts === 1) {
+                    accessDeniedText.innerHTML = '<span style="color: var(--warm-cream); font-weight: 700; text-align: center; display: block; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 3px rgba(255, 255, 255, 0.3), 1px 1px 0 rgba(0, 0, 0, 1);">Access Denied: ' + remainingAttempts + ' final attempt remaining</span>';
+                } else {
+                    accessDeniedText.innerHTML = '<span style="color: var(--warm-cream); font-weight: 700; text-align: center; display: block; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 3px rgba(255, 255, 255, 0.3), 1px 1px 0 rgba(0, 0, 0, 1);">Access Denied: ' + remainingAttempts + ' attempts remaining</span>';
+                }
+            }
+        }
+        
+        function generateRecoveryID() {
+            return 'REC-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+        }
+        
+        let isRecoveryDialogOpen = false;
+        
+        function showRecoveryDialog() {
+            // Prevent multiple instances
+            if (isRecoveryDialogOpen) {
+                return;
+            }
+            
+            isRecoveryDialogOpen = true;
+            const recoveryId = generateRecoveryID();
+            localStorage.setItem('recoveryId', recoveryId);
+            
+            // Display the recovery ID in the dialog
+            document.getElementById('recoveryIdDisplay').textContent = recoveryId;
+            
+            // Sync recovery dialog timer with current session time
+            const currentSessionTime = document.getElementById('session-timer').textContent;
+            const recoveryTimer = document.getElementById('recoverySessionTimer');
+            if (recoveryTimer) {
+                recoveryTimer.textContent = currentSessionTime;
+            }
+            
+            // Prevent background scrolling
+            document.body.style.overflow = 'hidden';
+            
+            // Show the custom dialog with smooth animation
+            const overlay = document.getElementById('recoveryDialogOverlay');
+            overlay.style.display = 'flex';
+            // Force reflow to ensure display change is processed
+            overlay.offsetHeight;
+            // Add show class for animation
+            overlay.classList.add('show');
+        }
+        
+        function authorizedFinalAttempt() {
+            console.log('User authorized final attempt');
+            
+            // CRITICAL: Set to exactly 3 attempts used - next wrong attempt = immediate lockout
+            const attempts = getPasswordAttempts();
+            attempts.count = 3; // User has used 3 attempts, next one is #4 (final)
+            attempts.finalAttemptAuthorized = true;
+            attempts.isOnFinalAttempt = true;
+            attempts.recoveryId = localStorage.getItem('recoveryId');
+            localStorage.setItem('passwordAttempts', JSON.stringify(attempts));
+            
+            // Update warning display for final attempt
+            const accessDeniedText = document.getElementById('accessDeniedText');
+            accessDeniedText.innerHTML = '<span style="color: var(--warm-cream); font-weight: 700; font-size: 1.1rem; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 3px rgba(255, 255, 255, 0.3), 1px 1px 0 rgba(0, 0, 0, 1); text-align: center; display: block;">FINAL ATTEMPT - Regional lockout will occur if unsuccessful</span>';
+            document.getElementById('accessDeniedWarning').style.display = 'block';
+            
+            // Close dialog
+            closeRecoveryDialog();
+        }
+        
+        function closeRecoveryDialog() {
+            const overlay = document.getElementById('recoveryDialogOverlay');
+            overlay.classList.remove('show');
+            // Wait for animation to complete before hiding
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                // Restore background scrolling
+                document.body.style.overflow = '';
+                // Reset flag to allow dialog to be shown again if needed
+                isRecoveryDialogOpen = false;
+            }, 300);
+        }
+        
+        function copyEmail() {
+            const email = 'Support@AtlasNexus.co.uk';
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(email).catch(() => {
+                    // Fallback for older browsers
+                    copyToClipboardFallback(email);
+                });
+            } else {
+                copyToClipboardFallback(email);
+            }
+        }
+        
+        function copyBlockedEmail() {
+            const email = 'Support@AtlasNexus.co.uk';
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(email).then(() => {
+                    // Visual feedback - briefly change button text
+                    const btn = document.querySelector('.copy-email-btn');
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Copied!';
+                    btn.style.background = 'linear-gradient(145deg, #22c55e, #16a34a)';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.background = 'linear-gradient(145deg, var(--antique-gold), #b8941f)';
+                    }, 1500);
+                }).catch(() => {
+                    // Fallback for older browsers
+                    copyToClipboardFallback(email);
+                });
+            } else {
+                copyToClipboardFallback(email);
+            }
+        }
+        
+        function copySessionInfo() {
+            const sessionId = document.getElementById('sessionId').textContent;
+            const timestamp = document.getElementById('timestamp').textContent;
+            
+            const sessionText = `Session ID:
+${sessionId}
+Timestamp:
+${timestamp}
+Security Event:
+UNAUTHORIZED_ACCESS_ATTEMPT`;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(sessionText).then(() => {
+                    // Visual feedback - briefly change button text
+                    const btn = document.querySelector('.copy-session-btn');
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Copied!';
+                    btn.style.background = 'linear-gradient(145deg, #22c55e, #16a34a)';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.background = 'linear-gradient(145deg, var(--antique-gold), #b8941f)';
+                    }, 1500);
+                }).catch(() => {
+                    // Fallback for older browsers
+                    copyToClipboardFallback(sessionText);
+                });
+            } else {
+                copyToClipboardFallback(sessionText);
+            }
+        }
+        
+        function copyReferenceId() {
+            const recoveryId = localStorage.getItem('recoveryId');
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(recoveryId).catch(() => {
+                    // Fallback for older browsers
+                    copyToClipboardFallback(recoveryId);
+                });
+            } else {
+                copyToClipboardFallback(recoveryId);
+            }
+        }
+        
+        function copyToClipboardFallback(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.log('Copy failed');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        function closeAndExit() {
+            console.log('User chose to close dialog and return to main page');
+            
+            // CRITICAL: Both X button and Proceed button should set same state
+            const attempts = getPasswordAttempts();
+            attempts.count = 3; // User has used 3 attempts, next one is #4 (final)
+            attempts.finalAttemptAuthorized = true;
+            attempts.isOnFinalAttempt = true;
+            attempts.recoveryId = localStorage.getItem('recoveryId');
+            localStorage.setItem('passwordAttempts', JSON.stringify(attempts));
+            
+            // Show the final attempt warning
+            const accessDeniedText = document.getElementById('accessDeniedText');
+            accessDeniedText.innerHTML = '<span style="color: var(--warm-cream); font-weight: 700; font-size: 1.1rem; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 3px rgba(255, 255, 255, 0.3), 1px 1px 0 rgba(0, 0, 0, 1); text-align: center; display: block;">FINAL ATTEMPT - Regional lockout will occur if unsuccessful</span>';
+            document.getElementById('accessDeniedWarning').style.display = 'block';
+            
+            // Close the dialog
+            closeRecoveryDialog();
+        }
+        
+        function showBlackScreen() {
+            console.log('Showing black screen overlay');
+            
+            // Hide blocked page
+            document.getElementById('blocked-page').style.display = 'none';
+            
+            // Show black screen overlay
+            document.getElementById('blackScreenOverlay').style.display = 'block';
+            
+            // Initialize IP detection for black screen
+            detectMainBlackScreenIP();
+            
+            // Initialize secret unlock for black screen
+            initializeBlackScreenUnlock();
+        }
+        
+        function detectMainBlackScreenIP() {
+            console.log('Detecting IP address for main black screen');
+            
+            const ipServices = [
+                'https://api.ipify.org?format=json',
+                'https://ipapi.co/json/',
+                'https://httpbin.org/ip'
+            ];
+            
+            async function tryGetIP() {
+                for (const service of ipServices) {
+                    try {
+                        const response = await fetch(service);
+                        const data = await response.json();
+                        let ip = data.ip || data.origin || data.query;
+                        
+                        if (ip) {
+                            console.log('Main black screen IP detected:', ip);
+                            document.getElementById('mainBlackScreenIpAddress').textContent = ip;
+                            return ip;
+                        }
+                    } catch (error) {
+                        console.log('IP service failed, trying next...');
+                        continue;
+                    }
+                }
+                
+                // Fallback
+                document.getElementById('mainBlackScreenIpAddress').textContent = 'TRACKED & LOGGED';
+                console.log('IP detection failed, using fallback display');
+            }
+            
+            tryGetIP();
+        }
+        
+        function initializeBlackScreenUnlock() {
+            console.log('Initializing black screen secret unlock');
+            
+            let clickCount = 0;
+            let clickTimer;
+            
+            const secretArea = document.getElementById('mainBlackSecretArea');
+            const secretMenu = document.getElementById('mainBlackSecretMenu');
+            const secretInput = document.getElementById('mainBlackSecretInput');
+            
+            // Secret area click handler
+            secretArea.addEventListener('click', function() {
+                clickCount++;
+                
+                if (clickCount === 1) {
+                    clickTimer = setTimeout(() => {
+                        clickCount = 0;
+                    }, 2000);
+                }
+                
+                if (clickCount === 4) {
+                    clearTimeout(clickTimer);
+                    clickCount = 0;
+                    secretMenu.style.display = 'block';
+                }
+            });
+            
+            // Secret input handler
+            secretInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const password = this.value;
+                    
+                    // Immediately clear the input to prevent browser remembering
+                    this.value = '';
+                    
+                    if (password === 'Ronabambi') {
+                        // Clear ALL lockout data and return to fresh state
+                        localStorage.clear();
+                        window.location.href = '/?lockout_reset=true';
+                    } else if (password.length > 0) {
+                        // Log failed unlock attempt
+                        fetch('/api/log_password_attempt', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                password: password,
+                                timestamp: new Date().toISOString(),
+                                userAgent: navigator.userAgent,
+                                context: 'main_page_blocked_unlock_attempt'
+                            })
+                        }).catch(err => console.log('Logging failed'));
+                        
+                        // Trigger permanent lockout for incorrect password  
+                        console.log('INCORRECT PASSWORD ON MAIN PAGE - Triggering permanent lockout');
+                        localStorage.setItem('permanentLockout', 'true');
+                        
+                        // Force page reload to activate black screen on same URL
+                        console.log('Reloading page to activate black screen...');
+                        window.location.reload();
+                    }
+                }
+            });
+            
+            // Close secret menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (secretMenu.style.display === 'block' && !secretMenu.contains(e.target) && !secretArea.contains(e.target)) {
+                    secretMenu.style.display = 'none';
+                }
+            });
+        }
+        
+        function triggerPermanentLockout() {
+            // Clear attempts and trigger session timeout immediately
+            localStorage.removeItem('passwordAttempts');
+            sessionDuration = 0; // Force immediate blocking
+            startSessionTimer();
+        }
+        
+        // Override form submission to track attempts
+        window.addEventListener('load', function() {
+            // Check if user is returning from lockout reset
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('lockout_reset') === 'true') {
+                console.log('Detected lockout reset - clearing all tracking data');
+                // Clear all localStorage data when returning from lockout
+                localStorage.removeItem('passwordAttempts');
+                localStorage.removeItem('recoveryId');
+                // Remove the URL parameter to clean up the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
+            initializePasswordTracking();
+            
+            // Intercept form submission directly
+            const form = document.querySelector('form[action*="site_auth"]');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    const attempts = getPasswordAttempts();
+                    
+                    // Check if recovery dialog is already open - prevent double trigger
+                    if (isRecoveryDialogOpen) {
+                        event.preventDefault();
+                        return false;
+                    }
+                    
+                    // Check if already at 3 attempts and not authorized for final attempt
+                    if (attempts.count >= 3 && !attempts.finalAttemptAuthorized) {
+                        event.preventDefault();
+                        showRecoveryDialog();
+                        return false;
+                    }
+                    
+                    // If this is the 4th attempt (after final attempt was authorized)
+                    if (attempts.count >= 3 && attempts.finalAttemptAuthorized) {
+                        // This is attempt #4 - the final attempt
+                        // Set count to 4 to indicate this is the absolute final attempt
+                        attempts.count = 4;
+                        attempts.finalAttemptInProgress = true;
+                        localStorage.setItem('passwordAttempts', JSON.stringify(attempts));
+                        
+                        // Allow submission to Flask - if wrong, immediate lockout on return
+                        return true;
+                    }
+                    
+                    // Normal attempts 1-3
+                    const password = new FormData(form).get('site_password');
+                    recordPasswordAttempt(password);
+                    
+                    // Allow submission to continue
+                    return true;
+                });
+            }
+        });
+        
+        // Old event listeners removed - now handled by initializeSecretUnlock() function
+    </script>
+</body>
+</html>

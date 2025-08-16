@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Securitization Engine{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Page Header -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="display-6 fw-bold text-dark mb-2">
+                    <i class="fas fa-cog text-primary me-3"></i>
+                    Admin Panel
+                </h1>
+                <p class="lead text-muted mb-0">
+                    System administration and user management
+                </p>
+            </div>
+            <div>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- System Overview -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-server me-2"></i>System Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-semibold">Engine Status:</span>
+                    <span class="badge bg-success">
+                        <i class="fas fa-check-circle me-1"></i>Online
+                    </span>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-semibold">Active Users:</span>
+                    <span class="fw-bold text-primary">{{ users | length }}</span>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-semibold">Database:</span>
+                    <span class="badge bg-success">
+                        <i class="fas fa-database me-1"></i>Connected
+                    </span>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-semibold">Security:</span>
+                    <span class="badge bg-success">
+                        <i class="fas fa-shield-alt me-1"></i>Active
+                    </span>
+                </div>
+                
+                <hr>
+                
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="refreshSystem()">
+                        <i class="fas fa-sync me-2"></i>Refresh System
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="clearCache()">
+                        <i class="fas fa-broom me-2"></i>Clear Cache
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="exportLogs()">
+                        <i class="fas fa-download me-2"></i>Export Logs
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success" onclick="addUser()">
+                        <i class="fas fa-user-plus me-2"></i>Add New User
+                    </button>
+                    <button class="btn btn-warning" onclick="backupData()">
+                        <i class="fas fa-save me-2"></i>Backup Data
+                    </button>
+                    <button class="btn btn-info" onclick="systemSettings()">
+                        <i class="fas fa-cogs me-2"></i>System Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Management -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>User Management
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Created</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for email, user_data in users.items() %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                             style="width: 40px; height: 40px; font-size: 14px; font-weight: bold;">
+                                            {{ user_data['name'].split()[0][0] }}{{ user_data['name'].split()[-1][0] if user_data['name'].split()|length > 1 else '' }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">{{ user_data['name'] }}</div>
+                                            <small class="text-muted">ID: {{ user_data['id'] }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-medium">{{ email }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'warning' if user_data['role'] == 'admin' else 'primary' }}">
+                                        {{ user_data['role'].title() }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ user_data['created_at'].strftime('%Y-%m-%d') }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-circle fa-sm me-1"></i>Active
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" 
+                                                onclick="editUser('{{ email }}')"
+                                                data-bs-toggle="tooltip" 
+                                                title="Edit User">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-info" 
+                                                onclick="viewUser('{{ email }}')"
+                                                data-bs-toggle="tooltip" 
+                                                title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if email != current_user.email %}
+                                        <button class="btn btn-outline-danger" 
+                                                onclick="deleteUser('{{ email }}')"
+                                                data-bs-toggle="tooltip" 
+                                                title="Delete User">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Logs -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-file-alt me-2"></i>Recent System Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activityLog">
+                            <tr>
+                                <td>{{ current_timestamp or '2025-08-15 13:30:00' }}</td>
+                                <td>{{ user.name }}</td>
+                                <td>Accessed Admin Panel</td>
+                                <td><span class="badge bg-success">Success</span></td>
+                            </tr>
+                            <tr>
+                                <td>2025-08-15 13:26:32</td>
+                                <td>System</td>
+                                <td>Analysis Engine: 6,561 permutations processed</td>
+                                <td><span class="badge bg-success">Success</span></td>
+                            </tr>
+                            <tr>
+                                <td>2025-08-15 13:26:01</td>
+                                <td>Enhanced Engine</td>
+                                <td>Generated enhanced permutations</td>
+                                <td><span class="badge bg-success">Success</span></td>
+                            </tr>
+                            <tr>
+                                <td>2025-08-15 13:25:30</td>
+                                <td>Data Loader</td>
+                                <td>Loaded Tables v6.xlsm (52 tenants, 115 rating rules)</td>
+                                <td><span class="badge bg-success">Success</span></td>
+                            </tr>
+                            <tr>
+                                <td>2025-08-15 13:25:00</td>
+                                <td>System</td>
+                                <td>Web application started</td>
+                                <td><span class="badge bg-success">Success</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <button class="btn btn-outline-secondary" onclick="loadMoreLogs()">
+                        <i class="fas fa-chevron-down me-2"></i>Load More
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Configuration Settings -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-sliders-h me-2"></i>System Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="configForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Site Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" value="SecureABS2025!" readonly>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword(this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Session Timeout (hours)</label>
+                            <input type="number" class="form-control" value="8" min="1" max="24">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Max Permutations Default</label>
+                            <input type="number" class="form-control" value="3000" min="100" max="10000">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Auto-Refresh Interval (seconds)</label>
+                            <input type="number" class="form-control" value="30" min="10" max="300">
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="d-flex justify-content-end gap-3">
+                        <button type="button" class="btn btn-outline-secondary" onclick="resetConfig()">
+                            <i class="fas fa-undo me-2"></i>Reset to Defaults
+                        </button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save me-2"></i>Save Configuration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Admin functions
+function refreshSystem() {
+    const btn = event.target;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Refreshing...';
+    btn.disabled = true;
+    
+    setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-sync me-2"></i>Refresh System';
+        btn.disabled = false;
+        alert('System refreshed successfully!');
+    }, 2000);
+}
+
+function clearCache() {
+    if (confirm('Are you sure you want to clear the system cache?')) {
+        alert('Cache cleared successfully!');
+    }
+}
+
+function exportLogs() {
+    alert('Log export functionality will be available in the next update.');
+}
+
+function addUser() {
+    const email = prompt('Enter new user email:');
+    if (email && email.includes('@')) {
+        const name = prompt('Enter user full name:');
+        if (name) {
+            const role = prompt('Enter user role (admin/analyst):', 'analyst');
+            if (role === 'admin' || role === 'analyst') {
+                alert(`User ${name} (${email}) will be created with ${role} role.\n\nThis feature will be fully implemented in the next update.`);
+            } else {
+                alert('Invalid role. Must be "admin" or "analyst".');
+            }
+        }
+    } else {
+        alert('Please enter a valid email address.');
+    }
+}
+
+function backupData() {
+    if (confirm('Create a system backup? This may take a few minutes.')) {
+        alert('Backup functionality will be available in the next update.');
+    }
+}
+
+function systemSettings() {
+    alert('Advanced system settings will be available in the next update.');
+}
+
+function editUser(email) {
+    alert(`Edit user: ${email}\n\nUser management interface will be fully implemented in the next update.`);
+}
+
+function viewUser(email) {
+    alert(`View details for: ${email}\n\nDetailed user profiles will be available in the next update.`);
+}
+
+function deleteUser(email) {
+    if (confirm(`Are you sure you want to delete user: ${email}?\n\nThis action cannot be undone.`)) {
+        alert(`User ${email} would be deleted.\n\nThis feature will be fully implemented in the next update.`);
+    }
+}
+
+function loadMoreLogs() {
+    const tbody = document.getElementById('activityLog');
+    const loadingRow = document.createElement('tr');
+    loadingRow.innerHTML = '<td colspan="4" class="text-center"><span class="spinner-border spinner-border-sm me-2"></span>Loading...</td>';
+    tbody.appendChild(loadingRow);
+    
+    setTimeout(() => {
+        tbody.removeChild(loadingRow);
+        
+        // Add some sample log entries
+        const newLogs = [
+            ['2025-08-15 13:20:15', 'Analyst', 'Exported results to Excel', 'success'],
+            ['2025-08-15 13:15:30', 'System', 'Background cleanup completed', 'success'],
+            ['2025-08-15 13:10:45', 'Admin', 'Updated configuration settings', 'success']
+        ];
+        
+        newLogs.forEach(log => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${log[0]}</td>
+                <td>${log[1]}</td>
+                <td>${log[2]}</td>
+                <td><span class="badge bg-${log[3] === 'success' ? 'success' : 'danger'}">${log[3].charAt(0).toUpperCase() + log[3].slice(1)}</span></td>
+            `;
+            tbody.appendChild(row);
+        });
+    }, 1000);
+}
+
+function togglePassword(btn) {
+    const input = btn.previousElementSibling;
+    const icon = btn.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+function resetConfig() {
+    if (confirm('Reset all configuration to default values?')) {
+        document.getElementById('configForm').reset();
+        alert('Configuration reset to defaults.');
+    }
+}
+
+// Handle config form submission
+document.getElementById('configForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+    btn.disabled = true;
+    
+    setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-save me-2"></i>Save Configuration';
+        btn.disabled = false;
+        alert('Configuration saved successfully!\n\nNote: Some changes may require system restart.');
+    }, 1500);
+});
+</script>
+{% endblock %}

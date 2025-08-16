@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AtlasNexus Registration Approval Required</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .title {
+            color: #1e3c72;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .user-details {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 25px 0;
+            border-left: 4px solid #1e3c72;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 8px;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #495057;
+            min-width: 150px;
+            flex-shrink: 0;
+        }
+        .detail-value {
+            color: #212529;
+            flex-grow: 1;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1e3c72;
+            margin: 25px 0 15px 0;
+            border-bottom: 2px solid #1e3c72;
+            padding-bottom: 5px;
+        }
+        .action-buttons {
+            text-align: center;
+            margin: 35px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 0 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-approve {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-reject {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .footer {
+            background-color: #1e3c72;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+        .timestamp {
+            color: #6c757d;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">AtlasNexus</div>
+            <div>Institutional Securitisation Platform</div>
+        </div>
+        
+        <div class="content">
+            <div class="title">New Registration Approval Required</div>
+            
+            <p>A new user has submitted a registration request for institutional access to the AtlasNexus platform. Please review the details below and approve or reject the application.</p>
+            
+            <div class="user-details">
+                <div class="section-title">Personal Information</div>
+                <div class="detail-row">
+                    <div class="detail-label">Full Name:</div>
+                    <div class="detail-value">{{ registration_data.full_name }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Email Address:</div>
+                    <div class="detail-value">{{ registration_data.email }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Mobile Number:</div>
+                    <div class="detail-value">{{ registration_data.phone }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Personal Address:</div>
+                    <div class="detail-value">{{ registration_data.personal_address|replace('\n', '<br>')|safe }}</div>
+                </div>
+                
+                <div class="section-title">Professional Information</div>
+                <div class="detail-row">
+                    <div class="detail-label">Organisation:</div>
+                    <div class="detail-value">{{ registration_data.company }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Professional Title:</div>
+                    <div class="detail-value">{{ registration_data.role }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Company Number:</div>
+                    <div class="detail-value">{{ registration_data.company_number }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Company Address:</div>
+                    <div class="detail-value">{{ registration_data.registered_company_address|replace('\n', '<br>')|safe }}</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="{{ approve_url }}" class="btn btn-approve">
+                    ✓ Approve Registration
+                </a>
+                <a href="{{ reject_url }}" class="btn btn-reject">
+                    ✗ Reject Registration
+                </a>
+            </div>
+            
+            <p style="text-align: center; color: #6c757d; font-size: 14px;">
+                Clicking "Approve Registration" will automatically generate a secure password and send login credentials to the user.
+            </p>
+            
+            <div class="timestamp">
+                Registration submitted: {{ timestamp }}
+            </div>
+        </div>
+        
+        <div class="footer">
+            AtlasNexus Institutional Platform<br>
+            Secure • Professional • Compliant
+        </div>
+    </div>
+</body>
+</html>

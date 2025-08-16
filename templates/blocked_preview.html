@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Blocked - Preview</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iNyIgeT0iMTMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxNSIgcng9IjMiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iIzMzMzMzMyIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxjaXJjbGUgY3g9IjE2IiBjeT0iMjAuNSIgcj0iMiIgZmlsbD0iIzMzMzMzMyIvPgo8cGF0aCBkPSJNMTEgOSBDMTEgNS4xMyAxMy4xMyAzIDE3IDMgQzIwLjg3IDMgMjMgNS4xMyAyMyA5IFYxMyBIMjAgVjkgQzIwIDYuNzkgMTguMjEgNSAxNiA1IEMxMy43OSA1IDEyIDYuNzkgMTIgOSBWMTMgSDkgVjkgWiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzMzMzIiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8L3N2Zz4K" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+Pro:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --oxford-blue: #0f1419;
+            --charcoal: #1a1f2e;
+            --slate-grey: #2a3441;
+            --warm-cream: #faf9f7;
+            --burgundy: #722f37;
+            --antique-gold: #d4af37;
+        }
+        
+        .blocked-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--oxford-blue) 0%, var(--charcoal) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: var(--warm-cream);
+            text-align: center;
+        }
+        
+        .blocked-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #dc2626;
+            margin-bottom: 25px;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.8),
+                0 0 2px rgba(255, 255, 255, 0.3);
+        }
+        
+        .blocked-message {
+            font-family: 'Source Serif Pro', serif;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            max-width: 600px;
+            line-height: 1.5;
+            text-shadow: 
+                1px 1px 3px rgba(0, 0, 0, 0.9),
+                0 0 2px rgba(255, 255, 255, 0.7);
+        }
+        
+        .blocked-timer {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #dc2626;
+            margin: 25px 0;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.8),
+                0 0 2px rgba(255, 255, 255, 0.3);
+        }
+        
+        .warning-text {
+            font-family: 'Source Serif Pro', serif;
+            font-size: 1.3rem;
+            color: var(--warm-cream);
+            margin: 20px 0;
+            font-weight: 600;
+            text-shadow: 
+                1px 1px 3px rgba(0, 0, 0, 0.8),
+                0 0 1px rgba(255, 255, 255, 0.2);
+        }
+        
+        .support-info {
+            font-family: 'Source Serif Pro', serif;
+            font-size: 1.2rem;
+            color: var(--warm-cream);
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(220, 38, 38, 0.2);
+            border: 2px solid #dc2626;
+            border-radius: 8px;
+            max-width: 600px;
+            text-shadow: 
+                1px 1px 2px rgba(0, 0, 0, 0.9),
+                0 0 1px rgba(255, 255, 255, 0.6);
+        }
+        
+        .email-highlight {
+            color: #fbbf24;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-shadow: 
+                1px 1px 3px rgba(0, 0, 0, 0.9),
+                0 0 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        .ip-warning {
+            font-family: 'Source Serif Pro', serif;
+            font-size: 1.1rem;
+            color: var(--warm-cream);
+            margin-top: 20px;
+            font-style: italic;
+            text-shadow: 
+                1px 1px 3px rgba(0, 0, 0, 0.8),
+                0 0 1px rgba(255, 255, 255, 0.2);
+            max-width: 700px;
+            line-height: 1.4;
+        }
+        
+        .session-info {
+            font-family: 'Source Serif Pro', serif;
+            font-size: 1.1rem;
+            color: rgba(250, 249, 247, 0.8);
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            max-width: 600px;
+        }
+        
+        .permanent-lockout {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            display: none;
+            z-index: 10000;
+        }
+        
+        .secret-unlock {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 30px;
+            height: 30px;
+            background: transparent;
+            cursor: pointer;
+            z-index: 10001;
+        }
+        
+        .secret-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 20, 25, 0.95);
+            border: 2px solid #dc2626;
+            border-radius: 8px;
+            padding: 30px;
+            display: none;
+            z-index: 10002;
+            text-align: center;
+        }
+        
+        .secret-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            padding: 10px;
+            color: var(--warm-cream);
+            font-family: 'Source Serif Pro', serif;
+            font-size: 1rem;
+            text-align: center;
+            margin: 10px 0;
+            outline: none;
+        }
+        
+        .secret-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .email-link {
+            color: var(--warm-cream);
+            text-decoration: underline;
+            font-weight: 700;
+            font-size: 1.3rem;
+            text-shadow: 
+                1px 1px 3px rgba(0, 0, 0, 0.8),
+                0 0 1px rgba(255, 255, 255, 0.3);
+        }
+        
+        .email-link:hover {
+            color: #ffffff;
+            text-decoration: none;
+        }
+        
+        .global-unlock {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+            width: 80px;
+            height: 25px;
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.3);
+            text-align: center;
+            padding: 5px;
+            outline: none;
+            font-family: monospace;
+            opacity: 0.1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .global-unlock:focus {
+            opacity: 0.8;
+            background: rgba(0, 0, 0, 0.8);
+            color: rgba(255, 255, 255, 0.9);
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+        
+        .global-unlock::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 9px;
+        }
+    </style>
+</head>
+<body>
+    <div class="blocked-page">
+        <div class="blocked-title">
+            <i class="fas fa-ban me-3"></i>
+            ACCESS BLOCKED
+        </div>
+        <div class="blocked-message">
+            <strong>SECURITY BREACH DETECTED</strong><br>
+            Unauthorized access attempt has triggered permanent security protocols.
+        </div>
+        
+        <div class="blocked-timer" id="block-timer">44:59</div>
+        
+        <div class="warning-text">
+            PERMANENT REGION LOCKOUT IMMINENT
+        </div>
+        
+        <div class="support-info">
+            <div style="font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; color: #dc2626; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(255, 255, 255, 0.3);">
+                IMMEDIATE ACTION REQUIRED
+            </div>
+            <div style="margin-bottom: 10px;">
+                Contact support IMMEDIATELY to prevent permanent lockout:
+            </div>
+            <div>
+                <a href="" class="email-link" id="supportEmail">Support@AtlasNexus.co.uk</a>
+            </div>
+            <div style="margin-top: 15px; font-size: 1.1rem;">
+                Include the following information in your message:
+            </div>
+        </div>
+        
+        <div class="session-info">
+            <div><strong>Session ID:</strong> <span id="sessionId"></span></div>
+            <div><strong>Timestamp:</strong> <span id="timestamp"></span></div>
+            <div><strong>Security Event:</strong> UNAUTHORIZED_ACCESS_ATTEMPT</div>
+        </div>
+        
+        <div class="ip-warning">
+            Your IP address and geolocation have been logged and disclosed to our security host.<br>
+            Law enforcement protocols may be initiated for repeated violations.
+        </div>
+    </div>
+    
+    <!-- Permanent Lockout Page -->
+    <div id="permanentLockout" class="permanent-lockout"></div>
+    
+    <!-- Secret Unlock Area -->
+    <div id="secretArea" class="secret-unlock"></div>
+    
+    <!-- Secret Menu -->
+    <div id="secretMenu" class="secret-menu">
+        <div style="color: var(--warm-cream); font-family: 'Source Serif Pro', serif; margin-bottom: 15px; font-size: 1.2rem;">
+            Global Access Override
+        </div>
+        <input type="password" id="blockedPreviewSecretInput" class="secret-input" placeholder="Enter global password" maxlength="20">
+        <div style="color: rgba(255, 255, 255, 0.6); font-size: 1rem; margin-top: 10px;">
+            Press Enter to submit
+        </div>
+    </div>
+    
+    <script>
+        // Check for permanent lockout state
+        function checkPermanentLockout() {
+            const isPermanentlyLocked = localStorage.getItem('permanentLockout');
+            if (isPermanentlyLocked === 'true') {
+                document.getElementById('permanentLockout').style.display = 'block';
+                return true;
+            }
+            return false;
+        }
+        
+        // Timer management - uses stored remaining time
+        let timeRemaining;
+        let lastUpdateTime = localStorage.getItem('lastUpdateTime');
+        let storedTimeRemaining = localStorage.getItem('timeRemaining');
+        
+        if (!storedTimeRemaining || !lastUpdateTime) {
+            // First time - start with 1 minute for testing
+            timeRemaining = 1 * 60; // 1 minute for testing (was 45 minutes)
+            localStorage.setItem('timeRemaining', timeRemaining.toString());
+            localStorage.setItem('lastUpdateTime', Date.now().toString());
+        } else {
+            // Calculate how much time has passed since last update
+            const now = Date.now();
+            const timePassed = Math.floor((now - parseInt(lastUpdateTime)) / 1000);
+            timeRemaining = Math.max(0, parseInt(storedTimeRemaining) - timePassed);
+        }
+        
+        // Update the display immediately with current time
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        document.getElementById('block-timer').textContent = 
+            `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        function updateTimer() {
+            if (timeRemaining <= 0) {
+                // Timer expired - redirect to black screen
+                localStorage.setItem('permanentLockout', 'true');
+                window.location.href = '/black_screen';
+                return;
+            }
+            
+            timeRemaining--;
+            
+            // Store current state
+            localStorage.setItem('timeRemaining', timeRemaining.toString());
+            localStorage.setItem('lastUpdateTime', Date.now().toString());
+            
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('block-timer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Update timer every second
+        setInterval(updateTimer, 1000);
+        
+        // Generate session ID and timestamp
+        function generateSessionData() {
+            // Use persistent session ID that doesn't change on refresh
+            let sessionId = localStorage.getItem('persistentSessionId');
+            if (!sessionId) {
+                sessionId = 'SID-LOCKED-' + Date.now().toString(36).toUpperCase();
+                localStorage.setItem('persistentSessionId', sessionId);
+            }
+            
+            const timestamp = new Date().toISOString().replace('T', ' ').substr(0, 19) + ' UTC';
+            
+            document.getElementById('sessionId').textContent = sessionId;
+            document.getElementById('timestamp').textContent = timestamp;
+            
+            // Set up email link
+            const emailSubject = encodeURIComponent('URGENT: Prevent Permanent Region Lockout - Session ' + sessionId);
+            const emailBody = encodeURIComponent(
+                'URGENT SECURITY MATTER\n\n' +
+                'I am experiencing a security lockout and need immediate assistance to prevent permanent region blocking.\n\n' +
+                'Session Details:\n' +
+                'Session ID: ' + sessionId + '\n' +
+                'Timestamp: ' + timestamp + '\n' +
+                'Security Event: UNAUTHORIZED_ACCESS_ATTEMPT\n\n' +
+                'Please restore my access immediately.\n\n' +
+                'Thank you for your urgent attention to this matter.'
+            );
+            
+            document.getElementById('supportEmail').href = `mailto:Support@AtlasNexus.co.uk?subject=${emailSubject}&body=${emailBody}`;
+        }
+        
+        // Initialize session data
+        generateSessionData();
+        
+        // Log this blocked access attempt
+        fetch('/api/log_blocked_access', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                sessionId: document.getElementById('sessionId').textContent,
+                timestamp: document.getElementById('timestamp').textContent,
+                userAgent: navigator.userAgent,
+                referrer: document.referrer
+            })
+        }).catch(err => console.log('Logging failed'));
+        
+        // Initialize page
+        if (!checkPermanentLockout()) {
+            // Only run timer if not permanently locked
+            setInterval(updateTimer, 1000);
+        }
+        
+        // Secret unlock functionality
+        let clickCount = 0;
+        let clickTimer;
+        
+        document.getElementById('secretArea').addEventListener('click', function() {
+            clickCount++;
+            
+            if (clickCount === 1) {
+                clickTimer = setTimeout(() => {
+                    clickCount = 0;
+                }, 2000); // Reset after 2 seconds
+            }
+            
+            if (clickCount === 4) {
+                clearTimeout(clickTimer);
+                clickCount = 0;
+                document.getElementById('secretMenu').style.display = 'block';
+            }
+        });
+        
+        // Secret menu functionality
+        document.getElementById('blockedPreviewSecretInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const password = this.value;
+                if (password === 'Ronabambi') {
+                    // Clear ONLY lockout data - do NOT clear site authentication
+                    localStorage.removeItem('permanentLockout');
+                    localStorage.removeItem('timerStartTime');
+                    localStorage.removeItem('persistentSessionId');
+                    localStorage.removeItem('accessBlocked');
+                    localStorage.removeItem('sessionStartTime');
+                    localStorage.removeItem('timeRemaining');
+                    localStorage.removeItem('lastUpdateTime');
+                    // Redirect to first page where user must still enter site password
+                    window.location.href = '/?lockout_reset=true';
+                } else if (password.length > 0) {
+                    // Clear the input field first
+                    this.value = '';
+                    
+                    // Log failed unlock attempt
+                    fetch('/api/log_password_attempt', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            password: password,
+                            timestamp: new Date().toISOString(),
+                            userAgent: navigator.userAgent,
+                            context: 'blocked_page_unlock_attempt'
+                        })
+                    }).catch(err => console.log('Logging failed'));
+                    
+                    // Trigger permanent lockout for incorrect password
+                    console.log('INCORRECT PASSWORD DETECTED - Triggering permanent lockout');
+                    console.log('Setting permanentLockout to true');
+                    localStorage.setItem('permanentLockout', 'true');
+                    
+                    // Redirect to main page which will show black screen
+                    console.log('Redirecting to main page with black screen...');
+                    window.location.replace('/');
+                }
+            }
+        });
+        
+        // Close secret menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('secretMenu');
+            const area = document.getElementById('secretArea');
+            if (menu.style.display === 'block' && !menu.contains(e.target) && !area.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
