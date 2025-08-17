@@ -61,8 +61,13 @@ def index():
         
         # Check blocking status
         blocked_until = session.get(f'blocked_until_{ip_address}')
-        if blocked_until and datetime.now() < blocked_until:
-            return render_template('site_auth.html', show_blocked=True, blocked_until=blocked_until), 403
+        if blocked_until:
+            # Convert to datetime if it's a string
+            if isinstance(blocked_until, str):
+                blocked_until = datetime.fromisoformat(blocked_until)
+            # Make both naive for comparison
+            if datetime.now().replace(tzinfo=None) < blocked_until.replace(tzinfo=None):
+                return render_template('site_auth.html', show_blocked=True, blocked_until=blocked_until), 403
         
         if session.get(f'blackscreen_{ip_address}'):
             return render_template('site_auth.html', show_blackscreen=True), 403
@@ -89,8 +94,13 @@ def site_auth():
     
     # Check if already blocked
     blocked_until = session.get(f'blocked_until_{ip_address}')
-    if blocked_until and datetime.now() < blocked_until:
-        return render_template('site_auth.html', show_blocked=True, blocked_until=blocked_until), 403
+    if blocked_until:
+        # Convert to datetime if it's a string
+        if isinstance(blocked_until, str):
+            blocked_until = datetime.fromisoformat(blocked_until)
+        # Make both naive for comparison
+        if datetime.now().replace(tzinfo=None) < blocked_until.replace(tzinfo=None):
+            return render_template('site_auth.html', show_blocked=True, blocked_until=blocked_until), 403
     
     # Check if permanently blocked
     if session.get(f'blackscreen_{ip_address}'):
