@@ -194,6 +194,13 @@ def secure_login():
     
     return render_template('secure_login.html')
 
+@app.route('/verify-access-code', methods=['POST'])
+def verify_access_code():
+    """Handle verification code submission."""
+    # For now, just redirect back to login
+    # In production, this would validate the verification code
+    return redirect('/secure-login')
+
 @app.route('/dashboard')
 @login_required
 def dashboard():

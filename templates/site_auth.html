@@ -1142,7 +1142,7 @@
                         startBlockCountdown();
                     </script>
                     {% else %}
-                    <form method="POST" action="{{ url_for('site_auth') }}" class="needs-validation" novalidate>
+                    <form method="POST" action="/site-auth" class="needs-validation" novalidate>
                         <div class="mb-4">
                             <input type="password" class="form-control form-control-lg" 
                                    id="site_password" name="site_password" required
@@ -2062,7 +2062,7 @@
             }
             
             // Reset form
-            const form = document.querySelector('form[action*="site_auth"]');
+            const form = document.querySelector('form[action*="site-auth"]');
             if (form) form.reset();
             
             // Hide Flask alerts
@@ -2675,18 +2675,6 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                 const formData = new FormData(form);
                 const password = formData.get('site_password');
                 
-                // Check if password is correct client-side first
-                if (password === 'RedAMC' || password === 'PartnerAccess' || password === 'PartnerPass') {
-                    // Show success message with loading animation
-                    showSuccessLoading();
-                    
-                    // Wait 4-5 seconds then submit
-                    setTimeout(() => {
-                        form.submit();
-                    }, 4500);
-                    return;
-                }
-                
                 // For incorrect passwords, use AJAX to maintain URL
                 fetch('/site-auth', {
                     method: 'POST',
@@ -2711,7 +2699,7 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                 });
             }
             
-            const form = document.querySelector('form[action*="site_auth"]');
+            const form = document.querySelector('form[action*="site-auth"]');
             if (form) {
                 form.addEventListener('submit', function(event) {
                     const attempts = getPasswordAttempts();
@@ -2729,7 +2717,18 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                         return false;
                     }
                     
-                    // Always prevent default form submission to use AJAX
+                    // Get the password value
+                    const password = new FormData(form).get('site_password');
+                    
+                    // Check if password is correct
+                    if (password === 'RedAMC' || password === 'PartnerAccess') {
+                        // Show success animation
+                        showSuccessLoading();
+                        // Allow normal form submission for correct passwords
+                        return true;
+                    }
+                    
+                    // For all incorrect passwords, prevent default to use AJAX
                     event.preventDefault();
                     
                     // If this is the 4th attempt (after final attempt was authorized)
@@ -2741,23 +2740,10 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                         attempts.finalAttemptInProgress = true;
                         localStorage.setItem('passwordAttempts', JSON.stringify(attempts));
                         
-                        // Get the password and check if it's correct
-                        const password = new FormData(form).get('site_password');
-                        
-                        // Check if password is correct
-                        if (password === 'RedAMC' || password === 'PartnerAccess') {
-                            // Correct password - submit via AJAX
-                            submitPasswordViaAJAX(form);
-                            return false;
-                        } else {
-                            // Wrong password on 4th attempt - trigger immediate smooth transition
-                            triggerPermanentLockout();
-                            return false;
-                        }
+                        // Wrong password on 4th attempt - trigger immediate smooth transition
+                        triggerPermanentLockout();
+                        return false;
                     }
-                    
-                    // Normal attempts 1-3
-                    const password = new FormData(form).get('site_password');
                     
                     // Only record attempt if password is wrong
                     if (password !== 'RedAMC' && password !== 'PartnerAccess' && password !== 'PartnerPass') {
