@@ -3495,15 +3495,16 @@
             const emailField = this.querySelector('input[name="email"]');
             const passwordField = this.querySelector('input[name="password"]');
             
-            if (emailField.value === 'username@username.com' && passwordField.value === 'password') {
-                // For temporary user, redirect directly after a short delay
+            // Check for our authorized credentials
+            if (emailField.value.toLowerCase() === 'spikemaz8@aol.com' && passwordField.value === 'SpikeMaz') {
+                // For authorized user, submit form to server for proper authentication
                 setTimeout(() => {
-                    window.location.href = '/dashboard';
+                    this.submit();
                 }, 1000);
                 return;
             }
             
-            // For other users, submit form for SMS verification
+            // For other users, also submit form
             setTimeout(() => {
                 this.submit();
             }, 1500);
