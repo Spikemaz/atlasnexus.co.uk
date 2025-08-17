@@ -81,12 +81,8 @@ def index():
         attempt_count = session.get(f'attempt_count_{ip_address}', 0)
         return render_template('site_auth.html', attempt_count=attempt_count)
     
-    # If user is already logged in, go to dashboard
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
-    
-    # Show main login page
-    return render_template('secure_login.html')
+    # Site is authenticated, redirect to secure_login (Security Gate 2)
+    return redirect(url_for('secure_login'))
 
 @app.route('/site_auth', methods=['POST'])
 def site_auth():
@@ -161,9 +157,14 @@ def site_auth():
 
 @app.route('/secure_login', methods=['GET', 'POST'])
 def secure_login():
-    """Main login and registration page."""
+    """Main login and registration page (Security Gate 2)."""
+    # Check if site authentication is complete
     if 'site_authenticated' not in session:
         return redirect(url_for('index'))
+    
+    # If already logged in as user, go to dashboard
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
         action = request.form.get('action')

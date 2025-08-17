@@ -2574,23 +2574,48 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                 `;
                 
                 overlay.innerHTML = `
-                    <div style="text-align: center;">
-                        <div style="color: #28a745; font-size: 4rem; margin-bottom: 30px;">
-                            <i class="fas fa-check-circle" style="animation: pulse 1s ease infinite;"></i>
+                    <div style="text-align: center; position: relative; height: 100vh; display: flex; flex-direction: column; justify-content: center;">
+                        <div style="max-width: 600px; margin: 0 auto;">
+                            <div style="color: #28a745; font-size: 4rem; margin-bottom: 30px;">
+                                <i class="fas fa-shield-alt" style="animation: pulse 1s ease infinite;"></i>
+                            </div>
+                            <h2 style="color: var(--antique-gold); font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 20px; letter-spacing: 3px;">
+                                ACCESS GRANTED
+                            </h2>
+                            
+                            <div id="securityChecks" style="text-align: left; margin: 30px auto; max-width: 400px;">
+                                <div class="security-check" data-delay="500" style="color: #6c757d; font-size: 1.1rem; margin: 15px 0; opacity: 0;">
+                                    <i class="fas fa-circle-notch fa-spin"></i> Verifying credentials...
+                                </div>
+                                <div class="security-check" data-delay="1200" style="color: #6c757d; font-size: 1.1rem; margin: 15px 0; opacity: 0;">
+                                    <i class="fas fa-circle-notch fa-spin"></i> Establishing secure channel...
+                                </div>
+                                <div class="security-check" data-delay="2000" style="color: #6c757d; font-size: 1.1rem; margin: 15px 0; opacity: 0;">
+                                    <i class="fas fa-circle-notch fa-spin"></i> Encrypting connection (AES-256)...
+                                </div>
+                                <div class="security-check" data-delay="2800" style="color: #6c757d; font-size: 1.1rem; margin: 15px 0; opacity: 0;">
+                                    <i class="fas fa-circle-notch fa-spin"></i> Authenticating session token...
+                                </div>
+                                <div class="security-check" data-delay="3500" style="color: #6c757d; font-size: 1.1rem; margin: 15px 0; opacity: 0;">
+                                    <i class="fas fa-circle-notch fa-spin"></i> Initializing Security Gate 2...
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 40px;">
+                                <div class="loading-bar" style="width: 300px; height: 4px; background: rgba(212, 175, 55, 0.2); border-radius: 2px; margin: 0 auto; overflow: hidden;">
+                                    <div style="height: 100%; background: linear-gradient(90deg, transparent, var(--antique-gold), transparent); width: 40%; animation: loading-sweep 1.5s ease-in-out infinite;"></div>
+                                </div>
+                                <p style="color: #8b92a8; font-size: 0.9rem; margin-top: 15px; letter-spacing: 2px; text-transform: uppercase;">
+                                    Redirecting to secure portal...
+                                </p>
+                            </div>
                         </div>
-                        <h2 style="color: var(--antique-gold); font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 20px;">
-                            SUCCESS
-                        </h2>
-                        <p style="color: #faf9f7; font-size: 1.3rem; margin-bottom: 30px;">
-                            Connecting to encrypted server<br>
-                            Please wait...
-                        </p>
-                        <div class="loading-dots" style="color: var(--antique-gold); font-size: 2rem; letter-spacing: 10px;">
-                            <span style="animation: blink 1.4s infinite;">●</span>
-                            <span style="animation: blink 1.4s infinite 0.2s;">●</span>
-                            <span style="animation: blink 1.4s infinite 0.4s;">●</span>
-                            <span style="animation: blink 1.4s infinite 0.6s;">●</span>
-                            <span style="animation: blink 1.4s infinite 0.8s;">●</span>
+                        
+                        <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 100%; text-align: center;">
+                            <p style="color: #6c757d; font-size: 0.8rem; letter-spacing: 1px;">
+                                SESSION ID: <span id="sessionCode">${Math.random().toString(36).substr(2, 9).toUpperCase()}</span><br>
+                                PROTOCOL: TLS 1.3 | CIPHER: ECDHE-RSA-AES256-GCM-SHA384
+                            </p>
                         </div>
                     </div>
                     
@@ -2603,9 +2628,19 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                             0%, 100% { transform: scale(1); }
                             50% { transform: scale(1.1); }
                         }
-                        @keyframes blink {
-                            0%, 50%, 100% { opacity: 0.3; }
-                            25% { opacity: 1; }
+                        @keyframes loading-sweep {
+                            0% { transform: translateX(-100%); }
+                            100% { transform: translateX(350%); }
+                        }
+                        @keyframes checkComplete {
+                            from { 
+                                opacity: 1;
+                                color: #6c757d;
+                            }
+                            to { 
+                                opacity: 1;
+                                color: #28a745;
+                            }
                         }
                     </style>
                 `;
@@ -2617,6 +2652,22 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                 if (warningMsg) {
                     warningMsg.style.display = 'none';
                 }
+                
+                // Animate security checks appearing one by one
+                const checks = overlay.querySelectorAll('.security-check');
+                checks.forEach((check, index) => {
+                    const delay = parseInt(check.getAttribute('data-delay'));
+                    setTimeout(() => {
+                        check.style.transition = 'opacity 0.5s ease';
+                        check.style.opacity = '1';
+                        
+                        // After a short delay, mark as complete
+                        setTimeout(() => {
+                            check.innerHTML = check.innerHTML.replace('fa-circle-notch fa-spin', 'fa-check-circle');
+                            check.style.color = '#28a745';
+                        }, 500);
+                    }, delay);
+                });
             }
             
             // AJAX form submission to maintain URL
