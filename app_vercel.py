@@ -10,6 +10,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from datetime import datetime, timedelta
 import secrets
+try:
+    from security_tracker import security_tracker
+    SECURITY_TRACKING = True
+except ImportError:
+    SECURITY_TRACKING = False
+    print("Security tracking module not available")
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -112,14 +118,35 @@ def site_auth():
         session.pop(f'blocked_until_{ip_address}', None)
         session.pop(f'blackscreen_{ip_address}', None)
         
+        # Clear security tracking for successful login
+        if SECURITY_TRACKING:
+            security_tracker.clear_successful_login(ip_address)
+        
         # Store access code
         session['access_code'] = 'RedAMC' if password == SITE_PASSWORD_INTERNAL else 'PartnerAccess'
         session['site_authenticated'] = True
         
         return redirect(url_for('secure_login'))
     else:
-        # Failed attempt - log it (simplified for production)
+        # Failed attempt - log it with security tracking
         print(f"Security attempt: IP={ip_address}, attempt={attempt_count}, password={password}")
+        
+        # Track failed attempt in security system
+        if SECURITY_TRACKING:
+            user_agent = request.headers.get('User-Agent', 'Unknown')
+            session_id = session.get('session_id', secrets.token_hex(16))
+            session['session_id'] = session_id
+            
+            tracking_result = security_tracker.log_failed_attempt(
+                ip_address=ip_address,
+                password=password,
+                user_agent=user_agent,
+                session_id=session_id
+            )
+            
+            # Log if security incident was triggered
+            if tracking_result['incident_triggered']:
+                print(f"SECURITY INCIDENT: IP {ip_address} triggered lockout after {attempt_count} attempts")
         
         if attempt_count >= 5:
             session[f'blackscreen_{ip_address}'] = True
@@ -186,8 +213,65 @@ def admin_panel():
         flash('Access denied. Admin access required.', 'danger')
         return redirect(url_for('dashboard'))
     
-    # Simple admin view - no database operations for serverless
-    return render_template('admin_simple.html')
+    # Get security incidents if tracking is enabled
+    security_incidents = []
+    ip_reputation = []
+    if SECURITY_TRACKING:
+        try:
+            security_incidents = security_tracker.get_recent_incidents(limit=50)
+            ip_reputation = security_tracker.get_ip_reputation_report()
+        except Exception as e:
+            print(f"Error loading security data: {e}")
+    
+    return render_template('admin_simple.html', 
+                         security_incidents=security_incidents,
+                         ip_reputation=ip_reputation)
+
+@app.route('/api/security/incidents')
+@login_required
+def get_security_incidents():
+    """API endpoint for security incidents (admin only)"""
+    if current_user.email != ADMIN_EMAIL:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    if not SECURITY_TRACKING:
+        return jsonify({'incidents': [], 'tracking_enabled': False})
+    
+    try:
+        incidents = security_tracker.get_recent_incidents(limit=100)
+        return jsonify({
+            'incidents': incidents,
+            'tracking_enabled': True,
+            'total': len(incidents)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/log_password_attempt', methods=['POST'])
+def log_password_attempt():
+    """Log password attempts from client-side (secret menu attempts)"""
+    if not SECURITY_TRACKING:
+        return jsonify({'status': 'tracking_disabled'}), 200
+    
+    try:
+        data = request.json
+        ip_address = request.remote_addr
+        password = data.get('password', '')
+        context = data.get('context', 'unknown')
+        user_agent = data.get('userAgent', request.headers.get('User-Agent', 'Unknown'))
+        
+        # Log the secret menu attempt
+        security_tracker.log_failed_attempt(
+            ip_address=ip_address,
+            password=f"SECRET_MENU:{password}",
+            user_agent=user_agent,
+            session_id=f"context:{context}"
+        )
+        
+        return jsonify({'status': 'logged'}), 200
+    except Exception as e:
+        print(f"Error logging password attempt: {e}")
+        return jsonify({'status': 'error'}), 500
 
 @app.route('/logout')
 @login_required

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Incidents - AtlasNexus Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --dark-bg: #0f1419;
+            --card-bg: #1a1f2e;
+            --text-light: #e1e4e8;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --success: #28a745;
+        }
+        
+        body {
+            background: var(--dark-bg);
+            color: var(--text-light);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, var(--card-bg) 0%, #2a3441 100%);
+            padding: 2rem;
+            border-bottom: 2px solid var(--primary-gold);
+            margin-bottom: 2rem;
+        }
+        
+        .security-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .security-card:hover {
+            border-color: var(--primary-gold);
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.2);
+        }
+        
+        .incident-severity-high {
+            border-left: 4px solid var(--danger);
+        }
+        
+        .incident-severity-medium {
+            border-left: 4px solid var(--warning);
+        }
+        
+        .incident-severity-low {
+            border-left: 4px solid var(--success);
+        }
+        
+        .ip-badge {
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--primary-gold);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .attempt-badge {
+            background: rgba(220, 53, 69, 0.2);
+            color: #ff6b6b;
+            padding: 0.25rem 0.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .password-hash {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+        }
+        
+        .risk-score {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .risk-high { background: rgba(220, 53, 69, 0.3); color: #ff6b6b; }
+        .risk-medium { background: rgba(255, 193, 7, 0.3); color: #ffc107; }
+        .risk-low { background: rgba(40, 167, 69, 0.3); color: #28a745; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-gold);
+        }
+        
+        .stat-label {
+            color: #8b92a8;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .tab-nav {
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            margin-bottom: 2rem;
+        }
+        
+        .tab-nav .nav-link {
+            color: var(--text-light);
+            border: none;
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-nav .nav-link.active {
+            background: transparent;
+            color: var(--primary-gold);
+            border-bottom: 3px solid var(--primary-gold);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .btn-action {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-whitelist {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border-color: #28a745;
+        }
+        
+        .btn-blacklist {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        .btn-investigate {
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--primary-gold);
+            border-color: var(--primary-gold);
+        }
+        
+        .alert-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 400px;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-0">
+                        <i class="fas fa-shield-alt text-warning me-2"></i>
+                        Security Incident Monitor
+                    </h1>
+                    <p class="text-muted mb-0 mt-2">Real-time threat detection and analysis</p>
+                </div>
+                <div>
+                    <a href="/admin" class="btn btn-outline-warning me-2">
+                        <i class="fas fa-arrow-left"></i> Back to Admin
+                    </a>
+                    <a href="/dashboard" class="btn btn-outline-light">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Statistics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalIncidents">{{ security_incidents|length }}</div>
+                <div class="stat-label">Total Incidents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value text-danger" id="activeThreats">
+                    {{ security_incidents|selectattr('resolved', 'equalto', false)|list|length }}
+                </div>
+                <div class="stat-label">Active Threats</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value text-warning" id="blockedIPs">
+                    {{ ip_reputation|selectattr('is_blacklisted', 'equalto', true)|list|length }}
+                </div>
+                <div class="stat-label">Blocked IPs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value text-info" id="riskScore">
+                    {% set high_risk = ip_reputation|selectattr('risk_score', 'ge', 75)|list|length %}
+                    {{ high_risk }}
+                </div>
+                <div class="stat-label">High Risk IPs</div>
+            </div>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs tab-nav" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-bs-toggle="tab" href="#incidents">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Recent Incidents
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#reputation">
+                    <i class="fas fa-network-wired me-2"></i>IP Reputation
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#realtime">
+                    <i class="fas fa-chart-line me-2"></i>Real-time Monitor
+                </a>
+            </li>
+        </ul>
+        
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Recent Incidents Tab -->
+            <div class="tab-pane fade show active" id="incidents">
+                {% for incident in security_incidents %}
+                <div class="security-card {% if incident.attempt_count >= 5 %}incident-severity-high{% elif incident.attempt_count >= 4 %}incident-severity-medium{% else %}incident-severity-low{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h5 class="mb-2">
+                                <span class="ip-badge">{{ incident.ip_address }}</span>
+                                <span class="attempt-badge ms-2">{{ incident.attempt_count }} attempts</span>
+                                {% if incident.lockout_triggered %}
+                                <span class="badge bg-danger ms-2">LOCKOUT TRIGGERED</span>
+                                {% endif %}
+                                {% if incident.email_sent %}
+                                <span class="badge bg-info ms-2">
+                                    <i class="fas fa-envelope"></i> Alert Sent
+                                </span>
+                                {% endif %}
+                            </h5>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <small class="text-muted">Location:</small>
+                                    <p class="mb-1">{{ incident.city|default('Unknown', true) }}, {{ incident.country|default('Unknown', true) }}</p>
+                                    <small class="text-muted">ISP:</small>
+                                    <p class="mb-1">{{ incident.isp|default('Unknown', true) }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">Timestamp:</small>
+                                    <p class="mb-1">{{ incident.incident_time }}</p>
+                                    <small class="text-muted">Type:</small>
+                                    <p class="mb-1">{{ incident.incident_type }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <small class="text-muted">Password Hashes Attempted:</small>
+                                <div class="password-hash">
+                                    {% for pwd in incident.attempted_passwords %}
+                                        <span class="me-2">{{ pwd }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2">
+                                <small class="text-muted">User Agent:</small>
+                                <p class="mb-0" style="font-size: 0.85rem;">{{ incident.user_agent }}</p>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button class="btn btn-action btn-whitelist" onclick="whitelistIP('{{ incident.ip_address }}')">
+                                    <i class="fas fa-check"></i> Whitelist
+                                </button>
+                                <button class="btn btn-action btn-blacklist" onclick="blacklistIP('{{ incident.ip_address }}')">
+                                    <i class="fas fa-ban"></i> Permanent Block
+                                </button>
+                                <button class="btn btn-action btn-investigate" onclick="investigateIP('{{ incident.ip_address }}')">
+                                    <i class="fas fa-search"></i> Investigate
+                                </button>
+                                {% if not incident.resolved %}
+                                <button class="btn btn-action btn-success" onclick="resolveIncident({{ incident.id }})">
+                                    <i class="fas fa-check-circle"></i> Mark Resolved
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">Incident #{{ incident.id }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% if not security_incidents %}
+                <div class="alert alert-success">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    No security incidents detected. System is secure.
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- IP Reputation Tab -->
+            <div class="tab-pane fade" id="reputation">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>IP Address</th>
+                                <th>Risk Score</th>
+                                <th>Total Attempts</th>
+                                <th>Blocked Count</th>
+                                <th>First Seen</th>
+                                <th>Last Seen</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ip in ip_reputation %}
+                            <tr>
+                                <td><span class="ip-badge">{{ ip.ip_address }}</span></td>
+                                <td>
+                                    <span class="risk-score {% if ip.risk_score >= 75 %}risk-high{% elif ip.risk_score >= 50 %}risk-medium{% else %}risk-low{% endif %}">
+                                        {{ ip.risk_score }}
+                                    </span>
+                                </td>
+                                <td>{{ ip.total_attempts }}</td>
+                                <td>{{ ip.blocked_count }}</td>
+                                <td>{{ ip.first_seen }}</td>
+                                <td>{{ ip.last_seen }}</td>
+                                <td>
+                                    {% if ip.is_blacklisted %}
+                                    <span class="badge bg-danger">Blacklisted</span>
+                                    {% elif ip.is_whitelisted %}
+                                    <span class="badge bg-success">Whitelisted</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Monitoring</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-warning" onclick="investigateIP('{{ ip.ip_address }}')">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Real-time Monitor Tab -->
+            <div class="tab-pane fade" id="realtime">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Real-time monitoring active. New incidents will appear automatically.
+                </div>
+                <div id="realtimeContainer">
+                    <!-- Real-time incidents will be added here via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Real-time monitoring
+        function checkNewIncidents() {
+            fetch('/api/security/incidents')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.incidents && data.incidents.length > 0) {
+                        // Update statistics
+                        document.getElementById('totalIncidents').textContent = data.incidents.length;
+                        
+                        // Check for new incidents
+                        const latestIncident = data.incidents[0];
+                        const lastCheckTime = localStorage.getItem('lastIncidentCheck');
+                        
+                        if (!lastCheckTime || new Date(latestIncident.incident_time) > new Date(lastCheckTime)) {
+                            showNotification('New Security Incident', `IP ${latestIncident.ip_address} triggered lockout`);
+                            localStorage.setItem('lastIncidentCheck', latestIncident.incident_time);
+                        }
+                    }
+                })
+                .catch(error => console.error('Error fetching incidents:', error));
+        }
+        
+        function showNotification(title, message) {
+            const notification = document.createElement('div');
+            notification.className = 'alert alert-danger alert-notification';
+            notification.innerHTML = `
+                <h6 class="alert-heading">${title}</h6>
+                <p class="mb-0">${message}</p>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+        
+        function whitelistIP(ip) {
+            if (confirm(`Whitelist IP ${ip}? This will allow unrestricted access.`)) {
+                console.log('Whitelisting IP:', ip);
+                // Implementation would go here
+            }
+        }
+        
+        function blacklistIP(ip) {
+            if (confirm(`Permanently block IP ${ip}?`)) {
+                console.log('Blacklisting IP:', ip);
+                // Implementation would go here
+            }
+        }
+        
+        function investigateIP(ip) {
+            window.open(`https://www.abuseipdb.com/check/${ip}`, '_blank');
+        }
+        
+        function resolveIncident(id) {
+            console.log('Resolving incident:', id);
+            // Implementation would go here
+        }
+        
+        // Check for new incidents every 30 seconds
+        setInterval(checkNewIncidents, 30000);
+        
+        // Initial check
+        checkNewIncidents();
+    </script>
+</body>
+</html>
