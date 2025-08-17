@@ -2752,12 +2752,16 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 })
-                .then(response => {
-                    if (response.status === 403) {
-                        // Blocked or blackscreen - reload to show appropriate page
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.redirect) {
+                        // Successful authentication - redirect to secure login
+                        window.location.href = data.redirect;
+                    } else if (data.blocked) {
+                        // User is blocked - reload to show block message
                         window.location.reload();
                     } else {
-                        // Failed attempt - reload to update attempt count display
+                        // Failed attempt - reload to update attempt count
                         window.location.reload();
                     }
                 })
@@ -2790,7 +2794,8 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                     const password = new FormData(form).get('site_password');
                     
                     // Check if password is correct
-                    if (password === 'RedAMC' || password === 'PartnerAccess') {
+                    // Accept either test passwords or production password
+                    if (password === 'RedAMC' || password === 'PartnerAccess' || password === 'SpikeMaz') {
                         // Show success animation
                         showSuccessLoading();
                         // Allow normal form submission for correct passwords
@@ -2815,7 +2820,8 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                     }
                     
                     // Only record attempt if password is wrong
-                    if (password !== 'RedAMC' && password !== 'PartnerAccess' && password !== 'PartnerPass') {
+                    // Check if password is incorrect
+                    if (password !== 'RedAMC' && password !== 'PartnerAccess' && password !== 'PartnerPass' && password !== 'SpikeMaz') {
                         recordPasswordAttempt(password);
                     }
                     

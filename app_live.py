@@ -50,10 +50,11 @@ def index():
 @app.route('/auth', methods=['POST'])
 def authenticate():
     """Handle Gate 1 authentication"""
-    password = request.form.get('password') or request.form.get('site_password', '')
+    # Check both field names since the form might use either
+    password = request.form.get('site_password') or request.form.get('password', '')
     client_ip = request.remote_addr
     
-    # Check if password is correct
+    # Check if password is correct (SpikeMaz)
     if password == SITE_PASSWORD:
         # Clear failed attempts
         if client_ip in failed_attempts:
