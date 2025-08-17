@@ -2877,8 +2877,32 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                     if (password === 'RedAMC' || password === 'PartnerAccess' || password === 'SpikeMaz') {
                         // Show success animation
                         showSuccessLoading();
-                        // Allow normal form submission for correct passwords
-                        return true;
+                        // Prevent default and submit via AJAX to handle redirect properly
+                        event.preventDefault();
+                        
+                        // Submit the form via AJAX
+                        const formData = new FormData(form);
+                        fetch('/site-auth', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.redirect) {
+                                // Redirect to Gate 2
+                                window.location.href = data.redirect;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            // Fallback - try direct navigation
+                            window.location.href = '/secure-login';
+                        });
+                        
+                        return false;
                     }
                     
                     // For all incorrect passwords, prevent default to use AJAX
