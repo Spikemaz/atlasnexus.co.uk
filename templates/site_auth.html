@@ -1438,11 +1438,25 @@
         // Session Timer Management
         let sessionStartTime;
         let sessionDuration = 1 * 60; // 1 minute for testing (was 15 minutes)
-        let blockDuration = 1 * 60; // 1 minute for testing (was 45 minutes)
+        let blockDuration = 45 * 60; // 45 minutes
         let sessionTimer;
         let blockTimer;
         
         function initializeSession() {
+            // Check for lockout reset parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('lockout_reset')) {
+                // Clear all tracking data for fresh start
+                localStorage.removeItem('accessBlocked');
+                localStorage.removeItem('sessionStartTime');
+                localStorage.removeItem('timerStartTime');
+                localStorage.removeItem('timeRemaining');
+                localStorage.removeItem('passwordAttempts');
+                localStorage.removeItem('permanentLockout');
+                // Remove the parameter from URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
             // Check if already blocked
             const blockData = localStorage.getItem('accessBlocked');
             if (blockData) {
@@ -1454,17 +1468,14 @@
                 } else {
                     // Block period expired, clear it
                     localStorage.removeItem('accessBlocked');
+                    localStorage.removeItem('sessionStartTime');
+                    localStorage.removeItem('timerStartTime');
                 }
             }
             
-            // Initialize or get existing session
-            const stored = localStorage.getItem('sessionStartTime');
-            if (stored) {
-                sessionStartTime = parseInt(stored);
-            } else {
-                sessionStartTime = Date.now();
-                localStorage.setItem('sessionStartTime', sessionStartTime.toString());
-            }
+            // Always start fresh session when not blocked
+            sessionStartTime = Date.now();
+            localStorage.setItem('sessionStartTime', sessionStartTime.toString());
             
             startSessionTimer();
         }
@@ -2545,7 +2556,16 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
             // AJAX form submission to maintain URL
             function submitPasswordViaAJAX(form) {
                 const formData = new FormData(form);
+                const password = formData.get('site_password');
                 
+                // Check if password is correct client-side first
+                if (password === 'RedAMC' || password === 'PartnerAccess' || password === 'PartnerPass') {
+                    // For correct passwords, use normal form submission to handle redirect properly
+                    form.submit();
+                    return;
+                }
+                
+                // For incorrect passwords, use AJAX to maintain URL
                 fetch('/site_auth', {
                     method: 'POST',
                     body: formData,
@@ -2554,10 +2574,7 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                     }
                 })
                 .then(response => {
-                    if (response.redirected) {
-                        // Successful login - redirect to secure_login
-                        window.location.href = response.url;
-                    } else if (response.status === 403) {
+                    if (response.status === 403) {
                         // Blocked or blackscreen - reload to show appropriate page
                         window.location.reload();
                     } else {
@@ -2568,7 +2585,7 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                 .catch(error => {
                     console.error('Error submitting form:', error);
                     // Fallback to normal form submission if AJAX fails
-                    form.submit();
+                    window.location.reload();
                 });
             }
             
