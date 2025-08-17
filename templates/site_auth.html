@@ -2542,6 +2542,36 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
             initializePasswordTracking();
             
             // Intercept form submission directly
+            // AJAX form submission to maintain URL
+            function submitPasswordViaAJAX(form) {
+                const formData = new FormData(form);
+                
+                fetch('/site_auth', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        // Successful login - redirect to secure_login
+                        window.location.href = response.url;
+                    } else if (response.status === 403) {
+                        // Blocked or blackscreen - reload to show appropriate page
+                        window.location.reload();
+                    } else {
+                        // Failed attempt - reload to update attempt count display
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting form:', error);
+                    // Fallback to normal form submission if AJAX fails
+                    form.submit();
+                });
+            }
+            
             const form = document.querySelector('form[action*="site_auth"]');
             if (form) {
                 form.addEventListener('submit', function(event) {
@@ -2560,10 +2590,12 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                         return false;
                     }
                     
+                    // Always prevent default form submission to use AJAX
+                    event.preventDefault();
+                    
                     // If this is the 4th attempt (after final attempt was authorized)
                     if (attempts.count >= 3 && attempts.finalAttemptAuthorized) {
                         // This is attempt #4 - the final attempt
-                        event.preventDefault(); // Prevent normal form submission
                         
                         // Set count to 4 to indicate this is the absolute final attempt
                         attempts.count = 4;
@@ -2575,9 +2607,9 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                         
                         // Check if password is correct
                         if (password === 'RedAMC' || password === 'PartnerAccess') {
-                            // Correct password - allow normal submission
-                            form.submit();
-                            return true;
+                            // Correct password - submit via AJAX
+                            submitPasswordViaAJAX(form);
+                            return false;
                         } else {
                             // Wrong password on 4th attempt - trigger immediate smooth transition
                             triggerPermanentLockout();
@@ -2589,8 +2621,9 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                     const password = new FormData(form).get('site_password');
                     recordPasswordAttempt(password);
                     
-                    // Allow submission to continue
-                    return true;
+                    // Submit via AJAX to maintain URL
+                    submitPasswordViaAJAX(form);
+                    return false;
                 });
             }
         });
