@@ -68,7 +68,7 @@
                                 window.location.href = '/?lockout_reset=true';
                             } else if (password.length > 0) {
                                 // Log failed unlock attempt
-                                fetch('/api/log_password_attempt', {
+                                fetch('/api/log-password-attempt', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',
@@ -1935,7 +1935,7 @@
 
                 } else if (password.length > 0) {
                     // Log failed unlock attempt
-                    fetch('/api/log_password_attempt', {
+                    fetch('/api/log-password-attempt', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -2167,7 +2167,7 @@
             }
             
             // Server logging handled by Flask route to avoid duplicates
-            // fetch('/api/log_password_attempt', {...})
+            // fetch('/api/log-password-attempt', {...})
         }
         
         function updateAttemptDisplay() {
@@ -2485,7 +2485,7 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                         window.location.href = '/?lockout_reset=true';
                     } else if (password.length > 0) {
                         // Log failed unlock attempt
-                        fetch('/api/log_password_attempt', {
+                        fetch('/api/log-password-attempt', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -2688,7 +2688,7 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                 }
                 
                 // For incorrect passwords, use AJAX to maintain URL
-                fetch('/site_auth', {
+                fetch('/site-auth', {
                     method: 'POST',
                     body: formData,
                     headers: {

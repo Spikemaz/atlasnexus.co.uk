@@ -24,7 +24,7 @@ app.secret_key = 'AtlasNexus_2024_Secure_Key_For_Production_Live'
 # Initialize Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'secure_login'
+login_manager.login_view = 'secure-login'
 
 # Site passwords
 SITE_PASSWORD_INTERNAL = "RedAMC"
@@ -81,10 +81,10 @@ def index():
         attempt_count = session.get(f'attempt_count_{ip_address}', 0)
         return render_template('site_auth.html', attempt_count=attempt_count)
     
-    # Site is authenticated, redirect to secure_login (Security Gate 2)
-    return redirect(url_for('secure_login'))
+    # Site is authenticated, redirect to secure-login (Security Gate 2)
+    return redirect('/secure-login')
 
-@app.route('/site_auth', methods=['POST'])
+@app.route('/site-auth', methods=['POST'])
 def site_auth():
     """Validate site-wide password with security tracking."""
     password = request.form.get('site_password')
@@ -122,7 +122,7 @@ def site_auth():
         session['access_code'] = 'RedAMC' if password == SITE_PASSWORD_INTERNAL else 'PartnerAccess'
         session['site_authenticated'] = True
         
-        return redirect(url_for('secure_login'))
+        return redirect('/secure-login')
     else:
         # Failed attempt - log it with security tracking
         print(f"Security attempt: IP={ip_address}, attempt={attempt_count}, password={password}")
@@ -155,16 +155,16 @@ def site_auth():
             flash('Invalid password. Please try again.', 'error')
             return render_template('site_auth.html', attempt_count=attempt_count)
 
-@app.route('/secure_login', methods=['GET', 'POST'])
+@app.route('/secure-login', methods=['GET', 'POST'])
 def secure_login():
     """Main login and registration page (Security Gate 2)."""
     # Check if site authentication is complete
     if 'site_authenticated' not in session:
-        return redirect(url_for('index'))
+        return redirect('/')
     
     # If already logged in as user, go to dashboard
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect('/dashboard')
     
     if request.method == 'POST':
         action = request.form.get('action')
@@ -178,7 +178,7 @@ def secure_login():
                 if check_password_hash(user_data['password_hash'], password):
                     user = User(user_data['id'], email, user_data['name'], user_data['role'])
                     login_user(user, remember=True)
-                    return redirect(url_for('dashboard'))
+                    return redirect('/dashboard')
             
             flash('Invalid email or password.', 'danger')
         
@@ -202,17 +202,31 @@ def dashboard():
     return render_template('dashboard.html', user=current_user, show_admin_link=show_admin_link)
 
 @app.route('/market-updates')
+@login_required
 def market_updates():
     """Market intelligence preview page."""
     return render_template('market_updates.html')
 
-@app.route('/admin')
+@app.route('/settings')
 @login_required
-def admin_panel():
+def settings():
+    """User settings and preferences page."""
+    return render_template('settings.html', user=current_user)
+
+@app.route('/account')
+@app.route('/profile')
+@login_required
+def account():
+    """User account/profile page."""
+    return render_template('account.html', user=current_user)
+
+@app.route('/admin-console')
+@login_required
+def admin_console():
     """Admin panel - only accessible to Marcus after login."""
     if current_user.email != ADMIN_EMAIL:
         flash('Access denied. Admin access required.', 'danger')
-        return redirect(url_for('dashboard'))
+        return redirect('/dashboard')
     
     # Get security incidents if tracking is enabled
     security_incidents = []
@@ -228,7 +242,7 @@ def admin_panel():
                          security_incidents=security_incidents,
                          ip_reputation=ip_reputation)
 
-@app.route('/api/security/incidents')
+@app.route('/api/security-incidents')
 @login_required
 def get_security_incidents():
     """API endpoint for security incidents (admin only)"""
@@ -248,7 +262,7 @@ def get_security_incidents():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/log_password_attempt', methods=['POST'])
+@app.route('/api/log-password-attempt', methods=['POST'])
 def log_password_attempt():
     """Log password attempts from client-side (secret menu attempts)"""
     if not SECURITY_TRACKING:
