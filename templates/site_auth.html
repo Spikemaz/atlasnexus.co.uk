@@ -1125,17 +1125,20 @@
         }
         
         @media (max-width: 480px) {
-            /* Even smaller adjustments for phones */
+            /* iPhone optimized layout */
             .header-info {
-                font-size: 0.75rem !important;
-                padding: 6px 8px !important;
+                font-size: 0.7rem !important;
+                padding: 5px 8px !important;
+                position: fixed;
+                top: 0;
+                z-index: 1000;
             }
             
             .network-status,
             .session-timeout {
-                font-size: 0.65rem !important;
-                padding: 4px 8px !important;
-                top: 45px !important;
+                font-size: 0.6rem !important;
+                padding: 3px 6px !important;
+                top: 35px !important;
             }
             
             .network-status {
@@ -1146,23 +1149,51 @@
                 left: 5px !important;
             }
             
-            /* Adjust main container for small screens */
+            /* Main container to fit one screen */
             .main-container {
-                padding: 100px 10px 90px 10px !important;
+                padding: 70px 10px 50px 10px !important;
+                min-height: calc(100vh - 120px);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            
+            /* Center the security card */
+            .security-card {
+                padding: 20px 15px !important;
+                margin: 10px auto !important;
+                max-width: 95% !important;
             }
             
             .security-header h1 {
-                font-size: 1.5rem !important;
-                line-height: 1.2 !important;
+                font-size: 1.3rem !important;
+                line-height: 1.1 !important;
+                margin-bottom: 5px !important;
             }
             
             .security-header h2 {
-                font-size: 1rem !important;
+                font-size: 0.9rem !important;
+                margin-bottom: 15px !important;
             }
             
-            .security-card {
-                padding: 25px 15px !important;
-                margin: 15px 5px !important;
+            /* Compact form */
+            .form-control {
+                font-size: 16px !important;
+                padding: 10px 12px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .btn-authenticate {
+                font-size: 0.95rem !important;
+                padding: 12px 20px !important;
+                width: 100% !important;
+                margin-top: 10px !important;
+            }
+            
+            .security-info {
+                font-size: 0.8rem !important;
+                padding: 8px !important;
+                margin-top: 10px !important;
             }
             
             /* Fix input fields on mobile */
@@ -1175,16 +1206,32 @@
                 font-size: 16px !important;
             }
             
-            /* Bank symbol smaller on very small screens */
+            /* Move bank symbol to footer */
             .bank-symbol {
-                font-size: 0.8rem !important;
-                margin: 15px auto !important;
+                display: none !important;
             }
             
-            /* Footer even smaller */
+            /* Enhanced footer with Global Access Portal */
             .footer-copyright {
-                font-size: 0.7rem !important;
-                padding: 6px !important;
+                font-size: 0.65rem !important;
+                padding: 8px !important;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(15, 20, 25, 0.95);
+            }
+            
+            /* Add Global Access Portal text to footer */
+            .footer-copyright::before {
+                content: "🏛️ Global Access Portal";
+                color: var(--antique-gold);
+                font-size: 0.7rem;
+                margin-right: auto;
+                padding-left: 10px;
             }
         }
         
@@ -1725,7 +1772,7 @@
             const timerStartTime = localStorage.getItem('timerStartTime');
             if (timerStartTime) {
                 const elapsed = Math.floor((Date.now() - parseInt(timerStartTime)) / 1000);
-                if (elapsed >= (1 * 60)) { // 1 minute elapsed (was 45 minutes)
+                if (elapsed >= (15 * 60)) { // 15 minutes elapsed
                     localStorage.setItem('permanentLockout', 'true');
                     document.getElementById('permanentLockout').style.display = 'block';
                     return;
@@ -1772,8 +1819,8 @@
             let storedTimeRemaining = localStorage.getItem('timeRemaining');
             
             if (!storedTimeRemaining || !lastUpdateTime) {
-                // First time - start with 45 minutes
-                timeRemaining = 1 * 60; // 1 minute for testing (was 45 minutes)
+                // First time - start with 15 minutes for Gate 1
+                timeRemaining = 15 * 60; // 15 minutes lockout
                 localStorage.setItem('timeRemaining', timeRemaining.toString());
                 localStorage.setItem('lastUpdateTime', Date.now().toString());
             } else {
