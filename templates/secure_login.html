@@ -2223,6 +2223,122 @@
                 justify-content: center;
             }
         }
+        
+        /* Enhanced Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .ticker-container {
+                padding: 8px 10px;
+            }
+            
+            .ticker-item {
+                margin: 0 15px;
+                font-size: 0.85rem;
+            }
+            
+            .main-container {
+                padding: 15px;
+            }
+            
+            .auth-card {
+                padding: 25px 20px;
+                margin: 20px auto;
+            }
+            
+            .header-title {
+                font-size: 1.8rem;
+            }
+            
+            .header-subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .form-section h3 {
+                font-size: 1rem;
+            }
+            
+            .input-group input {
+                font-size: 16px !important; /* Prevents zoom on iOS */
+                padding: 12px;
+            }
+            
+            .submit-button {
+                padding: 14px 20px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .ticker-container {
+                padding: 6px 8px;
+            }
+            
+            .ticker-item {
+                font-size: 0.75rem;
+                margin: 0 10px;
+            }
+            
+            .header-title {
+                font-size: 1.5rem;
+                line-height: 1.2;
+            }
+            
+            .header-subtitle {
+                font-size: 0.85rem;
+            }
+            
+            .auth-card {
+                padding: 20px 15px;
+                border-radius: 12px;
+            }
+            
+            .form-section {
+                padding: 15px;
+            }
+            
+            .registration-toggle {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+            }
+            
+            /* Fix input fields on all mobile devices */
+            input[type="text"],
+            input[type="password"],
+            input[type="email"],
+            input[type="tel"],
+            select {
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                font-size: 16px !important;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            
+            /* Adjust footer for mobile */
+            .footer-section {
+                padding: 15px;
+                font-size: 0.75rem;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+        
+        /* Prevent horizontal scroll on all devices */
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Ensure proper scaling */
+        html {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
     </style>
 </head>
 <body>

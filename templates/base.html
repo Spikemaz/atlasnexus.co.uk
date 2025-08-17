@@ -259,6 +259,95 @@
                 margin-bottom: 2rem;
             }
         }
+        
+        /* Enhanced Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            
+            .display-6 {
+                font-size: 1.75rem !important;
+            }
+            
+            .lead {
+                font-size: 1rem !important;
+            }
+            
+            .card-body {
+                padding: 1rem !important;
+            }
+            
+            .btn {
+                font-size: 0.9rem;
+                padding: 0.5rem 1rem;
+            }
+            
+            .badge {
+                font-size: 0.75rem !important;
+            }
+            
+            /* Dashboard specific */
+            .h2 {
+                font-size: 1.5rem !important;
+            }
+            
+            .h3 {
+                font-size: 1.25rem !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .navbar-brand {
+                font-size: 1rem !important;
+            }
+            
+            .display-6 {
+                font-size: 1.25rem !important;
+            }
+            
+            .lead {
+                font-size: 0.9rem !important;
+            }
+            
+            .card-body {
+                padding: 0.75rem !important;
+            }
+            
+            .h2 {
+                font-size: 1.25rem !important;
+            }
+            
+            .h3 {
+                font-size: 1.1rem !important;
+            }
+            
+            .badge {
+                font-size: 0.65rem !important;
+                padding: 0.25rem 0.5rem !important;
+            }
+            
+            /* Mobile tables */
+            .table {
+                font-size: 0.85rem;
+            }
+            
+            /* Fix iOS zoom */
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+            
+            /* Reduce padding on mobile */
+            .container-fluid {
+                padding: 0 10px;
+            }
+        }
+        
+        /* Prevent horizontal scroll */
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
     </style>
     
     {% block extra_head %}{% endblock %}
