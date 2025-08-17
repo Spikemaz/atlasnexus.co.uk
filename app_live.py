@@ -150,8 +150,18 @@ def dashboard():
     if not session.get('authenticated'):
         return redirect(url_for('index'))
     
-    # Use standalone dashboard for live version
-    return render_template('dashboard_live.html')
+    # Use same dashboard as local version for consistency
+    user_type = session.get('user_type', 'authorized')
+    
+    # Create user object for template
+    class UserObj:
+        def __init__(self):
+            self.role = user_type
+            self.name = session.get('username', 'User')
+    
+    user = UserObj()
+    
+    return render_template('dashboard.html', user=user, user_type=user_type)
 
 @app.route('/site-auth', methods=['POST'])
 def site_auth():
@@ -208,6 +218,52 @@ def register_user():
     # For now, just redirect back with a message
     flash('Registration is currently disabled', 'info')
     return redirect(url_for('secure_login'))
+
+@app.route('/account')
+def account():
+    """Account page"""
+    if not session.get('authenticated'):
+        return redirect(url_for('index'))
+    
+    user = {
+        'name': session.get('username', 'User'),
+        'email': session.get('username', 'user@atlasnexus.com'),
+        'role': session.get('user_type', 'authorized'),
+        'account_type': 'Premium',
+        'member_since': '2024'
+    }
+    
+    return render_template('account.html', user=user)
+
+@app.route('/analysis')
+def analysis():
+    """Analysis page"""
+    if not session.get('authenticated'):
+        return redirect(url_for('index'))
+    
+    analysis_data = {
+        'portfolio_performance': '+12.5%',
+        'risk_rating': 'Moderate',
+        'total_assets': '$2.5M',
+        'active_positions': 8
+    }
+    
+    return render_template('analysis.html', analysis_data=analysis_data)
+
+@app.route('/settings')
+def settings():
+    """Settings page"""
+    if not session.get('authenticated'):
+        return redirect(url_for('index'))
+    
+    user_settings = {
+        'notifications': True,
+        'two_factor': False,
+        'theme': 'dark',
+        'language': 'en'
+    }
+    
+    return render_template('settings.html', settings=user_settings)
 
 @app.route('/market-updates')
 def market_updates():
