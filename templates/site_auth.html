@@ -1048,8 +1048,43 @@
         
         /* Mobile Responsive Styles */
         @media (max-width: 768px) {
+            /* Fix header to be smaller on mobile */
+            .header-info {
+                font-size: 0.85rem !important;
+                padding: 8px 10px !important;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            /* Move network status and session timeout below header */
+            .network-status {
+                top: 55px !important;
+                right: 10px !important;
+                font-size: 0.75rem !important;
+                padding: 6px 10px !important;
+                z-index: 997;
+            }
+            
+            .session-timeout {
+                top: 55px !important;
+                left: 10px !important;
+                font-size: 0.75rem !important;
+                padding: 6px 10px !important;
+                z-index: 997;
+            }
+            
+            /* Hide bank symbol on mobile to prevent overlap */
+            .bank-symbol {
+                position: static !important;
+                margin: 20px auto !important;
+                text-align: center !important;
+                font-size: 0.9rem !important;
+            }
+            
+            /* Adjust main container */
             .main-container {
-                padding: 20px 15px !important;
+                padding: 110px 15px 100px 15px !important;
+                margin-top: 0 !important;
             }
             
             .security-header h1 {
@@ -1081,9 +1116,41 @@
                 font-size: 0.9rem !important;
                 padding: 10px !important;
             }
+            
+            /* Fix footer */
+            .footer-copyright {
+                font-size: 0.75rem !important;
+                padding: 8px !important;
+            }
         }
         
         @media (max-width: 480px) {
+            /* Even smaller adjustments for phones */
+            .header-info {
+                font-size: 0.75rem !important;
+                padding: 6px 8px !important;
+            }
+            
+            .network-status,
+            .session-timeout {
+                font-size: 0.65rem !important;
+                padding: 4px 8px !important;
+                top: 45px !important;
+            }
+            
+            .network-status {
+                right: 5px !important;
+            }
+            
+            .session-timeout {
+                left: 5px !important;
+            }
+            
+            /* Adjust main container for small screens */
+            .main-container {
+                padding: 100px 10px 90px 10px !important;
+            }
+            
             .security-header h1 {
                 font-size: 1.5rem !important;
                 line-height: 1.2 !important;
@@ -1106,6 +1173,18 @@
                 -moz-appearance: none;
                 appearance: none;
                 font-size: 16px !important;
+            }
+            
+            /* Bank symbol smaller on very small screens */
+            .bank-symbol {
+                font-size: 0.8rem !important;
+                margin: 15px auto !important;
+            }
+            
+            /* Footer even smaller */
+            .footer-copyright {
+                font-size: 0.7rem !important;
+                padding: 6px !important;
             }
         }
         
