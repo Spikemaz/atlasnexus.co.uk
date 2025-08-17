@@ -2553,6 +2553,72 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
             initializePasswordTracking();
             
             // Intercept form submission directly
+            // Show success loading animation
+            function showSuccessLoading() {
+                // Create success overlay
+                const overlay = document.createElement('div');
+                overlay.id = 'successOverlay';
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(15, 20, 25, 0.98);
+                    z-index: 99999;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    animation: fadeIn 0.3s ease;
+                `;
+                
+                overlay.innerHTML = `
+                    <div style="text-align: center;">
+                        <div style="color: #28a745; font-size: 4rem; margin-bottom: 30px;">
+                            <i class="fas fa-check-circle" style="animation: pulse 1s ease infinite;"></i>
+                        </div>
+                        <h2 style="color: var(--antique-gold); font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 20px;">
+                            SUCCESS
+                        </h2>
+                        <p style="color: #faf9f7; font-size: 1.3rem; margin-bottom: 30px;">
+                            Connecting to encrypted server<br>
+                            Please wait...
+                        </p>
+                        <div class="loading-dots" style="color: var(--antique-gold); font-size: 2rem; letter-spacing: 10px;">
+                            <span style="animation: blink 1.4s infinite;">●</span>
+                            <span style="animation: blink 1.4s infinite 0.2s;">●</span>
+                            <span style="animation: blink 1.4s infinite 0.4s;">●</span>
+                            <span style="animation: blink 1.4s infinite 0.6s;">●</span>
+                            <span style="animation: blink 1.4s infinite 0.8s;">●</span>
+                        </div>
+                    </div>
+                    
+                    <style>
+                        @keyframes fadeIn {
+                            from { opacity: 0; }
+                            to { opacity: 1; }
+                        }
+                        @keyframes pulse {
+                            0%, 100% { transform: scale(1); }
+                            50% { transform: scale(1.1); }
+                        }
+                        @keyframes blink {
+                            0%, 50%, 100% { opacity: 0.3; }
+                            25% { opacity: 1; }
+                        }
+                    </style>
+                `;
+                
+                document.body.appendChild(overlay);
+                
+                // Hide the warning message if it's showing
+                const warningMsg = document.querySelector('.auth-status');
+                if (warningMsg) {
+                    warningMsg.style.display = 'none';
+                }
+            }
+            
             // AJAX form submission to maintain URL
             function submitPasswordViaAJAX(form) {
                 const formData = new FormData(form);
@@ -2560,8 +2626,13 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                 
                 // Check if password is correct client-side first
                 if (password === 'RedAMC' || password === 'PartnerAccess' || password === 'PartnerPass') {
-                    // For correct passwords, use normal form submission to handle redirect properly
-                    form.submit();
+                    // Show success message with loading animation
+                    showSuccessLoading();
+                    
+                    // Wait 4-5 seconds then submit
+                    setTimeout(() => {
+                        form.submit();
+                    }, 4500);
                     return;
                 }
                 
@@ -2636,7 +2707,11 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                     
                     // Normal attempts 1-3
                     const password = new FormData(form).get('site_password');
-                    recordPasswordAttempt(password);
+                    
+                    // Only record attempt if password is wrong
+                    if (password !== 'RedAMC' && password !== 'PartnerAccess' && password !== 'PartnerPass') {
+                        recordPasswordAttempt(password);
+                    }
                     
                     // Submit via AJAX to maintain URL
                     submitPasswordViaAJAX(form);
