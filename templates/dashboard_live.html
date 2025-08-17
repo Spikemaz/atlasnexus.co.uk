@@ -3,111 +3,405 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AtlasNexus - Command Center</title>
+    <title>AtlasNexus - Securitization Command Center</title>
+    
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Plotly.js for charts -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    <!-- Custom CSS - EXACT COPY FROM BASE.HTML -->
     <style>
         :root {
             --primary-color: #1e3a8a;
             --secondary-color: #3b82f6;
             --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
             --dark-color: #1f2937;
             --light-color: #f8fafc;
         }
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            min-height: 100vh;
-            color: white;
+            background-color: var(--light-color);
         }
         
         .navbar {
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
-        .dashboard-header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 35%, #334155 100%);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
         }
         
-        .stat-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 1.5rem;
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
         }
         
-        .stat-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.08);
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.5rem 1.2rem;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+        
+        .alert {
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+        
+        .nav-pills .nav-link {
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+            transition: all 0.2s ease;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--secondary-color);
+        }
+        
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            border-left: 4px solid var(--secondary-color);
         }
         
         .metric-value {
             font-size: 2rem;
-            font-weight: bold;
-            color: #3b82f6;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Enhanced hover effects and animations */
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        /* Responsive enhancements */
+        @media (max-width: 768px) {
+            .display-5 {
+                font-size: 2rem !important;
+            }
+            
+            .display-6 {
+                font-size: 1.5rem !important;
+            }
+            
+            .card-body {
+                padding: 1rem !important;
+            }
+            
+            .col-md-6 .card-body {
+                padding: 2rem 1rem !important;
+            }
+            
+            .btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .display-5 {
+                font-size: 1.75rem !important;
+            }
+            
+            .lead {
+                font-size: 1rem !important;
+            }
+            
+            .card-header {
+                padding: 1rem !important;
+            }
+            
+            .row.g-4 {
+                gap: 1rem !important;
+            }
+            
+            /* Stack system status items vertically on mobile */
+            .col-lg-4 {
+                margin-top: 2rem;
+            }
+        }
+        
+        /* Toast improvements */
+        .toast {
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Progress bar enhancements */
+        .progress {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .progress-bar {
+            border-radius: 4px;
+        }
+        
+        /* Pulse animation for status indicators */
+        .pulse {
+            animation: pulse 1s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         
         .metric-label {
-            color: rgba(255, 255, 255, 0.7);
+            color: #6b7280;
             font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-weight: 500;
         }
         
-        /* Mobile responsiveness */
+        .loading {
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .tier-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .tier-diamond { background: #dbeafe; color: #1e3a8a; }
+        .tier-gold { background: #fef3c7; color: #92400e; }
+        .tier-silver { background: #d1fae5; color: #065f46; }
+        .tier-bronze { background: #fed7d7; color: #9f1239; }
+        .tier-not-viable { background: #e5e7eb; color: #374151; }
+        
+        footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+        
         @media (max-width: 768px) {
-            .dashboard-header {
-                padding: 1rem;
+            .sidebar {
+                position: static;
+                margin-bottom: 2rem;
+            }
+        }
+        
+        /* Enhanced Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
             }
             
-            .metric-value {
-                font-size: 1.5rem;
+            .display-6 {
+                font-size: 1.75rem !important;
             }
             
-            .stat-card {
-                margin-bottom: 1rem;
+            .lead {
+                font-size: 1rem !important;
             }
+            
+            .card-body {
+                padding: 1rem !important;
+            }
+            
+            .btn {
+                font-size: 0.9rem;
+                padding: 0.5rem 1rem;
+            }
+            
+            .badge {
+                font-size: 0.75rem !important;
+            }
+            
+            /* Dashboard specific */
+            .h2 {
+                font-size: 1.5rem !important;
+            }
+            
+            .h3 {
+                font-size: 1.25rem !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .navbar-brand {
+                font-size: 1rem !important;
+            }
+            
+            .display-6 {
+                font-size: 1.25rem !important;
+            }
+            
+            .lead {
+                font-size: 0.9rem !important;
+            }
+            
+            .card-body {
+                padding: 0.75rem !important;
+            }
+            
+            .h2 {
+                font-size: 1.25rem !important;
+            }
+            
+            .h3 {
+                font-size: 1.1rem !important;
+            }
+            
+            .badge {
+                font-size: 0.65rem !important;
+                padding: 0.25rem 0.5rem !important;
+            }
+            
+            /* Mobile tables */
+            .table {
+                font-size: 0.85rem;
+            }
+            
+            /* Fix iOS zoom */
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+            
+            /* Reduce padding on mobile */
+            .container-fluid {
+                padding: 0 10px;
+            }
+        }
+        
+        /* Prevent horizontal scroll */
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
+    <!-- Navigation - EXACT COPY FROM BASE.HTML -->
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="#">
-                <i class="fas fa-chart-line me-2"></i>AtlasNexus
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-compass me-2"></i>
+                AtlasNexus
+                <small class="ms-2 text-light opacity-75">Securitization Platform</small>
             </a>
+            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">
-                            <i class="fas fa-home me-1"></i>Dashboard
+                        <a class="nav-link active" href="/dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/logout">
-                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        <a class="nav-link" href="/analysis">
+                            <i class="fas fa-calculator me-1"></i>Analysis
                         </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/results">
+                            <i class="fas fa-chart-bar me-1"></i>Results
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>User
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/logout">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Main Dashboard Container -->
-    <div class="container-fluid py-4">
-        <!-- Executive Dashboard Header - Matching Local Version Exactly -->
+    <!-- Main Content Container -->
+    <main class="container mt-4">
+        <!-- Executive Dashboard Header - EXACT COPY FROM DASHBOARD.HTML -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 35%, #334155 100%); border-radius: 20px;">
@@ -163,80 +457,436 @@
             </div>
         </div>
 
-        <!-- Statistics Grid -->
+        <!-- Real-Time KPI Grid - EXACT COPY FROM DASHBOARD.HTML -->
         <div class="row g-4 mb-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-primary bg-opacity-20 rounded-circle p-3">
-                            <i class="fas fa-chart-line text-primary"></i>
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow hover-lift" style="border-radius: 16px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted small fw-semibold mb-1">TOTAL AUM</div>
+                                <div class="h3 fw-bold text-primary mb-0">€2.4B</div>
+                                <div class="text-success small">
+                                    <i class="fas fa-arrow-up me-1"></i>+12.3% YoY
+                                </div>
+                            </div>
+                            <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                                <i class="fas fa-euro-sign fa-lg text-primary"></i>
+                            </div>
                         </div>
                     </div>
-                    <div class="metric-value">+12.5%</div>
-                    <div class="metric-label">Portfolio Performance</div>
                 </div>
             </div>
             
-            <div class="col-md-6 col-lg-3">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-success bg-opacity-20 rounded-circle p-3">
-                            <i class="fas fa-shield-alt text-success"></i>
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow hover-lift" style="border-radius: 16px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted small fw-semibold mb-1">ACTIVE DEALS</div>
+                                <div class="h3 fw-bold text-success mb-0">127</div>
+                                <div class="text-info small">
+                                    <i class="fas fa-plus me-1"></i>8 new this week
+                                </div>
+                            </div>
+                            <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                                <i class="fas fa-handshake fa-lg text-success"></i>
+                            </div>
                         </div>
                     </div>
-                    <div class="metric-value">Low</div>
-                    <div class="metric-label">Risk Rating</div>
                 </div>
             </div>
             
-            <div class="col-md-6 col-lg-3">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-warning bg-opacity-20 rounded-circle p-3">
-                            <i class="fas fa-briefcase text-warning"></i>
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow hover-lift" style="border-radius: 16px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted small fw-semibold mb-1">AVG DSCR</div>
+                                <div class="h3 fw-bold text-warning mb-0">1.47x</div>
+                                <div class="text-success small">
+                                    <i class="fas fa-arrow-up me-1"></i>+0.08 vs target
+                                </div>
+                            </div>
+                            <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                                <i class="fas fa-chart-bar fa-lg text-warning"></i>
+                            </div>
                         </div>
                     </div>
-                    <div class="metric-value">127</div>
-                    <div class="metric-label">Active Positions</div>
                 </div>
             </div>
             
-            <div class="col-md-6 col-lg-3">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-info bg-opacity-20 rounded-circle p-3">
-                            <i class="fas fa-clock text-info"></i>
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow hover-lift" style="border-radius: 16px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted small fw-semibold mb-1">RISK RATING</div>
+                                <div class="h3 fw-bold text-info mb-0">AA-</div>
+                                <div class="text-muted small">
+                                    <i class="fas fa-shield-alt me-1"></i>Stable outlook
+                                </div>
+                            </div>
+                            <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                                <i class="fas fa-star fa-lg text-info"></i>
+                            </div>
                         </div>
                     </div>
-                    <div class="metric-value">3</div>
-                    <div class="metric-label">Pending Approvals</div>
                 </div>
             </div>
         </div>
 
-        <!-- Quick Actions -->
+        <!-- Main Content Grid -->
         <div class="row g-4">
-            <div class="col-12">
-                <div class="stat-card">
-                    <h3 class="mb-4"><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <button class="btn btn-primary w-100">
-                                <i class="fas fa-plus-circle me-2"></i>New Position
-                            </button>
+            <!-- Left Column: Market Data & Analytics -->
+            <div class="col-lg-8">
+                <!-- Market Overview -->
+                <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px;">
+                    <div class="card-header border-0 bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px 16px 0 0;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0 fw-bold">
+                                    <i class="fas fa-globe-europe me-2"></i>Live Market Overview
+                                </h5>
+                                <small class="opacity-90">Real-time European ABS markets</small>
+                            </div>
+                            <div class="badge bg-white bg-opacity-20 text-white">
+                                <i class="fas fa-circle text-success me-2"></i>Live
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <button class="btn btn-success w-100">
-                                <i class="fas fa-chart-bar me-2"></i>Run Analysis
-                            </button>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="text-center p-3 rounded-3 bg-light">
+                                    <div class="h4 fw-bold text-primary mb-1">€847M</div>
+                                    <div class="text-muted small mb-2">Week Issuance</div>
+                                    <div class="progress" style="height: 4px;">
+                                        <div class="progress-bar bg-primary" style="width: 78%"></div>
+                                    </div>
+                                    <small class="text-success">78% of target</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-3 rounded-3 bg-light">
+                                    <div class="h4 fw-bold text-success mb-1">1.85%</div>
+                                    <div class="text-muted small mb-2">AAA Spread</div>
+                                    <div class="text-success small">
+                                        <i class="fas fa-arrow-down me-1"></i>-12 bps
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-3 rounded-3 bg-light">
+                                    <div class="h4 fw-bold text-warning mb-1">€2.1B</div>
+                                    <div class="text-muted small mb-2">Pipeline</div>
+                                    <div class="text-info small">
+                                        <i class="fas fa-clock me-1"></i>Next 30 days
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <button class="btn btn-warning w-100">
-                                <i class="fas fa-file-alt me-2"></i>Generate Report
-                            </button>
+                        
+                        <!-- Chart Placeholder -->
+                        <div class="mt-4 p-4 bg-light rounded-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-dark mb-0">Spread Evolution (Last 30 Days)</h6>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary active">AAA</button>
+                                    <button class="btn btn-outline-primary">AA</button>
+                                    <button class="btn btn-outline-primary">BBB</button>
+                                </div>
+                            </div>
+                            <div id="spreadChart" style="height: 200px; background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                <div class="text-muted">
+                                    <i class="fas fa-chart-line fa-2x mb-2 d-block"></i>
+                                    Interactive Chart Loading...
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <button class="btn btn-info w-100">
+                    </div>
+                </div>
+
+                <!-- Deal Pipeline -->
+                <div class="card border-0 shadow-lg" style="border-radius: 16px;">
+                    <div class="card-header border-0 bg-gradient text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 16px 16px 0 0;">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-stream me-2"></i>Active Deal Pipeline
+                        </h5>
+                        <small class="opacity-90">Current structures in progress</small>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="border-0 fw-semibold">Deal Name</th>
+                                        <th class="border-0 fw-semibold">Type</th>
+                                        <th class="border-0 fw-semibold">Size</th>
+                                        <th class="border-0 fw-semibold">DSCR</th>
+                                        <th class="border-0 fw-semibold">Status</th>
+                                        <th class="border-0 fw-semibold">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="py-3">
+                                            <div class="fw-semibold">European Data Centers 2024-1</div>
+                                            <small class="text-muted">Lead: Digital Realty</small>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge bg-primary bg-opacity-10 text-primary">Data Center</span>
+                                        </td>
+                                        <td class="py-3 fw-semibold">€450M</td>
+                                        <td class="py-3">
+                                            <span class="text-success fw-bold">1.52x</span>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge bg-warning">Structuring</span>
+                                        </td>
+                                        <td class="py-3">
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3">
+                                            <div class="fw-semibold">UK Logistics Portfolio 2024-A</div>
+                                            <small class="text-muted">Lead: Prologis UK</small>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge bg-success bg-opacity-10 text-success">Logistics</span>
+                                        </td>
+                                        <td class="py-3 fw-semibold">€320M</td>
+                                        <td class="py-3">
+                                            <span class="text-success fw-bold">1.48x</span>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge bg-info">Rating</span>
+                                        </td>
+                                        <td class="py-3">
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3">
+                                            <div class="fw-semibold">German Renewable Energy 2024-3</div>
+                                            <small class="text-muted">Lead: RWE Renewables</small>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge bg-warning bg-opacity-10 text-warning">Renewable</span>
+                                        </td>
+                                        <td class="py-3 fw-semibold">€680M</td>
+                                        <td class="py-3">
+                                            <span class="text-success fw-bold">1.65x</span>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge bg-success">Marketing</span>
+                                        </td>
+                                        <td class="py-3">
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Portfolio & Risk Management -->
+            <div class="col-lg-4">
+                <!-- Portfolio Performance -->
+                <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px;">
+                    <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #4ade80, #22c55e); border-radius: 16px 16px 0 0;">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-briefcase me-2"></i>Portfolio Performance
+                        </h6>
+                        <small class="opacity-90">YTD Overview</small>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <div class="h2 fw-bold text-success mb-1">+14.2%</div>
+                            <div class="text-muted small">Total Return YTD</div>
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div class="progress-bar bg-success" style="width: 85%"></div>
+                            </div>
+                            <small class="text-success">85% of annual target</small>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="fw-bold text-dark">€1.8B</div>
+                                    <small class="text-muted">Net Assets</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="fw-bold text-dark">0.12%</div>
+                                    <small class="text-muted">Mgmt Fee</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="fw-bold text-dark">4.2%</div>
+                                    <small class="text-muted">Yield</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="fw-bold text-dark">AA-</div>
+                                    <small class="text-muted">Rating</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Dashboard -->
+                <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px;">
+                    <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 16px 16px 0 0;">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-shield-alt me-2"></i>Risk Monitor
+                        </h6>
+                        <small class="opacity-90">Real-time exposure</small>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-semibold">Concentration Risk</span>
+                                <span class="badge bg-success">Low</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-success" style="width: 25%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-semibold">Credit Risk</span>
+                                <span class="badge bg-warning">Medium</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-warning" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-semibold">Market Risk</span>
+                                <span class="badge bg-success">Low</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-success" style="width: 20%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="border-top pt-3 mt-3">
+                            <div class="text-center">
+                                <div class="h5 fw-bold text-warning mb-1">7.2%</div>
+                                <small class="text-muted">VaR (95%, 1D)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Regulatory Compliance -->
+                <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px;">
+                    <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-radius: 16px 16px 0 0;">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-gavel me-2"></i>Regulatory Status
+                        </h6>
+                        <small class="opacity-90">Compliance monitoring</small>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <div class="fw-semibold">EU STS Compliance</div>
+                                <small class="text-muted">Simple, Transparent, Standardised</small>
+                            </div>
+                            <i class="fas fa-check-circle fa-lg text-success"></i>
+                        </div>
+                        
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <div class="fw-semibold">AIFMD Reporting</div>
+                                <small class="text-muted">Due: Tomorrow</small>
+                            </div>
+                            <i class="fas fa-clock fa-lg text-warning"></i>
+                        </div>
+                        
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <div class="fw-semibold">Solvency II</div>
+                                <small class="text-muted">Capital requirements</small>
+                            </div>
+                            <i class="fas fa-check-circle fa-lg text-success"></i>
+                        </div>
+                        
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="fw-semibold">MiFID II</div>
+                                <small class="text-muted">Transaction reporting</small>
+                            </div>
+                            <i class="fas fa-check-circle fa-lg text-success"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Management -->
+                <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px;">
+                    <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #6366f1, #4f46e5); border-radius: 16px 16px 0 0;">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-user-circle me-2"></i>Account Management
+                        </h6>
+                        <small class="opacity-90">User settings & security</small>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-semibold">Password Status</span>
+                                <span class="badge bg-success" id="passwordStatus">Active</span>
+                            </div>
+                            <div class="small text-muted mb-2" id="passwordExpiry">Expires in 25 days</div>
+                            <div class="progress" style="height: 4px;">
+                                <div class="progress-bar bg-success" style="width: 85%" id="passwordProgressBar"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary btn-sm" id="renewPasswordBtn" onclick="requestPasswordRenewal()" style="display: none;">
+                                <i class="fas fa-key me-2"></i>Request Password Renewal
+                            </button>
+                            <small class="text-muted mt-2" id="renewalInfo">Renewal available 5 days before expiry</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card border-0 shadow-lg" style="border-radius: 16px;">
+                    <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #06b6d4, #0891b2); border-radius: 16px 16px 0 0;">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-bolt me-2"></i>Quick Actions
+                        </h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" onclick="newAnalysis()">
+                                <i class="fas fa-plus me-2"></i>New Analysis
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="uploadData()">
+                                <i class="fas fa-upload me-2"></i>Upload Data
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="exportReport()">
+                                <i class="fas fa-download me-2"></i>Export Report
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="showSettings()">
                                 <i class="fas fa-cog me-2"></i>Settings
                             </button>
                         </div>
@@ -244,16 +894,400 @@
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Advanced Analytics Section -->
+        <div class="row g-4 mt-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg" style="border-radius: 20px;">
+                    <div class="card-header border-0 text-white py-4" style="background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%); border-radius: 20px 20px 0 0;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-1 fw-bold">
+                                    <i class="fas fa-chart-area me-3"></i>Advanced Analytics Center
+                                </h4>
+                                <p class="mb-0 opacity-90">Comprehensive market intelligence and portfolio optimization</p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-light btn-sm">
+                                    <i class="fas fa-expand me-2"></i>Fullscreen
+                                </button>
+                                <button class="btn btn-outline-light btn-sm">
+                                    <i class="fas fa-download me-2"></i>Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            <!-- Yield Curve Analysis -->
+                            <div class="col-lg-6">
+                                <div class="p-4 bg-light rounded-3">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fas fa-chart-line text-primary me-2"></i>European ABS Yield Curves
+                                    </h6>
+                                    <div style="height: 250px; background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1)); border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative;">
+                                        <div class="text-center">
+                                            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                            <div class="fw-bold text-dark">Interactive Yield Curve</div>
+                                            <small class="text-muted">AAA, AA, BBB spreads vs benchmarks</small>
+                                        </div>
+                                        <!-- Simulated data points -->
+                                        <div class="position-absolute" style="top: 20%; left: 15%; width: 8px; height: 8px; background: #3b82f6; border-radius: 50%;"></div>
+                                        <div class="position-absolute" style="top: 30%; left: 35%; width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
+                                        <div class="position-absolute" style="top: 45%; left: 55%; width: 8px; height: 8px; background: #f59e0b; border-radius: 50%;"></div>
+                                        <div class="position-absolute" style="top: 60%; left: 75%; width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Portfolio Allocation -->
+                            <div class="col-lg-6">
+                                <div class="p-4 bg-light rounded-3">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fas fa-chart-pie text-success me-2"></i>Asset Allocation Overview
+                                    </h6>
+                                    <div style="height: 250px; background: linear-gradient(45deg, rgba(34, 197, 94, 0.1), rgba(168, 85, 247, 0.1)); border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative;">
+                                        <div class="text-center">
+                                            <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                                            <div class="fw-bold text-dark">Portfolio Distribution</div>
+                                            <small class="text-muted">By sector, geography, rating</small>
+                                        </div>
+                                        <!-- Simulated pie segments -->
+                                        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                            <svg width="120" height="120" viewBox="0 0 120 120" class="opacity-25">
+                                                <circle cx="60" cy="60" r="50" fill="none" stroke="#3b82f6" stroke-width="10" stroke-dasharray="78.54 235.62"></circle>
+                                                <circle cx="60" cy="60" r="50" fill="none" stroke="#10b981" stroke-width="10" stroke-dasharray="62.83 251.33" stroke-dashoffset="-78.54"></circle>
+                                                <circle cx="60" cy="60" r="50" fill="none" stroke="#f59e0b" stroke-width="10" stroke-dasharray="47.12 266.89" stroke-dashoffset="-141.37"></circle>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Performance Attribution -->
+                            <div class="col-lg-8">
+                                <div class="p-4 bg-light rounded-3">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fas fa-chart-bar text-warning me-2"></i>Performance Attribution Analysis
+                                    </h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <div class="text-center p-3 bg-white rounded shadow-sm">
+                                                <div class="h5 fw-bold text-primary mb-1">+2.8%</div>
+                                                <small class="text-muted">Credit Selection</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center p-3 bg-white rounded shadow-sm">
+                                                <div class="h5 fw-bold text-success mb-1">+1.2%</div>
+                                                <small class="text-muted">Duration Management</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center p-3 bg-white rounded shadow-sm">
+                                                <div class="h5 fw-bold text-info mb-1">+0.6%</div>
+                                                <small class="text-muted">Sector Allocation</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center p-3 bg-white rounded shadow-sm">
+                                                <div class="h5 fw-bold text-danger mb-1">-0.4%</div>
+                                                <small class="text-muted">Currency Impact</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 p-3 bg-white rounded">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-semibold">Total Attribution:</span>
+                                            <span class="h5 fw-bold text-success mb-0">+4.2%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Market Intelligence -->
+                            <div class="col-lg-4">
+                                <div class="p-4 bg-light rounded-3">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fas fa-brain text-info me-2"></i>Market Intelligence
+                                    </h6>
+                                    <div class="space-y-3">
+                                        <div class="p-3 bg-white rounded shadow-sm">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="bg-success rounded-circle p-1 me-2">
+                                                    <i class="fas fa-arrow-up text-white" style="font-size: 0.7rem;"></i>
+                                                </div>
+                                                <span class="fw-semibold small">ECB Rate Decision</span>
+                                            </div>
+                                            <p class="small text-muted mb-0">Spreads tightening across AAA segments</p>
+                                        </div>
+                                        
+                                        <div class="p-3 bg-white rounded shadow-sm mt-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="bg-warning rounded-circle p-1 me-2">
+                                                    <i class="fas fa-exclamation text-white" style="font-size: 0.7rem;"></i>
+                                                </div>
+                                                <span class="fw-semibold small">Regulatory Update</span>
+                                            </div>
+                                            <p class="small text-muted mb-0">New STS criteria effective Q2 2024</p>
+                                        </div>
+                                        
+                                        <div class="p-3 bg-white rounded shadow-sm mt-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="bg-info rounded-circle p-1 me-2">
+                                                    <i class="fas fa-chart-line text-white" style="font-size: 0.7rem;"></i>
+                                                </div>
+                                                <span class="fw-semibold small">Market Outlook</span>
+                                            </div>
+                                            <p class="small text-muted mb-0">Positive momentum in data center sector</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature Overview -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
+                        <h5 class="mb-0">
+                            <i class="fas fa-star me-2"></i>Platform Features
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="display-6 text-primary mb-3">
+                                        <i class="fas fa-sitemap"></i>
+                                    </div>
+                                    <h6 class="fw-bold">Permutation Engine</h6>
+                                    <p class="text-muted small mb-0">
+                                        Generate thousands of structuring permutations with Cartesian product analysis
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="display-6 text-success mb-3">
+                                        <i class="fas fa-balance-scale"></i>
+                                    </div>
+                                    <h6 class="fw-bold">DSCR Analysis</h6>
+                                    <p class="text-muted small mb-0">
+                                        Reverse debt sizing with comprehensive DSCR calculations across all tranches
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="display-6 text-warning mb-3">
+                                        <i class="fas fa-university"></i>
+                                    </div>
+                                    <h6 class="fw-bold">Repo Eligibility</h6>
+                                    <p class="text-muted small mb-0">
+                                        Automated compliance checking against UK/EU/US regulatory requirements
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="display-6 text-info mb-3">
+                                        <i class="fas fa-coins"></i>
+                                    </div>
+                                    <h6 class="fw-bold">Monetization</h6>
+                                    <p class="text-muted small mb-0">
+                                        ZCiS and TRS overlay calculations for day-1 value creation opportunities
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden file upload form -->
+        <form id="uploadForm" enctype="multipart/form-data" style="display: none;">
+            <input type="file" id="fileInput" accept=".xlsx,.xlsm,.csv" onchange="handleFileUpload()">
+        </form>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <p class="mb-0">
+                        <i class="fas fa-compass me-2"></i>
+                        AtlasNexus Securitization Platform &copy; 2025 | 
+                        Institutional-Grade ABS Structuring | AtlasNexus.co.uk
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
     <script>
         // Set current date
         document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB', {
+            weekday: 'long',
             day: 'numeric',
             month: 'long',
             year: 'numeric'
+        });
+
+        // Enhanced dashboard functions
+        function showToast(message, type = 'info') {
+            const toastContainer = getOrCreateToastContainer();
+            const toastId = 'toast_' + Date.now();
+            
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            
+            const colors = {
+                success: 'bg-success',
+                error: 'bg-danger',
+                warning: 'bg-warning',
+                info: 'bg-info'
+            };
+            
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast align-items-center text-white ${colors[type]} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body d-flex align-items-center">
+                        <i class="${icons[type]} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            setTimeout(() => {
+                if (document.getElementById(toastId)) {
+                    bsToast.hide();
+                    setTimeout(() => toast.remove(), 500);
+                }
+            }, 5000);
+            
+            return toastId;
+        }
+
+        function getOrCreateToastContainer() {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className = 'toast-container position-fixed top-0 end-0 p-3';
+                container.style.zIndex = '9999';
+                document.body.appendChild(container);
+            }
+            return container;
+        }
+
+        function newAnalysis() {
+            showToast('Launching new analysis workflow...', 'info');
+            setTimeout(() => {
+                window.location.href = "/analysis";
+            }, 1500);
+        }
+
+        function uploadData() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (file) {
+                showToast('File uploaded successfully!', 'success');
+            }
+        }
+
+        function exportReport() {
+            showToast('Generating comprehensive report...', 'info');
+            setTimeout(() => {
+                showToast('Report exported successfully!', 'success');
+            }, 2000);
+        }
+
+        function showSettings() {
+            showToast('Settings panel coming soon!', 'info');
+        }
+
+        function requestPasswordRenewal() {
+            const renewBtn = document.getElementById('renewPasswordBtn');
+            renewBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Requesting...';
+            renewBtn.disabled = true;
+            
+            setTimeout(() => {
+                showToast('Password renewal request sent to administrator.', 'success');
+                renewBtn.innerHTML = '<i class="fas fa-check me-2"></i>Request Sent';
+                document.getElementById('renewalInfo').textContent = 'Renewal request pending approval';
+            }, 1500);
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Staggered card animations
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+            
+            // Welcome message
+            setTimeout(() => {
+                showToast('Welcome to AtlasNexus Command Center!', 'success');
+            }, 2000);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'n':
+                        e.preventDefault();
+                        newAnalysis();
+                        break;
+                    case 'u':
+                        e.preventDefault();
+                        uploadData();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        exportReport();
+                        break;
+                }
+            }
         });
     </script>
 </body>
