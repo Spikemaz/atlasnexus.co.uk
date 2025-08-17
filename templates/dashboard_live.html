@@ -105,31 +105,60 @@
         </div>
     </nav>
 
-    <!-- Main Dashboard -->
+    <!-- Main Dashboard Container -->
     <div class="container-fluid py-4">
-        <!-- Header -->
-        <div class="dashboard-header">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <h1 class="display-5 fw-bold mb-3">
-                        <i class="fas fa-analytics me-3"></i>Command Center
-                    </h1>
-                    <p class="lead mb-0 opacity-90">AtlasNexus Securitization Platform</p>
-                    <div class="mt-3">
-                        <span class="badge bg-success me-2">
-                            <i class="fas fa-circle me-1"></i>Live Markets
-                        </span>
-                        <span class="badge bg-primary me-2">
-                            <i class="fas fa-user-tie me-1"></i>Authorized Access
-                        </span>
-                        <span class="badge bg-secondary">
-                            <i class="fas fa-calendar me-1"></i><span id="currentDate"></span>
-                        </span>
+        <!-- Executive Dashboard Header - Matching Local Version Exactly -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 35%, #334155 100%); border-radius: 20px;">
+                    <div class="card-body p-4 text-white">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-white bg-opacity-10 rounded-circle p-3 me-4">
+                                        <i class="fas fa-analytics fa-2x"></i>
+                                    </div>
+                                    <div>
+                                        <h1 class="display-6 fw-bold mb-1">Command Center</h1>
+                                        <p class="lead mb-0 opacity-90">AtlasNexus Securitization Platform</p>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-auto">
+                                        <div class="badge bg-success bg-opacity-90 text-white px-3 py-2">
+                                            <i class="fas fa-pulse me-2"></i>Live Markets
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="badge bg-info bg-opacity-90 text-white px-3 py-2">
+                                            <i class="fas fa-user-tie me-2"></i>Authorized
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="badge bg-white bg-opacity-20 text-white px-3 py-2">
+                                            <i class="fas fa-calendar me-2"></i><span id="currentDate"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 text-end">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="text-center">
+                                            <div class="h2 fw-bold mb-0">€2.4B</div>
+                                            <small class="opacity-75">Assets Under Management</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-center">
+                                            <div class="h2 fw-bold mb-0">127</div>
+                                            <small class="opacity-75">Active Structures</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                    <div class="h2 fw-bold mb-0">€2.4B</div>
-                    <small class="opacity-75">Assets Under Management</small>
                 </div>
             </div>
         </div>

@@ -150,18 +150,8 @@ def dashboard():
     if not session.get('authenticated'):
         return redirect(url_for('index'))
     
-    # Use same dashboard as local version for consistency
-    user_type = session.get('user_type', 'authorized')
-    
-    # Create user object for template
-    class UserObj:
-        def __init__(self):
-            self.role = user_type
-            self.name = session.get('username', 'User')
-    
-    user = UserObj()
-    
-    return render_template('dashboard.html', user=user, user_type=user_type)
+    # Use standalone dashboard for live version to avoid template dependency issues
+    return render_template('dashboard_live.html')
 
 @app.route('/site-auth', methods=['POST'])
 def site_auth():
