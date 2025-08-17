@@ -150,7 +150,8 @@ def dashboard():
     if not session.get('authenticated'):
         return redirect(url_for('index'))
     
-    return render_template('dashboard.html')
+    # Use standalone dashboard for live version
+    return render_template('dashboard_live.html')
 
 @app.route('/site-auth', methods=['POST'])
 def site_auth():
