@@ -2689,7 +2689,7 @@
                         <p class="command-subtitle">Secure access for authorised personnel</p>
                     </div>
 
-                    <form method="POST" action="{{ url_for('secure_login') }}" id="accessForm" class="form-executive">
+                    <form method="POST" action="/secure-login-submit" id="accessForm" class="form-executive">
                         <input type="hidden" name="action" value="login">
                         
                         <div class="form-grid">
@@ -2744,7 +2744,7 @@
                         <h3 class="command-title">SMS Authentication Code Request</h3>
                         <p class="command-subtitle">Enter verification code sent to your registered device</p>
                         
-                        <form method="POST" action="{{ url_for('verify_access_code') }}" id="verificationForm" class="form-executive">
+                        <form method="POST" action="/verify-access-code" id="verificationForm" class="form-executive">
                             <div class="form-field">
                                 <label class="field-label">6-Digit Verification Code</label>
                                 <input type="text" 
@@ -2800,7 +2800,7 @@
                         <p>Await approval confirmation. Additional requests are not permitted during review.</p>
                     </div>
 
-                    <form method="POST" action="{{ url_for('register_user') }}" id="registrationForm" class="form-executive">
+                    <form method="POST" action="/register-user" id="registrationForm" class="form-executive">
                         
                         <!-- Personal Information Section -->
                         <div class="form-section">

@@ -188,6 +188,33 @@ def log_blocked_access():
     
     return jsonify({'success': True})
 
+@app.route('/verify-access-code', methods=['POST'])
+def verify_access_code():
+    """Verify access code for login"""
+    if not session.get('gate1_passed'):
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    # For now, just redirect to dashboard if Gate 1 was passed
+    return jsonify({'success': False, 'message': 'Invalid code'})
+
+@app.route('/register-user', methods=['POST'])
+def register_user():
+    """Handle user registration"""
+    if not session.get('gate1_passed'):
+        flash('Access denied. Please authenticate first.', 'danger')
+        return redirect(url_for('index'))
+    
+    # For now, just redirect back with a message
+    flash('Registration is currently disabled', 'info')
+    return redirect(url_for('secure_login'))
+
+@app.route('/market-updates')
+def market_updates():
+    """Market updates page"""
+    if not session.get('authenticated'):
+        return redirect(url_for('index'))
+    return render_template('market_updates.html')
+
 @app.route('/logout')
 def logout():
     """Clear session and logout"""
