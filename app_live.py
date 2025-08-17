@@ -3,7 +3,7 @@ AtlasNexus - LIVE PRODUCTION VERSION
 Deployed to atlasnexus.co.uk with full security enabled
 """
 
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, timedelta
 import secrets
@@ -12,6 +12,22 @@ import os
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'AtlasNexus_Live_2024_' + secrets.token_hex(32))
 app.permanent_session_lifetime = timedelta(minutes=45)
+
+# Custom Jinja2 filters
+@app.template_filter('datetime')
+def datetime_filter(value, format_string='%B %d, %Y'):
+    """Format a datetime object or 'now' string"""
+    if value == 'now':
+        dt = datetime.now()
+    elif isinstance(value, str):
+        dt = datetime.now()
+    else:
+        dt = value
+    
+    # Convert Django-style format to Python strftime format
+    if format_string == 'l, F d, Y':
+        return dt.strftime('%A, %B %d, %Y')
+    return dt.strftime(format_string)
 
 # PRODUCTION MODE - Full security enabled
 TESTING_MODE = False
@@ -28,6 +44,17 @@ AUTHORIZED_USER = {
 # Security tracking
 failed_attempts = {}
 blocked_ips = set()
+
+@app.context_processor
+def inject_user():
+    """Inject current_user into all templates"""
+    class User:
+        def __init__(self, authenticated):
+            self.is_authenticated = authenticated
+            self.username = session.get('username', 'Guest')
+    
+    current_user = User(session.get('authenticated', False))
+    return dict(current_user=current_user)
 
 @app.route('/')
 def index():
