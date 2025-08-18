@@ -260,6 +260,8 @@ def site_auth():
         session['gate1_passed'] = True
         session['site_authenticated'] = True
         session.permanent = True
+        if is_ajax:
+            return jsonify({'success': True, 'redirect': '/secure-login'})
         return redirect(url_for('secure_login'))
     else:
         # Increment attempt count
