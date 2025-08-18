@@ -104,6 +104,24 @@ def api_portfolio_data():
         }
     })
 
+@app.route('/api/password_status')
+def api_password_status():
+    """API endpoint for password status"""
+    return jsonify({
+        'success': True,
+        'expires_in': '45 minutes',
+        'strength': 'strong',
+        'last_changed': '2025-01-15'
+    })
+
+@app.route('/api/renew_password', methods=['POST'])
+def api_renew_password():
+    """API endpoint for password renewal"""
+    return jsonify({
+        'success': True,
+        'message': 'Password renewed successfully'
+    })
+
 @app.route('/account')
 def account():
     """Account page"""
