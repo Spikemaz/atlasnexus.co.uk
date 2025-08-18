@@ -82,9 +82,13 @@ def authenticate():
         global_attempts = session.get(f'global_unlock_attempts_{ip_address}', 0)
         
         if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
-            # Success with global unlock
+            # Success with global unlock - reset ALL security tracking
             session.pop('global_unlock_active', None)
             session.pop(f'global_unlock_attempts_{ip_address}', None)
+            session.pop(f'attempt_count_{ip_address}', None)
+            session.pop(f'blocked_until_{ip_address}', None)
+            session.pop(f'blackscreen_{ip_address}', None)
+            session.pop(f'lockout_24h_{ip_address}', None)
             session['gate1_passed'] = True
             session['site_authenticated'] = True
             session.permanent = True
@@ -121,9 +125,13 @@ def authenticate():
     
     # Check actual passwords
     if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
-        # Reset attempts on success
+        # Reset ALL security tracking on successful login
         session.pop(f'attempt_count_{ip_address}', None)
         session.pop(f'blocked_until_{ip_address}', None)
+        session.pop(f'blackscreen_{ip_address}', None)
+        session.pop(f'lockout_24h_{ip_address}', None)
+        session.pop('global_unlock_active', None)
+        session.pop(f'global_unlock_attempts_{ip_address}', None)
         session['gate1_passed'] = True
         session['site_authenticated'] = True
         session.permanent = True
@@ -207,9 +215,13 @@ def site_auth():
     
     # Check actual passwords
     if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
-        # Reset attempts on success
+        # Reset ALL security tracking on successful login
         session.pop(f'attempt_count_{ip_address}', None)
         session.pop(f'blocked_until_{ip_address}', None)
+        session.pop(f'blackscreen_{ip_address}', None)
+        session.pop(f'lockout_24h_{ip_address}', None)
+        session.pop('global_unlock_active', None)
+        session.pop(f'global_unlock_attempts_{ip_address}', None)
         session['gate1_passed'] = True
         session['site_authenticated'] = True
         session.permanent = True
