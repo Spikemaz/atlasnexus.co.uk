@@ -14,17 +14,24 @@ import sys
 # ==================== CONFIGURATION ====================
 # Auto-detect environment
 def get_environment():
-    """Detect if we're local or production"""
+    """Detect if we're local, Vercel, or other production"""
+    # Check if running on Vercel
+    if os.environ.get('VERCEL'):
+        return 'vercel'
+    # Check if explicitly set to production
     if os.environ.get('APP_ENV', '').lower() in ['production', 'prod']:
         return 'production'
+    # Check hostname for local indicators
     hostname = socket.gethostname().lower()
-    if 'local' in hostname or 'desktop' in hostname:
+    if 'local' in hostname or 'desktop' in hostname or 'laptop' in hostname:
         return 'local'
+    # Default to production for safety
     return 'production'
 
 ENVIRONMENT = get_environment()
 IS_LOCAL = ENVIRONMENT == 'local'
-IS_PRODUCTION = ENVIRONMENT == 'production'
+IS_VERCEL = ENVIRONMENT == 'vercel'
+IS_PRODUCTION = ENVIRONMENT in ['production', 'vercel']
 
 # Settings (same for both environments except where noted)
 PASSWORDS = ['SpikeMaz', 'RedAMC', 'PartnerAccess']
@@ -56,10 +63,12 @@ def delete_duplicates():
         os.remove('templates/dashboard_live.html')
         print("Deleted dashboard_live.html - NOT ALLOWED!")
 
-# ==================== KILL OLD SERVERS ====================
+# ==================== KILL OLD SERVERS (LOCAL ONLY) ====================
 def kill_port_5000():
-    """Kill any existing servers on port 5000 before starting"""
-    if os.name == 'nt':  # Windows
+    """Kill any existing LOCAL servers on port 5000 before starting
+    Note: Vercel manages its own servers automatically - we don't touch those"""
+    # Only run on local Windows machines, not on Vercel
+    if os.name == 'nt' and not os.environ.get('VERCEL'):  
         try:
             result = subprocess.run(['netstat', '-ano'], capture_output=True, text=True)
             pids = set()
@@ -70,6 +79,7 @@ def kill_port_5000():
                         pids.add(parts[-1])
             for pid in pids:
                 subprocess.run(['taskkill', '/F', '/PID', pid], capture_output=True)
+                print(f"Killed existing server (PID: {pid})")
         except:
             pass
 
@@ -349,16 +359,28 @@ def server_error(e):
     return render_template('404.html', error='Server error'), 500
 
 # ==================== MAIN ====================
-# Clean up duplicate files on startup (works on Vercel too)
+# Clean up duplicate files on startup
 delete_duplicates()
 
+# Show environment info on startup
+if IS_VERCEL:
+    print("[VERCEL] Running on Vercel - atlasnexus.co.uk")
+    print("[VERCEL] Vercel manages all servers automatically")
+elif IS_LOCAL:
+    print(f"[LOCAL] Running locally in {ENVIRONMENT.upper()} mode")
+else:
+    print(f"[PRODUCTION] Running in {ENVIRONMENT.upper()} mode")
+
 if __name__ == '__main__':
-    # Kill any existing servers (local only)
+    # Only runs locally, not on Vercel
+    # Kill any existing LOCAL servers
     kill_port_5000()
     
-    print(f"\nStarting AtlasNexus in {ENVIRONMENT.upper()} mode")
-    print(f"URL: http://localhost:5000")
-    print("Press Ctrl+C to stop\n")
+    print(f"\n[START] Starting LOCAL AtlasNexus server")
+    print(f"[URL] http://localhost:5000")
+    print("[STOP] Press Ctrl+C to stop\n")
+    print("[INFO] This is your LOCAL server only.")
+    print("[INFO] Vercel deployment at atlasnexus.co.uk is managed separately.\n")
     
     try:
         app.run(host=HOST, port=5000, debug=DEBUG)
