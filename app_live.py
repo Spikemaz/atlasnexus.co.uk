@@ -88,7 +88,23 @@ def dashboard():
 @app.route('/site-auth', methods=['POST'])
 def site_auth():
     """Alternative endpoint for Gate 1"""
-    return authenticate()
+    password = request.form.get('site_password', '')
+    
+    if TESTING_MODE:
+        session['gate1_passed'] = True
+        session['site_authenticated'] = True
+        session.permanent = True
+        return redirect(url_for('secure_login'))
+    
+    # Production mode - check actual passwords
+    if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
+        session['gate1_passed'] = True
+        session['site_authenticated'] = True
+        session.permanent = True
+        return redirect(url_for('secure_login'))
+    else:
+        # Return back to login with error
+        return render_template('site_auth.html', error='Invalid password')
 
 # Minimal API endpoints for functionality
 @app.route('/api/log-password-attempt', methods=['POST'])
