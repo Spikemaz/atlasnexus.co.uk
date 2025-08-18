@@ -1,0 +1,46 @@
+=====================================
+SIMPLE DEPLOYMENT RULES
+=====================================
+
+GOLDEN RULE: ONE VERSION EVERYWHERE
+------------------------------------
+- What you test locally = What goes live
+- No app_live.py, No app_local.py
+- Just app.py
+
+HOW TO DEPLOY:
+--------------
+1. Test locally: python app.py
+2. If it works: double-click deploy.bat
+3. Done! Live site updates automatically
+
+NEVER DO THIS:
+--------------
+❌ Don't create app_live.py
+❌ Don't create separate versions
+❌ Don't edit files on GitHub directly
+❌ Don't have multiple Python files
+
+ALWAYS DO THIS:
+---------------
+✓ Edit locally first
+✓ Test locally first  
+✓ Use deploy.bat to push
+✓ Keep ONE app.py
+
+SIMPLE STRUCTURE:
+-----------------
+Project1/
+├── app.py           # THE ONLY APP FILE
+├── start.bat        # Start local server
+├── deploy.bat       # Deploy to live
+└── templates/       # 4 HTML files only
+    ├── Gate1.html
+    ├── Gate2.html
+    ├── Dashboard.html
+    └── 404.html
+
+=====================================
+Remember: If it works locally, 
+it will work on live. Same code!
+=====================================

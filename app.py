@@ -54,14 +54,26 @@ else:  # Production
 
 # ==================== PREVENT DUPLICATE FILES ====================
 def delete_duplicates():
-    """Delete app_live.py and dashboard_live.html if they exist"""
+    """Delete any duplicate/variant files that should never exist"""
     import os
-    if os.path.exists('app_live.py'):
-        os.remove('app_live.py')
-        print("Deleted app_live.py - NOT ALLOWED!")
-    if os.path.exists('templates/dashboard_live.html'):
-        os.remove('templates/dashboard_live.html')
-        print("Deleted dashboard_live.html - NOT ALLOWED!")
+    
+    # List of files that should NEVER exist
+    forbidden_files = [
+        'app_live.py',
+        'app_local.py', 
+        'app_backup.py',
+        'app_vercel.py',
+        'templates/dashboard_live.html',
+        'templates/site_auth.html',  # Old name
+        'templates/secure_login.html',  # Old name
+        'templates/blocked.html',  # Old name
+        'templates/blackscreen.html'  # Old name
+    ]
+    
+    for file in forbidden_files:
+        if os.path.exists(file):
+            os.remove(file)
+            print(f"[CLEANUP] Deleted {file} - NOT ALLOWED! Use single app.py only!")
 
 # ==================== KILL OLD SERVERS (LOCAL ONLY) ====================
 def kill_port_5000():
