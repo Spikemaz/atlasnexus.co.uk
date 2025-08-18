@@ -430,15 +430,6 @@
             letter-spacing: 0.5px;
             margin-top: 0.15rem;
         }
-        
-        .badge-id {
-            font-size: 0.6rem;
-            opacity: 0.6;
-            letter-spacing: 0.3px;
-            margin-top: 0.3rem;
-            padding-top: 0.3rem;
-            border-top: 1px solid rgba(212, 175, 55, 0.3);
-        }
     </style>
 </head>
 <body>
@@ -496,28 +487,16 @@
     <div class="global-connection">
         <div class="university-badge">
             <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <!-- Circle background -->
-                <circle cx="50" cy="50" r="45" fill="none" stroke="#D4AF37" stroke-width="2"/>
-                
-                <!-- Simplified bank building -->
-                <!-- Roof -->
-                <polygon points="25,40 50,30 75,40" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
-                
-                <!-- Three columns only -->
-                <rect x="30" y="40" width="5" height="25" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
-                <rect x="47.5" y="40" width="5" height="25" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
-                <rect x="65" y="40" width="5" height="25" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
-                
-                <!-- Foundation -->
-                <rect x="25" y="65" width="50" height="3" fill="#D4AF37"/>
-                
-                <!-- Dollar sign in center -->
-                <text x="50" y="54" text-anchor="middle" fill="#D4AF37" font-size="12" font-weight="bold">$</text>
+                <!-- Simple globe -->
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#D4AF37" stroke-width="2"/>
+                <!-- Horizontal line -->
+                <ellipse cx="50" cy="50" rx="40" ry="15" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+                <!-- Vertical line -->
+                <path d="M50 10 L50 90" stroke="#D4AF37" stroke-width="1.5"/>
             </svg>
             <div class="badge-text">
-                <div class="badge-title">SECURE PORTAL</div>
-                <div class="badge-subtitle">Authorised Access Only</div>
-                <div class="badge-id">AES-512 Encryption</div>
+                <div class="badge-title">GLOBAL CONNECTION</div>
+                <div class="badge-subtitle">Authorised Access</div>
             </div>
         </div>
     </div>
