@@ -228,6 +228,30 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
+        /* Countdown Timer */
+        .countdown-timer {
+            position: fixed;
+            top: 80px;
+            left: 2rem;
+            color: #ff6b6b;
+            font-family: monospace;
+            font-size: 1.2rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #ff6b6b;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
+        }
+        
+        .countdown-timer.warning {
+            animation: warningPulse 1s infinite;
+        }
+        
+        @keyframes warningPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 107, 107, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.8); }
+        }
+        
         /* Cursor follow effect */
         .cursor-glow {
             position: fixed;
@@ -361,8 +385,11 @@
         </div>
     </div>
     
-    <!-- Timer -->
+    <!-- Clock Timer -->
     <div class="timer" id="timer">00:00:00</div>
+    
+    <!-- Countdown Timer -->
+    <div class="countdown-timer" id="countdownTimer">15:00</div>
     
     <!-- Main content -->
     <div class="main-content">
@@ -396,7 +423,7 @@
     </div>
     
     <script>
-        // Timer
+        // Clock Timer
         function updateTimer() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
@@ -406,6 +433,56 @@
         }
         updateTimer();
         setInterval(updateTimer, 1000);
+        
+        // 15-Minute Countdown Timer
+        function initCountdown() {
+            // Get or set initial time
+            let countdownStart = localStorage.getItem('countdownStart');
+            if (!countdownStart) {
+                countdownStart = Date.now();
+                localStorage.setItem('countdownStart', countdownStart);
+            }
+            
+            const COUNTDOWN_DURATION = 15 * 60 * 1000; // 15 minutes in milliseconds
+            
+            function updateCountdown() {
+                const elapsed = Date.now() - parseInt(countdownStart);
+                const remaining = Math.max(0, COUNTDOWN_DURATION - elapsed);
+                
+                if (remaining === 0) {
+                    // Time's up - trigger block
+                    localStorage.removeItem('countdownStart');
+                    localStorage.removeItem('attemptCount');
+                    
+                    // Submit a fake failed attempt to trigger the block
+                    fetch('/site-auth', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                        body: 'site_password=TIMEOUT_TRIGGER_BLOCK_NOW'
+                    }).then(() => {
+                        window.location.href = '/';
+                    });
+                    return;
+                }
+                
+                const minutes = Math.floor(remaining / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                const countdownEl = document.getElementById('countdownTimer');
+                countdownEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                // Add warning effect when under 1 minute
+                if (remaining < 60000) {
+                    countdownEl.classList.add('warning');
+                } else {
+                    countdownEl.classList.remove('warning');
+                }
+                
+                setTimeout(updateCountdown, 1000);
+            }
+            
+            updateCountdown();
+        }
+        initCountdown();
         
         // Cursor glow follow
         const cursorGlow = document.getElementById('cursorGlow');
@@ -458,6 +535,7 @@
             .then(data => {
                 if (data.status === 'success') {
                     localStorage.removeItem('attemptCount');
+                    localStorage.removeItem('countdownStart'); // Clear countdown on success
                     window.location.href = data.redirect;
                 } else if (data.status === 'blocked' || data.status === 'blacklisted') {
                     localStorage.removeItem('attemptCount');

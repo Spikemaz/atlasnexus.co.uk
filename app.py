@@ -156,7 +156,8 @@ def kill_port_5000():
 
 # ==================== FLASK APP ====================
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(32)
+# Use a fixed secret key so sessions persist across restarts
+app.secret_key = 'your-fixed-secret-key-keep-this-secure-in-production-2024'
 app.permanent_session_lifetime = timedelta(minutes=PERMANENT_SESSION_LIFETIME)
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
@@ -258,6 +259,23 @@ def site_auth():
                 'message': f'Blocked for {remaining} more minutes',
                 'redirect': url_for('index')
             }), 403
+    
+    # Check for timeout trigger
+    if password == 'TIMEOUT_TRIGGER_BLOCK_NOW':
+        # Force block due to timeout
+        session[f'attempt_count_{ip_address}'] = MAX_ATTEMPTS_BEFORE_BLOCK
+        blocked_until = datetime.now() + timedelta(minutes=BLOCK_DURATION_MINUTES)
+        session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
+        # Generate reference code
+        import random
+        import string
+        ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        session[f'reference_code_{ip_address}'] = ref_code
+        return jsonify({
+            'status': 'blocked',
+            'message': 'Session timeout - blocked for 30 minutes',
+            'redirect': url_for('index')
+        }), 403
     
     # Get current attempt count
     attempt_count = session.get(f'attempt_count_{ip_address}', 0)
