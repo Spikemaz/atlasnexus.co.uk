@@ -46,6 +46,12 @@ def index():
                                  no_hidden_menu=True,
                                  lockout_24h=True)
     
+    # Check for blackscreen parameter (from failed global unlock)
+    if request.args.get('blackscreen') == 'true':
+        session[f'blackscreen_{ip_address}'] = True
+        session.permanent = True
+        return render_template('blackscreen.html', ip_address=ip_address)
+    
     # Check if blacklisted
     if session.get(f'blackscreen_{ip_address}'):
         return render_template('blackscreen.html', ip_address=ip_address)
