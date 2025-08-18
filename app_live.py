@@ -12,7 +12,7 @@ app.secret_key = secrets.token_hex(32)
 app.permanent_session_lifetime = timedelta(minutes=45)
 
 # TESTING MODE - No passwords required for local development
-TESTING_MODE = False
+TESTING_MODE = False  # Both local and live use same security now
 
 @app.route('/')
 def index():
