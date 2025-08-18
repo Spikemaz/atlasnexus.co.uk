@@ -33,6 +33,9 @@
     <div class="blackscreen-message">
         ACCESS PERMANENTLY DENIED<br>
         <span style="font-size: 18px; margin-top: 10px; display: block;">IP: {{ ip_address }}</span>
+        <span style="font-size: 14px; margin-top: 20px; display: block; opacity: 0.8;">
+            Contact: <a href="mailto:Support@Atlasnexus.co.uk" style="color: #ff0000;">Support@Atlasnexus.co.uk</a>
+        </span>
     </div>
 </body>
 </html>
@@ -69,6 +72,9 @@
         </p>
         <div class="countdown" id="countdown">--:--:--</div>
         <div>Reference Code: <span class="reference-code">{{ reference_code }}</span></div>
+        <div style="margin-top: 1.5rem; color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">
+            For assistance, contact: <a href="mailto:Support@Atlasnexus.co.uk" style="color: #D4AF37; text-decoration: none;">Support@Atlasnexus.co.uk</a>
+        </div>
     </div>
     
     {% if state == 'blocked_30min' %}
