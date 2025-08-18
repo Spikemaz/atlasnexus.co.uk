@@ -1373,9 +1373,23 @@
     
     <!-- Session Timeout (separate from main window) -->
     <div class="session-timeout">
-        <div class="timeout-display" id="session-timer">Loading...</div>
+        <div class="timeout-display" id="session-timer">15:00</div>
         <small>Session Timeout</small>
     </div>
+    <script>
+        // Immediately calculate and display actual time
+        (function() {
+            const storedStartTime = localStorage.getItem('sessionStartTime');
+            if (storedStartTime) {
+                const elapsed = Math.floor((Date.now() - parseInt(storedStartTime)) / 1000);
+                const remaining = Math.max(0, (15 * 60) - elapsed);
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                document.getElementById('session-timer').textContent = 
+                    minutes + ':' + seconds.toString().padStart(2, '0');
+            }
+        })();
+    </script>
     
     <!-- Blocked Page (hidden by default) -->
     <div id="blocked-page" class="blocked-page" style="display: none;">
@@ -1537,7 +1551,7 @@
                     SESSION EXPIRES IN
                 </div>
                 <div id="recoverySessionTimer" style="font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: #dc2626; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(255, 255, 255, 0.3);">
-                    Loading...
+                    15:00
                 </div>
                 <div style="color: var(--warm-cream); font-size: 0.75rem; margin-top: 2px; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);">
                     Contact support quickly to avoid lockout
