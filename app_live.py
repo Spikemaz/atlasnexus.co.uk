@@ -65,14 +65,38 @@ def index():
                                  ip_address=ip_address,
                                  no_hidden_menu=False)
     
-    # Check attempt count - if already at 4 or more, they're done
+    # Check attempt count - if already at 4 or more, they should be blocked
     attempt_count = session.get(f'attempt_count_{ip_address}', 0)
     if attempt_count >= 4:
-        # 4+ attempts means no more chances - straight to blackscreen
-        # They had their 4 attempts, no more login page access
-        session[f'blackscreen_{ip_address}'] = True
-        session.permanent = True
-        return render_template('blackscreen.html', ip_address=ip_address)
+        # They have 4+ attempts - they should see blocked page with 30 min timer
+        from datetime import datetime, timedelta
+        
+        # Get or create the block timestamp
+        blocked_until = session.get(f'blocked_until_{ip_address}')
+        if not blocked_until:
+            # First time seeing 4 attempts - create the 30-minute block
+            blocked_until = datetime.now() + timedelta(minutes=30)
+            session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
+            session.permanent = True
+        else:
+            if isinstance(blocked_until, str):
+                blocked_until = datetime.fromisoformat(blocked_until)
+        
+        # Calculate remaining time
+        remaining_minutes = int((blocked_until - datetime.now()).total_seconds() / 60)
+        
+        if remaining_minutes <= 0:
+            # 30 minutes expired - permanent blackscreen
+            session[f'blackscreen_{ip_address}'] = True
+            session.permanent = True
+            return render_template('blackscreen.html', ip_address=ip_address)
+        else:
+            # Still in 30-minute block period
+            return render_template('blocked.html', 
+                                 blocked_until=blocked_until,
+                                 remaining_minutes=remaining_minutes,
+                                 ip_address=ip_address,
+                                 no_hidden_menu=False)
     
     # Check if using global unlock (only 3 attempts allowed)
     if request.args.get('global_unlock') == 'true':
