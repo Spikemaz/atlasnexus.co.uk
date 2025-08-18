@@ -27,12 +27,12 @@
                             </div>
                             <div class="col-auto">
                                 <div class="badge bg-info bg-opacity-90 text-white px-3 py-2">
-                                    <i class="fas fa-user-tie me-2"></i>{{ user.role.title() }}
+                                    <i class="fas fa-user-tie me-2"></i>Administrator
                                 </div>
                             </div>
                             <div class="col-auto">
                                 <div class="badge bg-white bg-opacity-20 text-white px-3 py-2">
-                                    <i class="fas fa-calendar me-2"></i>{{ "now"|datetime:"l, F d, Y" }}
+                                    <i class="fas fa-calendar me-2"></i><span id="current-date"></span>
                                 </div>
                             </div>
                         </div>
@@ -1283,5 +1283,15 @@ function requestPasswordRenewal() {
 
 // Update password status every 5 minutes
 setInterval(updatePasswordStatus, 5 * 60 * 1000);
+
+// Display current date
+document.addEventListener('DOMContentLoaded', function() {
+    const dateElement = document.getElementById('current-date');
+    if (dateElement) {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dateElement.textContent = now.toLocaleDateString('en-US', options);
+    }
+});
 </script>
 {% endblock %}
