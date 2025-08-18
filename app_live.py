@@ -220,11 +220,16 @@ def site_auth():
     password = request.form.get('site_password', '')
     ip_address = request.remote_addr
     
+    # Check if this is an AJAX request
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
     # Get attempt count for this IP
     attempt_count = session.get(f'attempt_count_{ip_address}', 0)
     
     # Check if already blacklisted
     if session.get(f'blackscreen_{ip_address}'):
+        if is_ajax:
+            return jsonify({'success': False, 'redirect': '/', 'blackscreen': True})
         return render_template('blackscreen.html', ip_address=ip_address)
     
     # Check if temporarily blocked
@@ -234,6 +239,8 @@ def site_auth():
             blocked_until = datetime.fromisoformat(blocked_until)
         if datetime.now() < blocked_until:
             remaining_minutes = int((blocked_until - datetime.now()).total_seconds() / 60)
+            if is_ajax:
+                return jsonify({'success': False, 'redirect': '/', 'blocked': True})
             return render_template('blocked.html', 
                                  blocked_until=blocked_until,
                                  remaining_minutes=remaining_minutes,
