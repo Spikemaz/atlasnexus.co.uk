@@ -52,28 +52,74 @@ else:  # Production
     HOST = '0.0.0.0'
     SESSION_COOKIE_SECURE = True
 
-# ==================== PREVENT DUPLICATE FILES ====================
-def delete_duplicates():
-    """Delete any duplicate/variant files that should never exist"""
+# ==================== PROJECT AUDIT & CLEANUP ====================
+def audit_project():
+    """Audit project structure and clean up any unnecessary files"""
     import os
+    import glob
     
-    # List of files that should NEVER exist
+    # ALLOWED files (everything else gets flagged)
+    allowed_files = {
+        'app.py',
+        'local.bat',
+        'live.bat', 
+        'README.txt',
+        'vercel.json',
+        'requirements.txt',
+        '.gitignore'
+    }
+    
+    # ALLOWED template files
+    allowed_templates = {
+        'Gate1.html',
+        'Gate2.html',
+        'Dashboard.html',
+        '404.html'
+    }
+    
+    # Files that should NEVER exist (delete immediately)
     forbidden_files = [
         'app_live.py',
-        'app_local.py', 
+        'app_local.py',
         'app_backup.py',
         'app_vercel.py',
+        'run.py',
+        'start.bat',  # Old name
+        'deploy.bat',  # Old name
+        'RULES.md',
+        'README.md',
+        'DEPLOYMENT_RULES.txt',
+        'templates/site_auth.html',
+        'templates/secure_login.html',
+        'templates/blocked.html',
+        'templates/blackscreen.html',
         'templates/dashboard_live.html',
-        'templates/site_auth.html',  # Old name
-        'templates/secure_login.html',  # Old name
-        'templates/blocked.html',  # Old name
-        'templates/blackscreen.html'  # Old name
+        'templates/error.html'  # Old name for 404
     ]
     
+    # Delete forbidden files
     for file in forbidden_files:
         if os.path.exists(file):
             os.remove(file)
-            print(f"[CLEANUP] Deleted {file} - NOT ALLOWED! Use single app.py only!")
+            print(f"[DELETED] {file} - NOT ALLOWED!")
+    
+    # Check root directory for unexpected files
+    root_files = [f for f in os.listdir('.') if os.path.isfile(f)]
+    for file in root_files:
+        if file not in allowed_files and not file.startswith('.'):
+            print(f"[WARNING] Unexpected file: {file}")
+    
+    # Check templates directory
+    if os.path.exists('templates'):
+        template_files = os.listdir('templates')
+        for file in template_files:
+            if file not in allowed_templates:
+                filepath = f'templates/{file}'
+                os.remove(filepath)
+                print(f"[DELETED] {filepath} - Only Gate1, Gate2, Dashboard, 404 allowed!")
+    
+    # Report structure
+    print("[AUDIT] Project structure checked and cleaned")
 
 # ==================== KILL OLD SERVERS (LOCAL ONLY) ====================
 def kill_port_5000():
@@ -371,8 +417,8 @@ def server_error(e):
     return render_template('404.html', error='Server error'), 500
 
 # ==================== MAIN ====================
-# Clean up duplicate files on startup
-delete_duplicates()
+# Audit and clean project structure on EVERY startup
+audit_project()
 
 # Show environment info on startup
 if IS_VERCEL:
