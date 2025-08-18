@@ -24,7 +24,8 @@
       "Bash(do curl -X POST http://localhost:5000/auth -d \"site_password=wrong$i\" -c cookies.txt -b cookies.txt -s)",
       "Bash(del config.py run.py app.py README.md RULES.md)",
       "Bash(mv:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "WebFetch(domain:atlasnexus.co.uk)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"

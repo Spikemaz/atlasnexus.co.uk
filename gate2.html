@@ -2670,15 +2670,9 @@
 
             <div class="portal-content">
                 <!-- Flash Messages -->
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="executive-alert alert-{{ 'danger' if category == 'error' else category }}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
+                
+                    
+                
 
                 <!-- Institutional Access Section -->
                 <div class="content-section active" id="access-section">
