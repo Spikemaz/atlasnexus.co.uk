@@ -230,7 +230,8 @@ def site_auth():
             return render_template('blocked.html', 
                                  blocked_until=blocked_until,
                                  remaining_minutes=remaining_minutes,
-                                 ip_address=ip_address)
+                                 ip_address=ip_address,
+                                 no_hidden_menu=False)
     
     # Check actual passwords
     if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
@@ -263,7 +264,8 @@ def site_auth():
             return render_template('blocked.html', 
                                  blocked_until=blocked_until,
                                  remaining_minutes=remaining_minutes,
-                                 ip_address=ip_address)
+                                 ip_address=ip_address,
+                                 no_hidden_menu=False)
         else:
             # Show error with remaining attempts
             remaining = 4 - attempt_count
