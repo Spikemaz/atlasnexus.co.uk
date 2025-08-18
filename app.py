@@ -349,11 +349,11 @@ def server_error(e):
     return render_template('404.html', error='Server error'), 500
 
 # ==================== MAIN ====================
+# Clean up duplicate files on startup (works on Vercel too)
+delete_duplicates()
+
 if __name__ == '__main__':
-    # Delete duplicate files first
-    delete_duplicates()
-    
-    # Kill any existing servers
+    # Kill any existing servers (local only)
     kill_port_5000()
     
     print(f"\nStarting AtlasNexus in {ENVIRONMENT.upper()} mode")
