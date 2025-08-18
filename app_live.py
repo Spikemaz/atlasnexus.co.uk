@@ -1,33 +1,40 @@
 """
-AtlasNexus - Local Testing Version
-Only includes the 3 essential pages: /, /secure-login, /dashboard
+AtlasNexus - Unified Application
+Works for both local development and production
 """
 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from datetime import datetime, timedelta
 import secrets
+from config import config, IS_LOCAL, IS_PRODUCTION
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)
-app.permanent_session_lifetime = timedelta(minutes=15)  # Gate 1 timer: 15 minutes
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
+app.permanent_session_lifetime = timedelta(minutes=config.PERMANENT_SESSION_LIFETIME)
 
-# TESTING MODE - No passwords required for local development
-TESTING_MODE = False  # Both local and live use same security now
+# Apply configuration
+app.config['SESSION_COOKIE_HTTPONLY'] = config.SESSION_COOKIE_HTTPONLY
+app.config['SESSION_COOKIE_SAMESITE'] = config.SESSION_COOKIE_SAMESITE
+app.config['SESSION_COOKIE_SECURE'] = config.SESSION_COOKIE_SECURE
+app.config['DEBUG'] = config.DEBUG
+
+# Optional: Add environment indicator for debugging
+if config.SHOW_DEBUG_INFO:
+    print(f"[INFO] Running in {'LOCAL' if IS_LOCAL else 'PRODUCTION'} mode")
+    print(f"[INFO] Debug: {config.DEBUG}, Secure Cookies: {config.SESSION_COOKIE_SECURE}")
 
 @app.route('/')
 def index():
     """Gate 1 - Site Authentication"""
     ip_address = request.remote_addr
-    session.permanent = True  # Ensure session persists
+    session.permanent = True
     
-    # Debug logging
-    print(f"[DEBUG] IP: {ip_address}")
-    print(f"[DEBUG] Session data: {dict(session)}")
-    print(f"[DEBUG] Attempt count: {session.get(f'attempt_count_{ip_address}', 0)}")
-    print(f"[DEBUG] Blocked until: {session.get(f'blocked_until_{ip_address}')}")
+    # Debug logging only in local mode
+    if config.SHOW_DEBUG_INFO:
+        print(f"[DEBUG] IP: {ip_address}")
+        print(f"[DEBUG] Session data: {dict(session)}")
+        print(f"[DEBUG] Attempt count: {session.get(f'attempt_count_{ip_address}', 0)}")
+        print(f"[DEBUG] Blocked until: {session.get(f'blocked_until_{ip_address}')}")
     
     # Check for 24-hour lockout (after global unlock failure)
     lockout_24h = session.get(f'lockout_24h_{ip_address}')
@@ -38,7 +45,6 @@ def index():
         if datetime.now() < lockout_24h:
             remaining_hours = int((lockout_24h - datetime.now()).total_seconds() / 3600)
             remaining_minutes = int(((lockout_24h - datetime.now()).total_seconds() % 3600) / 60)
-            # Show blocked page WITHOUT hidden menu for 24-hour lockout
             return render_template('blocked.html', 
                                  blocked_until=lockout_24h,
                                  remaining_minutes=remaining_hours * 60 + remaining_minutes,
@@ -48,14 +54,12 @@ def index():
     
     # Check if using global unlock FIRST (before any blocking checks)
     if request.args.get('global_unlock') == 'true':
-        # Clear all blocking flags to allow access with global unlock
         session.pop(f'blocked_30min_{ip_address}', None)
         session.pop(f'blocked_until_{ip_address}', None)
         session.pop(f'blackscreen_{ip_address}', None)
         session['global_unlock_active'] = True
         session[f'global_unlock_attempts_{ip_address}'] = 0
         session.pop(f'attempt_count_{ip_address}', None)
-        # Continue to show the site_auth page with global unlock active
     
     # Check for blackscreen parameter (from failed global unlock)
     if request.args.get('blackscreen') == 'true':
@@ -76,25 +80,18 @@ def index():
                 blocked_until = datetime.fromisoformat(blocked_until)
             remaining_minutes = int((blocked_until - datetime.now()).total_seconds() / 60)
             if remaining_minutes <= 0:
-                # 30 minutes expired - convert to permanent blackscreen
                 session.pop(f'blocked_30min_{ip_address}', None)
                 session.pop(f'blocked_until_{ip_address}', None)
                 session[f'blackscreen_{ip_address}'] = True
                 return render_template('blackscreen.html', ip_address=ip_address)
             else:
-                # Still in 30-minute block
                 return render_template('blocked.html',
                                      blocked_until=blocked_until,
                                      remaining_minutes=remaining_minutes,
                                      ip_address=ip_address,
                                      no_hidden_menu=False)
     
-    # Legacy check - can be removed once we're sure all sessions use the new flag
-    # This is kept for backwards compatibility with existing sessions
-    
-    # Don't check attempt count here - the flags handle everything
     attempt_count = session.get(f'attempt_count_{ip_address}', 0)
-    
     global_unlock_active = session.get('global_unlock_active', False)
     global_attempts = session.get(f'global_unlock_attempts_{ip_address}', 0)
     
@@ -115,7 +112,7 @@ def authenticate():
     if session.get('global_unlock_active'):
         global_attempts = session.get(f'global_unlock_attempts_{ip_address}', 0)
         
-        if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
+        if password in config.VALID_PASSWORDS:
             # Success with global unlock - reset ALL security tracking
             session.pop('global_unlock_active', None)
             session.pop(f'global_unlock_attempts_{ip_address}', None)
@@ -132,14 +129,14 @@ def authenticate():
             global_attempts += 1
             session[f'global_unlock_attempts_{ip_address}'] = global_attempts
             
-            if global_attempts >= 3:
+            if global_attempts >= config.MAX_GLOBAL_UNLOCK_ATTEMPTS:
                 # Failed 3 times with global unlock - 24 hour lockout
-                lockout_until = datetime.now() + timedelta(hours=24)
+                lockout_until = datetime.now() + timedelta(hours=config.LOCKOUT_DURATION_HOURS)
                 session[f'lockout_24h_{ip_address}'] = lockout_until.isoformat()
                 session.pop('global_unlock_active', None)
                 return jsonify({'success': False, 'redirect': '/', 'lockout_24h': True})
             else:
-                remaining = 3 - global_attempts
+                remaining = config.MAX_GLOBAL_UNLOCK_ATTEMPTS - global_attempts
                 return jsonify({'success': False, 'message': f'Global unlock: {remaining} attempts remaining'})
     
     # Regular attempt handling
@@ -158,7 +155,7 @@ def authenticate():
             return jsonify({'success': False, 'redirect': '/', 'blocked': True})
     
     # Check actual passwords
-    if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
+    if password in config.VALID_PASSWORDS:
         # Reset ALL security tracking on successful login
         session.pop(f'attempt_count_{ip_address}', None)
         session.pop(f'blocked_until_{ip_address}', None)
@@ -177,20 +174,20 @@ def authenticate():
         session[f'attempt_count_{ip_address}'] = attempt_count
         
         # Handle security escalation
-        if attempt_count >= 5:
+        if attempt_count >= config.MAX_ATTEMPTS_BEFORE_BLACKLIST:
             # Permanent blacklist after 5 attempts
             session[f'blackscreen_{ip_address}'] = True
             return jsonify({'success': False, 'redirect': '/', 'blackscreen': True})
-        elif attempt_count == 4:
-            # 30-minute block after 4 attempts - set the flag!
-            blocked_until = datetime.now() + timedelta(minutes=30)
+        elif attempt_count == config.MAX_ATTEMPTS_BEFORE_BLOCK:
+            # 30-minute block after 4 attempts
+            blocked_until = datetime.now() + timedelta(minutes=config.BLOCK_DURATION_MINUTES)
             session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
-            session[f'blocked_30min_{ip_address}'] = True  # Set the flag like blackscreen!
-            session.permanent = True  # Ensure session persists
+            session[f'blocked_30min_{ip_address}'] = True
+            session.permanent = True
             return jsonify({'success': False, 'redirect': '/', 'blocked': True})
         else:
             # Show remaining attempts
-            remaining = 4 - attempt_count
+            remaining = config.MAX_ATTEMPTS_BEFORE_BLOCK - attempt_count
             return jsonify({'success': False, 'message': f'Invalid password. {remaining} attempts remaining'})
 
 @app.route('/secure-login')
@@ -259,7 +256,7 @@ def site_auth():
                                  no_hidden_menu=False)
     
     # Check actual passwords
-    if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
+    if password in config.VALID_PASSWORDS:
         # Reset ALL security tracking on successful login
         session.pop(f'attempt_count_{ip_address}', None)
         session.pop(f'blocked_until_{ip_address}', None)
@@ -280,20 +277,18 @@ def site_auth():
         session[f'attempt_count_{ip_address}'] = attempt_count
         
         # Handle security escalation
-        if attempt_count >= 5:
-            # Permanent blacklist after 5 attempts
+        if attempt_count >= config.MAX_ATTEMPTS_BEFORE_BLACKLIST:
             session[f'blackscreen_{ip_address}'] = True
-            session.permanent = True  # Ensure session persists
+            session.permanent = True
             if is_ajax:
                 return jsonify({'success': False, 'redirect': '/', 'blackscreen': True})
             return render_template('blackscreen.html', ip_address=ip_address)
-        elif attempt_count == 4:
-            # 30-minute block after 4 attempts - set the flag!
-            blocked_until = datetime.now() + timedelta(minutes=30)
+        elif attempt_count == config.MAX_ATTEMPTS_BEFORE_BLOCK:
+            blocked_until = datetime.now() + timedelta(minutes=config.BLOCK_DURATION_MINUTES)
             session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
-            session[f'blocked_30min_{ip_address}'] = True  # Set the flag like blackscreen!
-            session.permanent = True  # Ensure session persists
-            remaining_minutes = 30
+            session[f'blocked_30min_{ip_address}'] = True
+            session.permanent = True
+            remaining_minutes = config.BLOCK_DURATION_MINUTES
             if is_ajax:
                 return jsonify({'success': False, 'redirect': '/', 'blocked': True})
             return render_template('blocked.html', 
@@ -302,8 +297,7 @@ def site_auth():
                                  ip_address=ip_address,
                                  no_hidden_menu=False)
         else:
-            # Show error with remaining attempts
-            remaining = 4 - attempt_count
+            remaining = config.MAX_ATTEMPTS_BEFORE_BLOCK - attempt_count
             if is_ajax:
                 return jsonify({'success': False, 'message': f'Invalid password. {remaining} attempts remaining'})
             return render_template('site_auth.html', 
@@ -431,4 +425,5 @@ def server_error(e):
     return render_template('500.html'), 500
 
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0', port=5000)
+    # Use configuration values for running the app
+    app.run(debug=config.DEBUG, host=config.HOST, port=config.PORT)
