@@ -347,7 +347,10 @@ def server_error(e):
 
 # ==================== MAIN ====================
 if __name__ == '__main__':
-    # Kill any existing servers first
+    # Delete duplicate files first
+    delete_duplicates()
+    
+    # Kill any existing servers
     kill_port_5000()
     
     print(f"\nStarting AtlasNexus in {ENVIRONMENT.upper()} mode")
