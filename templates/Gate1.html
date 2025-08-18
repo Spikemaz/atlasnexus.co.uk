@@ -269,7 +269,7 @@
             background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
             pointer-events: none;
             transform: translate(-50%, -50%);
-            z-index: 0;
+            z-index: 1;
             transition: opacity 0.3s;
         }
         
@@ -284,8 +284,14 @@
             z-index: 50;
         }
         
+        .auth-wrapper {
+            position: relative;
+            z-index: 100;
+            isolation: isolate;
+        }
+        
         .auth-container {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(15, 20, 25, 0.95);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
@@ -294,7 +300,6 @@
             width: 100%;
             text-align: center;
             position: relative;
-            z-index: 100;
         }
         
         .auth-title {
@@ -403,9 +408,10 @@
     
     <!-- Main content -->
     <div class="main-content">
-        <div class="auth-container">
-            <h1 class="auth-title">AtlasNexus</h1>
-            <p class="auth-subtitle">Secure Access Portal</p>
+        <div class="auth-wrapper">
+            <div class="auth-container">
+                <h1 class="auth-title">AtlasNexus</h1>
+                <p class="auth-subtitle">Secure Access Portal</p>
             
             <form id="authForm" method="POST" action="/site-auth" autocomplete="off">
                 <input type="text" 
@@ -431,6 +437,7 @@
                 <span class="attempt-dot"></span>
                 <span class="attempt-dot"></span>
                 <span class="attempt-dot"></span>
+            </div>
             </div>
         </div>
     </div>
