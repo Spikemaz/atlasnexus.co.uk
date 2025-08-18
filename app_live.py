@@ -10,6 +10,9 @@ import secrets
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)
 app.permanent_session_lifetime = timedelta(minutes=15)  # Gate 1 timer: 15 minutes
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 
 # TESTING MODE - No passwords required for local development
 TESTING_MODE = False  # Both local and live use same security now
