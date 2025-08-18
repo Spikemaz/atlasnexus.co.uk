@@ -385,16 +385,27 @@ def auth():
     if not session.get(f'site_authenticated_{ip_address}'):
         return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
     
-    username = request.form.get('username', '').strip()
+    email = request.form.get('email', '').strip()
     password = request.form.get('password', '').strip()
     
     # Simple validation (expand as needed)
-    if username and password:
+    if email and password:
         session[f'user_authenticated_{ip_address}'] = True
-        session[f'username_{ip_address}'] = username
-        return jsonify({'status': 'success', 'redirect': url_for('dashboard')})
+        session[f'username_{ip_address}'] = email.split('@')[0]  # Use email prefix as username
+        
+        # Check if it's an AJAX request
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'status': 'success', 'redirect': url_for('dashboard')})
+        else:
+            # Regular form submission - redirect directly
+            return redirect(url_for('dashboard'))
     
-    return jsonify({'status': 'error', 'message': 'Invalid credentials'}), 401
+    # Failed authentication
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'status': 'error', 'message': 'Invalid credentials'}), 401
+    else:
+        # Regular form submission - redirect back to login
+        return redirect(url_for('secure_login'))
 
 @app.route('/dashboard')
 def dashboard():
