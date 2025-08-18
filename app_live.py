@@ -19,11 +19,28 @@ def index():
     """Gate 1 - Site Authentication"""
     ip_address = request.remote_addr
     
+    # Check for 24-hour lockout (after global unlock failure)
+    lockout_24h = session.get(f'lockout_24h_{ip_address}')
+    if lockout_24h:
+        from datetime import datetime
+        if isinstance(lockout_24h, str):
+            lockout_24h = datetime.fromisoformat(lockout_24h)
+        if datetime.now() < lockout_24h:
+            remaining_hours = int((lockout_24h - datetime.now()).total_seconds() / 3600)
+            remaining_minutes = int(((lockout_24h - datetime.now()).total_seconds() % 3600) / 60)
+            # Show blocked page WITHOUT hidden menu for 24-hour lockout
+            return render_template('blocked.html', 
+                                 blocked_until=lockout_24h,
+                                 remaining_minutes=remaining_hours * 60 + remaining_minutes,
+                                 ip_address=ip_address,
+                                 no_hidden_menu=True,
+                                 lockout_24h=True)
+    
     # Check if blacklisted
     if session.get(f'blackscreen_{ip_address}'):
         return render_template('blackscreen.html', ip_address=ip_address)
     
-    # Check if temporarily blocked
+    # Check if temporarily blocked (30-min)
     blocked_until = session.get(f'blocked_until_{ip_address}')
     if blocked_until:
         from datetime import datetime
@@ -34,10 +51,24 @@ def index():
             return render_template('blocked.html', 
                                  blocked_until=blocked_until,
                                  remaining_minutes=remaining_minutes,
-                                 ip_address=ip_address)
+                                 ip_address=ip_address,
+                                 no_hidden_menu=False)
+    
+    # Check if using global unlock (only 3 attempts allowed)
+    if request.args.get('global_unlock') == 'true':
+        session['global_unlock_active'] = True
+        session[f'global_unlock_attempts_{ip_address}'] = 0
+        session.pop(f'attempt_count_{ip_address}', None)
     
     attempt_count = session.get(f'attempt_count_{ip_address}', 0)
-    return render_template('site_auth.html', attempt_count=attempt_count, ip_address=ip_address)
+    global_unlock_active = session.get('global_unlock_active', False)
+    global_attempts = session.get(f'global_unlock_attempts_{ip_address}', 0)
+    
+    return render_template('site_auth.html', 
+                         attempt_count=attempt_count, 
+                         ip_address=ip_address,
+                         global_unlock_active=global_unlock_active,
+                         global_attempts=global_attempts)
 
 @app.route('/auth', methods=['POST'])
 def authenticate():
