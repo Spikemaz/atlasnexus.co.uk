@@ -24,14 +24,7 @@ def authenticate():
     """Handle Gate 1 authentication"""
     password = request.form.get('site_password', '')
     
-    if TESTING_MODE:
-        # Accept any input in testing mode
-        session['gate1_passed'] = True
-        session['site_authenticated'] = True
-        session.permanent = True
-        return jsonify({'success': True, 'redirect': '/secure-login'})
-    
-    # Production mode - check actual passwords
+    # Check actual passwords
     if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
         session['gate1_passed'] = True
         session['site_authenticated'] = True
@@ -43,10 +36,7 @@ def authenticate():
 @app.route('/secure-login')
 def secure_login():
     """Gate 2 - Secure Login with Live Ticker"""
-    if TESTING_MODE:
-        session['gate1_passed'] = True
-        session['site_authenticated'] = True
-    elif not session.get('gate1_passed'):
+    if not session.get('gate1_passed'):
         return redirect(url_for('index'))
     
     return render_template('secure_login.html')
@@ -54,17 +44,10 @@ def secure_login():
 @app.route('/secure-login-submit', methods=['POST'])
 def secure_login_submit():
     """Handle Gate 2 login submission"""
-    if TESTING_MODE:
-        session['authenticated'] = True
-        session['username'] = 'testuser'
-        session.permanent = True
-        return redirect(url_for('dashboard'))
-    
-    # Production mode - for now just authenticate (you can add real login later)
     email = request.form.get('email', '')
     password = request.form.get('password', '')
     
-    # Simple authentication for production
+    # Simple authentication
     if email and password:
         session['authenticated'] = True
         session['username'] = email
@@ -76,11 +59,7 @@ def secure_login_submit():
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     """Main Dashboard"""
-    if TESTING_MODE:
-        if not session.get('authenticated'):
-            session['authenticated'] = True
-            session['username'] = 'testuser'
-    elif not session.get('authenticated'):
+    if not session.get('authenticated'):
         return redirect(url_for('index'))
     
     return render_template('dashboard.html')
@@ -90,13 +69,7 @@ def site_auth():
     """Alternative endpoint for Gate 1"""
     password = request.form.get('site_password', '')
     
-    if TESTING_MODE:
-        session['gate1_passed'] = True
-        session['site_authenticated'] = True
-        session.permanent = True
-        return redirect(url_for('secure_login'))
-    
-    # Production mode - check actual passwords
+    # Check actual passwords
     if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
         session['gate1_passed'] = True
         session['site_authenticated'] = True
