@@ -233,17 +233,26 @@
             position: fixed;
             top: 80px;
             left: 2rem;
-            color: #ff6b6b;
+            color: rgba(255, 255, 255, 0.8);
             font-family: monospace;
             font-size: 1.2rem;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.5);
             padding: 0.5rem 1rem;
             border-radius: 8px;
-            border: 1px solid #ff6b6b;
-            box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
         }
         
-        .countdown-timer.warning {
+        .countdown-timer.orange {
+            color: #ff9500;
+            border-color: #ff9500;
+            box-shadow: 0 0 10px rgba(255, 149, 0, 0.3);
+        }
+        
+        .countdown-timer.red {
+            color: #ff6b6b;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
             animation: warningPulse 1s infinite;
         }
         
@@ -470,12 +479,14 @@
                 const countdownEl = document.getElementById('countdownTimer');
                 countdownEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
                 
-                // Add warning effect when under 1 minute
-                if (remaining < 60000) {
-                    countdownEl.classList.add('warning');
-                } else {
-                    countdownEl.classList.remove('warning');
+                // Change color based on time remaining
+                countdownEl.classList.remove('orange', 'red');
+                if (remaining <= 5 * 60000) { // 5 minutes or less - red
+                    countdownEl.classList.add('red');
+                } else if (remaining <= 10 * 60000) { // 10 minutes or less - orange
+                    countdownEl.classList.add('orange');
                 }
+                // Otherwise stays normal color
                 
                 setTimeout(updateCountdown, 1000);
             }

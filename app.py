@@ -288,6 +288,11 @@ def site_auth():
         session[f'attempt_count_{ip_address}'] = 0
         session[f'site_authenticated_{ip_address}'] = True
         session.pop(f'blocked_until_{ip_address}', None)
+        
+        if IS_LOCAL:
+            print(f"[DEBUG] Password correct! Setting site_authenticated for IP: {ip_address}")
+            print(f"[DEBUG] Session after auth: {dict(session)}")
+        
         return jsonify({'status': 'success', 'redirect': url_for('secure_login')}), 200
     
     # Failed attempt
@@ -384,8 +389,16 @@ def secure_login():
     """Gate 2 - User Authentication"""
     ip_address = request.remote_addr
     
+    # Debug logging
+    if IS_LOCAL:
+        print(f"[DEBUG] /secure-login accessed by IP: {ip_address}")
+        print(f"[DEBUG] Session keys: {list(session.keys())}")
+        print(f"[DEBUG] Site authenticated: {session.get(f'site_authenticated_{ip_address}')}")
+    
     # Verify site authentication
     if not session.get(f'site_authenticated_{ip_address}'):
+        if IS_LOCAL:
+            print(f"[DEBUG] No site authentication found, redirecting to index")
         return redirect(url_for('index'))
     
     # Check if user authenticated
