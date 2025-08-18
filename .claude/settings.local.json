@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for page in dashboard account analysis market-updates settings results pending-approval blackscreen)",
+      "Bash(do echo -n \"$page: \")",
+      "Bash(done)",
+      "Bash(for page in account analysis market-updates settings results pending-approval id-upload admin admin-security admin-simple comprehensive-admin)",
+      "Bash(for page in dashboard account analysis market-updates settings results pending-approval id-upload admin admin-security admin-simple comprehensive-admin)",
+      "Bash(for page in dashboard account analysis market-updates settings)",
+      "Bash(copy:*)",
+      "Bash(vercel:*)",
+      "Bash(grep:*)",
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(cp:*)",
+      "Bash(for i in {1..4})",
+      "Bash(rm:*)",
+      "Bash(cat:*)",
+      "Bash(do echo \"Attempt $i:\")",
+      "Bash(do curl -b cookies.txt -c cookies.txt -X POST http://localhost:5000/site-auth -d \"site_password=wrong$i\" -s -o response$i.html -w \"Attempt $i: %{http_code}\\n\")",
+      "Bash(do curl -X POST http://localhost:5000/auth -d \"site_password=wrong$i\" -c cookies.txt -b cookies.txt -s)",
+      "Bash(del config.py run.py app.py README.md RULES.md)",
+      "Bash(mv:*)",
+      "Bash(taskkill:*)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"
+    ]
+  }
+}
