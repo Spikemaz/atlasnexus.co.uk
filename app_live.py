@@ -185,6 +185,7 @@ def authenticate():
             # 30-minute block after 4 attempts
             blocked_until = datetime.now() + timedelta(minutes=30)
             session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
+            session.permanent = True  # Ensure session persists
             return jsonify({'success': False, 'redirect': '/', 'blocked': True})
         else:
             # Show remaining attempts
