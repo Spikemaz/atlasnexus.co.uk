@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AtlasNexus - Access Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+    
+    {% if state == 'blackscreen' %}
+    <!-- PERMANENT BLACKSCREEN -->
+    <style>
+        body { background: #000; }
+        .blackscreen-message {
+            color: #ff0000;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="blackscreen-message">
+        ACCESS PERMANENTLY DENIED<br>
+        <span style="font-size: 18px; margin-top: 10px; display: block;">IP: {{ ip_address }}</span>
+    </div>
+</body>
+</html>
+    
+    {% elif state in ['blocked_30min', 'blocked_24h'] %}
+    <!-- BLOCKED STATE -->
+    <style>
+        body { background: linear-gradient(135deg, #2C3137 0%, #364049 100%); color: #fff; }
+        .blocked-container {
+            background: rgba(44, 49, 55, 0.95);
+            border: 2px solid #ff6b6b;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(255, 107, 107, 0.3);
+        }
+        .blocked-title { color: #ff6b6b; font-size: 2rem; margin-bottom: 1rem; }
+        .countdown { font-size: 3rem; color: #ff6b6b; font-family: monospace; margin: 2rem 0; }
+        .reference-code { color: #D4AF37; font-family: monospace; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+    <div class="blocked-container">
+        <h1 class="blocked-title">Access Blocked</h1>
+        <p>
+            {% if state == 'blocked_24h' %}
+            24-HOUR SECURITY LOCKOUT ACTIVE
+            {% else %}
+            Temporary block due to failed attempts
+            {% endif %}
+        </p>
+        <div class="countdown" id="countdown">--:--:--</div>
+        <div>Reference Code: <span class="reference-code">{{ reference_code }}</span></div>
+    </div>
+    
+    {% if state == 'blocked_30min' %}
+    <!-- Hidden unlock menu for 30min blocks only -->
+    <div id="hiddenTrigger" style="position:fixed;bottom:0;left:0;width:50px;height:50px;cursor:pointer;"></div>
+    <div id="hiddenMenu" style="display:none;position:fixed;bottom:20px;left:20px;background:#000;border:2px solid #ff6b6b;border-radius:8px;padding:20px;min-width:300px;">
+        <h4 style="color:#ff6b6b;">Global Override</h4>
+        <form id="unlockForm">
+            <input type="password" id="unlockCode" placeholder="Override code" style="width:100%;padding:8px;margin:10px 0;background:#1a1a1a;color:#fff;border:1px solid #ff6b6b;border-radius:4px;">
+            <button type="submit" style="width:100%;padding:8px;background:#ff6b6b;color:#fff;border:none;border-radius:4px;">Override</button>
+        </form>
+    </div>
+    {% endif %}
+    
+    <script>
+        // Countdown timer
+        {% if state == 'blocked_24h' %}
+        const lockoutEnd = new Date('{{ blocked_until }}');
+        let timeLeft = Math.max(0, Math.floor((lockoutEnd - new Date()) / 1000));
+        {% else %}
+        let timeLeft = {{ remaining_seconds|default(1800) }};
+        {% endif %}
+        
+        function updateCountdown() {
+            if (timeLeft <= 0) {
+                window.location.href = '/';
+                return;
+            }
+            
+            {% if state == 'blocked_24h' %}
+            const hours = Math.floor(timeLeft / 3600);
+            const minutes = Math.floor((timeLeft % 3600) / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('countdown').textContent = 
+                `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+            {% else %}
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('countdown').textContent = 
+                `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+            {% endif %}
+            
+            timeLeft--;
+        }
+        
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+        
+        {% if state == 'blocked_30min' %}
+        // Hidden menu activation
+        let clicks = 0;
+        document.getElementById('hiddenTrigger').addEventListener('click', function() {
+            clicks++;
+            if (clicks >= 3) {
+                document.getElementById('hiddenMenu').style.display = 'block';
+                clicks = 0;
+            }
+            setTimeout(() => clicks = 0, 1000);
+        });
+        
+        document.getElementById('unlockForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetch('/unlock', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({code: document.getElementById('unlockCode').value})
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success') window.location.href = data.redirect;
+                else if (data.status === 'lockout') {
+                    alert('24-hour lockout applied');
+                    window.location.href = data.redirect;
+                }
+            });
+        });
+        {% endif %}
+    </script>
+</body>
+</html>
+    
+    {% else %}
+    <!-- NORMAL PASSWORD ENTRY -->
+    <style>
+        body { background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%); }
+        .auth-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 3rem;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        .auth-title {
+            color: #fff;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+        .auth-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .auth-input::placeholder { color: rgba(255, 255, 255, 0.5); }
+        .auth-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .auth-button:hover { transform: translateY(-2px); }
+        .warning-message {
+            color: #ff6b6b;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h1 class="auth-title">AtlasNexus</h1>
+        <form id="authForm" method="POST" action="/site-auth">
+            <input type="password" name="site_password" class="auth-input" placeholder="Enter Access Code" required autofocus>
+            <button type="submit" class="auth-button">ACCESS</button>
+        </form>
+        <div id="warningMessage" class="warning-message"></div>
+    </div>
+    
+    <script>
+        // Get attempts from localStorage
+        const attempts = parseInt(localStorage.getItem('attemptCount') || '0');
+        
+        // Show warning if there have been failed attempts
+        if (attempts > 0 && attempts < 4) {
+            const remaining = 4 - attempts;
+            const warning = document.getElementById('warningMessage');
+            warning.textContent = `${remaining} attempt${remaining !== 1 ? 's' : ''} remaining`;
+            warning.style.display = 'block';
+            warning.style.color = remaining === 1 ? '#ff0000' : '#ff6b6b';
+        }
+        
+        // Handle form submission
+        document.getElementById('authForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            fetch('/site-auth', {
+                method: 'POST',
+                body: new FormData(this)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    localStorage.removeItem('attemptCount');
+                    window.location.href = data.redirect;
+                } else if (data.status === 'blocked' || data.status === 'blacklisted') {
+                    localStorage.removeItem('attemptCount');
+                    window.location.href = data.redirect || '/';
+                } else {
+                    // Failed attempt
+                    const currentAttempts = parseInt(localStorage.getItem('attemptCount') || '0') + 1;
+                    localStorage.setItem('attemptCount', currentAttempts);
+                    
+                    if (data.message) {
+                        const warning = document.getElementById('warningMessage');
+                        warning.textContent = data.message;
+                        warning.style.display = 'block';
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                window.location.reload();
+            });
+        });
+    </script>
+</body>
+</html>
+    {% endif %}
