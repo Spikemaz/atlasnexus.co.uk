@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AtlasNexus - Dashboard</title>
+    <title>AtlasNexus - Securitization Command Center</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -11,12 +11,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #fff;
         }
         
+        /* Navigation */
         .navbar {
             background: rgba(15, 20, 25, 0.95);
             backdrop-filter: blur(10px);
@@ -31,39 +35,73 @@
             letter-spacing: 1px;
         }
         
-        .main-container {
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
+        .logout-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s;
         }
         
-        .welcome-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
             color: white;
         }
         
+        /* Main Container */
+        .main-container {
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        /* Executive Header */
+        .executive-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 35%, #334155 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Cards */
         .stat-card {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: white;
+            height: 100%;
             transition: all 0.3s;
         }
         
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+            background: rgba(255, 255, 255, 0.08);
         }
         
-        .stat-value {
+        .content-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .card-header-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.25rem;
+            border: none;
+        }
+        
+        /* KPI Styles */
+        .kpi-value {
             font-size: 2rem;
             font-weight: bold;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -71,83 +109,112 @@
             -webkit-text-fill-color: transparent;
         }
         
-        .stat-label {
+        .kpi-label {
             color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             margin-top: 0.5rem;
         }
         
-        .action-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        .action-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .action-card:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        }
-        
-        .action-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .action-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        
-        .action-description {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
-        }
-        
-        .status-indicator {
-            display: inline-block;
+        /* Status Indicators */
+        .status-dot {
             width: 8px;
             height: 8px;
             background: #00ff00;
             border-radius: 50%;
+            display: inline-block;
             margin-right: 0.5rem;
             animation: pulse 2s infinite;
         }
         
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0, 255, 0, 0); }
         }
         
-        .logout-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 8px;
+        /* Table Styles */
+        .custom-table {
+            background: transparent;
+            color: #fff;
+        }
+        
+        .custom-table thead {
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .custom-table tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.3s;
         }
         
-        .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        .custom-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Progress Bars */
+        .progress {
+            background: rgba(255, 255, 255, 0.1);
+            height: 6px;
+            border-radius: 3px;
+        }
+        
+        .progress-bar {
+            border-radius: 3px;
+        }
+        
+        /* Badges */
+        .badge-custom {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Chart Placeholder */
+        .chart-placeholder {
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        /* Quick Actions */
+        .quick-action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .quick-action-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+            
+            .executive-header {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -160,12 +227,12 @@
             </span>
             <div class="d-flex align-items-center">
                 <span class="text-white me-3">
-                    <span class="status-indicator"></span>
-                    Connected
+                    <span class="status-dot"></span>
+                    Server Online
                 </span>
                 <span class="text-white me-4">
                     <i class="fas fa-user-circle me-2"></i>
-                    {{ username|default('User') }}
+                    {{ username|default('Administrator') }}
                 </span>
                 <a href="{{ url_for('logout') }}" class="logout-btn">
                     <i class="fas fa-sign-out-alt me-2"></i>Logout
@@ -174,142 +241,512 @@
         </div>
     </nav>
     
-    <!-- Main Content -->
+    <!-- Main Container -->
     <div class="main-container">
-        <!-- Welcome Section -->
-        <div class="welcome-card">
-            <h1 class="display-6 fw-bold mb-3">Welcome to AtlasNexus Command Center</h1>
-            <p class="lead mb-0">Secure Financial Platform - All Systems Operational</p>
-        </div>
-        
-        <!-- Statistics Grid -->
-        <div class="row mb-4">
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card">
-                    <div class="stat-value">€2.4B</div>
-                    <div class="stat-label">Assets Under Management</div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card">
-                    <div class="stat-value">127</div>
-                    <div class="stat-label">Active Structures</div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card">
-                    <div class="stat-value">1.47x</div>
-                    <div class="stat-label">Average DSCR</div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card">
-                    <div class="stat-value">AA-</div>
-                    <div class="stat-label">Risk Rating</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Action Cards -->
-        <h3 class="text-white mb-3">Quick Actions</h3>
-        <div class="action-grid">
-            <div class="action-card" onclick="showFeature('analysis')">
-                <div class="action-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="action-title">Market Analysis</div>
-                <div class="action-description">View real-time market data and trends</div>
-            </div>
-            
-            <div class="action-card" onclick="showFeature('portfolio')">
-                <div class="action-icon">
-                    <i class="fas fa-briefcase"></i>
-                </div>
-                <div class="action-title">Portfolio Management</div>
-                <div class="action-description">Manage your investment portfolio</div>
-            </div>
-            
-            <div class="action-card" onclick="showFeature('reports')">
-                <div class="action-icon">
-                    <i class="fas fa-file-alt"></i>
-                </div>
-                <div class="action-title">Reports</div>
-                <div class="action-description">Generate and view financial reports</div>
-            </div>
-            
-            <div class="action-card" onclick="showFeature('settings')">
-                <div class="action-icon">
-                    <i class="fas fa-cog"></i>
-                </div>
-                <div class="action-title">Settings</div>
-                <div class="action-description">Configure account and system settings</div>
-            </div>
-            
-            <div class="action-card" onclick="showFeature('compliance')">
-                <div class="action-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <div class="action-title">Compliance</div>
-                <div class="action-description">View regulatory compliance status</div>
-            </div>
-            
-            <div class="action-card" onclick="showFeature('support')">
-                <div class="action-icon">
-                    <i class="fas fa-headset"></i>
-                </div>
-                <div class="action-title">Support</div>
-                <div class="action-description">Get help and contact support</div>
-            </div>
-        </div>
-        
-        <!-- Market Overview -->
-        <div class="mt-5">
-            <h3 class="text-white mb-3">Market Overview</h3>
-            <div class="welcome-card">
-                <div class="row">
-                    <div class="col-md-4">
-                        <h5 class="text-white mb-3">European Markets</h5>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span style="color: rgba(255,255,255,0.6)">DAX</span>
-                            <span class="text-success">+1.23%</span>
+        <!-- Executive Dashboard Header -->
+        <div class="executive-header">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-white bg-opacity-10 rounded-circle p-3 me-4">
+                            <i class="fas fa-chart-line fa-2x"></i>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span style="color: rgba(255,255,255,0.6)">FTSE 100</span>
-                            <span class="text-success">+0.87%</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span style="color: rgba(255,255,255,0.6)">CAC 40</span>
-                            <span class="text-danger">-0.34%</span>
+                        <div>
+                            <h1 class="display-6 fw-bold mb-1">Command Center</h1>
+                            <p class="lead mb-0 opacity-90">AtlasNexus Securitization Platform</p>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <h5 class="text-white mb-3">Bond Yields</h5>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span style="color: rgba(255,255,255,0.6)">10Y German</span>
-                            <span>2.45%</span>
+                    <div class="row g-3">
+                        <div class="col-auto">
+                            <span class="badge badge-custom bg-success bg-opacity-20 text-success">
+                                <i class="fas fa-circle me-2"></i>Live Markets
+                            </span>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span style="color: rgba(255,255,255,0.6)">10Y UK</span>
-                            <span>4.12%</span>
+                        <div class="col-auto">
+                            <span class="badge badge-custom bg-info bg-opacity-20 text-info">
+                                <i class="fas fa-user-tie me-2"></i>Administrator
+                            </span>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <span style="color: rgba(255,255,255,0.6)">10Y French</span>
-                            <span>2.98%</span>
+                        <div class="col-auto">
+                            <span class="badge badge-custom bg-white bg-opacity-20 text-white">
+                                <i class="fas fa-calendar me-2"></i><span id="current-date"></span>
+                            </span>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <h5 class="text-white mb-3">Currencies</h5>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span style="color: rgba(255,255,255,0.6)">EUR/USD</span>
-                            <span>1.0875</span>
+                </div>
+                <div class="col-lg-4 text-end">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="h2 fw-bold mb-0">€2.4B</div>
+                                <small class="opacity-75">Assets Under Management</small>
+                            </div>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span style="color: rgba(255,255,255,0.6)">GBP/USD</span>
-                            <span>1.2743</span>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="h2 fw-bold mb-0">127</div>
+                                <small class="opacity-75">Active Structures</small>
+                            </div>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <span style="color: rgba(255,255,255,0.6)">EUR/GBP</span>
-                            <span>0.8532</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Real-Time KPI Grid -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="kpi-value">€2.4B</div>
+                            <div class="kpi-label">Total AUM</div>
+                            <div class="text-success small mt-2">
+                                <i class="fas fa-arrow-up me-1"></i>+12.3% YoY
+                            </div>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-euro-sign fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="kpi-value">127</div>
+                            <div class="kpi-label">Active Deals</div>
+                            <div class="text-info small mt-2">
+                                <i class="fas fa-plus me-1"></i>8 new this week
+                            </div>
+                        </div>
+                        <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-handshake fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="kpi-value">1.47x</div>
+                            <div class="kpi-label">Avg DSCR</div>
+                            <div class="text-success small mt-2">
+                                <i class="fas fa-arrow-up me-1"></i>+0.08 vs target
+                            </div>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-chart-bar fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="kpi-value">AA-</div>
+                            <div class="kpi-label">Risk Rating</div>
+                            <div class="text-muted small mt-2">
+                                <i class="fas fa-shield-alt me-1"></i>Stable outlook
+                            </div>
+                        </div>
+                        <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-star fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Grid -->
+        <div class="row">
+            <!-- Left Column: Market Data & Analytics -->
+            <div class="col-lg-8">
+                <!-- Market Overview -->
+                <div class="content-card">
+                    <div class="card-header-gradient">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0 fw-bold">
+                                    <i class="fas fa-globe-europe me-2"></i>Live Market Overview
+                                </h5>
+                                <small class="opacity-90">Real-time European ABS markets</small>
+                            </div>
+                            <span class="badge bg-white bg-opacity-20 text-white">
+                                <i class="fas fa-circle text-success me-2"></i>Live
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-4">
+                                <div class="text-center p-3 rounded-3" style="background: rgba(255, 255, 255, 0.05);">
+                                    <div class="h4 fw-bold text-primary mb-1">€847M</div>
+                                    <div class="text-muted small mb-2">Week Issuance</div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" style="width: 78%"></div>
+                                    </div>
+                                    <small class="text-success">78% of target</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-3 rounded-3" style="background: rgba(255, 255, 255, 0.05);">
+                                    <div class="h4 fw-bold text-success mb-1">1.85%</div>
+                                    <div class="text-muted small mb-2">AAA Spread</div>
+                                    <div class="text-success small">
+                                        <i class="fas fa-arrow-down me-1"></i>-12 bps
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-3 rounded-3" style="background: rgba(255, 255, 255, 0.05);">
+                                    <div class="h4 fw-bold text-warning mb-1">€2.1B</div>
+                                    <div class="text-muted small mb-2">Pipeline</div>
+                                    <div class="text-info small">
+                                        <i class="fas fa-clock me-1"></i>Next 30 days
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chart Placeholder -->
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-line fa-3x mb-3"></i>
+                            <h6>Spread Evolution Chart</h6>
+                            <small>Interactive chart loading...</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Deal Pipeline -->
+                <div class="content-card">
+                    <div class="card-header-gradient" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-stream me-2"></i>Active Deal Pipeline
+                        </h5>
+                        <small class="opacity-90">Current structures in progress</small>
+                    </div>
+                    <div class="p-0">
+                        <div class="table-responsive">
+                            <table class="table custom-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="border-0 px-4 py-3">Deal Name</th>
+                                        <th class="border-0 px-4 py-3">Type</th>
+                                        <th class="border-0 px-4 py-3">Size</th>
+                                        <th class="border-0 px-4 py-3">DSCR</th>
+                                        <th class="border-0 px-4 py-3">Status</th>
+                                        <th class="border-0 px-4 py-3">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="px-4 py-3">
+                                            <div class="fw-semibold">European Data Centers 2024-1</div>
+                                            <small class="text-muted">Lead: Digital Realty</small>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="badge bg-primary bg-opacity-20 text-primary">Data Center</span>
+                                        </td>
+                                        <td class="px-4 py-3 fw-semibold">€450M</td>
+                                        <td class="px-4 py-3">
+                                            <span class="text-success fw-bold">1.52x</span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="badge bg-warning">Structuring</span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <button class="btn btn-sm btn-outline-light">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3">
+                                            <div class="fw-semibold">UK Logistics Portfolio 2024-A</div>
+                                            <small class="text-muted">Lead: Prologis UK</small>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="badge bg-success bg-opacity-20 text-success">Logistics</span>
+                                        </td>
+                                        <td class="px-4 py-3 fw-semibold">€320M</td>
+                                        <td class="px-4 py-3">
+                                            <span class="text-success fw-bold">1.48x</span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="badge bg-info">Rating</span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <button class="btn btn-sm btn-outline-light">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3">
+                                            <div class="fw-semibold">German Renewable Energy 2024-3</div>
+                                            <small class="text-muted">Lead: RWE Renewables</small>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="badge bg-warning bg-opacity-20 text-warning">Renewable</span>
+                                        </td>
+                                        <td class="px-4 py-3 fw-semibold">€680M</td>
+                                        <td class="px-4 py-3">
+                                            <span class="text-success fw-bold">1.65x</span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="badge bg-success">Marketing</span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <button class="btn btn-sm btn-outline-light">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Advanced Analytics Section -->
+                <div class="content-card">
+                    <div class="card-header-gradient" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-chart-area me-2"></i>Advanced Analytics Center
+                        </h5>
+                        <small class="opacity-90">Comprehensive market intelligence</small>
+                    </div>
+                    <div class="p-4">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h6 class="mb-3">
+                                    <i class="fas fa-chart-line text-primary me-2"></i>Yield Curves
+                                </h6>
+                                <div class="chart-placeholder" style="min-height: 200px;">
+                                    <i class="fas fa-chart-line fa-2x mb-2"></i>
+                                    <small>European ABS Yield Curves</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="mb-3">
+                                    <i class="fas fa-chart-pie text-success me-2"></i>Asset Allocation
+                                </h6>
+                                <div class="chart-placeholder" style="min-height: 200px;">
+                                    <i class="fas fa-chart-pie fa-2x mb-2"></i>
+                                    <small>Portfolio Distribution</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column: Portfolio & Risk Management -->
+            <div class="col-lg-4">
+                <!-- Portfolio Performance -->
+                <div class="content-card">
+                    <div class="card-header-gradient" style="background: linear-gradient(135deg, #4ade80, #22c55e);">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-briefcase me-2"></i>Portfolio Performance
+                        </h6>
+                        <small class="opacity-90">YTD Overview</small>
+                    </div>
+                    <div class="p-4">
+                        <div class="text-center mb-4">
+                            <div class="h2 fw-bold text-success mb-1">+14.2%</div>
+                            <div class="text-muted small">Total Return YTD</div>
+                            <div class="progress mt-2">
+                                <div class="progress-bar bg-success" style="width: 85%"></div>
+                            </div>
+                            <small class="text-success">85% of annual target</small>
+                        </div>
+                        
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="text-center p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
+                                    <div class="fw-bold">€1.8B</div>
+                                    <small class="text-muted">Net Assets</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
+                                    <div class="fw-bold">4.2%</div>
+                                    <small class="text-muted">Yield</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Risk Dashboard -->
+                <div class="content-card">
+                    <div class="card-header-gradient" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-shield-alt me-2"></i>Risk Monitor
+                        </h6>
+                        <small class="opacity-90">Real-time exposure</small>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-semibold">Concentration Risk</span>
+                                <span class="badge bg-success">Low</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" style="width: 25%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-semibold">Credit Risk</span>
+                                <span class="badge bg-warning">Medium</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-warning" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-semibold">Market Risk</span>
+                                <span class="badge bg-success">Low</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" style="width: 20%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="border-top pt-3 mt-3">
+                            <div class="text-center">
+                                <div class="h5 fw-bold text-warning mb-1">7.2%</div>
+                                <small class="text-muted">VaR (95%, 1D)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Regulatory Compliance -->
+                <div class="content-card">
+                    <div class="card-header-gradient" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-gavel me-2"></i>Regulatory Status
+                        </h6>
+                        <small class="opacity-90">Compliance monitoring</small>
+                    </div>
+                    <div class="p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <div class="fw-semibold">EU STS Compliance</div>
+                                <small class="text-muted">Simple, Transparent, Standardised</small>
+                            </div>
+                            <i class="fas fa-check-circle fa-lg text-success"></i>
+                        </div>
+                        
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <div class="fw-semibold">AIFMD Reporting</div>
+                                <small class="text-muted">Due: Tomorrow</small>
+                            </div>
+                            <i class="fas fa-clock fa-lg text-warning"></i>
+                        </div>
+                        
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="fw-semibold">MiFID II</div>
+                                <small class="text-muted">Transaction reporting</small>
+                            </div>
+                            <i class="fas fa-check-circle fa-lg text-success"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="content-card">
+                    <div class="card-header-gradient" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-bolt me-2"></i>Quick Actions
+                        </h6>
+                    </div>
+                    <div class="p-4">
+                        <button class="quick-action-btn" onclick="showFeature('analysis')">
+                            <i class="fas fa-plus me-2"></i>New Analysis
+                        </button>
+                        <button class="quick-action-btn" onclick="showFeature('upload')">
+                            <i class="fas fa-upload me-2"></i>Upload Data
+                        </button>
+                        <button class="quick-action-btn" onclick="showFeature('export')">
+                            <i class="fas fa-download me-2"></i>Export Report
+                        </button>
+                        <button class="quick-action-btn" onclick="showFeature('settings')">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Platform Features -->
+        <div class="content-card mt-4">
+            <div class="card-header-gradient" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
+                <h5 class="mb-0">
+                    <i class="fas fa-star me-2"></i>Platform Features
+                </h5>
+            </div>
+            <div class="p-4">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <div class="display-6 text-primary mb-3">
+                                <i class="fas fa-sitemap"></i>
+                            </div>
+                            <h6 class="fw-bold">Permutation Engine</h6>
+                            <p class="text-muted small mb-0">
+                                Generate thousands of structuring permutations with Cartesian product analysis
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <div class="display-6 text-success mb-3">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <h6 class="fw-bold">DSCR Analysis</h6>
+                            <p class="text-muted small mb-0">
+                                Reverse debt sizing with comprehensive DSCR calculations across all tranches
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <div class="display-6 text-warning mb-3">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <h6 class="fw-bold">Repo Eligibility</h6>
+                            <p class="text-muted small mb-0">
+                                Automated compliance checking against UK/EU/US regulatory requirements
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <div class="display-6 text-info mb-3">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <h6 class="fw-bold">Monetization</h6>
+                            <p class="text-muted small mb-0">
+                                ZCiS and TRS overlay calculations for day-1 value creation opportunities
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -321,24 +758,107 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        function showFeature(feature) {
-            alert(`${feature.charAt(0).toUpperCase() + feature.slice(1)} feature coming soon!`);
-        }
-        
-        // Add current time display
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', { 
-                hour12: false, 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit' 
+        // Display current date
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateElement = document.getElementById('current-date');
+            if (dateElement) {
+                const now = new Date();
+                const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+                dateElement.textContent = now.toLocaleDateString('en-US', options);
+            }
+            
+            // Animate cards on load
+            const cards = document.querySelectorAll('.stat-card, .content-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
             });
-            // You can add a time display element if needed
+            
+            // Animate KPI values
+            animateValues();
+        });
+        
+        function animateValues() {
+            const elements = document.querySelectorAll('.kpi-value');
+            elements.forEach(el => {
+                const text = el.textContent;
+                const hasEuro = text.includes('€');
+                const hasPercent = text.includes('%');
+                const hasX = text.includes('x');
+                
+                if (hasEuro || hasPercent || hasX) {
+                    let numStr = text.replace(/[^0-9.]/g, '');
+                    if (numStr) {
+                        const finalValue = parseFloat(numStr);
+                        let currentValue = 0;
+                        const increment = finalValue / 50;
+                        const timer = setInterval(() => {
+                            currentValue += increment;
+                            if (currentValue >= finalValue) {
+                                currentValue = finalValue;
+                                clearInterval(timer);
+                            }
+                            
+                            let displayValue = currentValue.toFixed(1);
+                            if (hasEuro) displayValue = '€' + displayValue + 'B';
+                            else if (hasPercent) displayValue = displayValue + '%';
+                            else if (hasX) displayValue = displayValue + 'x';
+                            else if (text === 'AA-') displayValue = 'AA-';
+                            else displayValue = Math.round(currentValue).toString();
+                            
+                            el.textContent = displayValue;
+                        }, 30);
+                    }
+                }
+            });
         }
         
-        setInterval(updateTime, 1000);
-        updateTime();
+        function showFeature(feature) {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.className = 'position-fixed top-0 end-0 p-3' style='z-index: 9999;';
+            toast.innerHTML = `
+                <div class="toast show" role="alert">
+                    <div class="toast-header">
+                        <strong class="me-auto">AtlasNexus</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${feature.charAt(0).toUpperCase() + feature.slice(1)} feature coming soon!
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        // Real-time updates simulation
+        setInterval(() => {
+            // Update random values slightly
+            const spreads = document.querySelectorAll('.text-success, .text-danger');
+            spreads.forEach(el => {
+                if (el.textContent.includes('bps') || el.textContent.includes('%')) {
+                    const change = (Math.random() - 0.5) * 0.1;
+                    const currentVal = parseFloat(el.textContent) || 0;
+                    const newVal = (currentVal + change).toFixed(2);
+                    if (change > 0) {
+                        el.className = 'text-success small';
+                        el.innerHTML = `<i class="fas fa-arrow-up me-1"></i>+${Math.abs(newVal)}%`;
+                    } else {
+                        el.className = 'text-danger small';
+                        el.innerHTML = `<i class="fas fa-arrow-down me-1"></i>${newVal}%`;
+                    }
+                }
+            });
+        }, 15000);
     </script>
 </body>
 </html>

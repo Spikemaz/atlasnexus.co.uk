@@ -4,3 +4,11 @@ venv/
 *.txt
 nul
 *_live.py
+
+# Temporary test files
+templates/temp/*
+!templates/temp/README.txt
+*.test.html
+*_test.html
+test_*
+cookies*.txt
