@@ -151,6 +151,7 @@ def authenticate():
         # Reset ALL security tracking on successful login
         session.pop(f'attempt_count_{ip_address}', None)
         session.pop(f'blocked_until_{ip_address}', None)
+        session.pop(f'blocked_30min_{ip_address}', None)
         session.pop(f'blackscreen_{ip_address}', None)
         session.pop(f'lockout_24h_{ip_address}', None)
         session.pop('global_unlock_active', None)
@@ -244,6 +245,7 @@ def site_auth():
         # Reset ALL security tracking on successful login
         session.pop(f'attempt_count_{ip_address}', None)
         session.pop(f'blocked_until_{ip_address}', None)
+        session.pop(f'blocked_30min_{ip_address}', None)
         session.pop(f'blackscreen_{ip_address}', None)
         session.pop(f'lockout_24h_{ip_address}', None)
         session.pop('global_unlock_active', None)
