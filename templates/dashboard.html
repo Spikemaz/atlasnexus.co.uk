@@ -1,1297 +1,344 @@
-{% extends "base.html" %}
-
-{% block title %}AtlasNexus - Securitization Command Center{% endblock %}
-
-{% block content %}
-<!-- Executive Dashboard Header -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 35%, #334155 100%); border-radius: 20px;">
-            <div class="card-body p-4 text-white">
-                <div class="row align-items-center">
-                    <div class="col-lg-8">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-white bg-opacity-10 rounded-circle p-3 me-4">
-                                <i class="fas fa-analytics fa-2x"></i>
-                            </div>
-                            <div>
-                                <h1 class="display-6 fw-bold mb-1">Command Center</h1>
-                                <p class="lead mb-0 opacity-90">AtlasNexus Securitization Platform</p>
-                            </div>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-auto">
-                                <div class="badge bg-success bg-opacity-90 text-white px-3 py-2">
-                                    <i class="fas fa-pulse me-2"></i>Live Markets
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="badge bg-info bg-opacity-90 text-white px-3 py-2">
-                                    <i class="fas fa-user-tie me-2"></i>Administrator
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="badge bg-white bg-opacity-20 text-white px-3 py-2">
-                                    <i class="fas fa-calendar me-2"></i><span id="current-date"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 text-end">
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <div class="text-center">
-                                    <div class="h2 fw-bold mb-0">€2.4B</div>
-                                    <small class="opacity-75">Assets Under Management</small>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-center">
-                                    <div class="h2 fw-bold mb-0">127</div>
-                                    <small class="opacity-75">Active Structures</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Real-Time KPI Grid -->
-<div class="row g-4 mb-4">
-    <div class="col-lg-3 col-md-6">
-        <div class="card border-0 shadow hover-lift" style="border-radius: 16px;">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="text-muted small fw-semibold mb-1">TOTAL AUM</div>
-                        <div class="h3 fw-bold text-primary mb-0">€2.4B</div>
-                        <div class="text-success small">
-                            <i class="fas fa-arrow-up me-1"></i>+12.3% YoY
-                        </div>
-                    </div>
-                    <div class="bg-primary bg-opacity-10 rounded-circle p-3">
-                        <i class="fas fa-euro-sign fa-lg text-primary"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AtlasNexus - Dashboard</title>
     
-    <div class="col-lg-3 col-md-6">
-        <div class="card border-0 shadow hover-lift" style="border-radius: 16px;">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="text-muted small fw-semibold mb-1">ACTIVE DEALS</div>
-                        <div class="h3 fw-bold text-success mb-0">127</div>
-                        <div class="text-info small">
-                            <i class="fas fa-plus me-1"></i>8 new this week
-                        </div>
-                    </div>
-                    <div class="bg-success bg-opacity-10 rounded-circle p-3">
-                        <i class="fas fa-handshake fa-lg text-success"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <div class="col-lg-3 col-md-6">
-        <div class="card border-0 shadow hover-lift" style="border-radius: 16px;">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="text-muted small fw-semibold mb-1">AVG DSCR</div>
-                        <div class="h3 fw-bold text-warning mb-0">1.47x</div>
-                        <div class="text-success small">
-                            <i class="fas fa-arrow-up me-1"></i>+0.08 vs target
-                        </div>
-                    </div>
-                    <div class="bg-warning bg-opacity-10 rounded-circle p-3">
-                        <i class="fas fa-chart-bar fa-lg text-warning"></i>
-                    </div>
-                </div>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .navbar {
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+        }
+        
+        .navbar-brand {
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+        
+        .main-container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .welcome-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stat-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .action-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .action-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .action-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .action-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .action-description {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container-fluid">
+            <span class="navbar-brand">
+                <i class="fas fa-globe me-2"></i>ATLASNEXUS
+            </span>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3">
+                    <span class="status-indicator"></span>
+                    Connected
+                </span>
+                <span class="text-white me-4">
+                    <i class="fas fa-user-circle me-2"></i>
+                    {{ username|default('User') }}
+                </span>
+                <a href="{{ url_for('logout') }}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                </a>
             </div>
         </div>
-    </div>
+    </nav>
     
-    <div class="col-lg-3 col-md-6">
-        <div class="card border-0 shadow hover-lift" style="border-radius: 16px;">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="text-muted small fw-semibold mb-1">RISK RATING</div>
-                        <div class="h3 fw-bold text-info mb-0">AA-</div>
-                        <div class="text-muted small">
-                            <i class="fas fa-shield-alt me-1"></i>Stable outlook
-                        </div>
-                    </div>
-                    <div class="bg-info bg-opacity-10 rounded-circle p-3">
-                        <i class="fas fa-star fa-lg text-info"></i>
-                    </div>
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Welcome Section -->
+        <div class="welcome-card">
+            <h1 class="display-6 fw-bold mb-3">Welcome to AtlasNexus Command Center</h1>
+            <p class="lead mb-0">Secure Financial Platform - All Systems Operational</p>
+        </div>
+        
+        <!-- Statistics Grid -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-value">€2.4B</div>
+                    <div class="stat-label">Assets Under Management</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-value">127</div>
+                    <div class="stat-label">Active Structures</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-value">1.47x</div>
+                    <div class="stat-label">Average DSCR</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-value">AA-</div>
+                    <div class="stat-label">Risk Rating</div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Main Content Grid -->
-<div class="row g-4">
-    <!-- Left Column: Market Data & Analytics -->
-    <div class="col-lg-8">
+        
+        <!-- Action Cards -->
+        <h3 class="text-white mb-3">Quick Actions</h3>
+        <div class="action-grid">
+            <div class="action-card" onclick="showFeature('analysis')">
+                <div class="action-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="action-title">Market Analysis</div>
+                <div class="action-description">View real-time market data and trends</div>
+            </div>
+            
+            <div class="action-card" onclick="showFeature('portfolio')">
+                <div class="action-icon">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <div class="action-title">Portfolio Management</div>
+                <div class="action-description">Manage your investment portfolio</div>
+            </div>
+            
+            <div class="action-card" onclick="showFeature('reports')">
+                <div class="action-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="action-title">Reports</div>
+                <div class="action-description">Generate and view financial reports</div>
+            </div>
+            
+            <div class="action-card" onclick="showFeature('settings')">
+                <div class="action-icon">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <div class="action-title">Settings</div>
+                <div class="action-description">Configure account and system settings</div>
+            </div>
+            
+            <div class="action-card" onclick="showFeature('compliance')">
+                <div class="action-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="action-title">Compliance</div>
+                <div class="action-description">View regulatory compliance status</div>
+            </div>
+            
+            <div class="action-card" onclick="showFeature('support')">
+                <div class="action-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <div class="action-title">Support</div>
+                <div class="action-description">Get help and contact support</div>
+            </div>
+        </div>
+        
         <!-- Market Overview -->
-        <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px;">
-            <div class="card-header border-0 bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px 16px 0 0;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-0 fw-bold">
-                            <i class="fas fa-globe-europe me-2"></i>Live Market Overview
-                        </h5>
-                        <small class="opacity-90">Real-time European ABS markets</small>
-                    </div>
-                    <div class="badge bg-white bg-opacity-20 text-white">
-                        <i class="fas fa-circle text-success me-2"></i>Live
-                    </div>
-                </div>
-            </div>
-            <div class="card-body p-4">
-                <div class="row g-4">
+        <div class="mt-5">
+            <h3 class="text-white mb-3">Market Overview</h3>
+            <div class="welcome-card">
+                <div class="row">
                     <div class="col-md-4">
-                        <div class="text-center p-3 rounded-3 bg-light">
-                            <div class="h4 fw-bold text-primary mb-1">€847M</div>
-                            <div class="text-muted small mb-2">Week Issuance</div>
-                            <div class="progress" style="height: 4px;">
-                                <div class="progress-bar bg-primary" style="width: 78%"></div>
-                            </div>
-                            <small class="text-success">78% of target</small>
+                        <h5 class="text-white mb-3">European Markets</h5>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span style="color: rgba(255,255,255,0.6)">DAX</span>
+                            <span class="text-success">+1.23%</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span style="color: rgba(255,255,255,0.6)">FTSE 100</span>
+                            <span class="text-success">+0.87%</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color: rgba(255,255,255,0.6)">CAC 40</span>
+                            <span class="text-danger">-0.34%</span>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="text-center p-3 rounded-3 bg-light">
-                            <div class="h4 fw-bold text-success mb-1">1.85%</div>
-                            <div class="text-muted small mb-2">AAA Spread</div>
-                            <div class="text-success small">
-                                <i class="fas fa-arrow-down me-1"></i>-12 bps
-                            </div>
+                        <h5 class="text-white mb-3">Bond Yields</h5>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span style="color: rgba(255,255,255,0.6)">10Y German</span>
+                            <span>2.45%</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span style="color: rgba(255,255,255,0.6)">10Y UK</span>
+                            <span>4.12%</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color: rgba(255,255,255,0.6)">10Y French</span>
+                            <span>2.98%</span>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="text-center p-3 rounded-3 bg-light">
-                            <div class="h4 fw-bold text-warning mb-1">€2.1B</div>
-                            <div class="text-muted small mb-2">Pipeline</div>
-                            <div class="text-info small">
-                                <i class="fas fa-clock me-1"></i>Next 30 days
-                            </div>
+                        <h5 class="text-white mb-3">Currencies</h5>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span style="color: rgba(255,255,255,0.6)">EUR/USD</span>
+                            <span>1.0875</span>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- Chart Placeholder -->
-                <div class="mt-4 p-4 bg-light rounded-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold text-dark mb-0">Spread Evolution (Last 30 Days)</h6>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary active">AAA</button>
-                            <button class="btn btn-outline-primary">AA</button>
-                            <button class="btn btn-outline-primary">BBB</button>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span style="color: rgba(255,255,255,0.6)">GBP/USD</span>
+                            <span>1.2743</span>
                         </div>
-                    </div>
-                    <div id="spreadChart" style="height: 200px; background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                        <div class="text-muted">
-                            <i class="fas fa-chart-line fa-2x mb-2 d-block"></i>
-                            Interactive Chart Loading...
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Deal Pipeline -->
-        <div class="card border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="card-header border-0 bg-gradient text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 16px 16px 0 0;">
-                <h5 class="mb-0 fw-bold">
-                    <i class="fas fa-stream me-2"></i>Active Deal Pipeline
-                </h5>
-                <small class="opacity-90">Current structures in progress</small>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="border-0 fw-semibold">Deal Name</th>
-                                <th class="border-0 fw-semibold">Type</th>
-                                <th class="border-0 fw-semibold">Size</th>
-                                <th class="border-0 fw-semibold">DSCR</th>
-                                <th class="border-0 fw-semibold">Status</th>
-                                <th class="border-0 fw-semibold">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="py-3">
-                                    <div class="fw-semibold">European Data Centers 2024-1</div>
-                                    <small class="text-muted">Lead: Digital Realty</small>
-                                </td>
-                                <td class="py-3">
-                                    <span class="badge bg-primary bg-opacity-10 text-primary">Data Center</span>
-                                </td>
-                                <td class="py-3 fw-semibold">€450M</td>
-                                <td class="py-3">
-                                    <span class="text-success fw-bold">1.52x</span>
-                                </td>
-                                <td class="py-3">
-                                    <span class="badge bg-warning">Structuring</span>
-                                </td>
-                                <td class="py-3">
-                                    <button class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="py-3">
-                                    <div class="fw-semibold">UK Logistics Portfolio 2024-A</div>
-                                    <small class="text-muted">Lead: Prologis UK</small>
-                                </td>
-                                <td class="py-3">
-                                    <span class="badge bg-success bg-opacity-10 text-success">Logistics</span>
-                                </td>
-                                <td class="py-3 fw-semibold">€320M</td>
-                                <td class="py-3">
-                                    <span class="text-success fw-bold">1.48x</span>
-                                </td>
-                                <td class="py-3">
-                                    <span class="badge bg-info">Rating</span>
-                                </td>
-                                <td class="py-3">
-                                    <button class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="py-3">
-                                    <div class="fw-semibold">German Renewable Energy 2024-3</div>
-                                    <small class="text-muted">Lead: RWE Renewables</small>
-                                </td>
-                                <td class="py-3">
-                                    <span class="badge bg-warning bg-opacity-10 text-warning">Renewable</span>
-                                </td>
-                                <td class="py-3 fw-semibold">€680M</td>
-                                <td class="py-3">
-                                    <span class="text-success fw-bold">1.65x</span>
-                                </td>
-                                <td class="py-3">
-                                    <span class="badge bg-success">Marketing</span>
-                                </td>
-                                <td class="py-3">
-                                    <button class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Right Column: Portfolio & Risk Management -->
-    <div class="col-lg-4">
-        <!-- Portfolio Performance -->
-        <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px;">
-            <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #4ade80, #22c55e); border-radius: 16px 16px 0 0;">
-                <h6 class="mb-0 fw-bold">
-                    <i class="fas fa-briefcase me-2"></i>Portfolio Performance
-                </h6>
-                <small class="opacity-90">YTD Overview</small>
-            </div>
-            <div class="card-body p-4">
-                <div class="text-center mb-4">
-                    <div class="h2 fw-bold text-success mb-1">+14.2%</div>
-                    <div class="text-muted small">Total Return YTD</div>
-                    <div class="progress mt-2" style="height: 6px;">
-                        <div class="progress-bar bg-success" style="width: 85%"></div>
-                    </div>
-                    <small class="text-success">85% of annual target</small>
-                </div>
-                
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="text-center p-2 bg-light rounded">
-                            <div class="fw-bold text-dark">€1.8B</div>
-                            <small class="text-muted">Net Assets</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="text-center p-2 bg-light rounded">
-                            <div class="fw-bold text-dark">0.12%</div>
-                            <small class="text-muted">Mgmt Fee</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="text-center p-2 bg-light rounded">
-                            <div class="fw-bold text-dark">4.2%</div>
-                            <small class="text-muted">Yield</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="text-center p-2 bg-light rounded">
-                            <div class="fw-bold text-dark">AA-</div>
-                            <small class="text-muted">Rating</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Risk Dashboard -->
-        <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px;">
-            <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 16px 16px 0 0;">
-                <h6 class="mb-0 fw-bold">
-                    <i class="fas fa-shield-alt me-2"></i>Risk Monitor
-                </h6>
-                <small class="opacity-90">Real-time exposure</small>
-            </div>
-            <div class="card-body p-4">
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="small fw-semibold">Concentration Risk</span>
-                        <span class="badge bg-success">Low</span>
-                    </div>
-                    <div class="progress" style="height: 6px;">
-                        <div class="progress-bar bg-success" style="width: 25%"></div>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="small fw-semibold">Credit Risk</span>
-                        <span class="badge bg-warning">Medium</span>
-                    </div>
-                    <div class="progress" style="height: 6px;">
-                        <div class="progress-bar bg-warning" style="width: 45%"></div>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="small fw-semibold">Market Risk</span>
-                        <span class="badge bg-success">Low</span>
-                    </div>
-                    <div class="progress" style="height: 6px;">
-                        <div class="progress-bar bg-success" style="width: 20%"></div>
-                    </div>
-                </div>
-                
-                <div class="border-top pt-3 mt-3">
-                    <div class="text-center">
-                        <div class="h5 fw-bold text-warning mb-1">7.2%</div>
-                        <small class="text-muted">VaR (95%, 1D)</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Regulatory Compliance -->
-        <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px;">
-            <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-radius: 16px 16px 0 0;">
-                <h6 class="mb-0 fw-bold">
-                    <i class="fas fa-gavel me-2"></i>Regulatory Status
-                </h6>
-                <small class="opacity-90">Compliance monitoring</small>
-            </div>
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div>
-                        <div class="fw-semibold">EU STS Compliance</div>
-                        <small class="text-muted">Simple, Transparent, Standardised</small>
-                    </div>
-                    <i class="fas fa-check-circle fa-lg text-success"></i>
-                </div>
-                
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div>
-                        <div class="fw-semibold">AIFMD Reporting</div>
-                        <small class="text-muted">Due: Tomorrow</small>
-                    </div>
-                    <i class="fas fa-clock fa-lg text-warning"></i>
-                </div>
-                
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div>
-                        <div class="fw-semibold">Solvency II</div>
-                        <small class="text-muted">Capital requirements</small>
-                    </div>
-                    <i class="fas fa-check-circle fa-lg text-success"></i>
-                </div>
-                
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="fw-semibold">MiFID II</div>
-                        <small class="text-muted">Transaction reporting</small>
-                    </div>
-                    <i class="fas fa-check-circle fa-lg text-success"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Account Management -->
-        <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px;">
-            <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #6366f1, #4f46e5); border-radius: 16px 16px 0 0;">
-                <h6 class="mb-0 fw-bold">
-                    <i class="fas fa-user-circle me-2"></i>Account Management
-                </h6>
-                <small class="opacity-90">User settings & security</small>
-            </div>
-            <div class="card-body p-4">
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="small fw-semibold">Password Status</span>
-                        <span class="badge bg-success" id="passwordStatus">Active</span>
-                    </div>
-                    <div class="small text-muted mb-2" id="passwordExpiry">Expires in 25 days</div>
-                    <div class="progress" style="height: 4px;">
-                        <div class="progress-bar bg-success" style="width: 85%" id="passwordProgressBar"></div>
-                    </div>
-                </div>
-                
-                <div class="d-grid">
-                    <button class="btn btn-outline-primary btn-sm" id="renewPasswordBtn" onclick="requestPasswordRenewal()" style="display: none;">
-                        <i class="fas fa-key me-2"></i>Request Password Renewal
-                    </button>
-                    <small class="text-muted mt-2" id="renewalInfo">Renewal available 5 days before expiry</small>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="card border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #06b6d4, #0891b2); border-radius: 16px 16px 0 0;">
-                <h6 class="mb-0 fw-bold">
-                    <i class="fas fa-bolt me-2"></i>Quick Actions
-                </h6>
-            </div>
-            <div class="card-body p-4">
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary" onclick="newAnalysis()">
-                        <i class="fas fa-plus me-2"></i>New Analysis
-                    </button>
-                    <button class="btn btn-outline-secondary" onclick="uploadData()">
-                        <i class="fas fa-upload me-2"></i>Upload Data
-                    </button>
-                    <button class="btn btn-outline-secondary" onclick="exportReport()">
-                        <i class="fas fa-download me-2"></i>Export Report
-                    </button>
-                    <button class="btn btn-outline-secondary" onclick="showSettings()">
-                        <i class="fas fa-cog me-2"></i>Settings
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Advanced Analytics Section -->
-<div class="row g-4 mt-4">
-    <div class="col-12">
-        <div class="card border-0 shadow-lg" style="border-radius: 20px;">
-            <div class="card-header border-0 text-white py-4" style="background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%); border-radius: 20px 20px 0 0;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 class="mb-1 fw-bold">
-                            <i class="fas fa-chart-area me-3"></i>Advanced Analytics Center
-                        </h4>
-                        <p class="mb-0 opacity-90">Comprehensive market intelligence and portfolio optimization</p>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-light btn-sm">
-                            <i class="fas fa-expand me-2"></i>Fullscreen
-                        </button>
-                        <button class="btn btn-outline-light btn-sm">
-                            <i class="fas fa-download me-2"></i>Export
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body p-4">
-                <div class="row g-4">
-                    <!-- Yield Curve Analysis -->
-                    <div class="col-lg-6">
-                        <div class="p-4 bg-light rounded-3">
-                            <h6 class="fw-bold mb-3">
-                                <i class="fas fa-chart-line text-primary me-2"></i>European ABS Yield Curves
-                            </h6>
-                            <div style="height: 250px; background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1)); border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative;">
-                                <div class="text-center">
-                                    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
-                                    <div class="fw-bold text-dark">Interactive Yield Curve</div>
-                                    <small class="text-muted">AAA, AA, BBB spreads vs benchmarks</small>
-                                </div>
-                                <!-- Simulated data points -->
-                                <div class="position-absolute" style="top: 20%; left: 15%; width: 8px; height: 8px; background: #3b82f6; border-radius: 50%;"></div>
-                                <div class="position-absolute" style="top: 30%; left: 35%; width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
-                                <div class="position-absolute" style="top: 45%; left: 55%; width: 8px; height: 8px; background: #f59e0b; border-radius: 50%;"></div>
-                                <div class="position-absolute" style="top: 60%; left: 75%; width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Portfolio Allocation -->
-                    <div class="col-lg-6">
-                        <div class="p-4 bg-light rounded-3">
-                            <h6 class="fw-bold mb-3">
-                                <i class="fas fa-chart-pie text-success me-2"></i>Asset Allocation Overview
-                            </h6>
-                            <div style="height: 250px; background: linear-gradient(45deg, rgba(34, 197, 94, 0.1), rgba(168, 85, 247, 0.1)); border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative;">
-                                <div class="text-center">
-                                    <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
-                                    <div class="fw-bold text-dark">Portfolio Distribution</div>
-                                    <small class="text-muted">By sector, geography, rating</small>
-                                </div>
-                                <!-- Simulated pie segments -->
-                                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
-                                    <svg width="120" height="120" viewBox="0 0 120 120" class="opacity-25">
-                                        <circle cx="60" cy="60" r="50" fill="none" stroke="#3b82f6" stroke-width="10" stroke-dasharray="78.54 235.62"></circle>
-                                        <circle cx="60" cy="60" r="50" fill="none" stroke="#10b981" stroke-width="10" stroke-dasharray="62.83 251.33" stroke-dashoffset="-78.54"></circle>
-                                        <circle cx="60" cy="60" r="50" fill="none" stroke="#f59e0b" stroke-width="10" stroke-dasharray="47.12 266.89" stroke-dashoffset="-141.37"></circle>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Performance Attribution -->
-                    <div class="col-lg-8">
-                        <div class="p-4 bg-light rounded-3">
-                            <h6 class="fw-bold mb-3">
-                                <i class="fas fa-chart-bar text-warning me-2"></i>Performance Attribution Analysis
-                            </h6>
-                            <div class="row g-3">
-                                <div class="col-md-3">
-                                    <div class="text-center p-3 bg-white rounded shadow-sm">
-                                        <div class="h5 fw-bold text-primary mb-1">+2.8%</div>
-                                        <small class="text-muted">Credit Selection</small>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="text-center p-3 bg-white rounded shadow-sm">
-                                        <div class="h5 fw-bold text-success mb-1">+1.2%</div>
-                                        <small class="text-muted">Duration Management</small>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="text-center p-3 bg-white rounded shadow-sm">
-                                        <div class="h5 fw-bold text-info mb-1">+0.6%</div>
-                                        <small class="text-muted">Sector Allocation</small>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="text-center p-3 bg-white rounded shadow-sm">
-                                        <div class="h5 fw-bold text-danger mb-1">-0.4%</div>
-                                        <small class="text-muted">Currency Impact</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-3 p-3 bg-white rounded">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="fw-semibold">Total Attribution:</span>
-                                    <span class="h5 fw-bold text-success mb-0">+4.2%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Market Intelligence -->
-                    <div class="col-lg-4">
-                        <div class="p-4 bg-light rounded-3">
-                            <h6 class="fw-bold mb-3">
-                                <i class="fas fa-brain text-info me-2"></i>Market Intelligence
-                            </h6>
-                            <div class="space-y-3">
-                                <div class="p-3 bg-white rounded shadow-sm">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <div class="bg-success rounded-circle p-1 me-2">
-                                            <i class="fas fa-arrow-up text-white" style="font-size: 0.7rem;"></i>
-                                        </div>
-                                        <span class="fw-semibold small">ECB Rate Decision</span>
-                                    </div>
-                                    <p class="small text-muted mb-0">Spreads tightening across AAA segments</p>
-                                </div>
-                                
-                                <div class="p-3 bg-white rounded shadow-sm mt-3">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <div class="bg-warning rounded-circle p-1 me-2">
-                                            <i class="fas fa-exclamation text-white" style="font-size: 0.7rem;"></i>
-                                        </div>
-                                        <span class="fw-semibold small">Regulatory Update</span>
-                                    </div>
-                                    <p class="small text-muted mb-0">New STS criteria effective Q2 2024</p>
-                                </div>
-                                
-                                <div class="p-3 bg-white rounded shadow-sm mt-3">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <div class="bg-info rounded-circle p-1 me-2">
-                                            <i class="fas fa-chart-line text-white" style="font-size: 0.7rem;"></i>
-                                        </div>
-                                        <span class="fw-semibold small">Market Outlook</span>
-                                    </div>
-                                    <p class="small text-muted mb-0">Positive momentum in data center sector</p>
-                                </div>
-                            </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color: rgba(255,255,255,0.6)">EUR/GBP</span>
+                            <span>0.8532</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<!-- Feature Overview -->
-<div class="row mt-5">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
-                <h5 class="mb-0">
-                    <i class="fas fa-star me-2"></i>Platform Features
-                </h5>
-            </div>
-            <div class="card-body p-4">
-                <div class="row g-4">
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            <div class="display-6 text-primary mb-3">
-                                <i class="fas fa-sitemap"></i>
-                            </div>
-                            <h6 class="fw-bold">Permutation Engine</h6>
-                            <p class="text-muted small mb-0">
-                                Generate thousands of structuring permutations with Cartesian product analysis
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            <div class="display-6 text-success mb-3">
-                                <i class="fas fa-balance-scale"></i>
-                            </div>
-                            <h6 class="fw-bold">DSCR Analysis</h6>
-                            <p class="text-muted small mb-0">
-                                Reverse debt sizing with comprehensive DSCR calculations across all tranches
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            <div class="display-6 text-warning mb-3">
-                                <i class="fas fa-university"></i>
-                            </div>
-                            <h6 class="fw-bold">Repo Eligibility</h6>
-                            <p class="text-muted small mb-0">
-                                Automated compliance checking against UK/EU/US regulatory requirements
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            <div class="display-6 text-info mb-3">
-                                <i class="fas fa-coins"></i>
-                            </div>
-                            <h6 class="fw-bold">Monetization</h6>
-                            <p class="text-muted small mb-0">
-                                ZCiS and TRS overlay calculations for day-1 value creation opportunities
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Hidden file upload form -->
-<form id="uploadForm" enctype="multipart/form-data" style="display: none;">
-    <input type="file" id="fileInput" accept=".xlsx,.xlsm,.csv" onchange="handleFileUpload()">
-</form>
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-// Enhanced upload functionality with better feedback
-function uploadData() {
-    document.getElementById('fileInput').click();
-}
-
-function handleFileUpload() {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
     
-    if (file) {
-        // Validate file type and size
-        const allowedTypes = ['.xlsx', '.xlsm', '.csv'];
-        const maxSize = 50 * 1024 * 1024; // 50MB
-        
-        const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-        if (!allowedTypes.includes(fileExtension)) {
-            showToast('Invalid file type. Please upload Excel (.xlsx, .xlsm) or CSV files.', 'error');
-            return;
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function showFeature(feature) {
+            alert(`${feature.charAt(0).toUpperCase() + feature.slice(1)} feature coming soon!`);
         }
         
-        if (file.size > maxSize) {
-            showToast('File too large. Maximum size is 50MB.', 'error');
-            return;
+        // Add current time display
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour12: false, 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+            // You can add a time display element if needed
         }
         
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        // Show enhanced loading state
-        const uploadBtn = document.querySelector('button[onclick="uploadData()"]');
-        const originalContent = uploadBtn.innerHTML;
-        
-        uploadBtn.innerHTML = `
-            <div class="d-flex flex-column align-items-center">
-                <div class="spinner-border spinner-border-sm mb-2" role="status"></div>
-                <span class="fw-semibold">Uploading</span>
-                <small class="text-muted">Processing ${file.name}</small>
-            </div>
-        `;
-        uploadBtn.disabled = true;
-        
-        // Add progress indicator
-        const progressToast = showProgressToast('Uploading file...', 0);
-        
-        fetch('{{ url_for("upload_data") }}', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            updateProgressToast(progressToast, 90);
-            return response.text();
-        })
-        .then(data => {
-            updateProgressToast(progressToast, 100);
-            setTimeout(() => {
-                hideProgressToast(progressToast);
-                showToast('File uploaded successfully!', 'success');
-                location.reload();
-            }, 500);
-        })
-        .catch(error => {
-            console.error('Upload error:', error);
-            hideProgressToast(progressToast);
-            showToast('Upload failed: ' + error.message, 'error');
-            uploadBtn.innerHTML = originalContent;
-            uploadBtn.disabled = false;
-        });
-    }
-}
-
-function exportTemplates() {
-    showToast('Template export functionality will be available in the next update.', 'info');
-}
-
-// Enhanced toast notification system
-function showToast(message, type = 'info') {
-    const toastContainer = getOrCreateToastContainer();
-    const toastId = 'toast_' + Date.now();
-    
-    const icons = {
-        success: 'fas fa-check-circle',
-        error: 'fas fa-exclamation-circle',
-        warning: 'fas fa-exclamation-triangle',
-        info: 'fas fa-info-circle'
-    };
-    
-    const colors = {
-        success: 'bg-success',
-        error: 'bg-danger',
-        warning: 'bg-warning',
-        info: 'bg-info'
-    };
-    
-    const toast = document.createElement('div');
-    toast.id = toastId;
-    toast.className = `toast align-items-center text-white ${colors[type]} border-0`;
-    toast.setAttribute('role', 'alert');
-    toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body d-flex align-items-center">
-                <i class="${icons[type]} me-2"></i>
-                ${message}
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-        </div>
-    `;
-    
-    toastContainer.appendChild(toast);
-    const bsToast = new bootstrap.Toast(toast);
-    bsToast.show();
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (document.getElementById(toastId)) {
-            bsToast.hide();
-            setTimeout(() => toast.remove(), 500);
-        }
-    }, 5000);
-    
-    return toastId;
-}
-
-function showProgressToast(message, progress) {
-    const toastContainer = getOrCreateToastContainer();
-    const toastId = 'progress_toast_' + Date.now();
-    
-    const toast = document.createElement('div');
-    toast.id = toastId;
-    toast.className = 'toast align-items-center text-white bg-primary border-0';
-    toast.innerHTML = `
-        <div class="toast-body">
-            <div class="d-flex align-items-center mb-2">
-                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                ${message}
-            </div>
-            <div class="progress" style="height: 4px;">
-                <div class="progress-bar bg-white" role="progressbar" style="width: ${progress}%"></div>
-            </div>
-        </div>
-    `;
-    
-    toastContainer.appendChild(toast);
-    const bsToast = new bootstrap.Toast(toast, { autohide: false });
-    bsToast.show();
-    
-    return toastId;
-}
-
-function updateProgressToast(toastId, progress) {
-    const toast = document.getElementById(toastId);
-    if (toast) {
-        const progressBar = toast.querySelector('.progress-bar');
-        if (progressBar) {
-            progressBar.style.width = progress + '%';
-        }
-    }
-}
-
-function hideProgressToast(toastId) {
-    const toast = document.getElementById(toastId);
-    if (toast) {
-        const bsToast = bootstrap.Toast.getInstance(toast);
-        if (bsToast) {
-            bsToast.hide();
-            setTimeout(() => toast.remove(), 500);
-        }
-    }
-}
-
-function getOrCreateToastContainer() {
-    let container = document.getElementById('toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'toast-container';
-        container.className = 'toast-container position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '9999';
-        document.body.appendChild(container);
-    }
-    return container;
-}
-
-function showHelp() {
-    // Create a modal with help content
-    const helpModal = `
-        <div class="modal fade" id="helpModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <i class="fas fa-question-circle me-2"></i>Help Guide
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <h6><i class="fas fa-play me-2"></i>Getting Started</h6>
-                        <ol>
-                            <li>Click <strong>"New Analysis"</strong> to configure analysis parameters</li>
-                            <li>Upload your data file (Excel format recommended)</li>
-                            <li>Set your DSCR targets, coupon ranges, and other variables</li>
-                            <li>Run the analysis and review results</li>
-                        </ol>
-                        
-                        <h6 class="mt-4"><i class="fas fa-chart-bar me-2"></i>Understanding Results</h6>
-                        <ul>
-                            <li><strong>Diamond Tier:</strong> Highest quality structures (repo eligible, DSCR ≥1.50)</li>
-                            <li><strong>Gold Tier:</strong> High quality structures (repo eligible, DSCR ≥1.40)</li>
-                            <li><strong>Silver Tier:</strong> Good structures (DSCR ≥1.30)</li>
-                            <li><strong>Bronze Tier:</strong> Acceptable structures (DSCR ≥1.20)</li>
-                            <li><strong>Not Viable:</strong> Below minimum thresholds</li>
-                        </ul>
-                        
-                        <h6 class="mt-4"><i class="fas fa-cog me-2"></i>Advanced Features</h6>
-                        <ul>
-                            <li>Upload custom data files with your specific parameters</li>
-                            <li>Export results to Excel for further analysis</li>
-                            <li>View interactive charts and visualizations</li>
-                            <li>Access monetization overlay calculations (ZCiS/TRS)</li>
-                        </ul>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Add modal to page and show it
-    document.body.insertAdjacentHTML('beforeend', helpModal);
-    const modal = new bootstrap.Modal(document.getElementById('helpModal'));
-    modal.show();
-    
-    // Remove modal from DOM when hidden
-    document.getElementById('helpModal').addEventListener('hidden.bs.modal', function() {
-        this.remove();
-    });
-}
-
-// Enhanced dashboard with real-time updates and advanced features
-document.addEventListener('DOMContentLoaded', function() {
-    initializeDashboard();
-    setupRealTimeUpdates();
-    setupInteractiveElements();
-    updatePasswordStatus();
-});
-
-function initializeDashboard() {
-    // Staggered card animations
-    const cards = document.querySelectorAll('.card');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        setTimeout(() => {
-            card.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 150);
-    });
-    
-    // Welcome message with advanced styling
-    setTimeout(() => {
-        showToast('Welcome to AtlasNexus Command Center! 🚀', 'success');
-    }, 2000);
-    
-    // Initialize real-time counters
-    animateCounters();
-}
-
-function setupRealTimeUpdates() {
-    // Simulate real-time data updates every 15 seconds
-    setInterval(() => {
-        updateMarketData();
-        updateRiskMetrics();
-        updatePortfolioPerformance();
-    }, 15000);
-    
-    // Status indicators pulse every 30 seconds
-    setInterval(() => {
-        const statusBadges = document.querySelectorAll('.badge:contains("Live"), .badge:contains("Ready")');
-        statusBadges.forEach(badge => {
-            badge.classList.add('pulse');
-            setTimeout(() => badge.classList.remove('pulse'), 2000);
-        });
-    }, 30000);
-}
-
-function setupInteractiveElements() {
-    // Enhanced hover effects for KPI cards
-    const kpiCards = document.querySelectorAll('.hover-lift');
-    kpiCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-8px) scale(1.02)';
-            this.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-            this.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-        });
-    });
-    
-    // Interactive chart placeholders
-    setupChartInteractions();
-}
-
-function animateCounters() {
-    const counters = document.querySelectorAll('.h2, .h3');
-    counters.forEach(counter => {
-        const target = counter.textContent.match(/[\d.]+/);
-        if (target) {
-            animateCounter(counter, 0, parseFloat(target[0]), 2000);
-        }
-    });
-}
-
-function animateCounter(element, start, end, duration) {
-    let startTime = null;
-    const prefix = element.textContent.replace(/[\d.]+/, '');
-    const suffix = element.textContent.split(/[\d.]+/)[1] || '';
-    
-    function animate(currentTime) {
-        if (startTime === null) startTime = currentTime;
-        const timeElapsed = currentTime - startTime;
-        const progress = Math.min(timeElapsed / duration, 1);
-        
-        const currentValue = start + (end - start) * easeOutQuart(progress);
-        element.textContent = prefix + currentValue.toFixed(1) + suffix;
-        
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        }
-    }
-    
-    requestAnimationFrame(animate);
-}
-
-function easeOutQuart(t) {
-    return 1 - (--t) * t * t * t;
-}
-
-function updateMarketData() {
-    // Simulate market data fluctuations
-    const marketValues = document.querySelectorAll('[data-market-value]');
-    marketValues.forEach(element => {
-        const baseValue = parseFloat(element.dataset.marketValue) || 1.85;
-        const fluctuation = (Math.random() - 0.5) * 0.1;
-        const newValue = (baseValue + fluctuation).toFixed(2);
-        element.textContent = newValue + '%';
-        
-        // Add visual feedback for changes
-        element.style.color = fluctuation > 0 ? '#10b981' : '#ef4444';
-        setTimeout(() => element.style.color = '', 2000);
-    });
-}
-
-function updateRiskMetrics() {
-    // Simulate risk metric updates
-    const riskBars = document.querySelectorAll('.progress-bar');
-    riskBars.forEach(bar => {
-        const currentWidth = parseInt(bar.style.width) || 25;
-        const change = (Math.random() - 0.5) * 10;
-        const newWidth = Math.max(5, Math.min(95, currentWidth + change));
-        
-        bar.style.transition = 'width 1s ease';
-        bar.style.width = newWidth + '%';
-    });
-}
-
-function updatePortfolioPerformance() {
-    // Update portfolio metrics with smooth transitions
-    const performanceElement = document.querySelector('.h2.fw-bold.text-success');
-    if (performanceElement) {
-        const currentValue = parseFloat(performanceElement.textContent.replace(/[^\d.]/g, ''));
-        const change = (Math.random() - 0.5) * 0.5;
-        const newValue = (currentValue + change).toFixed(1);
-        performanceElement.textContent = '+' + newValue + '%';
-    }
-}
-
-function setupChartInteractions() {
-    // Add click handlers for chart areas
-    const chartAreas = document.querySelectorAll('[id$="Chart"]');
-    chartAreas.forEach(chart => {
-        chart.style.cursor = 'pointer';
-        chart.addEventListener('click', function() {
-            showToast('Interactive chart feature coming soon!', 'info');
-        });
-    });
-    
-    // Button group interactions for chart filters
-    const btnGroups = document.querySelectorAll('.btn-group .btn');
-    btnGroups.forEach(btn => {
-        btn.addEventListener('click', function() {
-            // Remove active class from siblings
-            this.parentNode.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
-            // Add active class to clicked button
-            this.classList.add('active');
-            showToast(`Switched to ${this.textContent} view`, 'info');
-        });
-    });
-}
-
-// Enhanced action functions
-function newAnalysis() {
-    showToast('Launching new analysis workflow...', 'info');
-    setTimeout(() => {
-        window.location.href = "{{ url_for('analysis') }}";
-    }, 1500);
-}
-
-function exportReport() {
-    showToast('Generating comprehensive report...', 'info');
-    // Simulate report generation
-    const progressToast = showProgressToast('Generating report...', 0);
-    
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += Math.random() * 20;
-        updateProgressToast(progressToast, Math.min(progress, 100));
-        
-        if (progress >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-                hideProgressToast(progressToast);
-                showToast('Report exported successfully!', 'success');
-            }, 500);
-        }
-    }, 300);
-}
-
-function showSettings() {
-    showToast('Settings panel coming soon!', 'info');
-}
-
-// Advanced keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-    if (e.ctrlKey || e.metaKey) {
-        switch(e.key) {
-            case 'n':
-                e.preventDefault();
-                newAnalysis();
-                break;
-            case 'u':
-                e.preventDefault();
-                uploadData();
-                break;
-            case 'e':
-                e.preventDefault();
-                exportReport();
-                break;
-            case 'd':
-                e.preventDefault();
-                showToast('Dashboard shortcuts: Ctrl+N (New), Ctrl+U (Upload), Ctrl+E (Export)', 'info');
-                break;
-        }
-    }
-});
-
-// Password Management Functions
-function updatePasswordStatus() {
-    // Make AJAX call to get current password status
-    fetch('/api/password_status')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const daysLeft = data.days_until_expiry;
-                const progressPercent = Math.max(0, (daysLeft / 30) * 100);
-                
-                // Update status badge
-                const statusBadge = document.getElementById('passwordStatus');
-                const expiryText = document.getElementById('passwordExpiry');
-                const progressBar = document.getElementById('passwordProgressBar');
-                const renewBtn = document.getElementById('renewPasswordBtn');
-                const renewInfo = document.getElementById('renewalInfo');
-                
-                if (data.status === 'pending_first_login') {
-                    statusBadge.className = 'badge bg-info';
-                    statusBadge.textContent = 'Pending Activation';
-                    expiryText.textContent = 'Timer starts on first login';
-                    progressBar.className = 'progress-bar bg-info';
-                    progressBar.style.width = '100%';
-                    renewBtn.style.display = 'none';
-                    renewInfo.textContent = 'Password activated on first login';
-                } else if (daysLeft <= 0) {
-                    statusBadge.className = 'badge bg-danger';
-                    statusBadge.textContent = 'Expired';
-                    expiryText.textContent = 'Password has expired';
-                    progressBar.className = 'progress-bar bg-danger';
-                    progressBar.style.width = '0%';
-                    renewInfo.textContent = 'Contact administrator for new credentials';
-                } else if (daysLeft <= 5) {
-                    statusBadge.className = 'badge bg-warning';
-                    statusBadge.textContent = 'Expires Soon';
-                    expiryText.textContent = `Expires in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`;
-                    progressBar.className = 'progress-bar bg-warning';
-                    progressBar.style.width = progressPercent + '%';
-                    renewBtn.style.display = 'block';
-                    renewInfo.textContent = 'Renewal available now';
-                } else if (daysLeft <= 10) {
-                    statusBadge.className = 'badge bg-info';
-                    statusBadge.textContent = 'Active';
-                    expiryText.textContent = `Expires in ${daysLeft} days`;
-                    progressBar.className = 'progress-bar bg-info';
-                    progressBar.style.width = progressPercent + '%';
-                    renewInfo.textContent = `Renewal available in ${5 - (30 - daysLeft)} days`;
-                } else {
-                    statusBadge.className = 'badge bg-success';
-                    statusBadge.textContent = 'Active';
-                    expiryText.textContent = `Expires in ${daysLeft} days`;
-                    progressBar.className = 'progress-bar bg-success';
-                    progressBar.style.width = progressPercent + '%';
-                    renewInfo.textContent = 'Renewal available 5 days before expiry';
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching password status:', error);
-            // Fallback to default values if API fails
-            document.getElementById('passwordStatus').textContent = 'Unknown';
-            document.getElementById('passwordExpiry').textContent = 'Unable to fetch status';
-        });
-}
-
-function requestPasswordRenewal() {
-    const renewBtn = document.getElementById('renewPasswordBtn');
-    const originalContent = renewBtn.innerHTML;
-    
-    // Show loading state
-    renewBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Requesting...';
-    renewBtn.disabled = true;
-    
-    fetch('/request_password_renewal', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showToast('Password renewal request sent to administrator. You will receive new credentials via email once approved.', 'success');
-            renewBtn.innerHTML = '<i class="fas fa-check me-2"></i>Request Sent';
-            renewBtn.disabled = true;
-            document.getElementById('renewalInfo').textContent = 'Renewal request pending approval';
-        } else {
-            showToast(data.message || 'Failed to send renewal request. Please try again.', 'error');
-            renewBtn.innerHTML = originalContent;
-            renewBtn.disabled = false;
-        }
-    })
-    .catch(error => {
-        console.error('Error requesting renewal:', error);
-        showToast('An error occurred while requesting password renewal.', 'error');
-        renewBtn.innerHTML = originalContent;
-        renewBtn.disabled = false;
-    });
-}
-
-// Update password status every 5 minutes
-setInterval(updatePasswordStatus, 5 * 60 * 1000);
-
-// Display current date
-document.addEventListener('DOMContentLoaded', function() {
-    const dateElement = document.getElementById('current-date');
-    if (dateElement) {
-        const now = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        dateElement.textContent = now.toLocaleDateString('en-US', options);
-    }
-});
-</script>
-{% endblock %}
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
+</body>
+</html>
