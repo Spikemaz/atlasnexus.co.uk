@@ -101,18 +101,19 @@ def index():
                 import string
                 ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
                 session[f'reference_code_{ip_address}'] = ref_code
-            return render_template('blocked.html', 
+            return render_template('Gate1.html', 
+                                 state='blocked_24h',
                                  blocked_until=lockout_24h,
                                  is_24h_lockout=True,
                                  reference_code=ref_code)
         else:
             # 24-hour lockout expired - apply permanent blackscreen
             session[f'permanent_block_{ip_address}'] = True
-            return render_template('blackscreen.html')
+            return render_template('Gate1.html', state='blackscreen', ip_address=ip_address)
     
     # Check for permanent blacklist
     if session.get(f'permanent_block_{ip_address}'):
-        return render_template('blackscreen.html')
+        return render_template('Gate1.html', state='blackscreen', ip_address=ip_address)
     
     # Check for global unlock attempt
     if session.get(f'global_unlock_{ip_address}'):
@@ -138,7 +139,8 @@ def index():
                 import string
                 ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
                 session[f'reference_code_{ip_address}'] = ref_code
-            return render_template('blocked.html', 
+            return render_template('Gate1.html', 
+                                 state='blocked_30min',
                                  blocked_until=blocked_until,
                                  remaining_minutes=remaining_minutes,
                                  remaining_seconds=remaining_seconds,
@@ -152,7 +154,7 @@ def index():
     if session.get(f'site_authenticated_{ip_address}'):
         return redirect(url_for('secure_login'))
     
-    return render_template('site_auth.html')
+    return render_template('Gate1.html', state='normal')
 
 @app.route('/site-auth', methods=['POST'])
 def site_auth():
@@ -246,7 +248,8 @@ def blocked():
             remaining_minutes = remaining_seconds // 60
             # Get stored reference code
             ref_code = session.get(f'reference_code_{ip_address}', 'REF-UNKNOWN')
-            return render_template('blocked.html',
+            return render_template('Gate1.html',
+                                 state='blocked_30min',
                                  blocked_until=blocked_until,
                                  remaining_minutes=remaining_minutes,
                                  remaining_seconds=remaining_seconds,
@@ -290,7 +293,7 @@ def secure_login():
     if session.get(f'user_authenticated_{ip_address}'):
         return redirect(url_for('dashboard'))
     
-    return render_template('secure_login.html')
+    return render_template('Gate2.html')
 
 @app.route('/auth', methods=['POST'])
 def auth():
@@ -324,7 +327,7 @@ def dashboard():
         return redirect(url_for('secure_login'))
     
     username = session.get(f'username_{ip_address}', 'User')
-    return render_template('dashboard.html', username=username)
+    return render_template('Dashboard.html', username=username)
 
 @app.route('/logout')
 def logout():
@@ -339,11 +342,11 @@ def logout():
 
 @app.errorhandler(404)
 def not_found(e):
-    return render_template('error.html', error='Page not found'), 404
+    return render_template('404.html', error='Page not found'), 404
 
 @app.errorhandler(500)
 def server_error(e):
-    return render_template('error.html', error='Server error'), 500
+    return render_template('404.html', error='Server error'), 500
 
 # ==================== MAIN ====================
 if __name__ == '__main__':
