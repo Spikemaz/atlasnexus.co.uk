@@ -379,6 +379,58 @@
             background: #ff6b6b;
             box-shadow: 0 0 10px #ff6b6b;
         }
+        
+        /* Global Connection Badge */
+        .global-connection {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+        }
+        
+        .university-badge {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border: 2px solid #D4AF37;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+        }
+        
+        .university-badge svg {
+            width: 60px;
+            height: 60px;
+            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+            animation: rotateGlobe 20s linear infinite;
+        }
+        
+        @keyframes rotateGlobe {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+        
+        .badge-text {
+            color: #D4AF37;
+            text-align: left;
+        }
+        
+        .badge-title {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .badge-subtitle {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            letter-spacing: 1px;
+            margin-top: 0.25rem;
+        }
     </style>
 </head>
 <body>
@@ -406,13 +458,17 @@
             <h1 class="auth-title">AtlasNexus</h1>
             <p class="auth-subtitle">Secure Access Portal</p>
             
-            <form id="authForm" method="POST" action="/site-auth">
+            <form id="authForm" method="POST" action="/site-auth" autocomplete="off">
                 <input type="password" 
                        name="site_password" 
                        class="auth-input" 
                        placeholder="Enter Access Code" 
                        required 
-                       autofocus>
+                       autofocus
+                       autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       spellcheck="false">
                 <button type="submit" class="auth-button">ACCESS</button>
             </form>
             
@@ -422,6 +478,36 @@
                 <span class="attempt-dot"></span>
                 <span class="attempt-dot"></span>
                 <span class="attempt-dot"></span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Official Global Connection Badge -->
+    <div class="global-connection">
+        <div class="university-badge">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <!-- Globe -->
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#D4AF37" stroke-width="2"/>
+                <ellipse cx="50" cy="50" rx="45" ry="20" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+                <ellipse cx="50" cy="50" rx="20" ry="45" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+                <path d="M50 5 L50 95" stroke="#D4AF37" stroke-width="1.5"/>
+                <path d="M5 50 L95 50" stroke="#D4AF37" stroke-width="1.5"/>
+                
+                <!-- University pillars -->
+                <rect x="30" y="70" width="5" height="20" fill="#D4AF37"/>
+                <rect x="40" y="70" width="5" height="20" fill="#D4AF37"/>
+                <rect x="55" y="70" width="5" height="20" fill="#D4AF37"/>
+                <rect x="65" y="70" width="5" height="20" fill="#D4AF37"/>
+                
+                <!-- University roof -->
+                <polygon points="25,70 50,60 75,70" fill="#D4AF37"/>
+                
+                <!-- Foundation -->
+                <rect x="25" y="90" width="50" height="3" fill="#D4AF37"/>
+            </svg>
+            <div class="badge-text">
+                <div class="badge-title">GLOBAL CONNECTION</div>
+                <div class="badge-subtitle">Institutional Access Network</div>
             </div>
         </div>
     </div>
