@@ -75,6 +75,84 @@ def log_password_attempt():
 def log_blocked_access():
     return jsonify({'success': True})
 
+@app.route('/upload_data', methods=['POST'])
+def upload_data():
+    """Handle file uploads"""
+    return jsonify({'success': True, 'message': 'Upload functionality not implemented in test mode'})
+
+@app.route('/api/market-data')
+def api_market_data():
+    """API endpoint for market data"""
+    return jsonify({
+        'success': True,
+        'data': {
+            'performance': '+2.4%',
+            'yield': '3.8%',
+            'rating': 'AA+'
+        }
+    })
+
+@app.route('/api/portfolio-data')
+def api_portfolio_data():
+    """API endpoint for portfolio data"""
+    return jsonify({
+        'success': True,
+        'data': {
+            'total_assets': '€2.4B',
+            'portfolios': 127,
+            'active_deals': 42
+        }
+    })
+
+@app.route('/account')
+def account():
+    """Account page"""
+    if not session.get('authenticated'):
+        return redirect(url_for('index'))
+    return render_template('account.html')
+
+@app.route('/analysis')
+def analysis():
+    """Analysis page"""
+    if not session.get('authenticated'):
+        return redirect(url_for('index'))
+    return render_template('analysis.html')
+
+@app.route('/market-updates')
+def market_updates():
+    """Market updates page"""
+    if not session.get('authenticated'):
+        return redirect(url_for('index'))
+    return render_template('market_updates.html')
+
+@app.route('/settings')
+def settings():
+    """Settings page"""
+    if not session.get('authenticated'):
+        return redirect(url_for('index'))
+    return render_template('settings.html')
+
+@app.route('/results')
+def results():
+    """Results page"""
+    if not session.get('authenticated'):
+        return redirect(url_for('index'))
+    return render_template('results.html')
+
+@app.route('/pending-approval')
+def pending_approval():
+    """Pending approval page"""
+    if not session.get('authenticated'):
+        return redirect(url_for('index'))
+    return render_template('pending_approval.html')
+
+@app.route('/admin')
+def admin():
+    """Admin page"""
+    if not session.get('authenticated'):
+        return redirect(url_for('index'))
+    return render_template('admin.html')
+
 @app.route('/logout')
 def logout():
     """Logout and clear session"""

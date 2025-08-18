@@ -15,17 +15,16 @@ for module in ['app', 'app_vercel']:
         del sys.modules[module]
 
 # Import the app
-from app import app, SITE_PASSWORDS, ADMIN_EMAIL, ADMIN_PASSWORD
+from app import app
 
 # Clear debug log
 if os.path.exists('debug.log'):
     os.remove('debug.log')
 
 print("\n" + "="*60)
-print("ATLASNEXUS SECURITIZATION PLATFORM")
+print("ATLASNEXUS SECURITIZATION PLATFORM - LOCAL VERSION")
 print("="*60)
-print(f"\nSite Passwords: {', '.join(SITE_PASSWORDS.keys())}")
-print(f"Admin Login: {ADMIN_EMAIL} / {ADMIN_PASSWORD}")
+print(f"\nTESTING MODE: No passwords required")
 print(f"URL: http://localhost:5000")
 print("\nNOTE: Press Ctrl+C to stop the server")
 print("="*60 + "\n")
