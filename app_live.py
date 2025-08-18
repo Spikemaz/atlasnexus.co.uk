@@ -244,11 +244,8 @@ def site_auth():
             blocked_until = datetime.fromisoformat(blocked_until)
         if datetime.now() < blocked_until:
             remaining_minutes = int((blocked_until - datetime.now()).total_seconds() / 60)
-            return render_template('blocked.html', 
-                                 blocked_until=blocked_until,
-                                 remaining_minutes=remaining_minutes,
-                                 ip_address=ip_address,
-                                 no_hidden_menu=False)
+            # Redirect to index which will show the blocked page
+            return redirect(url_for('index'))
     
     # Check actual passwords
     if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
