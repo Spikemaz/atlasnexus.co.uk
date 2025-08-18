@@ -23,6 +23,12 @@ def index():
     ip_address = request.remote_addr
     session.permanent = True  # Ensure session persists
     
+    # Debug logging
+    print(f"[DEBUG] IP: {ip_address}")
+    print(f"[DEBUG] Session data: {dict(session)}")
+    print(f"[DEBUG] Attempt count: {session.get(f'attempt_count_{ip_address}', 0)}")
+    print(f"[DEBUG] Blocked until: {session.get(f'blocked_until_{ip_address}')}")
+    
     # Check for 24-hour lockout (after global unlock failure)
     lockout_24h = session.get(f'lockout_24h_{ip_address}')
     if lockout_24h:
