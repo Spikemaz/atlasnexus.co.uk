@@ -4,12 +4,12 @@ Only includes the 3 essential pages: /, /secure-login, /dashboard
 """
 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-from datetime import timedelta
+from datetime import datetime, timedelta
 import secrets
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)
-app.permanent_session_lifetime = timedelta(minutes=45)
+app.permanent_session_lifetime = timedelta(minutes=15)  # Gate 1 timer: 15 minutes
 
 # TESTING MODE - No passwords required for local development
 TESTING_MODE = False  # Both local and live use same security now
@@ -17,21 +17,78 @@ TESTING_MODE = False  # Both local and live use same security now
 @app.route('/')
 def index():
     """Gate 1 - Site Authentication"""
-    return render_template('site_auth.html')
+    ip_address = request.remote_addr
+    
+    # Check if blacklisted
+    if session.get(f'blackscreen_{ip_address}'):
+        return render_template('blackscreen.html', ip_address=ip_address)
+    
+    # Check if temporarily blocked
+    blocked_until = session.get(f'blocked_until_{ip_address}')
+    if blocked_until:
+        from datetime import datetime
+        if isinstance(blocked_until, str):
+            blocked_until = datetime.fromisoformat(blocked_until)
+        if datetime.now() < blocked_until:
+            remaining_minutes = int((blocked_until - datetime.now()).total_seconds() / 60)
+            return render_template('blocked.html', 
+                                 blocked_until=blocked_until,
+                                 remaining_minutes=remaining_minutes,
+                                 ip_address=ip_address)
+    
+    attempt_count = session.get(f'attempt_count_{ip_address}', 0)
+    return render_template('site_auth.html', attempt_count=attempt_count)
 
 @app.route('/auth', methods=['POST'])
 def authenticate():
-    """Handle Gate 1 authentication"""
+    """Handle Gate 1 authentication with security tracking"""
+    from datetime import datetime, timedelta
     password = request.form.get('site_password', '')
+    ip_address = request.remote_addr
+    
+    # Get attempt count for this IP
+    attempt_count = session.get(f'attempt_count_{ip_address}', 0)
+    
+    # Check if already blacklisted
+    if session.get(f'blackscreen_{ip_address}'):
+        return jsonify({'success': False, 'redirect': '/', 'blackscreen': True})
+    
+    # Check if temporarily blocked
+    blocked_until = session.get(f'blocked_until_{ip_address}')
+    if blocked_until:
+        if isinstance(blocked_until, str):
+            blocked_until = datetime.fromisoformat(blocked_until)
+        if datetime.now() < blocked_until:
+            return jsonify({'success': False, 'redirect': '/', 'blocked': True})
     
     # Check actual passwords
     if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
+        # Reset attempts on success
+        session.pop(f'attempt_count_{ip_address}', None)
+        session.pop(f'blocked_until_{ip_address}', None)
         session['gate1_passed'] = True
         session['site_authenticated'] = True
         session.permanent = True
         return jsonify({'success': True, 'redirect': '/secure-login'})
     else:
-        return jsonify({'success': False, 'message': 'Invalid password'})
+        # Increment attempt count
+        attempt_count += 1
+        session[f'attempt_count_{ip_address}'] = attempt_count
+        
+        # Handle security escalation
+        if attempt_count >= 5:
+            # Permanent blacklist after 5 attempts
+            session[f'blackscreen_{ip_address}'] = True
+            return jsonify({'success': False, 'redirect': '/', 'blackscreen': True})
+        elif attempt_count == 4:
+            # 30-minute block after 4 attempts
+            blocked_until = datetime.now() + timedelta(minutes=30)
+            session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
+            return jsonify({'success': False, 'redirect': '/', 'blocked': True})
+        else:
+            # Show remaining attempts
+            remaining = 4 - attempt_count
+            return jsonify({'success': False, 'message': f'Invalid password. {remaining} attempts remaining'})
 
 @app.route('/secure-login')
 def secure_login():
@@ -66,18 +123,64 @@ def dashboard():
 
 @app.route('/site-auth', methods=['POST'])
 def site_auth():
-    """Alternative endpoint for Gate 1"""
+    """Alternative endpoint for Gate 1 with security tracking"""
+    from datetime import datetime, timedelta
     password = request.form.get('site_password', '')
+    ip_address = request.remote_addr
+    
+    # Get attempt count for this IP
+    attempt_count = session.get(f'attempt_count_{ip_address}', 0)
+    
+    # Check if already blacklisted
+    if session.get(f'blackscreen_{ip_address}'):
+        return render_template('blackscreen.html', ip_address=ip_address)
+    
+    # Check if temporarily blocked
+    blocked_until = session.get(f'blocked_until_{ip_address}')
+    if blocked_until:
+        if isinstance(blocked_until, str):
+            blocked_until = datetime.fromisoformat(blocked_until)
+        if datetime.now() < blocked_until:
+            remaining_minutes = int((blocked_until - datetime.now()).total_seconds() / 60)
+            return render_template('blocked.html', 
+                                 blocked_until=blocked_until,
+                                 remaining_minutes=remaining_minutes,
+                                 ip_address=ip_address)
     
     # Check actual passwords
     if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
+        # Reset attempts on success
+        session.pop(f'attempt_count_{ip_address}', None)
+        session.pop(f'blocked_until_{ip_address}', None)
         session['gate1_passed'] = True
         session['site_authenticated'] = True
         session.permanent = True
         return redirect(url_for('secure_login'))
     else:
-        # Return back to login with error
-        return render_template('site_auth.html', error='Invalid password')
+        # Increment attempt count
+        attempt_count += 1
+        session[f'attempt_count_{ip_address}'] = attempt_count
+        
+        # Handle security escalation
+        if attempt_count >= 5:
+            # Permanent blacklist after 5 attempts
+            session[f'blackscreen_{ip_address}'] = True
+            return render_template('blackscreen.html', ip_address=ip_address)
+        elif attempt_count == 4:
+            # 30-minute block after 4 attempts
+            blocked_until = datetime.now() + timedelta(minutes=30)
+            session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
+            remaining_minutes = 30
+            return render_template('blocked.html', 
+                                 blocked_until=blocked_until,
+                                 remaining_minutes=remaining_minutes,
+                                 ip_address=ip_address)
+        else:
+            # Show error with remaining attempts
+            remaining = 4 - attempt_count
+            return render_template('site_auth.html', 
+                                 error=f'Invalid password. {remaining} attempts remaining',
+                                 attempt_count=attempt_count)
 
 # Minimal API endpoints for functionality
 @app.route('/api/log-password-attempt', methods=['POST'])

@@ -44,7 +44,11 @@
 </head>
 <body>
     <div class="blackscreen">
-        <!-- Completely black screen - no content visible -->
+        <!-- Show IP address in red -->
+        <div style="color: #ff0000; font-size: 24px; font-weight: bold; text-align: center;">
+            ACCESS PERMANENTLY DENIED<br>
+            <span style="font-size: 18px; margin-top: 10px; display: block;">IP: {{ ip_address }}</span>
+        </div>
     </div>
     
     <script>

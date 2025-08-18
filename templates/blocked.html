@@ -161,12 +161,13 @@
         <h1 class="blocked-title">Access Blocked</h1>
         
         <p class="blocked-message">
-            Your access has been temporarily blocked due to multiple failed authentication attempts.
+            Your access has been temporarily blocked due to multiple failed authentication attempts.<br>
+            <strong style="color: #ff6b6b;">IP Address: {{ ip_address }}</strong>
         </p>
 
         <div class="countdown-container">
             <div class="countdown-title">Time remaining until access restoration:</div>
-            <div class="countdown-time" id="countdown">44:59</div>
+            <div class="countdown-time" id="countdown">{{ remaining_minutes }}:00</div>
         </div>
 
         <div class="warning-text">
@@ -177,15 +178,15 @@
         <div class="security-notice">
             <h4>Why was I blocked?</h4>
             <p>
-                After 4 failed password attempts, access is automatically blocked for 45 minutes 
+                After 4 failed password attempts, access is automatically blocked for 30 minutes 
                 to protect against unauthorized access attempts. This is a standard security measure.
             </p>
         </div>
     </div>
 
     <script>
-        // 45 minute countdown timer
-        let timeLeft = 45 * 60; // 45 minutes in seconds
+        // 30 minute countdown timer
+        let timeLeft = {{ remaining_minutes|default(30) }} * 60; // minutes in seconds
 
         function updateCountdown() {
             const minutes = Math.floor(timeLeft / 60);
