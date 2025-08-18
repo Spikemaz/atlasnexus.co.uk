@@ -48,9 +48,29 @@ def index():
             blocked_until = datetime.fromisoformat(blocked_until)
         if datetime.now() < blocked_until:
             remaining_minutes = int((blocked_until - datetime.now()).total_seconds() / 60)
+            # Still blocked - keep showing blocked page
             return render_template('blocked.html', 
                                  blocked_until=blocked_until,
                                  remaining_minutes=remaining_minutes,
+                                 ip_address=ip_address,
+                                 no_hidden_menu=False)
+    
+    # Check attempt count - if already at 4, they should be blocked
+    attempt_count = session.get(f'attempt_count_{ip_address}', 0)
+    if attempt_count >= 4:
+        # They have 4+ attempts but no block set - this means they're trying to bypass
+        # Check if they should be blackscreened (5+ attempts)
+        if attempt_count >= 5:
+            session[f'blackscreen_{ip_address}'] = True
+            return render_template('blackscreen.html', ip_address=ip_address)
+        else:
+            # Set the 30-minute block that should have been set
+            from datetime import datetime, timedelta
+            blocked_until = datetime.now() + timedelta(minutes=30)
+            session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
+            return render_template('blocked.html', 
+                                 blocked_until=blocked_until,
+                                 remaining_minutes=30,
                                  ip_address=ip_address,
                                  no_hidden_menu=False)
     
@@ -60,7 +80,6 @@ def index():
         session[f'global_unlock_attempts_{ip_address}'] = 0
         session.pop(f'attempt_count_{ip_address}', None)
     
-    attempt_count = session.get(f'attempt_count_{ip_address}', 0)
     global_unlock_active = session.get('global_unlock_active', False)
     global_attempts = session.get(f'global_unlock_attempts_{ip_address}', 0)
     
