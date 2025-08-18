@@ -1632,7 +1632,7 @@
         
         // Session Timer Management
         let sessionStartTime;
-        let sessionDuration = 1 * 60; // 1 minute for testing (was 15 minutes)
+        let sessionDuration = 15 * 60; // 15 minutes session timer
         let blockDuration = 45 * 60; // 45 minutes
         let sessionTimer;
         let blockTimer;
@@ -2383,7 +2383,7 @@
             
             if (attempts.count === 0) {
                 // Show initial state with 3 attempts in dark green background
-                accessDeniedText.innerHTML = '<span style="background-color: #dc2626; color: white; font-weight: 700; text-align: center; display: block; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 1px 1px 0 rgba(0, 0, 0, 1); padding: 8px 12px; border-radius: 4px;">Access Denied: 3 attempts remaining</span>';
+                accessDeniedText.innerHTML = '<span style="background-color: #16a34a; color: white; font-weight: 700; text-align: center; display: block; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 1px 1px 0 rgba(0, 0, 0, 1); padding: 8px 12px; border-radius: 4px;">Access Status: 3 attempts remaining</span>';
                 warning.style.display = 'block';
             } else if (attempts.count > 0) {
                 warning.style.display = 'block';
@@ -2720,7 +2720,7 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
             closeRecoveryDialog();
             
             // Start fresh 45-minute countdown and immediately show blocked page
-            sessionDuration = 45 * 60; // 45 minutes
+            sessionDuration = 15 * 60; // 15 minutes
             localStorage.setItem('timeRemaining', sessionDuration.toString());
             localStorage.setItem('lastUpdateTime', Date.now().toString());
             localStorage.setItem('timerStartTime', Date.now().toString());
