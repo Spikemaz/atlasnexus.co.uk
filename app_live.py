@@ -95,16 +95,6 @@ def index():
     # Don't check attempt count here - the flags handle everything
     attempt_count = session.get(f'attempt_count_{ip_address}', 0)
     
-    # Check if using global unlock (only 3 attempts allowed)
-    if request.args.get('global_unlock') == 'true':
-        # Clear all blocking flags to allow access with global unlock
-        session.pop(f'blocked_30min_{ip_address}', None)
-        session.pop(f'blocked_until_{ip_address}', None)
-        session.pop(f'blackscreen_{ip_address}', None)
-        session['global_unlock_active'] = True
-        session[f'global_unlock_attempts_{ip_address}'] = 0
-        session.pop(f'attempt_count_{ip_address}', None)
-    
     global_unlock_active = session.get('global_unlock_active', False)
     global_attempts = session.get(f'global_unlock_attempts_{ip_address}', 0)
     
