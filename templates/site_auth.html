@@ -2451,6 +2451,13 @@
             // Display the recovery ID in the dialog
             document.getElementById('recoveryIdDisplay').textContent = recoveryId;
             
+            // Update background message to show regional lock warning
+            const accessDeniedText = document.getElementById('accessDeniedText');
+            if (accessDeniedText) {
+                accessDeniedText.innerHTML = '<span style="background-color: #dc2626; color: white; font-weight: 700; text-align: center; display: block; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 1px 1px 0 rgba(0, 0, 0, 1); padding: 8px 12px; border-radius: 4px;">FINAL ATTEMPT - Regional lockout will occur if unsuccessful</span>';
+                document.getElementById('accessDeniedWarning').style.display = 'block';
+            }
+            
             // Sync recovery dialog timer with current session time
             const currentSessionTime = document.getElementById('session-timer').textContent;
             const recoveryTimer = document.getElementById('recoverySessionTimer');
