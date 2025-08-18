@@ -64,8 +64,8 @@ def audit_project():
         'local.bat',
         'live.bat', 
         'README.txt',
-        'vercel.json',
-        'requirements.txt',
+        'requirements.txt',  # NEEDED by Vercel to install Python packages
+        'vercel.json',  # NEEDED by Vercel to know how to run app
         '.gitignore'
     }
     
