@@ -55,24 +55,39 @@ def index():
                                  ip_address=ip_address,
                                  no_hidden_menu=False)
     
-    # Check attempt count - if already at 4, they should be blocked
+    # Check attempt count - if already at 4 or more, they should be blocked
     attempt_count = session.get(f'attempt_count_{ip_address}', 0)
     if attempt_count >= 4:
-        # They have 4+ attempts but no block set - this means they're trying to bypass
-        # Check if they should be blackscreened (5+ attempts)
+        # They have 4+ attempts - ensure they're blocked
         if attempt_count >= 5:
+            # 5+ attempts = permanent blackscreen
             session[f'blackscreen_{ip_address}'] = True
             return render_template('blackscreen.html', ip_address=ip_address)
         else:
-            # Set the 30-minute block that should have been set
+            # Exactly 4 attempts - ensure 30-minute block
             from datetime import datetime, timedelta
-            blocked_until = datetime.now() + timedelta(minutes=30)
-            session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
-            return render_template('blocked.html', 
-                                 blocked_until=blocked_until,
-                                 remaining_minutes=30,
-                                 ip_address=ip_address,
-                                 no_hidden_menu=False)
+            # Check if block time exists, if not create it
+            if not session.get(f'blocked_until_{ip_address}'):
+                blocked_until = datetime.now() + timedelta(minutes=30)
+                session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
+            else:
+                blocked_until = session.get(f'blocked_until_{ip_address}')
+                if isinstance(blocked_until, str):
+                    blocked_until = datetime.fromisoformat(blocked_until)
+            
+            remaining_minutes = int((blocked_until - datetime.now()).total_seconds() / 60)
+            if remaining_minutes <= 0:
+                # Block expired, reset attempts
+                session.pop(f'attempt_count_{ip_address}', None)
+                session.pop(f'blocked_until_{ip_address}', None)
+                attempt_count = 0
+            else:
+                # Still blocked - show blocked page
+                return render_template('blocked.html', 
+                                     blocked_until=blocked_until,
+                                     remaining_minutes=remaining_minutes,
+                                     ip_address=ip_address,
+                                     no_hidden_menu=False)
     
     # Check if using global unlock (only 3 attempts allowed)
     if request.args.get('global_unlock') == 'true':
