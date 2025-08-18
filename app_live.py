@@ -59,6 +59,19 @@ def secure_login_submit():
         session['username'] = 'testuser'
         session.permanent = True
         return redirect(url_for('dashboard'))
+    
+    # Production mode - for now just authenticate (you can add real login later)
+    email = request.form.get('email', '')
+    password = request.form.get('password', '')
+    
+    # Simple authentication for production
+    if email and password:
+        session['authenticated'] = True
+        session['username'] = email
+        session.permanent = True
+        return redirect(url_for('dashboard'))
+    else:
+        return redirect(url_for('secure_login'))
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
