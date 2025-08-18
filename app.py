@@ -58,6 +58,10 @@ def audit_project():
     import os
     import glob
     
+    # Only run on local, not on Vercel or production
+    if not IS_LOCAL:
+        return
+    
     # ALLOWED files (everything else gets flagged)
     allowed_files = {
         'app.py',
@@ -97,11 +101,14 @@ def audit_project():
         'templates/error.html'  # Old name for 404
     ]
     
-    # Delete forbidden files
+    # Delete forbidden files (with error handling)
     for file in forbidden_files:
         if os.path.exists(file):
-            os.remove(file)
-            print(f"[DELETED] {file} - NOT ALLOWED!")
+            try:
+                os.remove(file)
+                print(f"[DELETED] {file} - NOT ALLOWED!")
+            except Exception as e:
+                print(f"[WARNING] Could not delete {file}: {e}")
     
     # Check root directory for unexpected files
     root_files = [f for f in os.listdir('.') if os.path.isfile(f)]
@@ -109,14 +116,20 @@ def audit_project():
         if file not in allowed_files and not file.startswith('.'):
             print(f"[WARNING] Unexpected file: {file}")
     
-    # Check templates directory
+    # Check templates directory (with error handling)
     if os.path.exists('templates'):
-        template_files = os.listdir('templates')
-        for file in template_files:
-            if file not in allowed_templates:
-                filepath = f'templates/{file}'
-                os.remove(filepath)
-                print(f"[DELETED] {filepath} - Only Gate1, Gate2, Dashboard, 404 allowed!")
+        try:
+            template_files = os.listdir('templates')
+            for file in template_files:
+                if file not in allowed_templates:
+                    filepath = f'templates/{file}'
+                    try:
+                        os.remove(filepath)
+                        print(f"[DELETED] {filepath} - Only Gate1, Gate2, Dashboard, 404 allowed!")
+                    except Exception as e:
+                        print(f"[WARNING] Could not delete {filepath}: {e}")
+        except Exception as e:
+            print(f"[WARNING] Could not check templates: {e}")
     
     # Report structure
     print("[AUDIT] Project structure checked and cleaned")
@@ -417,8 +430,9 @@ def server_error(e):
     return render_template('404.html', error='Server error'), 500
 
 # ==================== MAIN ====================
-# Audit and clean project structure on EVERY startup
-audit_project()
+# Audit and clean project structure (only on local, not Vercel)
+if IS_LOCAL:
+    audit_project()
 
 # Show environment info on startup
 if IS_VERCEL:
