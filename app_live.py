@@ -360,54 +360,8 @@ def api_renew_password():
         'message': 'Password renewed successfully'
     })
 
-@app.route('/account')
-def account():
-    """Account page"""
-    if not session.get('authenticated'):
-        return redirect(url_for('index'))
-    return render_template('account.html')
-
-@app.route('/analysis')
-def analysis():
-    """Analysis page"""
-    if not session.get('authenticated'):
-        return redirect(url_for('index'))
-    return render_template('analysis.html')
-
-@app.route('/market-updates')
-def market_updates():
-    """Market updates page"""
-    if not session.get('authenticated'):
-        return redirect(url_for('index'))
-    return render_template('market_updates.html')
-
-@app.route('/settings')
-def settings():
-    """Settings page"""
-    if not session.get('authenticated'):
-        return redirect(url_for('index'))
-    return render_template('settings.html')
-
-@app.route('/results')
-def results():
-    """Results page"""
-    if not session.get('authenticated'):
-        return redirect(url_for('index'))
-    return render_template('results.html')
-
-@app.route('/pending-approval')
-def pending_approval():
-    """Pending approval page"""
-    if not session.get('authenticated'):
-        return redirect(url_for('index'))
-    return render_template('pending_approval.html')
-
-@app.route('/admin')
-def admin():
-    """Admin page"""
-    if not session.get('authenticated'):
-        return redirect(url_for('index'))
-    return render_template('admin.html')
+# All dashboard sub-pages are handled by the main dashboard route
+# Users navigate within the dashboard interface itself
 
 @app.route('/logout')
 def logout():
