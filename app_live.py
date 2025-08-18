@@ -83,11 +83,8 @@ def index():
         if isinstance(lockout_24h, str):
             lockout_24h = datetime.fromisoformat(lockout_24h)
         if datetime.now() < lockout_24h:
-            remaining_hours = int((lockout_24h - datetime.now()).total_seconds() / 3600)
-            remaining_minutes = int(((lockout_24h - datetime.now()).total_seconds() % 3600) / 60)
             return render_template('blocked.html', 
                                  blocked_until=lockout_24h,
-                                 remaining_minutes=remaining_hours * 60 + remaining_minutes,
                                  is_24h_lockout=True)
     
     # Check for permanent blacklist
@@ -225,23 +222,13 @@ def unlock():
                 session.pop(key, None)
         return jsonify({'status': 'success', 'redirect': '/'})
     else:
-        # Track failed unlock attempts
-        unlock_attempts = session.get(f'unlock_attempts_{ip_address}', 0) + 1
-        session[f'unlock_attempts_{ip_address}'] = unlock_attempts
-        
-        if unlock_attempts >= 3:
-            # Apply 24-hour lockout
-            lockout_until = datetime.now() + timedelta(hours=LOCKOUT_DURATION_HOURS)
-            session[f'lockout_24h_{ip_address}'] = lockout_until.isoformat()
-            return jsonify({
-                'status': 'lockout',
-                'message': '24-hour lockout applied',
-                'redirect': '/'
-            })
-        
+        # Wrong code = immediate 24-hour lockout (only 1 attempt allowed)
+        lockout_until = datetime.now() + timedelta(hours=LOCKOUT_DURATION_HOURS)
+        session[f'lockout_24h_{ip_address}'] = lockout_until.isoformat()
         return jsonify({
-            'status': 'error',
-            'message': f'Invalid code. {3 - unlock_attempts} attempts remaining'
+            'status': 'lockout',
+            'message': '24-hour lockout applied',
+            'redirect': '/'
         })
 
 @app.route('/secure-login')
