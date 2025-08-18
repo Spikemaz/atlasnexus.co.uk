@@ -278,12 +278,8 @@ def site_auth():
             blocked_until = datetime.now() + timedelta(minutes=30)
             session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
             session.permanent = True  # Ensure session persists
-            remaining_minutes = 30
-            return render_template('blocked.html', 
-                                 blocked_until=blocked_until,
-                                 remaining_minutes=remaining_minutes,
-                                 ip_address=ip_address,
-                                 no_hidden_menu=False)
+            # Redirect to index which will show the blocked page
+            return redirect(url_for('index'))
         else:
             # Show error with remaining attempts
             remaining = 4 - attempt_count
