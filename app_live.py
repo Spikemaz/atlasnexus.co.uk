@@ -45,6 +45,17 @@ else:  # Production
     HOST = '0.0.0.0'
     SESSION_COOKIE_SECURE = True
 
+# ==================== PREVENT DUPLICATE FILES ====================
+def delete_duplicates():
+    """Delete app_live.py and dashboard_live.html if they exist"""
+    import os
+    if os.path.exists('app_live.py'):
+        os.remove('app_live.py')
+        print("Deleted app_live.py - NOT ALLOWED!")
+    if os.path.exists('templates/dashboard_live.html'):
+        os.remove('templates/dashboard_live.html')
+        print("Deleted dashboard_live.html - NOT ALLOWED!")
+
 # ==================== KILL OLD SERVERS ====================
 def kill_port_5000():
     """Kill any existing servers on port 5000 before starting"""
