@@ -75,6 +75,35 @@ def log_password_attempt():
 def log_blocked_access():
     return jsonify({'success': True})
 
+@app.route('/upload_data', methods=['POST'])
+def upload_data():
+    """Handle file uploads"""
+    return jsonify({'success': True, 'message': 'Upload functionality not implemented in test mode'})
+
+@app.route('/api/market-data')
+def api_market_data():
+    """API endpoint for market data"""
+    return jsonify({
+        'success': True,
+        'data': {
+            'performance': '+2.4%',
+            'yield': '3.8%',
+            'rating': 'AA+'
+        }
+    })
+
+@app.route('/api/portfolio-data')
+def api_portfolio_data():
+    """API endpoint for portfolio data"""
+    return jsonify({
+        'success': True,
+        'data': {
+            'total_assets': '€2.4B',
+            'portfolios': 127,
+            'active_deals': 42
+        }
+    })
+
 @app.route('/account')
 def account():
     """Account page"""
