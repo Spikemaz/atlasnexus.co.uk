@@ -277,6 +277,7 @@ def site_auth():
             # 30-minute block after 4 attempts
             blocked_until = datetime.now() + timedelta(minutes=30)
             session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
+            session.permanent = True  # Ensure session persists
             remaining_minutes = 30
             return render_template('blocked.html', 
                                  blocked_until=blocked_until,
