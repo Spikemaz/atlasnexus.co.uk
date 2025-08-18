@@ -273,6 +273,8 @@ def site_auth():
             # Permanent blacklist after 5 attempts
             session[f'blackscreen_{ip_address}'] = True
             session.permanent = True  # Ensure session persists
+            if is_ajax:
+                return jsonify({'success': False, 'redirect': '/', 'blackscreen': True})
             return render_template('blackscreen.html', ip_address=ip_address)
         elif attempt_count == 4:
             # 30-minute block after 4 attempts - set the flag!
@@ -281,6 +283,8 @@ def site_auth():
             session[f'blocked_30min_{ip_address}'] = True  # Set the flag like blackscreen!
             session.permanent = True  # Ensure session persists
             remaining_minutes = 30
+            if is_ajax:
+                return jsonify({'success': False, 'redirect': '/', 'blocked': True})
             return render_template('blocked.html', 
                                  blocked_until=blocked_until,
                                  remaining_minutes=remaining_minutes,
@@ -289,6 +293,8 @@ def site_auth():
         else:
             # Show error with remaining attempts
             remaining = 4 - attempt_count
+            if is_ajax:
+                return jsonify({'success': False, 'message': f'Invalid password. {remaining} attempts remaining'})
             return render_template('site_auth.html', 
                                  error=f'Invalid password. {remaining} attempts remaining',
                                  attempt_count=attempt_count)
