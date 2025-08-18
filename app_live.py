@@ -272,7 +272,9 @@ def site_auth():
         if attempt_count >= 5:
             # Permanent blacklist after 5 attempts
             session[f'blackscreen_{ip_address}'] = True
-            return render_template('blackscreen.html', ip_address=ip_address)
+            session.permanent = True  # Ensure session persists
+            # Redirect to index which will show the blackscreen
+            return redirect(url_for('index'))
         elif attempt_count == 4:
             # 30-minute block after 4 attempts
             blocked_until = datetime.now() + timedelta(minutes=30)
