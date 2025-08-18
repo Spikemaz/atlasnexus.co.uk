@@ -235,7 +235,7 @@ def site_auth():
     
     # Check if already blacklisted
     if session.get(f'blackscreen_{ip_address}'):
-        return render_template('blackscreen.html', ip_address=ip_address)
+        return redirect(url_for('index'))
     
     # Check if temporarily blocked
     blocked_until = session.get(f'blocked_until_{ip_address}')
