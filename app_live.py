@@ -22,12 +22,23 @@ def index():
 @app.route('/auth', methods=['POST'])
 def authenticate():
     """Handle Gate 1 authentication"""
+    password = request.form.get('site_password', '')
+    
     if TESTING_MODE:
         # Accept any input in testing mode
         session['gate1_passed'] = True
         session['site_authenticated'] = True
         session.permanent = True
         return jsonify({'success': True, 'redirect': '/secure-login'})
+    
+    # Production mode - check actual passwords
+    if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
+        session['gate1_passed'] = True
+        session['site_authenticated'] = True
+        session.permanent = True
+        return jsonify({'success': True, 'redirect': '/secure-login'})
+    else:
+        return jsonify({'success': False, 'message': 'Invalid password'})
 
 @app.route('/secure-login')
 def secure_login():
