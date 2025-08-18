@@ -18,6 +18,7 @@ TESTING_MODE = False  # Both local and live use same security now
 def index():
     """Gate 1 - Site Authentication"""
     ip_address = request.remote_addr
+    session.permanent = True  # Ensure session persists
     
     # Check for 24-hour lockout (after global unlock failure)
     lockout_24h = session.get(f'lockout_24h_{ip_address}')
