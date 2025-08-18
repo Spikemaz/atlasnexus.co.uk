@@ -46,18 +46,29 @@ def index():
                                  no_hidden_menu=True,
                                  lockout_24h=True)
     
+    # Check if using global unlock FIRST (before any blocking checks)
+    if request.args.get('global_unlock') == 'true':
+        # Clear all blocking flags to allow access with global unlock
+        session.pop(f'blocked_30min_{ip_address}', None)
+        session.pop(f'blocked_until_{ip_address}', None)
+        session.pop(f'blackscreen_{ip_address}', None)
+        session['global_unlock_active'] = True
+        session[f'global_unlock_attempts_{ip_address}'] = 0
+        session.pop(f'attempt_count_{ip_address}', None)
+        # Continue to show the site_auth page with global unlock active
+    
     # Check for blackscreen parameter (from failed global unlock)
     if request.args.get('blackscreen') == 'true':
         session[f'blackscreen_{ip_address}'] = True
         session.permanent = True
         return render_template('blackscreen.html', ip_address=ip_address)
     
-    # Check if blacklisted
-    if session.get(f'blackscreen_{ip_address}'):
+    # Check if blacklisted (but skip if global_unlock was just activated)
+    if session.get(f'blackscreen_{ip_address}') and not request.args.get('global_unlock'):
         return render_template('blackscreen.html', ip_address=ip_address)
     
-    # Check if in 30-minute block (after 4 failed attempts)
-    if session.get(f'blocked_30min_{ip_address}'):
+    # Check if in 30-minute block (but skip if global_unlock was just activated)
+    if session.get(f'blocked_30min_{ip_address}') and not request.args.get('global_unlock'):
         from datetime import datetime, timedelta
         blocked_until = session.get(f'blocked_until_{ip_address}')
         if blocked_until:
