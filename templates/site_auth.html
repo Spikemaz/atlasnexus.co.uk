@@ -1668,9 +1668,22 @@
                 }
             }
             
-            // Always start fresh session when not blocked
-            sessionStartTime = Date.now();
-            localStorage.setItem('sessionStartTime', sessionStartTime.toString());
+            // Use existing session timer if available (don't reset on refresh)
+            const existingStartTime = localStorage.getItem('sessionStartTime');
+            if (existingStartTime) {
+                sessionStartTime = parseInt(existingStartTime);
+                // Check if session has expired
+                const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+                if (elapsed >= sessionDuration) {
+                    // Session expired, start new one
+                    sessionStartTime = Date.now();
+                    localStorage.setItem('sessionStartTime', sessionStartTime.toString());
+                }
+            } else {
+                // No existing session, start new one
+                sessionStartTime = Date.now();
+                localStorage.setItem('sessionStartTime', sessionStartTime.toString());
+            }
             
             startSessionTimer();
         }
@@ -1692,9 +1705,8 @@
                 sessionTimer = null;
             }
             
-            // Reset session timer to start fresh
-            sessionStartTime = Date.now();
-            localStorage.setItem('sessionStartTime', sessionStartTime.toString());
+            // Don't reset session timer - keep the existing one
+            // This prevents users from buying more time by hiding/showing the blocked page
             
             // Start new session timer
             startSessionTimer();
@@ -2719,9 +2731,9 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
             // Close any open recovery dialog first
             closeRecoveryDialog();
             
-            // Start fresh 45-minute countdown and immediately show blocked page
-            sessionDuration = 15 * 60; // 15 minutes
-            localStorage.setItem('timeRemaining', sessionDuration.toString());
+            // Start fresh 30-minute countdown for blocked page
+            const blockedDuration = 30 * 60; // 30 minutes for blocked page
+            localStorage.setItem('timeRemaining', blockedDuration.toString());
             localStorage.setItem('lastUpdateTime', Date.now().toString());
             localStorage.setItem('timerStartTime', Date.now().toString());
             
