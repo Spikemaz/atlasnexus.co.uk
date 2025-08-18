@@ -50,53 +50,33 @@ def index():
     if session.get(f'blackscreen_{ip_address}'):
         return render_template('blackscreen.html', ip_address=ip_address)
     
-    # Check if temporarily blocked (30-min)
-    blocked_until = session.get(f'blocked_until_{ip_address}')
-    if blocked_until:
-        from datetime import datetime
-        if isinstance(blocked_until, str):
-            blocked_until = datetime.fromisoformat(blocked_until)
-        if datetime.now() < blocked_until:
-            remaining_minutes = int((blocked_until - datetime.now()).total_seconds() / 60)
-            # Still blocked - keep showing blocked page
-            return render_template('blocked.html', 
-                                 blocked_until=blocked_until,
-                                 remaining_minutes=remaining_minutes,
-                                 ip_address=ip_address,
-                                 no_hidden_menu=False)
-    
-    # Check attempt count - if already at 4 or more, they should be blocked
-    attempt_count = session.get(f'attempt_count_{ip_address}', 0)
-    if attempt_count >= 4:
-        # They have 4+ attempts - they should see blocked page with 30 min timer
+    # Check if in 30-minute block (after 4 failed attempts)
+    if session.get(f'blocked_30min_{ip_address}'):
         from datetime import datetime, timedelta
-        
-        # Get or create the block timestamp
         blocked_until = session.get(f'blocked_until_{ip_address}')
-        if not blocked_until:
-            # First time seeing 4 attempts - create the 30-minute block
-            blocked_until = datetime.now() + timedelta(minutes=30)
-            session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
-            session.permanent = True
-        else:
+        if blocked_until:
             if isinstance(blocked_until, str):
                 blocked_until = datetime.fromisoformat(blocked_until)
-        
-        # Calculate remaining time
-        remaining_minutes = int((blocked_until - datetime.now()).total_seconds() / 60)
-        
-        if remaining_minutes <= 0:
-            # 30 minutes expired - permanent blackscreen
-            session[f'blackscreen_{ip_address}'] = True
-            session.permanent = True
-            return render_template('blackscreen.html', ip_address=ip_address)
-        else:
-            # Still in 30-minute block period
-            return render_template('blocked.html', 
-                                 blocked_until=blocked_until,
-                                 remaining_minutes=remaining_minutes,
-                                 ip_address=ip_address,
-                                 no_hidden_menu=False)
+            remaining_minutes = int((blocked_until - datetime.now()).total_seconds() / 60)
+            if remaining_minutes <= 0:
+                # 30 minutes expired - convert to permanent blackscreen
+                session.pop(f'blocked_30min_{ip_address}', None)
+                session.pop(f'blocked_until_{ip_address}', None)
+                session[f'blackscreen_{ip_address}'] = True
+                return render_template('blackscreen.html', ip_address=ip_address)
+            else:
+                # Still in 30-minute block
+                return render_template('blocked.html',
+                                     blocked_until=blocked_until,
+                                     remaining_minutes=remaining_minutes,
+                                     ip_address=ip_address,
+                                     no_hidden_menu=False)
+    
+    # Legacy check - can be removed once we're sure all sessions use the new flag
+    # This is kept for backwards compatibility with existing sessions
+    
+    # Don't check attempt count here - the flags handle everything
+    attempt_count = session.get(f'attempt_count_{ip_address}', 0)
     
     # Check if using global unlock (only 3 attempts allowed)
     if request.args.get('global_unlock') == 'true':
@@ -190,9 +170,10 @@ def authenticate():
             session[f'blackscreen_{ip_address}'] = True
             return jsonify({'success': False, 'redirect': '/', 'blackscreen': True})
         elif attempt_count == 4:
-            # 30-minute block after 4 attempts
+            # 30-minute block after 4 attempts - set the flag!
             blocked_until = datetime.now() + timedelta(minutes=30)
             session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
+            session[f'blocked_30min_{ip_address}'] = True  # Set the flag like blackscreen!
             session.permanent = True  # Ensure session persists
             return jsonify({'success': False, 'redirect': '/', 'blocked': True})
         else:
@@ -283,9 +264,10 @@ def site_auth():
             session.permanent = True  # Ensure session persists
             return render_template('blackscreen.html', ip_address=ip_address)
         elif attempt_count == 4:
-            # 30-minute block after 4 attempts
+            # 30-minute block after 4 attempts - set the flag!
             blocked_until = datetime.now() + timedelta(minutes=30)
             session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
+            session[f'blocked_30min_{ip_address}'] = True  # Set the flag like blackscreen!
             session.permanent = True  # Ensure session persists
             remaining_minutes = 30
             return render_template('blocked.html', 
