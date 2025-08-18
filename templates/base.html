@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>{% block title %}Securitization Dashboard{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS -->
@@ -260,7 +260,7 @@
             }
         }
         
-        /* Enhanced Mobile Responsiveness */
+        /* Enhanced Mobile Responsiveness for Android and iOS */
         @media (max-width: 768px) {
             .navbar-brand {
                 font-size: 1.2rem;
@@ -281,6 +281,8 @@
             .btn {
                 font-size: 0.9rem;
                 padding: 0.5rem 1rem;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
             }
             
             .badge {
@@ -294,6 +296,92 @@
             
             .h3 {
                 font-size: 1.25rem !important;
+            }
+            
+            /* Touch-friendly spacing */
+            .form-control, .form-select {
+                min-height: 44px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            /* Better table handling on mobile */
+            .table-responsive {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Stack columns on mobile */
+            .row > [class*='col-'] {
+                margin-bottom: 1rem;
+            }
+        }
+        
+        /* Small mobile devices (max-width: 576px) */
+        @media (max-width: 576px) {
+            .container, .container-fluid {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            
+            /* Ensure text is readable */
+            body {
+                font-size: 14px;
+            }
+            
+            /* Stack navigation items */
+            .navbar-nav {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .navbar-nav .nav-link {
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+            
+            /* Responsive charts */
+            .plotly, .chart-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Mobile-friendly cards */
+            .card {
+                border-radius: 8px;
+                margin-bottom: 1rem;
+            }
+            
+            /* Touch-friendly buttons */
+            .btn-group-vertical .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+        
+        /* iOS specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            /* iOS Safari specific styles */
+            input, textarea, select {
+                font-size: 16px !important; /* Prevents zoom */
+            }
+            
+            /* Fix for iOS button styling */
+            .btn {
+                -webkit-appearance: none;
+                -webkit-border-radius: 8px;
+            }
+        }
+        
+        /* Android specific optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            /* Touch device optimizations */
+            .hover-lift:hover {
+                transform: none;
+            }
+            
+            /* Larger touch targets */
+            a, button, .btn {
+                min-height: 44px;
+                min-width: 44px;
             }
         }
         
