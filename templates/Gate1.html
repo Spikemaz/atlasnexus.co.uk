@@ -391,19 +391,19 @@
         .university-badge {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            background: rgba(0, 0, 0, 0.8);
+            gap: 0.6rem;
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(10px);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
+            padding: 0.4rem 0.8rem;
+            border-radius: 5px;
             border: 1px solid #D4AF37;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
         }
         
         .university-badge svg {
-            width: 40px;
-            height: 40px;
-            filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
+            width: 32px;
+            height: 32px;
+            filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.3));
             animation: rotateGlobe 30s linear infinite;
         }
         
@@ -473,10 +473,12 @@
                        placeholder="Enter Access Code" 
                        required 
                        autofocus
-                       autocomplete="off"
+                       autocomplete="new-password"
                        autocorrect="off"
                        autocapitalize="off"
-                       spellcheck="false">
+                       spellcheck="false"
+                       data-lpignore="true"
+                       data-form-type="other">
                 <button type="submit" class="auth-button">ACCESS</button>
             </form>
             
@@ -494,32 +496,23 @@
     <div class="global-connection">
         <div class="university-badge">
             <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <!-- Bank building with columns -->
-                <!-- Roof/Pediment -->
-                <polygon points="10,35 50,20 90,35 90,40 10,40" fill="none" stroke="#D4AF37" stroke-width="2"/>
-                <polygon points="15,37 50,25 85,37" fill="none" stroke="#D4AF37" stroke-width="1"/>
+                <!-- Circle background -->
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#D4AF37" stroke-width="2"/>
                 
-                <!-- Columns -->
-                <rect x="20" y="40" width="6" height="30" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
-                <rect x="35" y="40" width="6" height="30" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
-                <rect x="47" y="40" width="6" height="30" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
-                <rect x="59" y="40" width="6" height="30" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
-                <rect x="74" y="40" width="6" height="30" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+                <!-- Simplified bank building -->
+                <!-- Roof -->
+                <polygon points="25,40 50,30 75,40" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
                 
-                <!-- Column capitals -->
-                <rect x="18" y="38" width="10" height="3" fill="#D4AF37"/>
-                <rect x="33" y="38" width="10" height="3" fill="#D4AF37"/>
-                <rect x="45" y="38" width="10" height="3" fill="#D4AF37"/>
-                <rect x="57" y="38" width="10" height="3" fill="#D4AF37"/>
-                <rect x="72" y="38" width="10" height="3" fill="#D4AF37"/>
+                <!-- Three columns only -->
+                <rect x="30" y="40" width="5" height="25" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+                <rect x="47.5" y="40" width="5" height="25" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+                <rect x="65" y="40" width="5" height="25" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
                 
                 <!-- Foundation -->
-                <rect x="10" y="70" width="80" height="4" fill="none" stroke="#D4AF37" stroke-width="2"/>
-                <rect x="10" y="74" width="80" height="3" fill="#D4AF37"/>
+                <rect x="25" y="65" width="50" height="3" fill="#D4AF37"/>
                 
-                <!-- Central emblem -->
-                <circle cx="50" cy="30" r="5" fill="none" stroke="#D4AF37" stroke-width="1"/>
-                <text x="50" y="33" text-anchor="middle" fill="#D4AF37" font-size="8">$</text>
+                <!-- Dollar sign in center -->
+                <text x="50" y="54" text-anchor="middle" fill="#D4AF37" font-size="12" font-weight="bold">$</text>
             </svg>
             <div class="badge-text">
                 <div class="badge-title">SECURE PORTAL</div>

@@ -324,7 +324,7 @@ def site_auth():
     else:
         return jsonify({
             'status': 'error',
-            'message': f'Invalid password. {attempts_left} attempts remaining'
+            'message': f'Invalid code. {attempts_left} attempts remaining'
         }), 401
 
 @app.route('/blocked')
