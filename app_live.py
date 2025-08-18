@@ -83,9 +83,17 @@ def index():
         if isinstance(lockout_24h, str):
             lockout_24h = datetime.fromisoformat(lockout_24h)
         if datetime.now() < lockout_24h:
+            # Get or generate reference code for 24h lockout
+            ref_code = session.get(f'reference_code_{ip_address}')
+            if not ref_code:
+                import random
+                import string
+                ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+                session[f'reference_code_{ip_address}'] = ref_code
             return render_template('blocked.html', 
                                  blocked_until=lockout_24h,
-                                 is_24h_lockout=True)
+                                 is_24h_lockout=True,
+                                 reference_code=ref_code)
         else:
             # 24-hour lockout expired - apply permanent blackscreen
             session[f'permanent_block_{ip_address}'] = True
@@ -109,10 +117,21 @@ def index():
         if isinstance(blocked_until, str):
             blocked_until = datetime.fromisoformat(blocked_until)
         if datetime.now() < blocked_until:
-            remaining = int((blocked_until - datetime.now()).total_seconds() / 60)
+            # Calculate exact remaining time
+            remaining_seconds = int((blocked_until - datetime.now()).total_seconds())
+            remaining_minutes = remaining_seconds // 60
+            # Get or generate reference code
+            ref_code = session.get(f'reference_code_{ip_address}')
+            if not ref_code:
+                import random
+                import string
+                ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+                session[f'reference_code_{ip_address}'] = ref_code
             return render_template('blocked.html', 
                                  blocked_until=blocked_until,
-                                 remaining_minutes=remaining)
+                                 remaining_minutes=remaining_minutes,
+                                 remaining_seconds=remaining_seconds,
+                                 reference_code=ref_code)
         else:
             # Block expired, reset attempts
             session.pop(f'blocked_until_{ip_address}', None)
@@ -174,6 +193,12 @@ def site_auth():
         # Temporary block
         blocked_until = datetime.now() + timedelta(minutes=BLOCK_DURATION_MINUTES)
         session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
+        # Generate and store reference code once
+        if not session.get(f'reference_code_{ip_address}'):
+            import random
+            import string
+            ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            session[f'reference_code_{ip_address}'] = ref_code
         return jsonify({
             'status': 'blocked',
             'message': f'Too many attempts. Blocked for {BLOCK_DURATION_MINUTES} minutes',
@@ -205,10 +230,16 @@ def blocked():
         if isinstance(blocked_until, str):
             blocked_until = datetime.fromisoformat(blocked_until)
         if datetime.now() < blocked_until:
-            remaining = int((blocked_until - datetime.now()).total_seconds() / 60)
+            # Calculate exact remaining time
+            remaining_seconds = int((blocked_until - datetime.now()).total_seconds())
+            remaining_minutes = remaining_seconds // 60
+            # Get stored reference code
+            ref_code = session.get(f'reference_code_{ip_address}', 'REF-UNKNOWN')
             return render_template('blocked.html',
                                  blocked_until=blocked_until,
-                                 remaining_minutes=remaining)
+                                 remaining_minutes=remaining_minutes,
+                                 remaining_seconds=remaining_seconds,
+                                 reference_code=ref_code)
     
     # Not blocked, redirect to index
     return redirect('/')
