@@ -77,7 +77,34 @@ def authenticate():
     password = request.form.get('site_password', '')
     ip_address = request.remote_addr
     
-    # Get attempt count for this IP
+    # Check if using global unlock (limited to 3 attempts)
+    if session.get('global_unlock_active'):
+        global_attempts = session.get(f'global_unlock_attempts_{ip_address}', 0)
+        
+        if password in ['SpikeMaz', 'RedAMC', 'PartnerAccess']:
+            # Success with global unlock
+            session.pop('global_unlock_active', None)
+            session.pop(f'global_unlock_attempts_{ip_address}', None)
+            session['gate1_passed'] = True
+            session['site_authenticated'] = True
+            session.permanent = True
+            return jsonify({'success': True, 'redirect': '/secure-login'})
+        else:
+            # Failed attempt with global unlock
+            global_attempts += 1
+            session[f'global_unlock_attempts_{ip_address}'] = global_attempts
+            
+            if global_attempts >= 3:
+                # Failed 3 times with global unlock - 24 hour lockout
+                lockout_until = datetime.now() + timedelta(hours=24)
+                session[f'lockout_24h_{ip_address}'] = lockout_until.isoformat()
+                session.pop('global_unlock_active', None)
+                return jsonify({'success': False, 'redirect': '/', 'lockout_24h': True})
+            else:
+                remaining = 3 - global_attempts
+                return jsonify({'success': False, 'message': f'Global unlock: {remaining} attempts remaining'})
+    
+    # Regular attempt handling
     attempt_count = session.get(f'attempt_count_{ip_address}', 0)
     
     # Check if already blacklisted
