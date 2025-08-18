@@ -10,8 +10,9 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
+            background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%);
+            overflow: hidden;
         }
     </style>
     
@@ -24,6 +25,7 @@
             font-size: 24px;
             font-weight: bold;
             text-align: center;
+            margin: auto;
         }
     </style>
 </head>
@@ -46,6 +48,7 @@
             padding: 2rem;
             max-width: 600px;
             width: 100%;
+            margin: auto;
             text-align: center;
             box-shadow: 0 20px 60px rgba(255, 107, 107, 0.3);
         }
@@ -148,9 +151,106 @@
 </html>
     
     {% else %}
-    <!-- NORMAL PASSWORD ENTRY -->
+    <!-- NORMAL PASSWORD ENTRY WITH ENHANCED FEATURES -->
     <style>
-        body { background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%); }
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 2rem;
+            background: rgba(15, 20, 25, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .header-title {
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        
+        .server-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background: rgba(15, 20, 25, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            z-index: 100;
+        }
+        
+        /* Timer */
+        .timer {
+            position: fixed;
+            top: 80px;
+            right: 2rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-family: monospace;
+            font-size: 1.2rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Cursor follow effect */
+        .cursor-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            transition: opacity 0.3s;
+        }
+        
+        /* Main container */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 2rem 80px;
+            position: relative;
+            z-index: 10;
+        }
+        
         .auth-container {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
@@ -160,12 +260,22 @@
             max-width: 400px;
             width: 100%;
             text-align: center;
+            position: relative;
         }
+        
         .auth-title {
             color: #fff;
             font-size: 2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .auth-subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
             margin-bottom: 2rem;
         }
+        
         .auth-input {
             width: 100%;
             padding: 12px;
@@ -175,8 +285,17 @@
             color: #fff;
             font-size: 1rem;
             margin-bottom: 1rem;
+            transition: all 0.3s;
         }
+        
+        .auth-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
         .auth-input::placeholder { color: rgba(255, 255, 255, 0.5); }
+        
         .auth-button {
             width: 100%;
             padding: 12px;
@@ -187,33 +306,140 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
-        .auth-button:hover { transform: translateY(-2px); }
+        
+        .auth-button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .auth-button:active { transform: translateY(0); }
+        
         .warning-message {
             color: #ff6b6b;
             margin-top: 1rem;
             display: none;
+            font-size: 0.9rem;
+        }
+        
+        /* Attempts indicator */
+        .attempts-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 1rem;
+            height: 20px;
+        }
+        
+        .attempt-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+        }
+        
+        .attempt-dot.used {
+            background: #ff6b6b;
+            box-shadow: 0 0 10px #ff6b6b;
         }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <h1 class="auth-title">AtlasNexus</h1>
-        <form id="authForm" method="POST" action="/site-auth">
-            <input type="password" name="site_password" class="auth-input" placeholder="Enter Access Code" required autofocus>
-            <button type="submit" class="auth-button">ACCESS</button>
-        </form>
-        <div id="warningMessage" class="warning-message"></div>
+    <!-- Cursor glow effect -->
+    <div class="cursor-glow" id="cursorGlow"></div>
+    
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">ATLASNEXUS</div>
+        <div class="server-status">
+            <span class="status-dot"></span>
+            <span>Server Online</span>
+        </div>
+    </div>
+    
+    <!-- Timer -->
+    <div class="timer" id="timer">00:00:00</div>
+    
+    <!-- Main content -->
+    <div class="main-content">
+        <div class="auth-container">
+            <h1 class="auth-title">AtlasNexus</h1>
+            <p class="auth-subtitle">Secure Access Portal</p>
+            
+            <form id="authForm" method="POST" action="/site-auth">
+                <input type="password" 
+                       name="site_password" 
+                       class="auth-input" 
+                       placeholder="Enter Access Code" 
+                       required 
+                       autofocus>
+                <button type="submit" class="auth-button">ACCESS</button>
+            </form>
+            
+            <div id="warningMessage" class="warning-message"></div>
+            
+            <div class="attempts-indicator" id="attemptsIndicator">
+                <span class="attempt-dot"></span>
+                <span class="attempt-dot"></span>
+                <span class="attempt-dot"></span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        © 2024 AtlasNexus. All rights reserved. | Secure Connection
     </div>
     
     <script>
+        // Timer
+        function updateTimer() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('timer').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        updateTimer();
+        setInterval(updateTimer, 1000);
+        
+        // Cursor glow follow
+        const cursorGlow = document.getElementById('cursorGlow');
+        let mouseX = 0, mouseY = 0;
+        let glowX = 0, glowY = 0;
+        
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        
+        function animateGlow() {
+            glowX += (mouseX - glowX) * 0.1;
+            glowY += (mouseY - glowY) * 0.1;
+            
+            cursorGlow.style.left = glowX + 'px';
+            cursorGlow.style.top = glowY + 'px';
+            
+            requestAnimationFrame(animateGlow);
+        }
+        animateGlow();
+        
         // Get attempts from localStorage
         const attempts = parseInt(localStorage.getItem('attemptCount') || '0');
         
+        // Update attempts indicator
+        const dots = document.querySelectorAll('.attempt-dot');
+        for (let i = 0; i < attempts && i < 3; i++) {
+            dots[i].classList.add('used');
+        }
+        
         // Show warning if there have been failed attempts
-        if (attempts > 0 && attempts < 4) {
-            const remaining = 4 - attempts;
+        if (attempts > 0 && attempts < 3) {
+            const remaining = 3 - attempts;
             const warning = document.getElementById('warningMessage');
             warning.textContent = `${remaining} attempt${remaining !== 1 ? 's' : ''} remaining`;
             warning.style.display = 'block';
@@ -240,6 +466,11 @@
                     // Failed attempt
                     const currentAttempts = parseInt(localStorage.getItem('attemptCount') || '0') + 1;
                     localStorage.setItem('attemptCount', currentAttempts);
+                    
+                    // Update dots
+                    if (currentAttempts <= 3) {
+                        dots[currentAttempts - 1].classList.add('used');
+                    }
                     
                     if (data.message) {
                         const warning = document.getElementById('warningMessage');
