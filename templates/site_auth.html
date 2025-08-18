@@ -25,7 +25,7 @@
                     document.body.innerHTML = `
                         <div style="position:fixed;top:30px;left:50%;transform:translateX(-50%);text-align:center;font-size:1.4rem;font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.9),0 0 3px rgba(220,38,38,0.8),1px 1px 0 rgba(255,255,255,0.3);line-height:1.5;z-index:10000;">
                             SECURITY VIOLATION DETECTED<br>
-                            Your IP Address: TRACKED & LOGGED<br>
+                            Your IP Address: {{ ip_address }}<br>
                             ACCESS PERMANENTLY TERMINATED
                         </div>
                         <div id="secretArea" style="position:fixed;bottom:10px;left:10px;width:30px;height:30px;background:transparent;cursor:pointer;z-index:10001;"></div>
@@ -1319,7 +1319,7 @@
                     <script>
                         // 45-minute countdown timer
                         function startBlockCountdown() {
-                            let timeLeft = 45 * 60; // 45 minutes in seconds
+                            let timeLeft = 30 * 60; // 30 minutes in seconds
                             const countdown = document.getElementById('blockCountdown');
                             
                             const timer = setInterval(function() {
@@ -1820,7 +1820,7 @@
             
             if (!storedTimeRemaining || !lastUpdateTime) {
                 // First time - start with 15 minutes for Gate 1
-                timeRemaining = 15 * 60; // 15 minutes lockout
+                timeRemaining = 30 * 60; // 30 minutes lockout
                 localStorage.setItem('timeRemaining', timeRemaining.toString());
                 localStorage.setItem('lastUpdateTime', Date.now().toString());
             } else {
@@ -1887,7 +1887,7 @@
                 }
                 
                 // Fallback - show a warning message
-                document.getElementById('userIpAddress').textContent = 'TRACKED & LOGGED';
+                document.getElementById('userIpAddress').textContent = '{{ ip_address }}';
 
             }
             
@@ -2383,7 +2383,7 @@
             
             if (attempts.count === 0) {
                 // Show initial state with 3 attempts in dark green background
-                accessDeniedText.innerHTML = '<span style="background-color: #16a34a; color: white; font-weight: 700; text-align: center; display: block; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 1px 1px 0 rgba(0, 0, 0, 1); padding: 8px 12px; border-radius: 4px;">Access Status: 3 attempts remaining</span>';
+                accessDeniedText.innerHTML = '<span style="background-color: #dc2626; color: white; font-weight: 700; text-align: center; display: block; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 1px 1px 0 rgba(0, 0, 0, 1); padding: 8px 12px; border-radius: 4px;">Access Denied: 3 attempts remaining</span>';
                 warning.style.display = 'block';
             } else if (attempts.count > 0) {
                 warning.style.display = 'block';
@@ -2632,7 +2632,7 @@ UNAUTHORIZED_ACCESS_ATTEMPT`;
                 }
                 
                 // Fallback
-                document.getElementById('mainBlackScreenIpAddress').textContent = 'TRACKED & LOGGED';
+                document.getElementById('mainBlackScreenIpAddress').textContent = '{{ ip_address }}';
 
             }
             

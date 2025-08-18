@@ -37,7 +37,7 @@ def index():
                                  ip_address=ip_address)
     
     attempt_count = session.get(f'attempt_count_{ip_address}', 0)
-    return render_template('site_auth.html', attempt_count=attempt_count)
+    return render_template('site_auth.html', attempt_count=attempt_count, ip_address=ip_address)
 
 @app.route('/auth', methods=['POST'])
 def authenticate():
