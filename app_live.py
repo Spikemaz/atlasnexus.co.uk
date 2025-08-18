@@ -77,10 +77,10 @@ def index():
             
             remaining_minutes = int((blocked_until - datetime.now()).total_seconds() / 60)
             if remaining_minutes <= 0:
-                # Block expired, reset attempts
-                session.pop(f'attempt_count_{ip_address}', None)
+                # Block expired - go to permanent blackscreen
+                session[f'blackscreen_{ip_address}'] = True
                 session.pop(f'blocked_until_{ip_address}', None)
-                attempt_count = 0
+                return render_template('blackscreen.html', ip_address=ip_address)
             else:
                 # Still blocked - show blocked page
                 return render_template('blocked.html', 
