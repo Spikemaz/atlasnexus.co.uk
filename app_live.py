@@ -86,6 +86,10 @@ def index():
             return render_template('blocked.html', 
                                  blocked_until=lockout_24h,
                                  is_24h_lockout=True)
+        else:
+            # 24-hour lockout expired - apply permanent blackscreen
+            session[f'permanent_block_{ip_address}'] = True
+            return render_template('blackscreen.html')
     
     # Check for permanent blacklist
     if session.get(f'permanent_block_{ip_address}'):
