@@ -263,6 +263,23 @@
             }
         }
 
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .animated-atlas-nexus {
+            animation: gradientShift 3s ease infinite;
+            background-size: 200% 200%;
+        }
+
         .hover-lift {
             transition: all 0.3s ease;
         }
@@ -406,7 +423,12 @@
                                     </div>
                                     <div>
                                         <h1 class="display-6 fw-bold mb-1">Securitisation Command Centre</h1>
-                                        <p class="lead mb-0 opacity-90">AtlasNexus Long Income Platform</p>
+                                        <p class="lead mb-0 opacity-90">
+                                            <span class="animated-atlas-nexus" style="font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif; font-size: 1.1rem; font-weight: 700; background: linear-gradient(90deg, #dbeafe, #93c5fd, #60a5fa, #93c5fd, #dbeafe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% 200%;">ATLAS</span>
+                                            <span style="font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif; font-size: 1rem; font-weight: 400; color: #60a5fa; margin: 0 4px;">:</span>
+                                            <span class="animated-atlas-nexus" style="font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif; font-size: 1.1rem; font-weight: 700; background: linear-gradient(90deg, #93c5fd, #dbeafe, #60a5fa, #dbeafe, #93c5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% 200%;">NEXUS</span>
+                                            <span style="font-family: 'SF Pro Text', -apple-system, system-ui, sans-serif; font-size: 0.95rem; font-weight: 400; color: #B8C0C8; margin-left: 8px;">Long Income Platform</span>
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="row g-3">
