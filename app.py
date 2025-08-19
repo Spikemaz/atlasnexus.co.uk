@@ -260,10 +260,13 @@ def send_email(to_email, subject, html_content):
 
 def send_email_async(to_email, subject, html_content):
     """Send email asynchronously in background thread"""
-    thread = threading.Thread(target=send_email, args=(to_email, subject, html_content))
-    thread.daemon = True
-    thread.start()
-    print(f"[EMAIL] Queued email to {to_email} for background sending")
+    try:
+        thread = threading.Thread(target=send_email, args=(to_email, subject, html_content))
+        thread.daemon = True
+        thread.start()
+        print(f"[EMAIL] Queued email to {to_email} for background sending")
+    except Exception as e:
+        print(f"[EMAIL ERROR] Failed to queue email: {e}")
 
 # ==================== FLASK APP ====================
 app = Flask(__name__)
@@ -734,43 +737,44 @@ def companies_house_search():
 @app.route('/register', methods=['POST'])
 def register():
     """Handle user registration"""
-    ip_address = request.remote_addr
-    
-    # Verify site authentication first
-    if not session.get(f'site_authenticated_{ip_address}'):
-        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
-    
-    # Get form data
-    data = {
-        'email': request.form.get('email', '').strip().lower(),
-        'full_name': request.form.get('fullname', '').strip(),
-        'phone': request.form.get('phone', '').strip(),
-        'country_code': request.form.get('country_code', '').strip(),
-        'company_name': request.form.get('company_name', '').strip(),
-        'company_number': request.form.get('company_number', '').strip(),
-        'job_title': request.form.get('job_title', '').strip(),
-        'personal_address': request.form.get('personal_address', '').strip(),
-        'business_address': request.form.get('business_address', '').strip(),
-        'verification_token': generate_verification_token(),
-        'email_verified': False,
-        'admin_approved': False,
-        'created_at': datetime.now().isoformat(),
-        'ip_address': ip_address
-    }
-    
-    # Load existing registrations
-    registrations = load_json_db(REGISTRATIONS_FILE)
-    
-    # Check if email already exists
-    if data['email'] in registrations:
-        return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
-    
-    # Save registration
-    registrations[data['email']] = data
-    save_json_db(REGISTRATIONS_FILE, registrations)
-    
-    # Send verification email
-    verification_link = f"{request.host_url}verify-email?token={data['verification_token']}&email={data['email']}"
+    try:
+        ip_address = request.remote_addr
+        
+        # Verify site authentication first
+        if not session.get(f'site_authenticated_{ip_address}'):
+            return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+        
+        # Get form data
+        data = {
+            'email': request.form.get('email', '').strip().lower(),
+            'full_name': request.form.get('fullname', '').strip(),
+            'phone': request.form.get('phone', '').strip(),
+            'country_code': request.form.get('country_code', '').strip(),
+            'company_name': request.form.get('company_name', '').strip(),
+            'company_number': request.form.get('company_number', '').strip(),
+            'job_title': request.form.get('job_title', '').strip(),
+            'personal_address': request.form.get('personal_address', '').strip(),
+            'business_address': request.form.get('business_address', '').strip(),
+            'verification_token': generate_verification_token(),
+            'email_verified': False,
+            'admin_approved': False,
+            'created_at': datetime.now().isoformat(),
+            'ip_address': ip_address
+        }
+        
+        # Load existing registrations
+        registrations = load_json_db(REGISTRATIONS_FILE)
+        
+        # Check if email already exists
+        if data['email'] in registrations:
+            return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
+        
+        # Save registration
+        registrations[data['email']] = data
+        save_json_db(REGISTRATIONS_FILE, registrations)
+        
+        # Send verification email
+        verification_link = f"{request.host_url}verify-email?token={data['verification_token']}&email={data['email']}"
     
     email_html = f"""
     <html>
@@ -786,22 +790,22 @@ def register():
         </body>
     </html>
     """
-    
-    send_email_async(data['email'], 'AtlasNexus - Verify Your Email', email_html)
-    
-    # Generate approval token for email-based approval
-    approval_token = generate_verification_token()
-    data['approval_token'] = approval_token
-    
-    # Re-save with approval token
-    registrations[data['email']] = data
-    save_json_db(REGISTRATIONS_FILE, registrations)
-    
-    # Notify admin of new registration with approval/reject buttons
-    approve_link = f"{request.host_url}admin/quick-approve?token={approval_token}&email={data['email']}"
-    reject_link = f"{request.host_url}admin/quick-reject?token={approval_token}&email={data['email']}"
-    
-    admin_html = f"""
+        
+        send_email_async(data['email'], 'AtlasNexus - Verify Your Email', email_html)
+        
+        # Generate approval token for email-based approval
+        approval_token = generate_verification_token()
+        data['approval_token'] = approval_token
+        
+        # Re-save with approval token
+        registrations[data['email']] = data
+        save_json_db(REGISTRATIONS_FILE, registrations)
+        
+        # Notify admin of new registration with approval/reject buttons
+        approve_link = f"{request.host_url}admin/quick-approve?token={approval_token}&email={data['email']}"
+        reject_link = f"{request.host_url}admin/quick-reject?token={approval_token}&email={data['email']}"
+        
+        admin_html = f"""
     <html>
         <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
             <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -888,15 +892,23 @@ def register():
     </html>
     """
     
-    send_email_async(EMAIL_CONFIG['admin_email'], 'New Registration - Action Required', admin_html)
-    
-    # Store registration in session for awaiting page
-    session[f'registration_pending_{ip_address}'] = data['email']
-    
-    return jsonify({
-        'status': 'success',
-        'redirect': '/awaiting-verification'
-    })
+        send_email_async(EMAIL_CONFIG['admin_email'], 'New Registration - Action Required', admin_html)
+        
+        # Store registration in session for awaiting page
+        session[f'registration_pending_{ip_address}'] = data['email']
+        
+        return jsonify({
+            'status': 'success',
+            'redirect': '/awaiting-verification'
+        })
+    except Exception as e:
+        print(f"[REGISTRATION ERROR] {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'status': 'error',
+            'message': 'Registration failed. Please try again.'
+        }), 500
 
 @app.route('/awaiting-verification')
 def awaiting_verification():
