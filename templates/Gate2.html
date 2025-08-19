@@ -1050,6 +1050,35 @@
                 transform: translateX(-50%);
             }
         }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                box-shadow: 0 0 10px currentColor;
+            }
+            50% {
+                opacity: 0.7;
+                box-shadow: 0 0 20px currentColor;
+            }
+        }
 
         /* Cookie Consent Popup */
         .cookie-popup {
@@ -2465,7 +2494,152 @@
 
         // View market preview
         function viewMarketPreview() {
-            alert('Full market intelligence requires authentication');
+            // Create market intelligence preview overlay
+            const previewOverlay = document.createElement('div');
+            previewOverlay.id = 'marketPreviewOverlay';
+            previewOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #0a0e1a;
+                z-index: 10000;
+                overflow-y: auto;
+                animation: fadeIn 0.5s ease;
+            `;
+            
+            previewOverlay.innerHTML = `
+                <div style="position: relative; min-height: 100vh;">
+                    <!-- Close Button -->
+                    <button onclick="closeMarketPreview()" style="position: fixed; top: 20px; right: 20px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; padding: 10px 20px; border-radius: 8px; cursor: pointer; z-index: 10001; font-weight: 600;">
+                        ✕ Close Preview
+                    </button>
+                    
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 3rem 2rem; text-align: center; border-bottom: 2px solid var(--platinum-gold);">
+                        <h1 style="font-family: var(--font-display); font-size: 3rem; font-weight: 700; color: var(--pure-white); margin-bottom: 1rem;">
+                            Market Intelligence Platform
+                        </h1>
+                        <p style="color: var(--platinum-gold); font-size: 1.2rem;">
+                            Institutional-Grade Securitization Analytics
+                        </p>
+                    </div>
+                    
+                    <!-- Market Overview Grid -->
+                    <div style="padding: 3rem 2rem; max-width: 1400px; margin: 0 auto;">
+                        <h2 style="color: var(--pure-white); font-size: 2rem; margin-bottom: 2rem;">Real-Time Market Overview</h2>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 3rem;">
+                            <!-- CLO Market Card -->
+                            <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem;">
+                                <h3 style="color: #60a5fa; margin-bottom: 1rem;">CLO Market</h3>
+                                <div style="color: var(--pure-white); font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;">€145.3B</div>
+                                <div style="color: #22c55e; font-size: 0.9rem;">+12.4% YTD Issuance</div>
+                                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(96, 165, 250, 0.2);">
+                                    <div style="color: var(--silver-light); font-size: 0.85rem;">AAA Spread: 175bps</div>
+                                    <div style="color: var(--silver-light); font-size: 0.85rem;">New Issue Pipeline: €8.2B</div>
+                                </div>
+                            </div>
+                            
+                            <!-- ABS Market Card -->
+                            <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 1.5rem;">
+                                <h3 style="color: #22c55e; margin-bottom: 1rem;">ABS Market</h3>
+                                <div style="color: var(--pure-white); font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;">£62.8B</div>
+                                <div style="color: #22c55e; font-size: 0.9rem;">+8.7% QoQ Growth</div>
+                                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(34, 197, 94, 0.2);">
+                                    <div style="color: var(--silver-light); font-size: 0.85rem;">Auto ABS: £23.4B</div>
+                                    <div style="color: var(--silver-light); font-size: 0.85rem;">Card ABS: £15.6B</div>
+                                </div>
+                            </div>
+                            
+                            <!-- RMBS Market Card -->
+                            <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 12px; padding: 1.5rem;">
+                                <h3 style="color: #fbbf24; margin-bottom: 1rem;">RMBS Market</h3>
+                                <div style="color: var(--pure-white); font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;">£187.4B</div>
+                                <div style="color: #ef4444; font-size: 0.9rem;">-3.2% MoM</div>
+                                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(251, 191, 36, 0.2);">
+                                    <div style="color: var(--silver-light); font-size: 0.85rem;">Prime RMBS: £142.3B</div>
+                                    <div style="color: var(--silver-light); font-size: 0.85rem;">BTL RMBS: £45.1B</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Detailed Analytics Section -->
+                        <h2 style="color: var(--pure-white); font-size: 2rem; margin-bottom: 2rem;">Detailed Analytics</h2>
+                        
+                        <div style="background: rgba(30, 41, 59, 0.5); border-radius: 12px; padding: 2rem; margin-bottom: 2rem;">
+                            <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">Spread Analysis</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                                <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px;">
+                                    <div style="color: var(--silver-light); font-size: 0.85rem;">IG Corps</div>
+                                    <div style="color: var(--pure-white); font-size: 1.5rem; font-weight: bold;">145bps</div>
+                                    <div style="color: #22c55e; font-size: 0.8rem;">-5bps today</div>
+                                </div>
+                                <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px;">
+                                    <div style="color: var(--silver-light); font-size: 0.85rem;">HY Corps</div>
+                                    <div style="color: var(--pure-white); font-size: 1.5rem; font-weight: bold;">425bps</div>
+                                    <div style="color: #ef4444; font-size: 0.8rem;">+8bps today</div>
+                                </div>
+                                <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px;">
+                                    <div style="color: var(--silver-light); font-size: 0.85rem;">CLO BBB</div>
+                                    <div style="color: var(--pure-white); font-size: 1.5rem; font-weight: bold;">385bps</div>
+                                    <div style="color: #22c55e; font-size: 0.8rem;">-12bps today</div>
+                                </div>
+                                <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px;">
+                                    <div style="color: var(--silver-light); font-size: 0.85rem;">CMBS AAA</div>
+                                    <div style="color: var(--pure-white); font-size: 1.5rem; font-weight: bold;">165bps</div>
+                                    <div style="color: #fbbf24; font-size: 0.8rem;">Unchanged</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Performance Metrics -->
+                        <div style="background: rgba(30, 41, 59, 0.5); border-radius: 12px; padding: 2rem; margin-bottom: 2rem;">
+                            <h3 style="color: #22c55e; margin-bottom: 1.5rem;">Performance Metrics</h3>
+                            <div style="color: var(--silver-light); line-height: 2;">
+                                <div>• European CLO issuance up 45% YoY, driven by refinancing activity</div>
+                                <div>• UK RMBS spreads tighten 20bps on BoE dovish pivot expectations</div>
+                                <div>• Investment grade credit outperforms with 2.3% MTD total return</div>
+                                <div>• Structured credit allocation increases to 12% of institutional portfolios</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fade Overlay -->
+                    <div id="fadeOverlay" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 60%; background: linear-gradient(to bottom, transparent, rgba(10, 14, 26, 0.95) 50%, #0a0e1a); pointer-events: none; opacity: 0; transition: opacity 0.5s ease;"></div>
+                    
+                    <!-- Login Prompt -->
+                    <div id="loginPrompt" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); background: rgba(30, 41, 59, 0.98); border: 2px solid var(--platinum-gold); border-radius: 12px; padding: 2rem 3rem; text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; z-index: 10002;">
+                        <h3 style="color: var(--platinum-gold); font-size: 1.5rem; margin-bottom: 1rem;">Access Full Intelligence</h3>
+                        <p style="color: var(--silver-light); margin-bottom: 1.5rem;">Login to access real-time data, advanced analytics, and proprietary research</p>
+                        <button onclick="closeMarketPreview(); showLogin();" style="background: linear-gradient(135deg, var(--platinum-gold) 0%, #3b82f6 100%); color: var(--pure-white); border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1.1rem;">
+                            Login to Continue
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(previewOverlay);
+            
+            // Add scroll listener
+            let hasTriggeredFade = false;
+            previewOverlay.addEventListener('scroll', function() {
+                if (!hasTriggeredFade && previewOverlay.scrollTop > 200) {
+                    hasTriggeredFade = true;
+                    document.getElementById('fadeOverlay').style.opacity = '1';
+                    document.getElementById('loginPrompt').style.opacity = '1';
+                    document.getElementById('loginPrompt').style.pointerEvents = 'auto';
+                }
+            });
+        }
+        
+        function closeMarketPreview() {
+            const overlay = document.getElementById('marketPreviewOverlay');
+            if (overlay) {
+                overlay.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => overlay.remove(), 300);
+            }
         }
 
         // Cookie consent management
