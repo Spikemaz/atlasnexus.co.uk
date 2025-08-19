@@ -971,17 +971,10 @@
         .market-ticker {
             display: flex;
             width: max-content;
-            animation: scroll 180s linear infinite; /* Even slower for better readability */
             will-change: transform;
-            transition: none;
-            /* Start with content already shifted to hide initial gap */
-            animation-delay: -3s;
+            transition: transform 0.5s linear;
             padding-left: 0;
             margin-left: 0;
-        }
-
-        .market-ticker.paused {
-            animation-play-state: paused;
         }
 
         .ticker-content {
@@ -1710,9 +1703,9 @@
             'US 2Y': { value: 4.89, change24h: 0.01, change7d: -0.02, change30d: 0.08 },
             
             // Central Bank Rates
-            'FED RATE': { value: 5.50, change24h: 0, change7d: 0, change30d: 0.25 },
-            'BOE RATE': { value: 5.25, change24h: 0, change7d: 0, change30d: 0 },
-            'ECB RATE': { value: 4.00, change24h: 0, change7d: 0, change30d: -0.25 },
+            'FED RATE': { value: 5.50, change24h: 0, change7d: 0, change30d: 0.25, history: [5.25, 5.25, 5.50, 5.50] },
+            'BOE RATE': { value: 5.25, change24h: 0, change7d: 0, change30d: 0, history: [5.00, 5.00, 5.25, 5.25] },
+            'ECB RATE': { value: 4.00, change24h: 0, change7d: 0, change30d: -0.25, history: [4.50, 4.25, 4.00, 4.00] },
             
             // Reference Rates
             'SOFR': { value: 5.32, change24h: -0.01, change7d: 0.02, change30d: 0.18 },
@@ -1743,76 +1736,199 @@
             'SILVER': { value: 24.56, change24h: -0.34, change7d: 0.78, change30d: -1.23 }
         };
 
+        // Ticker variables for smooth scrolling
+        let tickerPosition = 0;
+        let tickerAnimationId = null;
+        let isDragging = false;
+        let startX = 0;
+        let scrollLeft = 0;
+        
         // Create ticker content
         function createTicker() {
             const ticker = document.getElementById('marketTicker');
+            const container = document.getElementById('tickerContainer');
+            if (!ticker || !container) return;
+            
             let content = '';
             
-            // Create two identical sets for seamless looping
-            for (let i = 0; i < 2; i++) {
+            // Build one complete set of ticker content
+            function buildTickerContent() {
+                let singleSet = '';
+                
                 // Bonds Section
-                content += '<span class="ticker-section-header">BONDS</span>';
-                content += '<span class="ticker-separator">●</span>';
+                singleSet += '<span class="ticker-section-header">BONDS</span>';
+                singleSet += '<span class="ticker-separator">●</span>';
                 ['US 10Y', 'UK 10Y', 'DE 10Y', 'US 5Y', 'US 2Y'].forEach(key => {
                     const data = marketData[key];
-                    content += createTickerItem(key, data);
+                    if (data) singleSet += createTickerItem(key, data);
                 });
                 
                 // Central Banks
-                content += '<span class="ticker-section-header">CENTRAL BANKS</span>';
-                content += '<span class="ticker-separator">●</span>';
+                singleSet += '<span class="ticker-section-header">CENTRAL BANKS</span>';
+                singleSet += '<span class="ticker-separator">●</span>';
                 ['FED RATE', 'BOE RATE', 'ECB RATE'].forEach(key => {
                     const data = marketData[key];
-                    content += createTickerItem(key, data);
+                    if (data) singleSet += createTickerItem(key, data);
                 });
                 
                 // Reference Rates
-                content += '<span class="ticker-section-header">REFERENCE RATES</span>';
-                content += '<span class="ticker-separator">●</span>';
+                singleSet += '<span class="ticker-section-header">REFERENCE RATES</span>';
+                singleSet += '<span class="ticker-separator">●</span>';
                 ['SOFR', 'SONIA', 'ESTR'].forEach(key => {
                     const data = marketData[key];
-                    content += createTickerItem(key, data);
+                    if (data) singleSet += createTickerItem(key, data);
                 });
                 
                 // Credit Spreads
-                content += '<span class="ticker-section-header">SECURITISATION</span>';
-                content += '<span class="ticker-separator">●</span>';
+                singleSet += '<span class="ticker-section-header">SECURITISATION</span>';
+                singleSet += '<span class="ticker-separator">●</span>';
                 ['IG SPREAD', 'HY SPREAD', 'CMBS AAA', 'RMBS AAA', 'CLO AAA'].forEach(key => {
                     const data = marketData[key];
-                    content += createTickerItem(key, data);
+                    if (data) singleSet += createTickerItem(key, data);
                 });
                 
                 // FX
-                content += '<span class="ticker-section-header">FX</span>';
-                content += '<span class="ticker-separator">●</span>';
+                singleSet += '<span class="ticker-section-header">FX</span>';
+                singleSet += '<span class="ticker-separator">●</span>';
                 ['GBP/USD', 'EUR/USD', 'USD/JPY', 'EUR/GBP'].forEach(key => {
                     const data = marketData[key];
-                    content += createTickerItem(key, data);
+                    if (data) singleSet += createTickerItem(key, data);
                 });
                 
                 // Equities
-                content += '<span class="ticker-section-header">EQUITIES</span>';
-                content += '<span class="ticker-separator">●</span>';
+                singleSet += '<span class="ticker-section-header">EQUITIES</span>';
+                singleSet += '<span class="ticker-separator">●</span>';
                 ['S&P 500', 'FTSE 100', 'DAX'].forEach(key => {
                     const data = marketData[key];
-                    content += createTickerItem(key, data);
+                    if (data) singleSet += createTickerItem(key, data);
                 });
                 
                 // Commodities  
-                content += '<span class="ticker-section-header">COMMODITIES</span>';
-                content += '<span class="ticker-separator">●</span>';
+                singleSet += '<span class="ticker-section-header">COMMODITIES</span>';
+                singleSet += '<span class="ticker-separator">●</span>';
                 ['GOLD', 'OIL WTI', 'SILVER'].forEach(key => {
                     const data = marketData[key];
-                    content += createTickerItem(key, data);
+                    if (data) singleSet += createTickerItem(key, data);
                 });
                 
-                // Add separator between rounds
-                if (i === 0) {
-                    content += '<span class="ticker-separator" style="margin: 0 2rem;">||</span>';
+                singleSet += '<span class="ticker-separator" style="margin: 0 2rem;">||</span>';
+                return singleSet;
+            }
+            
+            // Create three copies for seamless endless scrolling
+            const singleContent = buildTickerContent();
+            ticker.innerHTML = singleContent + singleContent + singleContent;
+            
+            // Setup drag functionality
+            container.addEventListener('mousedown', startDrag);
+            container.addEventListener('mousemove', drag);
+            container.addEventListener('mouseup', stopDrag);
+            container.addEventListener('mouseleave', stopDrag);
+            
+            // Touch events for mobile
+            container.addEventListener('touchstart', startDrag);
+            container.addEventListener('touchmove', drag);
+            container.addEventListener('touchend', stopDrag);
+            
+            // Start auto-scroll
+            startAutoScroll();
+        }
+        
+        function startAutoScroll() {
+            if (isDragging) return;
+            
+            const ticker = document.getElementById('marketTicker');
+            if (!ticker) return;
+            
+            // Cancel any existing animation
+            if (tickerAnimationId) {
+                cancelAnimationFrame(tickerAnimationId);
+            }
+            
+            // Smooth continuous animation
+            function animate() {
+                if (!isDragging) {
+                    tickerPosition -= 0.5; // Smooth scroll speed
+                    
+                    // Get actual width of one set of content
+                    const tickerWidth = ticker.scrollWidth / 3;
+                    
+                    // Reset position for endless loop
+                    if (Math.abs(tickerPosition) >= tickerWidth) {
+                        tickerPosition = tickerPosition % tickerWidth;
+                    }
+                    
+                    ticker.style.transform = `translateX(${tickerPosition}px)`;
+                    tickerAnimationId = requestAnimationFrame(animate);
                 }
             }
             
-            ticker.innerHTML = content;
+            animate();
+        }
+        
+        function startDrag(e) {
+            isDragging = true;
+            const container = document.getElementById('tickerContainer');
+            container.classList.add('dragging');
+            
+            // Cancel auto-scroll
+            if (tickerAnimationId) {
+                cancelAnimationFrame(tickerAnimationId);
+                tickerAnimationId = null;
+            }
+            
+            startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+            const ticker = document.getElementById('marketTicker');
+            const currentTransform = window.getComputedStyle(ticker).transform;
+            if (currentTransform !== 'none') {
+                const matrix = new DOMMatrix(currentTransform);
+                scrollLeft = matrix.m41; // Get current X translation
+            } else {
+                scrollLeft = tickerPosition;
+            }
+            
+            e.preventDefault();
+        }
+        
+        function drag(e) {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            const ticker = document.getElementById('marketTicker');
+            const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+            const walk = (x - startX) * 1.5; // Scroll speed multiplier
+            
+            tickerPosition = scrollLeft + walk;
+            
+            // Handle endless scrolling boundaries
+            const tickerWidth = ticker.scrollWidth / 3;
+            if (tickerPosition > 0) {
+                tickerPosition = -tickerWidth + (tickerPosition % tickerWidth);
+            } else if (Math.abs(tickerPosition) >= tickerWidth * 2) {
+                tickerPosition = tickerPosition % tickerWidth;
+            }
+            
+            ticker.style.transition = 'none'; // Remove transition for immediate response
+            ticker.style.transform = `translateX(${tickerPosition}px)`;
+        }
+        
+        function stopDrag() {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            const container = document.getElementById('tickerContainer');
+            const ticker = document.getElementById('marketTicker');
+            container.classList.remove('dragging');
+            
+            // Re-enable smooth transitions
+            ticker.style.transition = 'transform 0.5s linear';
+            
+            // Resume auto-scroll after a delay
+            setTimeout(() => {
+                if (!isDragging) {
+                    startAutoScroll();
+                }
+            }, 2000);
         }
 
         function createTickerItem(symbol, data) {
@@ -1835,6 +1951,26 @@
                 return (change > 0 ? '+' : '') + change.toFixed(2) + '%';
             };
             
+            // Special handling for central bank rates with history
+            if ((symbol === 'FED RATE' || symbol === 'BOE RATE' || symbol === 'ECB RATE') && data.history) {
+                return `
+                    <div class="ticker-item" style="display: inline-flex; align-items: center; gap: 8px; margin: 0 12px;">
+                        <span class="ticker-symbol" style="color: #dbeafe; font-weight: 600;">${symbol}:</span>
+                        <span class="ticker-value" style="color: #fff; font-weight: 500;">${formatValue(data.value)}</span>
+                        <span style="color: #64748b; font-size: 0.65rem; margin-left: 8px;">History:</span>
+                        ${data.history.map((rate, i) => `
+                            <span style="color: ${i === data.history.length - 1 ? '#fbbf24' : '#94a3b8'}; font-size: 0.75rem; font-weight: ${i === data.history.length - 1 ? '600' : '400'};">
+                                ${rate.toFixed(2)}%
+                            </span>
+                        `).join('')}
+                        <span style="color: #64748b; font-size: 0.65rem;">|</span>
+                        <span style="color: ${getChangeColor(data.change30d)}; font-size: 0.75rem;">30d: ${formatChange(data.change30d)}</span>
+                    </div>
+                    <span class="ticker-separator" style="color: #475569; margin: 0 8px;">●</span>
+                `;
+            }
+            
+            // Regular ticker item
             return `
                 <div class="ticker-item" style="display: inline-flex; align-items: center; gap: 8px; margin: 0 12px;">
                     <span class="ticker-symbol" style="color: #dbeafe; font-weight: 600;">${symbol}:</span>
