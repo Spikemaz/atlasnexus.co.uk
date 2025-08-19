@@ -1360,6 +1360,8 @@
     </div>
 
     <script>
+        let currentIPData = []; // Store IP data globally for details view
+        
         function toggleAdminPanel() {
             const panel = document.getElementById('adminPanel');
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
@@ -1373,10 +1375,106 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
+                        currentIPData = data.data; // Store for later use
                         displayIPData(data.data);
                     }
                 })
                 .catch(error => console.error('Error loading IP data:', error));
+        }
+        
+        function showIPDetails(ipAddress) {
+            const ipInfo = currentIPData.find(ip => ip.ip === ipAddress);
+            if (!ipInfo) return;
+            
+            let detailsHTML = `
+                <div style="padding: 20px;">
+                    <h3 style="color: #ef4444; margin-bottom: 20px;">Detailed Information for ${ipAddress}</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div>
+                            <strong style="color: #60a5fa;">Status:</strong> 
+                            <span style="color: #f59e0b;">${ipInfo.status}</span>
+                        </div>
+                        <div>
+                            <strong style="color: #60a5fa;">Lock Type:</strong> 
+                            <span style="color: #f59e0b;">${ipInfo.lockout_type || 'Unknown'}</span>
+                        </div>
+                        <div>
+                            <strong style="color: #60a5fa;">Reference Code:</strong> 
+                            <span style="color: white; font-family: monospace;">${ipInfo.reference_code || 'N/A'}</span>
+                        </div>
+                        <div>
+                            <strong style="color: #60a5fa;">Total Attempts:</strong> 
+                            <span style="color: #ef4444; font-weight: bold;">${ipInfo.total_attempts || 0}</span>
+                        </div>
+                        <div>
+                            <strong style="color: #60a5fa;">First Seen:</strong> 
+                            <span style="color: #94a3b8;">${ipInfo.first_seen || 'Unknown'}</span>
+                        </div>
+                        <div>
+                            <strong style="color: #60a5fa;">Locked At:</strong> 
+                            <span style="color: #94a3b8;">${ipInfo.locked_at || 'Unknown'}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <strong style="color: #60a5fa;">User Agent:</strong>
+                        <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 5px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 5px;">
+                            ${ipInfo.user_agent || 'Unknown'}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <strong style="color: #60a5fa;">Failed Passwords:</strong>
+                        <div style="margin-top: 10px;">
+                            ${ipInfo.failed_passwords && ipInfo.failed_passwords.length > 0 ? 
+                                ipInfo.failed_passwords.map(pwd => 
+                                    `<span style="display: inline-block; background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 5px 10px; margin: 5px; border-radius: 5px; font-family: monospace;">${pwd}</span>`
+                                ).join('') : 
+                                '<span style="color: #94a3b8;">No passwords logged</span>'
+                            }
+                        </div>
+                    </div>
+                    
+                    ${ipInfo.attempt_history && ipInfo.attempt_history.length > 0 ? `
+                        <div style="margin-bottom: 20px;">
+                            <strong style="color: #60a5fa;">Recent Attempt History:</strong>
+                            <div style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
+                                ${ipInfo.attempt_history.map(attempt => `
+                                    <div style="padding: 10px; margin: 5px 0; background: rgba(0,0,0,0.3); border-radius: 5px; border-left: 3px solid #ef4444;">
+                                        <div style="color: #ef4444; font-family: monospace;">${attempt.password}</div>
+                                        <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 5px;">
+                                            ${new Date(attempt.timestamp).toLocaleString('en-GB')} | Type: ${attempt.type}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button onclick="closeIPDetails()" style="background: #475569; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.id = 'ipDetailsModal';
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 20000; display: flex; align-items: center; justify-content: center;';
+            modal.innerHTML = `
+                <div style="background: rgba(54, 64, 73, 0.98); border: 2px solid #ef4444; border-radius: 12px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                    ${detailsHTML}
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        function closeIPDetails() {
+            const modal = document.getElementById('ipDetailsModal');
+            if (modal) modal.remove();
         }
         
         function displayIPData(ipData) {
@@ -1396,6 +1494,9 @@
                                 <th style="padding: 10px; text-align: left; color: #94a3b8;">Status</th>
                                 <th style="padding: 10px; text-align: left; color: #94a3b8;">Reason</th>
                                 <th style="padding: 10px; text-align: left; color: #94a3b8;">Failed Passwords</th>
+                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Browser/Device</th>
+                                <th style="padding: 10px; text-align: left; color: #94a3b8;">First Seen</th>
+                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Total Attempts</th>
                                 <th style="padding: 10px; text-align: left; color: #94a3b8;">Time Remaining</th>
                                 <th style="padding: 10px; text-align: left; color: #94a3b8;">Actions</th>
                             </tr>
@@ -1405,30 +1506,63 @@
             
             ipData.forEach(ip => {
                 const statusColor = ip.status === 'permanent' ? '#ef4444' : '#f59e0b';
-                const statusText = ip.status === 'permanent' ? 'PERMANENT BAN' : 'TEMPORARY BLOCK';
+                const statusText = ip.status === 'permanent' ? 'PERMANENT BAN' : 
+                                   ip.lockout_type === 'blocked_30min' ? '30-MIN BLOCK' : 
+                                   ip.lockout_type === 'blocked_24h' ? '24-HOUR BAN' : 'TEMPORARY BLOCK';
+                
+                // Parse browser info to make it shorter
+                let browserInfo = 'Unknown';
+                if (ip.user_agent && ip.user_agent !== 'Unknown') {
+                    if (ip.user_agent.includes('Chrome')) browserInfo = 'Chrome';
+                    else if (ip.user_agent.includes('Firefox')) browserInfo = 'Firefox';
+                    else if (ip.user_agent.includes('Safari')) browserInfo = 'Safari';
+                    else if (ip.user_agent.includes('Edge')) browserInfo = 'Edge';
+                    else browserInfo = ip.user_agent.substring(0, 20) + '...';
+                }
+                
+                // Format first seen date
+                let firstSeen = 'Unknown';
+                if (ip.first_seen) {
+                    const date = new Date(ip.first_seen);
+                    firstSeen = date.toLocaleString('en-GB', { 
+                        day: '2-digit', 
+                        month: 'short', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                }
                 
                 html += `
                     <tr style="border-bottom: 1px solid rgba(239, 68, 68, 0.1);">
-                        <td style="padding: 10px; color: white; font-family: monospace;">${ip.ip}</td>
-                        <td style="padding: 10px;">
-                            <span style="color: ${statusColor}; font-weight: 600;">${statusText}</span>
+                        <td style="padding: 10px; color: white; font-family: monospace; cursor: pointer;" 
+                            onclick="showIPDetails('${ip.ip}')" 
+                            title="Click for details">
+                            ${ip.ip} 
+                            <i class="fas fa-info-circle" style="color: #60a5fa; margin-left: 5px;"></i>
                         </td>
-                        <td style="padding: 10px; color: #94a3b8; font-size: 0.9rem;">${ip.reason}</td>
-                        <td style="padding: 10px; color: #ef4444; font-size: 0.85rem;">
+                        <td style="padding: 10px;">
+                            <span style="color: ${statusColor}; font-weight: 600; font-size: 0.8rem;">${statusText}</span>
+                        </td>
+                        <td style="padding: 10px; color: #94a3b8; font-size: 0.85rem;">${ip.reason}</td>
+                        <td style="padding: 10px; color: #ef4444; font-size: 0.8rem; max-width: 150px; overflow: hidden; text-overflow: ellipsis;" 
+                            title="${ip.failed_passwords ? ip.failed_passwords.join(', ') : 'N/A'}">
                             ${ip.failed_passwords ? ip.failed_passwords.join(', ') : 'N/A'}
                         </td>
-                        <td style="padding: 10px; color: #f59e0b;">
+                        <td style="padding: 10px; color: #60a5fa; font-size: 0.85rem;">${browserInfo}</td>
+                        <td style="padding: 10px; color: #94a3b8; font-size: 0.85rem;">${firstSeen}</td>
+                        <td style="padding: 10px; color: #f59e0b; font-weight: 600;">${ip.total_attempts || 0}</td>
+                        <td style="padding: 10px; color: #f59e0b; font-size: 0.85rem;">
                             ${ip.remaining_time || (ip.status === 'permanent' ? 'PERMANENT' : 'Expired')}
                         </td>
                         <td style="padding: 10px;">
-                            <button onclick="unbanIP('${ip.ip}')" style="background: #22c55e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+                            <button onclick="unbanIP('${ip.ip}')" style="background: #22c55e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px; font-size: 0.8rem;">
                                 Unban
                             </button>
                             ${ip.status !== 'permanent' ? `
-                                <button onclick="extendBan('${ip.ip}')" style="background: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+                                <button onclick="extendBan('${ip.ip}')" style="background: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px; font-size: 0.8rem;">
                                     Extend
                                 </button>
-                                <button onclick="permanentBan('${ip.ip}')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                <button onclick="permanentBan('${ip.ip}')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
                                     Permanent
                                 </button>
                             ` : ''}

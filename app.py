@@ -71,21 +71,28 @@ def save_attempt_logs(logs):
     except:
         return False
 
-def log_failed_attempt(ip_address, password_attempted, attempt_type='site_auth'):
-    """Log a failed password attempt"""
+def log_failed_attempt(ip_address, password_attempted, attempt_type='site_auth', user_agent=None):
+    """Log a failed password attempt with additional info"""
     logs = load_attempt_logs()
     if ip_address not in logs:
         logs[ip_address] = {
             'attempts': [],
             'total_attempts': 0,
-            'last_attempt': None
+            'last_attempt': None,
+            'first_seen': datetime.now().isoformat()
         }
     
-    logs[ip_address]['attempts'].append({
+    # Collect additional information
+    attempt_data = {
         'password': password_attempted,
         'type': attempt_type,
-        'timestamp': datetime.now().isoformat()
-    })
+        'timestamp': datetime.now().isoformat(),
+        'user_agent': user_agent or request.headers.get('User-Agent', 'Unknown'),
+        'referrer': request.headers.get('Referer', 'Direct'),
+        'accept_language': request.headers.get('Accept-Language', 'Unknown')
+    }
+    
+    logs[ip_address]['attempts'].append(attempt_data)
     logs[ip_address]['total_attempts'] += 1
     logs[ip_address]['last_attempt'] = datetime.now().isoformat()
     
@@ -94,6 +101,14 @@ def log_failed_attempt(ip_address, password_attempted, attempt_type='site_auth')
         logs[ip_address]['attempts'] = logs[ip_address]['attempts'][-50:]
     
     save_attempt_logs(logs)
+
+def clear_ip_attempts(ip_address):
+    """Clear password attempts for an IP (when they successfully authenticate)"""
+    logs = load_attempt_logs()
+    if ip_address in logs:
+        del logs[ip_address]
+        save_attempt_logs(logs)
+        print(f"[INFO] Cleared password attempts for IP {ip_address} after successful auth")
 
 def check_ip_lockout(ip_address):
     """Check if an IP is locked out"""
@@ -620,6 +635,9 @@ def site_auth():
         session[f'site_authenticated_{ip_address}'] = True
         session.pop(f'blocked_until_{ip_address}', None)
         
+        # Clear password attempts for this IP since they succeeded
+        clear_ip_attempts(ip_address)
+        
         if IS_LOCAL:
             print(f"[DEBUG] Password correct! Setting site_authenticated for IP: {ip_address}")
             print(f"[DEBUG] Session after auth: {dict(session)}")
@@ -631,18 +649,37 @@ def site_auth():
     attempts_left = MAX_ATTEMPTS_BEFORE_BLOCK - attempt_count
     
     if attempt_count >= MAX_ATTEMPTS_BEFORE_BLOCK:
-        # Get all failed passwords for this session
+        # Get all failed passwords and additional info
         logs = load_attempt_logs()
         recent_attempts = []
-        if ip_address in logs:
-            # Get last 3 attempts
-            recent_attempts = [a['password'] for a in logs[ip_address]['attempts'][-3:]]
+        additional_info = {}
         
-        # Apply 30-minute block (not permanent, just 30 minutes)
-        apply_ip_lockout(ip_address, 'blocked_30min', 
+        if ip_address in logs:
+            # Get last 3 attempts with full details
+            recent_attempts = [a['password'] for a in logs[ip_address]['attempts'][-3:]]
+            
+            # Collect additional info from the most recent attempt
+            if logs[ip_address]['attempts']:
+                last_attempt = logs[ip_address]['attempts'][-1]
+                additional_info = {
+                    'user_agent': last_attempt.get('user_agent', 'Unknown'),
+                    'first_seen': logs[ip_address].get('first_seen'),
+                    'total_attempts': logs[ip_address].get('total_attempts', 0),
+                    'browser_info': request.headers.get('User-Agent', 'Unknown'),
+                    'accept_language': request.headers.get('Accept-Language', 'Unknown')
+                }
+        
+        # Apply 30-minute block with comprehensive data
+        lockout_data = apply_ip_lockout(ip_address, 'blocked_30min', 
                         reason='3 failed password attempts',
                         failed_passwords=recent_attempts,
                         duration_hours=0.5)  # 30 minutes
+        
+        # Add additional info to the lockout record
+        lockouts = load_lockouts()
+        if ip_address in lockouts:
+            lockouts[ip_address]['additional_info'] = additional_info
+            save_lockouts(lockouts)
         
         blocked_until = datetime.now() + timedelta(minutes=BLOCK_DURATION_MINUTES)
         session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
@@ -1615,6 +1652,9 @@ def admin_ip_management():
         if ip in attempt_logs:
             attempts = attempt_logs[ip].get('attempts', [])[-10:]  # Last 10 attempts
         
+        # Get additional info if available
+        additional_info = info.get('additional_info', {})
+        
         ip_data.append({
             'ip': ip,
             'status': 'permanent' if info.get('permanent') else 'temporary',
@@ -1625,7 +1665,12 @@ def admin_ip_management():
             'failed_passwords': info.get('failed_passwords', []),
             'reference_code': info.get('reference_code'),
             'attempt_history': attempts,
-            'total_attempts': attempt_logs.get(ip, {}).get('total_attempts', 0)
+            'total_attempts': attempt_logs.get(ip, {}).get('total_attempts', 0),
+            'first_seen': additional_info.get('first_seen') or attempt_logs.get(ip, {}).get('first_seen'),
+            'user_agent': additional_info.get('user_agent', 'Unknown'),
+            'browser_info': additional_info.get('browser_info', 'Unknown'),
+            'accept_language': additional_info.get('accept_language', 'Unknown'),
+            'lockout_type': info.get('lockout_type', 'unknown')
         })
     
     return jsonify({'status': 'success', 'data': ip_data})
