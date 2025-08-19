@@ -1742,12 +1742,26 @@
         let isDragging = false;
         let startX = 0;
         let scrollLeft = 0;
+        let tickerInitialized = false;
         
         // Create ticker content
         function createTicker() {
             const ticker = document.getElementById('marketTicker');
             const container = document.getElementById('tickerContainer');
             if (!ticker || !container) return;
+            
+            // Prevent multiple initializations
+            if (tickerInitialized) {
+                // Just update content without re-adding event listeners
+                updateTickerContent();
+                return;
+            }
+            
+            // Stop any existing animation
+            if (tickerAnimationId) {
+                cancelAnimationFrame(tickerAnimationId);
+                tickerAnimationId = null;
+            }
             
             let content = '';
             
@@ -1819,7 +1833,7 @@
             const singleContent = buildTickerContent();
             ticker.innerHTML = singleContent + singleContent + singleContent;
             
-            // Setup drag functionality
+            // Setup drag functionality (only once)
             container.addEventListener('mousedown', startDrag);
             container.addEventListener('mousemove', drag);
             container.addEventListener('mouseup', stopDrag);
@@ -1829,6 +1843,9 @@
             container.addEventListener('touchstart', startDrag);
             container.addEventListener('touchmove', drag);
             container.addEventListener('touchend', stopDrag);
+            
+            // Mark as initialized
+            tickerInitialized = true;
             
             // Start auto-scroll
             startAutoScroll();
@@ -1986,6 +2003,73 @@
             `;
         }
 
+        // Function to update ticker content without reinitializing
+        function updateTickerContent() {
+            const ticker = document.getElementById('marketTicker');
+            if (!ticker) return;
+            
+            let content = '';
+            
+            // Build one complete set of ticker content
+            function buildTickerContent() {
+                let singleSet = '';
+                
+                // Bonds Section
+                singleSet += '<span class="ticker-section-header">BONDS</span>';
+                singleSet += '<span class="ticker-separator">●</span>';
+                ['US 10Y', 'UK 10Y', 'DE 10Y', 'US 5Y', 'US 2Y'].forEach(key => {
+                    const data = marketData[key];
+                    if (data) singleSet += createTickerItem(key, data);
+                });
+                
+                // Central Banks
+                singleSet += '<span class="ticker-section-header">CENTRAL BANKS</span>';
+                singleSet += '<span class="ticker-separator">●</span>';
+                ['FED RATE', 'BOE RATE', 'ECB RATE'].forEach(key => {
+                    const data = marketData[key];
+                    if (data) singleSet += createTickerItem(key, data);
+                });
+                
+                // Reference Rates
+                singleSet += '<span class="ticker-section-header">REFERENCE RATES</span>';
+                singleSet += '<span class="ticker-separator">●</span>';
+                ['SOFR', 'SONIA', 'ESTR'].forEach(key => {
+                    const data = marketData[key];
+                    if (data) singleSet += createTickerItem(key, data);
+                });
+                
+                // Credit Spreads
+                singleSet += '<span class="ticker-section-header">SECURITISATION</span>';
+                singleSet += '<span class="ticker-separator">●</span>';
+                ['IG SPREAD', 'HY SPREAD', 'CMBS AAA', 'RMBS AAA', 'CLO AAA'].forEach(key => {
+                    const data = marketData[key];
+                    if (data) singleSet += createTickerItem(key, data);
+                });
+                
+                // FX
+                singleSet += '<span class="ticker-section-header">FX</span>';
+                singleSet += '<span class="ticker-separator">●</span>';
+                ['GBP/USD', 'EUR/USD', 'USD/JPY', 'EUR/GBP'].forEach(key => {
+                    const data = marketData[key];
+                    if (data) singleSet += createTickerItem(key, data);
+                });
+                
+                // Commodities
+                singleSet += '<span class="ticker-section-header">COMMODITIES</span>';
+                singleSet += '<span class="ticker-separator">●</span>';
+                ['GOLD', 'SILVER', 'OIL'].forEach(key => {
+                    const data = marketData[key];
+                    if (data) singleSet += createTickerItem(key, data);
+                });
+                
+                return singleSet;
+            }
+            
+            // Create three copies for seamless loop
+            const singleContent = buildTickerContent();
+            ticker.innerHTML = singleContent + singleContent + singleContent;
+        }
+        
         // Initialize ticker with live data
         createTicker();
         
@@ -2918,17 +3002,7 @@
                 }, 2000); // Resume after 2 seconds
             }
             
-            // Mouse events
-            container.addEventListener('mousedown', startDrag);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', stopDrag);
-            document.addEventListener('mouseleave', stopDrag);
-            
-            // Touch events for mobile
-            container.addEventListener('touchstart', startDrag, { passive: false });
-            document.addEventListener('touchmove', drag, { passive: false });
-            document.addEventListener('touchend', stopDrag);
-            
+            // Remove duplicate event listeners - already added in createTicker()
             // Prevent text selection during drag
             container.addEventListener('selectstart', (e) => {
                 if (isDragging) e.preventDefault();
