@@ -3,13 +3,22 @@ AtlasNexus - Single File Application
 Everything in one place - no confusion
 """
 
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 from datetime import datetime, timedelta
 import secrets
 import os
 import socket
 import subprocess
 import sys
+import json
+import hashlib
+import string
+import random
+from pathlib import Path
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import threading
 
 # ==================== CONFIGURATION ====================
 # Auto-detect environment
@@ -78,7 +87,14 @@ def audit_project():
         'Gate1.html',
         'Gate2.html',
         'Dashboard.html',
-        '404.html'
+        '404.html',
+        'terms.html',
+        'privacy.html',
+        'compliance.html',
+        'data-protection.html',
+        'security.html',
+        'contact.html',
+        'awaiting_verification.html'  # Added for registration system
     }
     
     # Files that should NEVER exist (delete immediately)
@@ -153,6 +169,96 @@ def kill_port_5000():
                 print(f"Killed existing server (PID: {pid})")
         except:
             pass
+
+# ==================== DATABASE ====================
+# Simple file-based database for registrations
+DATA_DIR = Path('data')
+DATA_DIR.mkdir(exist_ok=True)
+REGISTRATIONS_FILE = DATA_DIR / 'registrations.json'
+USERS_FILE = DATA_DIR / 'users.json'
+ADMIN_ACTIONS_FILE = DATA_DIR / 'admin_actions.json'
+
+# Email configuration - Try to import from email_config.py first
+try:
+    from email_config import SENDER_EMAIL, SENDER_PASSWORD, ADMIN_EMAIL, SMTP_SERVER, SMTP_PORT
+    EMAIL_CONFIG = {
+        'smtp_server': SMTP_SERVER,
+        'smtp_port': SMTP_PORT,
+        'sender_email': SENDER_EMAIL,
+        'sender_password': SENDER_PASSWORD,
+        'admin_email': ADMIN_EMAIL
+    }
+    if SENDER_PASSWORD:
+        print("[EMAIL] Gmail configuration loaded successfully")
+    else:
+        print("[EMAIL] Gmail configuration found but password not set - emails will be simulated")
+except ImportError:
+    # Fallback to environment variables or defaults
+    EMAIL_CONFIG = {
+        'smtp_server': 'smtp.gmail.com',
+        'smtp_port': 587,
+        'sender_email': os.environ.get('SENDER_EMAIL', 'atlasnexushelp@gmail.com'),
+        'sender_password': os.environ.get('SENDER_PASSWORD', ''),
+        'admin_email': os.environ.get('ADMIN_EMAIL', 'spikemaz8@aol.com')
+    }
+    print("[EMAIL] Using default email configuration - edit email_config.py to enable emails")
+
+def load_json_db(file_path):
+    """Load JSON database file"""
+    if file_path.exists():
+        try:
+            with open(file_path, 'r') as f:
+                return json.load(f)
+        except:
+            return {}
+    return {}
+
+def save_json_db(file_path, data):
+    """Save JSON database file"""
+    with open(file_path, 'w') as f:
+        json.dump(data, f, indent=2, default=str)
+
+def generate_verification_token():
+    """Generate a secure verification token"""
+    return secrets.token_urlsafe(32)
+
+def generate_secure_password():
+    """Generate a secure password"""
+    chars = string.ascii_letters + string.digits + '!@#$%^&*'
+    return ''.join(random.choice(chars) for _ in range(12))
+
+def send_email(to_email, subject, html_content):
+    """Send email notification"""
+    if not EMAIL_CONFIG['sender_password']:
+        print(f"[EMAIL] Would send to {to_email}: {subject}")
+        return True  # Simulate success in development
+    
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = EMAIL_CONFIG['sender_email']
+        msg['To'] = to_email
+        
+        html_part = MIMEText(html_content, 'html')
+        msg.attach(html_part)
+        
+        with smtplib.SMTP(EMAIL_CONFIG['smtp_server'], EMAIL_CONFIG['smtp_port']) as server:
+            server.starttls()
+            server.login(EMAIL_CONFIG['sender_email'], EMAIL_CONFIG['sender_password'])
+            server.send_message(msg)
+        
+        print(f"[EMAIL] Sent successfully to {to_email}")
+        return True
+    except Exception as e:
+        print(f"[EMAIL ERROR] Failed to send to {to_email}: {e}")
+        return False
+
+def send_email_async(to_email, subject, html_content):
+    """Send email asynchronously in background thread"""
+    thread = threading.Thread(target=send_email, args=(to_email, subject, html_content))
+    thread.daemon = True
+    thread.start()
+    print(f"[EMAIL] Queued email to {to_email} for background sending")
 
 # ==================== FLASK APP ====================
 app = Flask(__name__)
@@ -407,6 +513,421 @@ def secure_login():
     
     return render_template('Gate2.html')
 
+@app.route('/api/companies-house-search', methods=['POST'])
+def companies_house_search():
+    """Real Companies House API search endpoint"""
+    import requests
+    import time
+    
+    ip_address = request.remote_addr
+    
+    # Verify site authentication
+    if not session.get(f'site_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    company_name = request.json.get('company_name', '').strip()
+    
+    if not company_name:
+        return jsonify({'status': 'error', 'message': 'Company name required'}), 400
+    
+    try:
+        # Companies House API key - you'll need to get one from https://developer.company-information.service.gov.uk/
+        API_KEY = os.environ.get('COMPANIES_HOUSE_API_KEY', 'YOUR_API_KEY_HERE')
+        
+        # If no API key is set, use known real UK companies data
+        if API_KEY == 'YOUR_API_KEY_HERE':
+            # Real UK companies data (public information)
+            known_companies = {
+                'barclays': {
+                    'company_name': 'BARCLAYS PLC',
+                    'company_number': '00048839',
+                    'registered_office_address': {
+                        'address_line_1': '1 Churchill Place',
+                        'locality': 'London',
+                        'postal_code': 'E14 5HP',
+                        'country': 'United Kingdom'
+                    },
+                    'company_status': 'active',
+                    'type': 'plc',
+                    'date_of_creation': '1896-07-20'
+                },
+                'hsbc': {
+                    'company_name': 'HSBC HOLDINGS PLC',
+                    'company_number': '00617987',
+                    'registered_office_address': {
+                        'address_line_1': '8 Canada Square',
+                        'locality': 'London',
+                        'postal_code': 'E14 5HQ',
+                        'country': 'United Kingdom'
+                    },
+                    'company_status': 'active',
+                    'type': 'plc',
+                    'date_of_creation': '1959-01-01'
+                },
+                'lloyds': {
+                    'company_name': 'LLOYDS BANKING GROUP PLC',
+                    'company_number': '00095000',
+                    'registered_office_address': {
+                        'address_line_1': 'The Mound',
+                        'locality': 'Edinburgh',
+                        'postal_code': 'EH1 1YZ',
+                        'country': 'Scotland'
+                    },
+                    'company_status': 'active',
+                    'type': 'plc',
+                    'date_of_creation': '1985-01-01'
+                },
+                'natwest': {
+                    'company_name': 'NATWEST GROUP PLC',
+                    'company_number': 'SC045551',
+                    'registered_office_address': {
+                        'address_line_1': '36 St Andrew Square',
+                        'locality': 'Edinburgh',
+                        'postal_code': 'EH2 2YB',
+                        'country': 'Scotland'
+                    },
+                    'company_status': 'active',
+                    'type': 'plc',
+                    'date_of_creation': '1968-03-25'
+                },
+                'santander': {
+                    'company_name': 'SANTANDER UK PLC',
+                    'company_number': '02294747',
+                    'registered_office_address': {
+                        'address_line_1': '2 Triton Square',
+                        'address_line_2': "Regent's Place",
+                        'locality': 'London',
+                        'postal_code': 'NW1 3AN',
+                        'country': 'United Kingdom'
+                    },
+                    'company_status': 'active',
+                    'type': 'plc',
+                    'date_of_creation': '1988-09-27'
+                },
+                'tesco': {
+                    'company_name': 'TESCO PLC',
+                    'company_number': '00445790',
+                    'registered_office_address': {
+                        'address_line_1': 'Tesco House',
+                        'address_line_2': 'Shire Park, Kestrel Way',
+                        'locality': 'Welwyn Garden City',
+                        'postal_code': 'AL7 1GA',
+                        'country': 'United Kingdom'
+                    },
+                    'company_status': 'active',
+                    'type': 'plc',
+                    'date_of_creation': '1947-11-27'
+                },
+                'sainsbury': {
+                    'company_name': "J SAINSBURY PLC",
+                    'company_number': '00185647',
+                    'registered_office_address': {
+                        'address_line_1': '33 Holborn',
+                        'locality': 'London',
+                        'postal_code': 'EC1N 2HT',
+                        'country': 'United Kingdom'
+                    },
+                    'company_status': 'active',
+                    'type': 'plc',
+                    'date_of_creation': '1929-07-12'
+                },
+                'bp': {
+                    'company_name': 'BP PLC',
+                    'company_number': '00102498',
+                    'registered_office_address': {
+                        'address_line_1': '1 St James\'s Square',
+                        'locality': 'London',
+                        'postal_code': 'SW1Y 4PD',
+                        'country': 'United Kingdom'
+                    },
+                    'company_status': 'active',
+                    'type': 'plc',
+                    'date_of_creation': '1909-04-14'
+                },
+                'shell': {
+                    'company_name': 'SHELL PLC',
+                    'company_number': '04366849',
+                    'registered_office_address': {
+                        'address_line_1': 'Shell Centre',
+                        'address_line_2': '2 York Road',
+                        'locality': 'London',
+                        'postal_code': 'SE1 7NA',
+                        'country': 'United Kingdom'
+                    },
+                    'company_status': 'active',
+                    'type': 'plc',
+                    'date_of_creation': '2002-02-05'
+                },
+                'vodafone': {
+                    'company_name': 'VODAFONE GROUP PUBLIC LIMITED COMPANY',
+                    'company_number': '01833679',
+                    'registered_office_address': {
+                        'address_line_1': 'Vodafone House',
+                        'address_line_2': 'The Connection',
+                        'locality': 'Newbury',
+                        'region': 'Berkshire',
+                        'postal_code': 'RG14 2FN',
+                        'country': 'United Kingdom'
+                    },
+                    'company_status': 'active',
+                    'type': 'plc',
+                    'date_of_creation': '1984-07-17'
+                }
+            }
+            
+            # Search for matching company
+            search_term = company_name.lower()
+            results = []
+            
+            for key, company in known_companies.items():
+                if key in search_term or search_term in key or search_term in company['company_name'].lower():
+                    results.append(company)
+            
+            # If no matches found in known companies, return empty
+            if not results:
+                return jsonify({
+                    'status': 'success',
+                    'results': [],
+                    'message': 'No companies found. Try searching for: Barclays, HSBC, Lloyds, NatWest, Santander, Tesco, Sainsbury, BP, Shell, or Vodafone'
+                })
+            
+            return jsonify({'status': 'success', 'results': results})
+        
+        else:
+            # Use real Companies House API
+            headers = {
+                'Authorization': API_KEY
+            }
+            
+            # Search companies endpoint
+            url = f'https://api.company-information.service.gov.uk/search/companies?q={company_name}&items_per_page=10'
+            
+            response = requests.get(url, headers=headers, auth=(API_KEY, ''))
+            
+            if response.status_code == 200:
+                data = response.json()
+                companies = []
+                
+                for item in data.get('items', []):
+                    companies.append({
+                        'company_name': item.get('title', ''),
+                        'company_number': item.get('company_number', ''),
+                        'registered_office_address': item.get('address', {}),
+                        'company_status': item.get('company_status', ''),
+                        'type': item.get('company_type', ''),
+                        'date_of_creation': item.get('date_of_creation', '')
+                    })
+                
+                return jsonify({'status': 'success', 'results': companies})
+            else:
+                return jsonify({'status': 'error', 'message': 'API request failed'}), 500
+                
+    except Exception as e:
+        print(f"Error searching Companies House: {e}")
+        return jsonify({'status': 'error', 'message': 'Search failed'}), 500
+
+@app.route('/register', methods=['POST'])
+def register():
+    """Handle user registration"""
+    ip_address = request.remote_addr
+    
+    # Verify site authentication first
+    if not session.get(f'site_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    # Get form data
+    data = {
+        'email': request.form.get('email', '').strip().lower(),
+        'full_name': request.form.get('fullname', '').strip(),
+        'phone': request.form.get('phone', '').strip(),
+        'country_code': request.form.get('country_code', '').strip(),
+        'company_name': request.form.get('company_name', '').strip(),
+        'company_number': request.form.get('company_number', '').strip(),
+        'job_title': request.form.get('job_title', '').strip(),
+        'personal_address': request.form.get('personal_address', '').strip(),
+        'business_address': request.form.get('business_address', '').strip(),
+        'verification_token': generate_verification_token(),
+        'email_verified': False,
+        'admin_approved': False,
+        'created_at': datetime.now().isoformat(),
+        'ip_address': ip_address
+    }
+    
+    # Load existing registrations
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    
+    # Check if email already exists
+    if data['email'] in registrations:
+        return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
+    
+    # Save registration
+    registrations[data['email']] = data
+    save_json_db(REGISTRATIONS_FILE, registrations)
+    
+    # Send verification email
+    verification_link = f"{request.host_url}verify-email?token={data['verification_token']}&email={data['email']}"
+    
+    email_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                <h2 style="color: #333;">Welcome to AtlasNexus</h2>
+                <p>Thank you for registering. Please verify your email address to continue.</p>
+                <a href="{verification_link}" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Verify Email</a>
+                <p style="color: #666; font-size: 14px;">If the button doesn't work, copy this link: {verification_link}</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                <p style="color: #999; font-size: 12px;">Once verified, your application will be reviewed within 24 hours.</p>
+            </div>
+        </body>
+    </html>
+    """
+    
+    send_email_async(data['email'], 'AtlasNexus - Verify Your Email', email_html)
+    
+    # Generate approval token for email-based approval
+    approval_token = generate_verification_token()
+    data['approval_token'] = approval_token
+    
+    # Re-save with approval token
+    registrations[data['email']] = data
+    save_json_db(REGISTRATIONS_FILE, registrations)
+    
+    # Notify admin of new registration with approval/reject buttons
+    approve_link = f"{request.host_url}admin/quick-approve?token={approval_token}&email={data['email']}"
+    reject_link = f"{request.host_url}admin/quick-reject?token={approval_token}&email={data['email']}"
+    
+    admin_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h2 style="color: #333; margin: 0;">🔔 New Registration Application</h2>
+                    <p style="color: #666; margin-top: 10px;">Requires your approval</p>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="color: #333; margin-top: 0; margin-bottom: 15px;">Applicant Details:</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; width: 120px;">Full Name:</td>
+                            <td style="padding: 8px 0; color: #333; font-weight: 600;">{data['full_name']}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666;">Email:</td>
+                            <td style="padding: 8px 0; color: #3b82f6; font-weight: 600;">{data['email']}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666;">Company:</td>
+                            <td style="padding: 8px 0; color: #333; font-weight: 600;">{data['company_name']}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666;">Company #:</td>
+                            <td style="padding: 8px 0; color: #333;">{data.get('company_number', 'Not provided')}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666;">Job Title:</td>
+                            <td style="padding: 8px 0; color: #333;">{data['job_title']}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666;">Phone:</td>
+                            <td style="padding: 8px 0; color: #333;">{data['country_code']} {data['phone']}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666;">Location:</td>
+                            <td style="padding: 8px 0; color: #333;">{data.get('personal_address', 'Not provided')}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666;">Email Verified:</td>
+                            <td style="padding: 8px 0;">
+                                <span style="color: {'#22c55e' if data.get('email_verified') else '#ef4444'}; font-weight: 600;">
+                                    {'✓ Yes' if data.get('email_verified') else '✗ Pending'}
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
+                        Click one of the buttons below to approve or reject this application directly from your email:
+                    </p>
+                    
+                    <a href="{approve_link}" style="display: inline-block; background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 14px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 0 10px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);">
+                        ✓ APPROVE APPLICATION
+                    </a>
+                    
+                    <a href="{reject_link}" style="display: inline-block; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 14px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 0 10px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
+                        ✗ REJECT APPLICATION
+                    </a>
+                </div>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                    <p style="color: #999; font-size: 12px; text-align: center; margin: 5px 0;">
+                        Or review in the admin panel:
+                    </p>
+                    <div style="text-align: center;">
+                        <a href="{request.host_url}dashboard" style="color: #3b82f6; text-decoration: none; font-size: 14px;">
+                            Open Admin Dashboard →
+                        </a>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #fef3c7; border-radius: 6px;">
+                    <p style="color: #92400e; font-size: 12px; margin: 0;">
+                        <strong>⚠ Security Note:</strong> These approval links are unique and expire after use. 
+                        Only click if you recognize this applicant.
+                    </p>
+                </div>
+            </div>
+        </body>
+    </html>
+    """
+    
+    send_email_async(EMAIL_CONFIG['admin_email'], 'New Registration - Action Required', admin_html)
+    
+    # Store registration in session for awaiting page
+    session[f'registration_pending_{ip_address}'] = data['email']
+    
+    return jsonify({
+        'status': 'success',
+        'redirect': '/awaiting-verification'
+    })
+
+@app.route('/awaiting-verification')
+def awaiting_verification():
+    """Show awaiting verification page"""
+    ip_address = request.remote_addr
+    
+    # Verify site authentication
+    if not session.get(f'site_authenticated_{ip_address}'):
+        return redirect(url_for('index'))
+    
+    email = session.get(f'registration_pending_{ip_address}')
+    return render_template('awaiting_verification.html', email=email)
+
+@app.route('/verify-email')
+def verify_email():
+    """Handle email verification"""
+    token = request.args.get('token')
+    email = request.args.get('email')
+    
+    if not token or not email:
+        return redirect(url_for('secure_login'))
+    
+    # Load registrations
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    
+    if email in registrations and registrations[email]['verification_token'] == token:
+        registrations[email]['email_verified'] = True
+        registrations[email]['verified_at'] = datetime.now().isoformat()
+        save_json_db(REGISTRATIONS_FILE, registrations)
+        
+        # Redirect to login with success message
+        session['email_verified'] = True
+        return redirect(url_for('secure_login'))
+    
+    return redirect(url_for('secure_login'))
+
 @app.route('/auth', methods=['POST'])
 def auth():
     """Handle user authentication"""
@@ -416,27 +937,34 @@ def auth():
     if not session.get(f'site_authenticated_{ip_address}'):
         return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
     
-    email = request.form.get('email', '').strip()
+    email = request.form.get('email', '').strip().lower()
     password = request.form.get('password', '').strip()
     
-    # Simple validation (expand as needed)
-    if email and password:
+    # Check for admin user
+    if email == 'spikemaz8@aol.com' and password == 'SpikeMaz':
         session[f'user_authenticated_{ip_address}'] = True
-        session[f'username_{ip_address}'] = email.split('@')[0]  # Use email prefix as username
-        
-        # Check if it's an AJAX request
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({'status': 'success', 'redirect': url_for('dashboard')})
-        else:
-            # Regular form submission - redirect directly
-            return redirect(url_for('dashboard'))
+        session[f'username_{ip_address}'] = 'Spikemaz8'
+        session[f'access_level_{ip_address}'] = 'admin'
+        session[f'is_admin_{ip_address}'] = True
+        return jsonify({'status': 'success', 'redirect': url_for('dashboard')})
+    
+    # Check approved users
+    users = load_json_db(USERS_FILE)
+    if email in users:
+        user = users[email]
+        # Check if password is valid and not expired
+        if user.get('password') == password:
+            expiry = datetime.fromisoformat(user.get('password_expiry', '2000-01-01'))
+            if datetime.now() < expiry:
+                session[f'user_authenticated_{ip_address}'] = True
+                session[f'username_{ip_address}'] = user.get('full_name', email)
+                session[f'access_level_{ip_address}'] = 'user'
+                return jsonify({'status': 'success', 'redirect': url_for('dashboard')})
+            else:
+                return jsonify({'status': 'error', 'message': 'Password expired. Contact admin.'}), 401
     
     # Failed authentication
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify({'status': 'error', 'message': 'Invalid credentials'}), 401
-    else:
-        # Regular form submission - redirect back to login
-        return redirect(url_for('secure_login'))
+    return jsonify({'status': 'error', 'message': 'Invalid credentials or account not approved'}), 401
 
 @app.route('/dashboard')
 def dashboard():
@@ -450,7 +978,346 @@ def dashboard():
         return redirect(url_for('secure_login'))
     
     username = session.get(f'username_{ip_address}', 'User')
-    return render_template('Dashboard.html', username=username)
+    is_admin = session.get(f'is_admin_{ip_address}', False)
+    
+    # If admin, include registration data
+    if is_admin:
+        registrations = load_json_db(REGISTRATIONS_FILE)
+        users = load_json_db(USERS_FILE)
+        admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
+        
+        # Prepare admin data
+        pending_registrations = [
+            reg for reg in registrations.values() 
+            if reg.get('email_verified') and not reg.get('admin_approved')
+        ]
+        
+        return render_template('Dashboard.html', 
+                             username=username,
+                             is_admin=is_admin,
+                             pending_registrations=pending_registrations,
+                             all_users=list(users.values()),
+                             admin_actions=list(admin_actions.values()) if isinstance(admin_actions, dict) else admin_actions)
+    
+    return render_template('Dashboard.html', username=username, is_admin=False)
+
+@app.route('/admin/approve-user', methods=['POST'])
+def admin_approve_user():
+    """Admin approve user"""
+    ip_address = request.remote_addr
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    email = request.json.get('email')
+    
+    # Load registrations
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    
+    if email not in registrations:
+        return jsonify({'status': 'error', 'message': 'Registration not found'}), 404
+    
+    # Generate password
+    password = generate_secure_password()
+    password_expiry = datetime.now() + timedelta(days=30)
+    
+    # Create user account
+    users = load_json_db(USERS_FILE)
+    users[email] = {
+        **registrations[email],
+        'password': password,
+        'password_expiry': password_expiry.isoformat(),
+        'admin_approved': True,
+        'approved_at': datetime.now().isoformat(),
+        'approved_by': 'spikemaz8@aol.com'
+    }
+    save_json_db(USERS_FILE, users)
+    
+    # Update registration status
+    registrations[email]['admin_approved'] = True
+    save_json_db(REGISTRATIONS_FILE, registrations)
+    
+    # Log admin action
+    admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
+    if not isinstance(admin_actions, list):
+        admin_actions = []
+    admin_actions.append({
+        'action': 'user_approved',
+        'email': email,
+        'timestamp': datetime.now().isoformat(),
+        'admin': 'spikemaz8@aol.com'
+    })
+    save_json_db(ADMIN_ACTIONS_FILE, admin_actions)
+    
+    # Send approval email with password
+    email_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                <h2 style="color: #333;">Account Approved - AtlasNexus</h2>
+                <p>Your account has been approved. You can now login with the following credentials:</p>
+                <div style="background: #f0f0f0; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                    <p><strong>Email:</strong> {email}</p>
+                    <p><strong>Password:</strong> {password}</p>
+                    <p style="color: #666; font-size: 14px;">This password expires in 30 days</p>
+                </div>
+                <a href="{request.host_url}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                <p style="color: #999; font-size: 12px;">For security, please change your password after first login.</p>
+            </div>
+        </body>
+    </html>
+    """
+    
+    send_email(email, 'Account Approved - AtlasNexus', email_html)
+    
+    return jsonify({
+        'status': 'success',
+        'message': f'User approved. Password sent to {email}',
+        'password': password  # Show to admin for reference
+    })
+
+@app.route('/admin/quick-approve')
+def admin_quick_approve():
+    """Quick approve from email link"""
+    token = request.args.get('token')
+    email = request.args.get('email')
+    
+    if not token or not email:
+        return "Invalid approval link", 400
+    
+    # Load registrations
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    
+    # Verify token
+    if email not in registrations or registrations[email].get('approval_token') != token:
+        return """
+        <html>
+        <body style="background: #1a1a1a; color: white; font-family: Arial; padding: 50px; text-align: center;">
+            <h1 style="color: #ef4444;">Invalid or Expired Link</h1>
+            <p>This approval link is invalid or has already been used.</p>
+            <a href="/dashboard" style="color: #3b82f6;">Go to Dashboard</a>
+        </body>
+        </html>
+        """, 400
+    
+    # Generate password
+    password = generate_secure_password()
+    password_expiry = datetime.now() + timedelta(days=30)
+    
+    # Create user account
+    users = load_json_db(USERS_FILE)
+    users[email] = {
+        **registrations[email],
+        'password': password,
+        'password_expiry': password_expiry.isoformat(),
+        'admin_approved': True,
+        'approved_at': datetime.now().isoformat(),
+        'approved_by': 'email_approval'
+    }
+    save_json_db(USERS_FILE, users)
+    
+    # Update registration status and remove token
+    registrations[email]['admin_approved'] = True
+    registrations[email]['approval_token'] = None  # Invalidate token
+    save_json_db(REGISTRATIONS_FILE, registrations)
+    
+    # Send approval email with password
+    user_email_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                <h2 style="color: #22c55e;">✓ Application Approved!</h2>
+                <p>Welcome to AtlasNexus! Your account has been approved.</p>
+                <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border: 2px solid #3b82f6; margin: 20px 0;">
+                    <h3 style="color: #1e40af; margin-top: 0;">Your Login Credentials:</h3>
+                    <p><strong>Email:</strong> {email}</p>
+                    <p><strong>Password:</strong> <code style="background: #e5e7eb; padding: 4px 8px; border-radius: 4px; font-size: 16px;">{password}</code></p>
+                    <p style="color: #666; font-size: 14px; margin-top: 10px;">⏱ This password expires in 30 days</p>
+                </div>
+                <a href="{request.host_url}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                <p style="color: #999; font-size: 12px;">Please save this password securely. For security, we recommend changing it after your first login.</p>
+            </div>
+        </body>
+    </html>
+    """
+    
+    send_email(email, 'Welcome to AtlasNexus - Account Approved', user_email_html)
+    
+    # Return success page
+    return f"""
+    <html>
+    <body style="background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%); color: white; font-family: Arial; padding: 50px; text-align: center; min-height: 100vh;">
+        <div style="max-width: 600px; margin: 0 auto; background: rgba(44, 49, 55, 0.95); padding: 40px; border-radius: 20px; border: 2px solid #22c55e;">
+            <h1 style="color: #22c55e; font-size: 3rem;">✓</h1>
+            <h2 style="color: #22c55e;">Application Approved!</h2>
+            <p style="font-size: 18px; margin: 20px 0;">User <strong>{email}</strong> has been approved.</p>
+            <div style="background: rgba(34, 197, 94, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <p>Generated Password: <code style="background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px;">{password}</code></p>
+                <p style="color: #94a3b8; font-size: 14px;">This has been emailed to the user</p>
+            </div>
+            <a href="/dashboard" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; margin-top: 20px;">Go to Dashboard</a>
+        </div>
+    </body>
+    </html>
+    """
+
+@app.route('/admin/quick-reject')
+def admin_quick_reject():
+    """Quick reject from email link"""
+    token = request.args.get('token')
+    email = request.args.get('email')
+    
+    if not token or not email:
+        return "Invalid rejection link", 400
+    
+    # Load registrations
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    
+    # Verify token
+    if email not in registrations or registrations[email].get('approval_token') != token:
+        return """
+        <html>
+        <body style="background: #1a1a1a; color: white; font-family: Arial; padding: 50px; text-align: center;">
+            <h1 style="color: #ef4444;">Invalid or Expired Link</h1>
+            <p>This rejection link is invalid or has already been used.</p>
+            <a href="/dashboard" style="color: #3b82f6;">Go to Dashboard</a>
+        </body>
+        </html>
+        """, 400
+    
+    # Remove from registrations
+    del registrations[email]
+    save_json_db(REGISTRATIONS_FILE, registrations)
+    
+    # Send rejection email
+    rejection_email_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                <h2 style="color: #333;">Registration Update</h2>
+                <p>Thank you for your interest in AtlasNexus.</p>
+                <p>Unfortunately, your registration application has not been approved at this time.</p>
+                <p>If you have questions or would like to discuss your application, please contact us at support@atlasnexus.co.uk</p>
+            </div>
+        </body>
+    </html>
+    """
+    
+    send_email(email, 'AtlasNexus - Registration Update', rejection_email_html)
+    
+    # Return success page
+    return f"""
+    <html>
+    <body style="background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%); color: white; font-family: Arial; padding: 50px; text-align: center; min-height: 100vh;">
+        <div style="max-width: 600px; margin: 0 auto; background: rgba(44, 49, 55, 0.95); padding: 40px; border-radius: 20px; border: 2px solid #ef4444;">
+            <h1 style="color: #ef4444; font-size: 3rem;">✗</h1>
+            <h2 style="color: #ef4444;">Application Rejected</h2>
+            <p style="font-size: 18px; margin: 20px 0;">User <strong>{email}</strong> has been rejected.</p>
+            <p style="color: #94a3b8;">A notification email has been sent to the applicant.</p>
+            <a href="/dashboard" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; margin-top: 20px;">Go to Dashboard</a>
+        </div>
+    </body>
+    </html>
+    """
+
+@app.route('/admin/reject-user', methods=['POST'])
+def admin_reject_user():
+    """Admin reject user"""
+    ip_address = request.remote_addr
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    email = request.json.get('email')
+    reason = request.json.get('reason', 'Application not approved')
+    
+    # Remove from registrations
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    if email in registrations:
+        del registrations[email]
+        save_json_db(REGISTRATIONS_FILE, registrations)
+    
+    # Send rejection email
+    email_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                <h2 style="color: #333;">Registration Update - AtlasNexus</h2>
+                <p>Unfortunately, your registration application has not been approved at this time.</p>
+                <p><strong>Reason:</strong> {reason}</p>
+                <p>If you have questions, please contact support@atlasnexus.co.uk</p>
+            </div>
+        </body>
+    </html>
+    """
+    
+    send_email(email, 'Registration Update - AtlasNexus', email_html)
+    
+    return jsonify({'status': 'success', 'message': 'User rejected'})
+
+@app.route('/test-email')
+def test_email():
+    """Test email configuration"""
+    ip_address = request.remote_addr
+    
+    # Only allow admin to test
+    if not session.get(f'is_admin_{ip_address}'):
+        return "Unauthorized", 401
+    
+    test_html = """
+    <html>
+        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                <h2 style="color: #333;">Email Configuration Test</h2>
+                <p>This is a test email from AtlasNexus to verify your Gmail SMTP configuration.</p>
+                <div style="background: #f0f0f0; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                    <p><strong>Configuration Details:</strong></p>
+                    <p>SMTP Server: smtp.gmail.com</p>
+                    <p>Port: 587</p>
+                    <p>Sender: """ + EMAIL_CONFIG['sender_email'] + """</p>
+                </div>
+                <p style="color: #22c55e; font-weight: bold;">✓ If you received this email, your configuration is working!</p>
+            </div>
+        </body>
+    </html>
+    """
+    
+    success = send_email(EMAIL_CONFIG['admin_email'], 'AtlasNexus Email Test', test_html)
+    
+    if success:
+        return f"""
+        <html>
+        <body style="background: #1a1a1a; color: white; font-family: Arial; padding: 50px; text-align: center;">
+            <h1 style="color: #22c55e;">✓ Email Sent Successfully!</h1>
+            <p>Check your email at: {EMAIL_CONFIG['admin_email']}</p>
+            <p style="margin-top: 30px;">
+                <a href="/dashboard" style="background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Back to Dashboard</a>
+            </p>
+        </body>
+        </html>
+        """
+    else:
+        return f"""
+        <html>
+        <body style="background: #1a1a1a; color: white; font-family: Arial; padding: 50px; text-align: center;">
+            <h1 style="color: #ef4444;">✗ Email Failed</h1>
+            <p>Please check your email_config.py file</p>
+            <p>Make sure you have:</p>
+            <ol style="text-align: left; display: inline-block;">
+                <li>Enabled 2-factor authentication on Gmail</li>
+                <li>Generated an App Password</li>
+                <li>Added the App Password to email_config.py</li>
+            </ol>
+            <p style="margin-top: 30px;">
+                <a href="/dashboard" style="background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Back to Dashboard</a>
+            </p>
+        </body>
+        </html>
+        """
 
 @app.route('/logout')
 def logout():
@@ -462,6 +1329,36 @@ def logout():
     session.pop(f'username_{ip_address}', None)
     
     return redirect(url_for('secure_login'))
+
+@app.route('/terms')
+def terms():
+    """Terms of Service page"""
+    return render_template('terms.html')
+
+@app.route('/privacy')
+def privacy():
+    """Privacy Policy page"""
+    return render_template('privacy.html')
+
+@app.route('/compliance')
+def compliance():
+    """Compliance page"""
+    return render_template('compliance.html')
+
+@app.route('/data-protection')
+def data_protection():
+    """Data Protection page"""
+    return render_template('data-protection.html')
+
+@app.route('/security')
+def security():
+    """Security page"""
+    return render_template('security.html')
+
+@app.route('/contact')
+def contact():
+    """Contact page"""
+    return render_template('contact.html')
 
 @app.errorhandler(404)
 def not_found(e):

@@ -25,7 +25,8 @@
       "Bash(del config.py run.py app.py README.md RULES.md)",
       "Bash(mv:*)",
       "Bash(taskkill:*)",
-      "WebFetch(domain:atlasnexus.co.uk)"
+      "WebFetch(domain:atlasnexus.co.uk)",
+      "Bash(cmd:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"

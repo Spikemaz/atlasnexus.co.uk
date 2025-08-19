@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security - AtlasNexus</title>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&family=SF+Pro+Text:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-charcoal: #1A1D23;
+            --silver-light: #B8C0C8;
+            --pearl-grey: #E5E9F0;
+            --platinum-gold: #60a5fa;
+            --font-display: 'SF Pro Display', -apple-system, system-ui, sans-serif;
+            --font-text: 'SF Pro Text', -apple-system, system-ui, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-text);
+            background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%);
+            color: var(--pearl-grey);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(184, 192, 200, 0.2);
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--silver-light);
+            font-size: 1.1rem;
+        }
+
+        .effective-date {
+            background: rgba(96, 165, 250, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: var(--platinum-gold);
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            color: var(--pearl-grey);
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(184, 192, 200, 0.1);
+        }
+
+        h3 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--silver-light);
+            margin: 25px 0 15px;
+        }
+
+        p, li {
+            color: var(--silver-light);
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: linear-gradient(90deg, #60a5fa, #93c5fd);
+            color: #0f172a;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 40px;
+            transition: transform 0.2s;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .contact-info {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .security-badge {
+            display: inline-block;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin: 0 5px;
+        }
+
+        .security-box {
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .security-box h3 {
+            color: var(--platinum-gold);
+            margin-top: 0;
+        }
+
+        .security-metric {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--platinum-gold);
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--silver-light);
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path d="M16 3L26.5 9.5V22.5L16 29L5.5 22.5V9.5L16 3Z" stroke="#93c5fd" stroke-width="2" fill="rgba(147, 197, 253, 0.08)"/>
+                </svg>
+                <span style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 700;">
+                    <span style="color: #60a5fa;">ATLAS</span><span style="color: #93c5fd;">:NEXUS</span>
+                </span>
+            </div>
+            <h1 class="title">Security Centre</h1>
+            <p class="subtitle">Enterprise-grade security protecting your financial data</p>
+        </div>
+
+        <div class="effective-date">
+            <strong>Security Status:</strong> Operational
+            <span class="security-badge">ISO 27001</span>
+            <span class="security-badge">SOC 2 Type II</span>
+            <span class="security-badge">PCI DSS</span>
+        </div>
+
+        <div class="security-metric">
+            <div class="metric-card">
+                <div class="metric-value">99.99%</div>
+                <div class="metric-label">Uptime SLA</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">256-bit</div>
+                <div class="metric-label">AES Encryption</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">24/7</div>
+                <div class="metric-label">Security Monitoring</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">&lt;1ms</div>
+                <div class="metric-label">Threat Response</div>
+            </div>
+        </div>
+
+        <h2>1. Security Architecture</h2>
+        <p>AtlasNexus employs a defence-in-depth security architecture with multiple layers of protection to ensure the highest level of security for your financial data and operations.</p>
+
+        <div class="security-box">
+            <h3>Infrastructure Security</h3>
+            <ul>
+                <li>Tier 4 data centres with biometric access controls</li>
+                <li>Redundant power and cooling systems</li>
+                <li>Geographic distribution for disaster recovery</li>
+                <li>Hardware security modules (HSMs) for cryptographic operations</li>
+                <li>Secure boot and trusted platform modules</li>
+            </ul>
+        </div>
+
+        <div class="security-box">
+            <h3>Application Security</h3>
+            <ul>
+                <li>Secure software development lifecycle (SSDLC)</li>
+                <li>Regular security code reviews and static analysis</li>
+                <li>Dynamic application security testing (DAST)</li>
+                <li>Dependency scanning and vulnerability management</li>
+                <li>Web application firewall (WAF) protection</li>
+            </ul>
+        </div>
+
+        <h2>2. Authentication & Access Control</h2>
+        <p>Multi-layered authentication ensures only authorised users can access our platform:</p>
+        <ul>
+            <li><strong>Multi-Factor Authentication (MFA):</strong> Required for all user accounts</li>
+            <li><strong>Biometric Authentication:</strong> Optional fingerprint and facial recognition</li>
+            <li><strong>Hardware Security Keys:</strong> Support for FIDO2/WebAuthn</li>
+            <li><strong>Single Sign-On (SSO):</strong> Enterprise SAML 2.0 integration</li>
+            <li><strong>Session Management:</strong> Automatic timeout and secure session handling</li>
+            <li><strong>IP Whitelisting:</strong> Restrict access to approved networks</li>
+        </ul>
+
+        <h2>3. Data Encryption</h2>
+        <p>Comprehensive encryption protects your data at every stage:</p>
+        
+        <div class="security-box">
+            <h3>Encryption at Rest</h3>
+            <ul>
+                <li>AES-256 encryption for all stored data</li>
+                <li>Encrypted database fields for sensitive information</li>
+                <li>Full disk encryption on all servers</li>
+                <li>Encrypted backups with separate key management</li>
+                <li>Secure key rotation policies</li>
+            </ul>
+        </div>
+
+        <div class="security-box">
+            <h3>Encryption in Transit</h3>
+            <ul>
+                <li>TLS 1.3 for all connections</li>
+                <li>Perfect forward secrecy</li>
+                <li>Certificate pinning for mobile applications</li>
+                <li>Encrypted API communications</li>
+                <li>VPN tunnels for administrative access</li>
+            </ul>
+        </div>
+
+        <h2>4. Threat Detection & Response</h2>
+        <p>Advanced security monitoring and incident response capabilities:</p>
+        <ul>
+            <li><strong>Security Operations Centre (SOC):</strong> 24/7 monitoring and response</li>
+            <li><strong>SIEM Platform:</strong> Real-time event correlation and analysis</li>
+            <li><strong>Intrusion Detection:</strong> Network and host-based IDS/IPS</li>
+            <li><strong>Behavioural Analytics:</strong> AI-powered anomaly detection</li>
+            <li><strong>Threat Intelligence:</strong> Integration with global threat feeds</li>
+            <li><strong>Incident Response:</strong> Documented procedures and rapid response team</li>
+        </ul>
+
+        <h2>5. Network Security</h2>
+        <p>Robust network defences protect against external threats:</p>
+        <ul>
+            <li>Next-generation firewalls with deep packet inspection</li>
+            <li>Network segmentation and microsegmentation</li>
+            <li>DDoS protection and mitigation</li>
+            <li>Zero trust network architecture</li>
+            <li>Secure remote access via VPN</li>
+            <li>Regular network vulnerability assessments</li>
+        </ul>
+
+        <h2>6. Compliance & Certifications</h2>
+        <p>We maintain compliance with leading security standards:</p>
+        
+        <div class="security-box">
+            <h3>Certifications</h3>
+            <ul>
+                <li><strong>ISO 27001:</strong> Information Security Management System</li>
+                <li><strong>ISO 27017:</strong> Cloud Security Controls</li>
+                <li><strong>ISO 27018:</strong> Personal Data Protection in the Cloud</li>
+                <li><strong>SOC 2 Type II:</strong> Security, Availability, and Confidentiality</li>
+                <li><strong>PCI DSS Level 1:</strong> Payment Card Industry Data Security</li>
+            </ul>
+        </div>
+
+        <h2>7. Security Testing</h2>
+        <p>Regular testing ensures our security measures remain effective:</p>
+        <ul>
+            <li><strong>Penetration Testing:</strong> Quarterly third-party assessments</li>
+            <li><strong>Vulnerability Scanning:</strong> Continuous automated scanning</li>
+            <li><strong>Red Team Exercises:</strong> Annual adversarial simulations</li>
+            <li><strong>Security Audits:</strong> Regular internal and external audits</li>
+            <li><strong>Bug Bounty Programme:</strong> Responsible disclosure rewards</li>
+        </ul>
+
+        <h2>8. Business Continuity</h2>
+        <p>Comprehensive planning ensures service availability:</p>
+        <ul>
+            <li>Redundant infrastructure across multiple regions</li>
+            <li>Automated failover and disaster recovery</li>
+            <li>Regular backup and recovery testing</li>
+            <li>Business continuity planning and testing</li>
+            <li>99.99% uptime SLA guarantee</li>
+            <li>Real-time data replication</li>
+        </ul>
+
+        <h2>9. Physical Security</h2>
+        <p>Our data centres maintain the highest physical security standards:</p>
+        <ul>
+            <li>24/7 on-site security personnel</li>
+            <li>Biometric access controls</li>
+            <li>CCTV surveillance and recording</li>
+            <li>Mantrap entry systems</li>
+            <li>Environmental monitoring and controls</li>
+            <li>Secure equipment disposal procedures</li>
+        </ul>
+
+        <h2>10. Security Awareness</h2>
+        <p>Our security culture extends throughout the organisation:</p>
+        <ul>
+            <li>Mandatory security training for all employees</li>
+            <li>Regular phishing simulations</li>
+            <li>Security awareness campaigns</li>
+            <li>Clear security policies and procedures</li>
+            <li>Background checks for all personnel</li>
+            <li>Confidentiality agreements and NDAs</li>
+        </ul>
+
+        <h2>11. Incident Response</h2>
+        <p>Our incident response plan ensures rapid and effective response:</p>
+        <ol>
+            <li><strong>Detection:</strong> Automated monitoring and alerting</li>
+            <li><strong>Analysis:</strong> Rapid triage and impact assessment</li>
+            <li><strong>Containment:</strong> Immediate threat isolation</li>
+            <li><strong>Eradication:</strong> Complete threat removal</li>
+            <li><strong>Recovery:</strong> Service restoration and validation</li>
+            <li><strong>Lessons Learned:</strong> Post-incident review and improvement</li>
+        </ol>
+
+        <h2>12. Report a Security Issue</h2>
+        <div class="contact-info">
+            <h3>Security Team Contact</h3>
+            <p>Report security concerns or vulnerabilities:</p>
+            <p><strong>Security Email:</strong> security@atlasnexus.co.uk</p>
+            <p><strong>Emergency Hotline:</strong> +44 (0) 20 1234 5681</p>
+            <p><strong>Bug Bounty:</strong> bugbounty@atlasnexus.co.uk</p>
+            <p><strong>PGP Key:</strong> Available on request for encrypted communications</p>
+            
+            <p style="margin-top: 15px;"><strong>Response Time:</strong> Critical issues addressed within 1 hour</p>
+        </div>
+
+        <a href="/" class="back-button">← Back to Platform</a>
+    </div>
+</body>
+</html>

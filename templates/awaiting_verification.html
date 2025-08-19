@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AtlasNexus - Awaiting Verification</title>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&family=SF+Pro+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-charcoal: #2C3137;
+            --slate-grey: #364049;
+            --steel-blue: #4A5568;
+            --silver-light: #B8C0C8;
+            --platinum-gold: #60a5fa;
+            --pure-white: #FFFFFF;
+            --success-green: #22C55E;
+            --font-display: 'SF Pro Display', -apple-system, system-ui, sans-serif;
+            --font-text: 'SF Pro Text', -apple-system, system-ui, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-text);
+            background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%);
+            color: var(--pure-white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--steel-blue) 0%, var(--slate-grey) 100%);
+            border-bottom: 2px solid var(--platinum-gold);
+            padding: 1rem 2rem;
+            backdrop-filter: blur(20px);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Main Content */
+        .main-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .verification-card {
+            background: linear-gradient(135deg, rgba(44, 49, 55, 0.95) 0%, rgba(54, 64, 73, 0.95) 100%);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .verification-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent 0%, var(--platinum-gold) 50%, transparent 100%);
+        }
+
+        .status-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.2) 0%, rgba(96, 165, 250, 0.1) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+
+        .status-icon svg {
+            width: 50px;
+            height: 50px;
+            stroke: var(--platinum-gold);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--pure-white);
+        }
+
+        .status-message {
+            color: var(--silver-light);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .email-display {
+            background: rgba(96, 165, 250, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 2rem 0;
+            font-family: var(--font-text);
+        }
+
+        .email-display .label {
+            color: var(--silver-light);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .email-display .email {
+            color: var(--platinum-gold);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .steps-container {
+            background: rgba(44, 49, 55, 0.5);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, var(--platinum-gold) 0%, #3b82f6 100%);
+            color: var(--pure-white);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            color: var(--pure-white);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .step-description {
+            color: var(--silver-light);
+            font-size: 0.9rem;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: transparent;
+            color: var(--platinum-gold);
+            border: 2px solid var(--platinum-gold);
+            padding: 12px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+        }
+
+        .back-button:hover {
+            background: var(--platinum-gold);
+            color: var(--deep-charcoal);
+            transform: translateY(-2px);
+        }
+
+        /* Loading animation */
+        .loading-dots {
+            display: inline-block;
+        }
+
+        .loading-dots span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--platinum-gold);
+            margin: 0 3px;
+            animation: dot-bounce 1.4s infinite ease-in-out both;
+        }
+
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0; }
+
+        @keyframes dot-bounce {
+            0%, 80%, 100% { 
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, rgba(20, 25, 31, 0.98) 0%, rgba(31, 41, 55, 0.95) 100%);
+            border-top: 1px solid rgba(96, 165, 250, 0.2);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            color: var(--silver-light);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path d="M16 3L26.5 9.5V22.5L16 29L5.5 22.5V9.5L16 3Z" stroke="#93c5fd" stroke-width="2" fill="rgba(147, 197, 253, 0.08)"/>
+                    <path d="M16 8L22 11.5V20.5L16 24L10 20.5V11.5L16 8Z" stroke="rgba(147, 197, 253, 0.4)" stroke-width="1"/>
+                    <circle cx="16" cy="16" r="3" fill="#dbeafe"/>
+                </svg>
+                <div style="display: flex; align-items: center;">
+                    <span style="font-size: 1.35rem; font-weight: 700; background: linear-gradient(90deg, #dbeafe, #93c5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ATLAS</span>
+                    <span style="font-size: 1.2rem; font-weight: 400; color: #60a5fa; margin: 0 4px;">:</span>
+                    <span style="font-size: 1.35rem; font-weight: 700; background: linear-gradient(90deg, #93c5fd, #dbeafe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">NEXUS</span>
+                </div>
+            </div>
+            <div style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">
+                Registration Pending
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="verification-card">
+            <div class="status-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/>
+                </svg>
+            </div>
+
+            <h1>Check Your Email</h1>
+            
+            <div class="status-message">
+                Your registration has been submitted successfully. We've sent a verification email to:
+            </div>
+
+            {% if email %}
+            <div class="email-display">
+                <div class="label">Registered Email</div>
+                <div class="email">{{ email }}</div>
+            </div>
+            {% endif %}
+
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-title">Verify Your Email</div>
+                        <div class="step-description">Click the verification link in the email we sent you</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-title">Admin Review</div>
+                        <div class="step-description">Your application will be reviewed within 24 hours</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-title">Receive Credentials</div>
+                        <div class="step-description">Once approved, you'll receive your login credentials via email</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin: 2rem 0; padding: 1rem; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 10px;">
+                <p style="color: var(--success-green); font-size: 0.9rem;">
+                    <strong>Note:</strong> Please check your spam folder if you don't see the email within a few minutes.
+                </p>
+            </div>
+
+            <div class="loading-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div style="margin-top: 1rem; color: var(--silver-light); font-size: 0.9rem;">
+                Processing your application...
+            </div>
+
+            <a href="/secure-login" class="back-button">Back to Login</a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>© 2024 AtlasNexus. All rights reserved. | Registration System</p>
+            <p style="margin-top: 0.5rem; color: #92969C;">
+                Support: Support@AtlasNexus.co.uk | +44 20 7123 4567
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Auto-check verification status
+        let checkCount = 0;
+        const maxChecks = 60; // Check for 5 minutes
+        
+        function checkVerificationStatus() {
+            if (checkCount >= maxChecks) {
+                return;
+            }
+            
+            fetch('/check-verification-status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.verified) {
+                        window.location.href = '/secure-login';
+                    }
+                })
+                .catch(error => console.log('Check failed:', error));
+            
+            checkCount++;
+            setTimeout(checkVerificationStatus, 5000); // Check every 5 seconds
+        }
+        
+        // Start checking after 10 seconds
+        setTimeout(checkVerificationStatus, 10000);
+    </script>
+</body>
+</html>

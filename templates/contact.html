@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - AtlasNexus</title>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&family=SF+Pro+Text:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-charcoal: #1A1D23;
+            --silver-light: #B8C0C8;
+            --pearl-grey: #E5E9F0;
+            --platinum-gold: #60a5fa;
+            --font-display: 'SF Pro Display', -apple-system, system-ui, sans-serif;
+            --font-text: 'SF Pro Text', -apple-system, system-ui, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-text);
+            background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%);
+            color: var(--pearl-grey);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--silver-light);
+            font-size: 1.1rem;
+        }
+
+        .contact-sections {
+            display: grid;
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .contact-card {
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        .contact-card h2 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--pearl-grey);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(26, 29, 35, 0.5);
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .contact-item:hover {
+            background: rgba(96, 165, 250, 0.1);
+        }
+
+        .contact-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--platinum-gold);
+        }
+
+        .contact-details {
+            flex: 1;
+        }
+
+        .contact-label {
+            font-size: 0.9rem;
+            color: var(--silver-light);
+            margin-bottom: 4px;
+        }
+
+        .contact-value {
+            font-size: 1.1rem;
+            color: var(--pearl-grey);
+            font-weight: 500;
+        }
+
+        .contact-value a {
+            color: var(--platinum-gold);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .contact-value a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        .hours-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .hours-item {
+            padding: 12px;
+            background: rgba(26, 29, 35, 0.5);
+            border-radius: 6px;
+        }
+
+        .hours-day {
+            color: var(--silver-light);
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .hours-time {
+            color: var(--pearl-grey);
+            font-weight: 500;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: linear-gradient(90deg, #60a5fa, #93c5fd);
+            color: #0f172a;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 40px;
+            transition: transform 0.2s;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .emergency-notice {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .emergency-notice h3 {
+            color: #f87171;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .hours-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path d="M16 3L26.5 9.5V22.5L16 29L5.5 22.5V9.5L16 3Z" stroke="#93c5fd" stroke-width="2" fill="rgba(147, 197, 253, 0.08)"/>
+                </svg>
+                <span style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 700;">
+                    <span style="color: #60a5fa;">ATLAS</span><span style="color: #93c5fd;">:NEXUS</span>
+                </span>
+            </div>
+            <h1 class="title">Contact Us</h1>
+            <p class="subtitle">Get in touch with our team</p>
+        </div>
+
+        <div class="contact-sections">
+            <div class="contact-card">
+                <h2>
+                    <svg class="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    Email Support
+                </h2>
+                <div class="contact-item">
+                    <div class="contact-details">
+                        <div class="contact-label">General Enquiries</div>
+                        <div class="contact-value">
+                            <a href="mailto:support@atlasnexus.co.uk">support@atlasnexus.co.uk</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-details">
+                        <div class="contact-label">Technical Support</div>
+                        <div class="contact-value">
+                            <a href="mailto:technical@atlasnexus.co.uk">technical@atlasnexus.co.uk</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-details">
+                        <div class="contact-label">Sales Enquiries</div>
+                        <div class="contact-value">
+                            <a href="mailto:sales@atlasnexus.co.uk">sales@atlasnexus.co.uk</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <h2>
+                    <svg class="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                    </svg>
+                    Phone Support
+                </h2>
+                <div class="contact-item">
+                    <div class="contact-details">
+                        <div class="contact-label">UK Main Line</div>
+                        <div class="contact-value">+44 (0) 20 1234 5678</div>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-details">
+                        <div class="contact-label">International</div>
+                        <div class="contact-value">+44 20 1234 5678</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <h2>
+                    <svg class="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Business Hours
+                </h2>
+                <div class="hours-grid">
+                    <div class="hours-item">
+                        <div class="hours-day">Monday - Friday</div>
+                        <div class="hours-time">8:00 AM - 6:00 PM GMT</div>
+                    </div>
+                    <div class="hours-item">
+                        <div class="hours-day">Saturday</div>
+                        <div class="hours-time">9:00 AM - 2:00 PM GMT</div>
+                    </div>
+                    <div class="hours-item">
+                        <div class="hours-day">Sunday</div>
+                        <div class="hours-time">Closed</div>
+                    </div>
+                    <div class="hours-item">
+                        <div class="hours-day">Bank Holidays</div>
+                        <div class="hours-time">Closed</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <h2>
+                    <svg class="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Office Location
+                </h2>
+                <div class="contact-item">
+                    <div class="contact-details">
+                        <div class="contact-label">Headquarters</div>
+                        <div class="contact-value">
+                            AtlasNexus Ltd<br>
+                            London<br>
+                            United Kingdom
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="emergency-notice">
+                <h3>24/7 Emergency Support</h3>
+                <p>For critical system issues outside business hours, please email: <strong>emergency@atlasnexus.co.uk</strong></p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="/" class="back-button">← Back to Platform</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -5,6 +5,10 @@ venv/
 nul
 *_live.py
 
+# SENSITIVE FILES - NEVER COMMIT
+email_config.py
+data/
+
 # Temporary test files
 templates/temp/*
 !templates/temp/README.txt

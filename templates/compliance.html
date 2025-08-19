@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance - AtlasNexus</title>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&family=SF+Pro+Text:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-charcoal: #1A1D23;
+            --silver-light: #B8C0C8;
+            --pearl-grey: #E5E9F0;
+            --platinum-gold: #60a5fa;
+            --font-display: 'SF Pro Display', -apple-system, system-ui, sans-serif;
+            --font-text: 'SF Pro Text', -apple-system, system-ui, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-text);
+            background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%);
+            color: var(--pearl-grey);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(184, 192, 200, 0.2);
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--silver-light);
+            font-size: 1.1rem;
+        }
+
+        .effective-date {
+            background: rgba(96, 165, 250, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: var(--platinum-gold);
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            color: var(--pearl-grey);
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(184, 192, 200, 0.1);
+        }
+
+        h3 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--silver-light);
+            margin: 25px 0 15px;
+        }
+
+        p, li {
+            color: var(--silver-light);
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: linear-gradient(90deg, #60a5fa, #93c5fd);
+            color: #0f172a;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 40px;
+            transition: transform 0.2s;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .contact-info {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .compliance-badge {
+            display: inline-block;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-left: 10px;
+        }
+
+        .regulation-box {
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .regulation-box h3 {
+            color: var(--platinum-gold);
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path d="M16 3L26.5 9.5V22.5L16 29L5.5 22.5V9.5L16 3Z" stroke="#93c5fd" stroke-width="2" fill="rgba(147, 197, 253, 0.08)"/>
+                </svg>
+                <span style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 700;">
+                    <span style="color: #60a5fa;">ATLAS</span><span style="color: #93c5fd;">:NEXUS</span>
+                </span>
+            </div>
+            <h1 class="title">Regulatory Compliance</h1>
+            <p class="subtitle">Our commitment to regulatory excellence and financial integrity</p>
+        </div>
+
+        <div class="effective-date">
+            <strong>Last Updated:</strong> 1 January 2024
+            <span class="compliance-badge">Fully Compliant</span>
+        </div>
+
+        <h2>1. Regulatory Framework</h2>
+        <p>AtlasNexus operates under a comprehensive regulatory framework designed to ensure the highest standards of financial integrity, data protection, and operational excellence. We maintain strict compliance with all applicable laws and regulations in the jurisdictions where we operate.</p>
+
+        <h2>2. Key Regulatory Compliance</h2>
+        
+        <div class="regulation-box">
+            <h3>Financial Conduct Authority (FCA)</h3>
+            <p>We adhere to FCA guidelines for financial services, including:</p>
+            <ul>
+                <li>Market conduct rules</li>
+                <li>Financial promotions regulations</li>
+                <li>Client money and asset protection rules</li>
+                <li>Systems and controls requirements</li>
+            </ul>
+        </div>
+
+        <div class="regulation-box">
+            <h3>General Data Protection Regulation (GDPR)</h3>
+            <p>Full compliance with GDPR requirements including:</p>
+            <ul>
+                <li>Lawful basis for data processing</li>
+                <li>Data subject rights management</li>
+                <li>Privacy by design implementation</li>
+                <li>Data breach notification procedures</li>
+                <li>International data transfer safeguards</li>
+            </ul>
+        </div>
+
+        <div class="regulation-box">
+            <h3>Anti-Money Laundering (AML)</h3>
+            <p>Comprehensive AML programme including:</p>
+            <ul>
+                <li>Customer due diligence (CDD)</li>
+                <li>Enhanced due diligence (EDD) for high-risk clients</li>
+                <li>Ongoing transaction monitoring</li>
+                <li>Suspicious activity reporting</li>
+                <li>Regular AML training for staff</li>
+            </ul>
+        </div>
+
+        <h2>3. Know Your Customer (KYC)</h2>
+        <p>Our KYC procedures ensure thorough verification of all clients:</p>
+        <ul>
+            <li><strong>Identity Verification:</strong> Multi-factor authentication and document verification</li>
+            <li><strong>Address Verification:</strong> Proof of address requirements</li>
+            <li><strong>Source of Funds:</strong> Documentation for fund origins</li>
+            <li><strong>Business Purpose:</strong> Understanding client objectives and risk profile</li>
+            <li><strong>Ongoing Monitoring:</strong> Regular review and update of client information</li>
+        </ul>
+
+        <h2>4. Market Abuse Regulation (MAR)</h2>
+        <p>We maintain strict controls to prevent market abuse:</p>
+        <ul>
+            <li>Insider dealing prevention measures</li>
+            <li>Market manipulation detection systems</li>
+            <li>Suspicious transaction and order reporting (STOR)</li>
+            <li>Personal account dealing restrictions</li>
+            <li>Information barriers and confidentiality protocols</li>
+        </ul>
+
+        <h2>5. Operational Resilience</h2>
+        <p>Our operational resilience framework ensures continuous service delivery:</p>
+        <ul>
+            <li>Business continuity planning</li>
+            <li>Disaster recovery procedures</li>
+            <li>Cyber security measures</li>
+            <li>Third-party risk management</li>
+            <li>Regular stress testing and scenario analysis</li>
+        </ul>
+
+        <h2>6. Risk Management Framework</h2>
+        <p>Comprehensive risk management covering:</p>
+        <ul>
+            <li><strong>Credit Risk:</strong> Counterparty assessment and monitoring</li>
+            <li><strong>Market Risk:</strong> Position limits and stress testing</li>
+            <li><strong>Operational Risk:</strong> Process controls and incident management</li>
+            <li><strong>Liquidity Risk:</strong> Cash flow management and contingency funding</li>
+            <li><strong>Reputational Risk:</strong> Brand protection and crisis management</li>
+        </ul>
+
+        <h2>7. Reporting and Transparency</h2>
+        <p>We maintain comprehensive reporting to regulatory authorities:</p>
+        <ul>
+            <li>Regular prudential reporting</li>
+            <li>Transaction reporting (MiFID II/MiFIR)</li>
+            <li>EMIR trade repository reporting</li>
+            <li>Financial crime reporting</li>
+            <li>Annual compliance assessments</li>
+        </ul>
+
+        <h2>8. Client Asset Protection</h2>
+        <p>Robust measures to safeguard client assets:</p>
+        <ul>
+            <li>Segregation of client assets</li>
+            <li>Daily reconciliations</li>
+            <li>Client money rules compliance</li>
+            <li>Regular audits and controls testing</li>
+            <li>FSCS protection where applicable</li>
+        </ul>
+
+        <h2>9. Compliance Monitoring</h2>
+        <p>Our compliance monitoring programme includes:</p>
+        <ul>
+            <li>Regular compliance reviews and audits</li>
+            <li>Automated surveillance systems</li>
+            <li>Employee training and certification</li>
+            <li>Whistleblowing procedures</li>
+            <li>Regulatory change management</li>
+        </ul>
+
+        <h2>10. International Standards</h2>
+        <p>Adherence to international standards and best practices:</p>
+        <ul>
+            <li>ISO 27001 - Information Security Management</li>
+            <li>ISO 22301 - Business Continuity Management</li>
+            <li>ISO 31000 - Risk Management</li>
+            <li>ISAE 3402 - Controls Assurance</li>
+        </ul>
+
+        <h2>11. Contact Our Compliance Team</h2>
+        <div class="contact-info">
+            <h3>Compliance Department</h3>
+            <p>For compliance-related enquiries or to report concerns:</p>
+            <p><strong>Email:</strong> compliance@atlasnexus.co.uk</p>
+            <p><strong>Compliance Hotline:</strong> +44 (0) 20 1234 5679</p>
+            <p><strong>Whistleblowing:</strong> whistleblowing@atlasnexus.co.uk</p>
+            <p><strong>Address:</strong> AtlasNexus Ltd, Compliance Department, London, United Kingdom</p>
+        </div>
+
+        <a href="/" class="back-button">← Back to Platform</a>
+    </div>
+</body>
+</html>

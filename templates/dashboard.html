@@ -4,373 +4,529 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AtlasNexus - Securitization Command Center</title>
-    
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&family=SF+Pro+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        :root {
+            /* Modern Financial Institution Palette */
+            --deep-charcoal: #1A1D23;
+            --slate-grey: #2C3137;
+            --steel-blue: #364049;
+            --silver-mist: #92969C;
+            --silver-light: #B8C0C8;
+            --pearl-grey: #E5E9F0;
+            --pure-white: #FFFFFF;
+            
+            /* Accent Colors */
+            --platinum-gold: #60a5fa;
+            --amber-yellow: #93c5fd;
+            --market-green: #22C55E;
+            --market-red: #EF4444;
+            --emerald-green: #059669;
+            --crimson-red: #B91C1C;
+            --royal-blue: #4169E1;
+            
+            /* Typography */
+            --font-display: 'SF Pro Display', -apple-system, system-ui, sans-serif;
+            --font-text: 'SF Pro Text', -apple-system, system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            font-family: var(--font-text);
+            background: var(--deep-charcoal);
+            color: var(--pearl-grey);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
             min-height: 100vh;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            color: #fff;
         }
         
-        /* Navigation */
-        .navbar {
-            background: rgba(15, 20, 25, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1rem 2rem;
+        /* Global text color fixes for dark theme */
+        .text-muted {
+            color: #B8C0C8 !important; /* Light silver for muted text */
         }
         
-        .navbar-brand {
-            color: #fff !important;
-            font-weight: 600;
-            font-size: 1.5rem;
-            letter-spacing: 1px;
+        .text-secondary {
+            color: #92969C !important; /* Medium silver for secondary text */
         }
         
-        .logout-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: all 0.3s;
+        .small {
+            color: #B8C0C8 !important; /* Ensure small text is visible */
         }
         
-        .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-            color: white;
+        label {
+            color: #B8C0C8 !important; /* Ensure labels are visible */
         }
         
-        /* Main Container */
-        .main-container {
-            padding: 2rem;
-            max-width: 1600px;
-            margin: 0 auto;
+        /* Override Bootstrap dark text colors */
+        .text-dark {
+            color: #E5E9F0 !important;
         }
         
-        /* Executive Header */
-        .executive-header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 35%, #334155 100%);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+        /* Ensure all headings are visible */
+        h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+            color: #E5E9F0 !important;
         }
         
-        /* Cards */
-        .stat-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.5rem;
+        /* Table text colors */
+        .table-dark {
+            color: #E5E9F0 !important;
+        }
+        
+        .table-dark th,
+        .table-dark td {
+            color: #E5E9F0 !important;
+        }
+        
+        /* Ensure all paragraph text is visible */
+        p {
+            color: #B8C0C8 !important;
+        }
+        
+        /* Fix any remaining dark text */
+        div, span {
+            color: inherit;
+        }
+
+        /* Premium Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
-            transition: all 0.3s;
+            background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%);
+            z-index: -2;
         }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
-            background: rgba(255, 255, 255, 0.08);
+
+        /* Animated Mesh Gradient */
+        .gradient-mesh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.4;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(96, 165, 250, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(65, 105, 225, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(34, 197, 94, 0.1) 0%, transparent 50%);
+            animation: meshMove 20s ease-in-out infinite;
         }
-        
-        .content-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 2rem;
+
+        @keyframes meshMove {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-20px, -20px) rotate(1deg); }
+            66% { transform: translate(20px, -10px) rotate(-1deg); }
         }
-        
-        .card-header-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 1.25rem;
-            border: none;
+
+        /* Premium Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--steel-blue) 0%, var(--slate-grey) 100%);
+            border-bottom: 2px solid var(--platinum-gold);
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            height: 70px;
         }
-        
-        /* KPI Styles */
-        .kpi-value {
-            font-size: 2rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
         }
-        
-        .kpi-label {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 0.5rem;
-        }
-        
-        /* Status Indicators */
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #00ff00;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 0.5rem;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7); }
-            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0, 255, 0, 0); }
-        }
-        
-        /* Table Styles */
-        .custom-table {
-            background: transparent;
-            color: #fff;
-        }
-        
-        .custom-table thead {
-            background: rgba(255, 255, 255, 0.05);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .custom-table tbody tr {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s;
-        }
-        
-        .custom-table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-        
-        /* Progress Bars */
-        .progress {
-            background: rgba(255, 255, 255, 0.1);
-            height: 6px;
-            border-radius: 3px;
-        }
-        
-        .progress-bar {
-            border-radius: 3px;
-        }
-        
-        /* Badges */
-        .badge-custom {
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        /* Chart Placeholder */
-        .chart-placeholder {
-            background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-            border-radius: 12px;
-            padding: 3rem;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.5);
-            min-height: 250px;
+
+        .logo {
             display: flex;
             align-items: center;
-            justify-content: center;
-            flex-direction: column;
+            gap: 0.5rem;
         }
-        
-        /* Quick Actions */
-        .quick-action-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
-            padding: 0.75rem;
-            border-radius: 8px;
-            transition: all 0.3s;
+
+        /* Market Ticker */
+        .market-ticker-container {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
             width: 100%;
-            margin-bottom: 0.5rem;
+            overflow: hidden;
+            background: linear-gradient(90deg, #1a1d23 0%, #0f1419 100%);
+            border-top: 1px solid rgba(96, 165, 250, 0.3);
+            border-bottom: 1px solid rgba(96, 165, 250, 0.3);
+            padding: 12px 0;
+            height: 45px;
+            z-index: 999;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .market-ticker {
+            display: flex;
+            width: max-content;
+            animation: scroll 180s linear infinite; /* Even slower for better readability */
+            cursor: grab;
+            /* Start with content already shifted to hide initial gap */
+            animation-delay: -3s;
+            padding-left: 0;
+            margin-left: 0;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
         
-        .quick-action-btn:hover {
-            background: rgba(102, 126, 234, 0.2);
-            border-color: #667eea;
-            transform: translateX(5px);
+        .market-ticker.paused {
+            animation-play-state: paused !important;
         }
         
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .main-container {
-                padding: 1rem;
+        .market-ticker-container.dragging {
+            cursor: grabbing;
+        }
+
+        .ticker-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0 1rem;
+            border-right: 1px solid rgba(96, 165, 250, 0.2);
+            white-space: nowrap;
+        }
+
+        .ticker-symbol {
+            font-weight: 700;
+            color: #93c5fd;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .ticker-value {
+            color: #ffffff;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+        }
+
+        .ticker-section-header {
+            display: inline-block;
+            padding: 0 1rem;
+            color: var(--platinum-gold);
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .ticker-separator {
+            color: rgba(96, 165, 250, 0.4);
+            margin: 0 0.5rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            margin-top: 115px; /* Account for header + ticker */
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Animation Classes */
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
             }
-            
-            .executive-header {
-                padding: 1.5rem;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
+        }
+
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* Cards */
+        .card {
+            background: linear-gradient(135deg, rgba(44, 49, 55, 0.95) 0%, rgba(54, 64, 73, 0.95) 100%);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            backdrop-filter: blur(10px);
+            color: #E5E9F0 !important; /* Ensure light text color */
+        }
+        
+        .card-body {
+            color: #E5E9F0 !important; /* Light text for card bodies */
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(44, 49, 55, 0.9) 0%, rgba(54, 64, 73, 0.9) 100%);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            color: #E5E9F0 !important; /* Ensure light text color */
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--platinum-gold);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="container-fluid">
-            <span class="navbar-brand">
-                <i class="fas fa-globe me-2"></i>ATLASNEXUS
-            </span>
-            <div class="d-flex align-items-center">
-                <span class="text-white me-3">
-                    <span class="status-dot"></span>
-                    Server Online
+    <!-- Animated Gradient Mesh -->
+    <div class="gradient-mesh"></div>
+
+    <!-- Header from Gate2 -->
+    <header class="header">
+        <div class="header-content">
+            <!-- Logo from Gate2 -->
+            <div class="logo" style="display: flex; align-items: center; gap: 12px;">
+                <div style="position: relative; width: 32px; height: 32px;">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="overflow: visible;">
+                        <!-- Rotating hexagon -->
+                        <path d="M16 3L26.5 9.5V22.5L16 29L5.5 22.5V9.5L16 3Z" stroke="#93c5fd" stroke-width="2" fill="rgba(147, 197, 253, 0.08)">
+                            <animateTransform attributeName="transform" type="rotate" from="0 16 16" to="360 16 16" dur="8s" repeatCount="indefinite"/>
+                        </path>
+                        <!-- Inner hexagon -->
+                        <path d="M16 8L22 11.5V20.5L16 24L10 20.5V11.5L16 8Z" stroke="rgba(147, 197, 253, 0.4)" stroke-width="1"/>
+                        <!-- Center circle -->
+                        <circle cx="16" cy="16" r="3" fill="#dbeafe"/>
+                        <!-- Orbiting dot -->
+                        <g>
+                            <animateTransform attributeName="transform" type="rotate" from="0 16 16" to="360 16 16" dur="3s" repeatCount="indefinite"/>
+                            <circle cx="16" cy="1" r="1.5" fill="#60a5fa">
+                                <animate attributeName="opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite"/>
+                            </circle>
+                        </g>
+                    </svg>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <span style="font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif; font-size: 1.35rem; font-weight: 700; background: linear-gradient(90deg, #dbeafe, #93c5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ATLAS</span>
+                    <span style="font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif; font-size: 1.2rem; font-weight: 400; color: #60a5fa; margin: 0 4px;">:</span>
+                    <span style="font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif; font-size: 1.35rem; font-weight: 700; background: linear-gradient(90deg, #93c5fd, #dbeafe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">NEXUS</span>
+                </div>
+            </div>
+            <!-- User Info Section -->
+            <div class="user-section" style="display: flex; align-items: center; gap: 2rem; color: rgba(255, 255, 255, 0.8);">
+                <span style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+                    <span style="width: 8px; height: 8px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 10px #00ff00;"></span>
+                    Dashboard Active
                 </span>
-                <span class="text-white me-4">
-                    <i class="fas fa-user-circle me-2"></i>
-                    {{ username|default('Administrator') }}
-                </span>
-                <a href="{{ url_for('logout') }}" class="logout-btn">
-                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                {% if is_admin %}
+                <button onclick="toggleAdminPanel()" style="background: linear-gradient(90deg, #22c55e, #16a34a); color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-right: 8px;">
+                    Admin
+                </button>
+                {% endif %}
+                <a href="/logout" style="background: linear-gradient(90deg, #ef4444, #dc2626); color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none;">
+                    Logout
                 </a>
             </div>
         </div>
-    </nav>
+    </header>
+
+    <!-- Market Ticker -->
+    <div class="market-ticker-container" id="tickerContainer">
+        <div class="market-ticker" id="marketTicker">
+            <!-- Content populated by JavaScript -->
+        </div>
+    </div>
     
-    <!-- Main Container -->
-    <div class="main-container">
+    <!-- Collapsible Navigation Toolbar -->
+    <div id="navToolbar" style="position: fixed; top: 115px; left: 0; right: 0; background: linear-gradient(90deg, #1e293b 0%, #334155 100%); border-bottom: 1px solid rgba(96, 165, 250, 0.3); z-index: 998; transition: all 0.3s ease; overflow: hidden; height: 0;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 2rem; padding: 10px 0;">
+            <button class="nav-btn dashboard-btn" onclick="showSection('dashboard')" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                <i class="fas fa-home me-2"></i>Dashboard
+            </button>
+            <button class="nav-btn" onclick="showSection('market')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                <i class="fas fa-chart-line me-2"></i>Market Updates
+            </button>
+            <button class="nav-btn" onclick="showSection('data')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                <i class="fas fa-database me-2"></i>Data
+            </button>
+            <button class="nav-btn" onclick="showSection('analytics')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                <i class="fas fa-chart-bar me-2"></i>Analytics
+            </button>
+            <button class="nav-btn" onclick="showSection('risk')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                <i class="fas fa-shield-alt me-2"></i>Risk Management
+            </button>
+            <button class="nav-btn" onclick="showSection('portfolio')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                <i class="fas fa-briefcase me-2"></i>Portfolio
+            </button>
+            <button class="nav-btn" onclick="showSection('compliance')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                <i class="fas fa-gavel me-2"></i>Compliance
+            </button>
+        </div>
+    </div>
+    
+    <!-- Toggle Button for Toolbar -->
+    <button id="toggleToolbar" onclick="toggleNavToolbar()" style="position: fixed; top: 115px; right: 20px; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 8px 12px; border-radius: 0 0 6px 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; z-index: 999; transition: all 0.3s;">
+        <i class="fas fa-chevron-down" id="toggleIcon"></i> Tools
+    </button>
+
+    <!-- Main Dashboard Content -->
+    <div class="main-container" id="main-dashboard" style="display: block;">
         <!-- Executive Dashboard Header -->
-        <div class="executive-header">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-white bg-opacity-10 rounded-circle p-3 me-4">
-                            <i class="fas fa-chart-line fa-2x"></i>
-                        </div>
-                        <div>
-                            <h1 class="display-6 fw-bold mb-1">Command Center</h1>
-                            <p class="lead mb-0 opacity-90">AtlasNexus Securitization Platform</p>
-                        </div>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-auto">
-                            <span class="badge badge-custom bg-success bg-opacity-20 text-success">
-                                <i class="fas fa-circle me-2"></i>Live Markets
-                            </span>
-                        </div>
-                        <div class="col-auto">
-                            <span class="badge badge-custom bg-info bg-opacity-20 text-info">
-                                <i class="fas fa-user-tie me-2"></i>Administrator
-                            </span>
-                        </div>
-                        <div class="col-auto">
-                            <span class="badge badge-custom bg-white bg-opacity-20 text-white">
-                                <i class="fas fa-calendar me-2"></i><span id="current-date"></span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 text-end">
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <div class="text-center">
-                                <div class="h2 fw-bold mb-0">€2.4B</div>
-                                <small class="opacity-75">Assets Under Management</small>
+        <div class="row mb-4 fade-in-up">
+            <div class="col-12">
+                <div class="card shadow-lg" style="border-radius: 20px;">
+                    <div class="card-body p-4 text-white">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-white bg-opacity-10 rounded-circle p-3 me-4">
+                                        <i class="fas fa-chart-line fa-2x"></i>
+                                    </div>
+                                    <div>
+                                        <h1 class="display-6 fw-bold mb-1">Securitization Command Center</h1>
+                                        <p class="lead mb-0 opacity-90">AtlasNexus Long Income Platform</p>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-auto">
+                                        <div class="badge bg-success bg-opacity-90 text-white px-3 py-2">
+                                            <i class="fas fa-circle me-2"></i>Live Markets
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="badge bg-info bg-opacity-90 text-white px-3 py-2">
+                                            <i class="fas fa-user-tie me-2"></i>Executive Access
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="badge bg-white bg-opacity-20 text-white px-3 py-2">
+                                            <i class="fas fa-calendar me-2"></i><span id="currentDate"></span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-center">
-                                <div class="h2 fw-bold mb-0">127</div>
-                                <small class="opacity-75">Active Structures</small>
+                            <div class="col-lg-4 text-end">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="text-center">
+                                            <div class="h2 fw-bold mb-0" id="aumCounter">€0B</div>
+                                            <small class="opacity-75">Assets Under Management</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-center">
+                                            <div class="h2 fw-bold mb-0" id="dealsCounter">0</div>
+                                            <small class="opacity-75">Active Structures</small>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <!-- Real-Time KPI Grid -->
-        <div class="row g-3 mb-4">
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card">
+        <div class="row g-4 mb-4">
+            <div class="col-lg-3 col-md-6 fade-in-up" style="animation-delay: 0.1s">
+                <div class="stat-card hover-lift">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="kpi-value">€2.4B</div>
-                            <div class="kpi-label">Total AUM</div>
-                            <div class="text-success small mt-2">
+                            <div class="small fw-semibold mb-1" style="color: #B8C0C8;">TOTAL AUM</div>
+                            <div class="h3 fw-bold text-primary mb-0">€2.4B</div>
+                            <div class="text-success small">
                                 <i class="fas fa-arrow-up me-1"></i>+12.3% YoY
                             </div>
                         </div>
                         <div class="bg-primary bg-opacity-10 rounded-circle p-3">
-                            <i class="fas fa-euro-sign fa-2x text-primary"></i>
+                            <i class="fas fa-euro-sign fa-lg text-primary"></i>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card">
+            <div class="col-lg-3 col-md-6 fade-in-up" style="animation-delay: 0.2s">
+                <div class="stat-card hover-lift">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="kpi-value">127</div>
-                            <div class="kpi-label">Active Deals</div>
-                            <div class="text-info small mt-2">
+                            <div class="small fw-semibold mb-1" style="color: #B8C0C8;">ACTIVE DEALS</div>
+                            <div class="h3 fw-bold text-success mb-0">127</div>
+                            <div class="text-info small">
                                 <i class="fas fa-plus me-1"></i>8 new this week
                             </div>
                         </div>
                         <div class="bg-success bg-opacity-10 rounded-circle p-3">
-                            <i class="fas fa-handshake fa-2x text-success"></i>
+                            <i class="fas fa-handshake fa-lg text-success"></i>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card">
+            <div class="col-lg-3 col-md-6 fade-in-up" style="animation-delay: 0.3s">
+                <div class="stat-card hover-lift">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="kpi-value">1.47x</div>
-                            <div class="kpi-label">Avg DSCR</div>
-                            <div class="text-success small mt-2">
+                            <div class="small fw-semibold mb-1" style="color: #B8C0C8;">AVG DSCR</div>
+                            <div class="h3 fw-bold text-warning mb-0">1.47x</div>
+                            <div class="text-success small">
                                 <i class="fas fa-arrow-up me-1"></i>+0.08 vs target
                             </div>
                         </div>
                         <div class="bg-warning bg-opacity-10 rounded-circle p-3">
-                            <i class="fas fa-chart-bar fa-2x text-warning"></i>
+                            <i class="fas fa-chart-bar fa-lg text-warning"></i>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card">
+            <div class="col-lg-3 col-md-6 fade-in-up" style="animation-delay: 0.4s">
+                <div class="stat-card hover-lift">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="kpi-value">AA-</div>
-                            <div class="kpi-label">Risk Rating</div>
-                            <div class="text-muted small mt-2">
+                            <div class="small fw-semibold mb-1" style="color: #B8C0C8;">RISK RATING</div>
+                            <div class="h3 fw-bold text-info mb-0">AA-</div>
+                            <div class="small" style="color: #B8C0C8;">
                                 <i class="fas fa-shield-alt me-1"></i>Stable outlook
                             </div>
                         </div>
                         <div class="bg-info bg-opacity-10 rounded-circle p-3">
-                            <i class="fas fa-star fa-2x text-info"></i>
+                            <i class="fas fa-star fa-lg text-info"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <!-- Main Content Grid -->
-        <div class="row">
+        <div class="row g-4">
             <!-- Left Column: Market Data & Analytics -->
             <div class="col-lg-8">
                 <!-- Market Overview -->
-                <div class="content-card">
-                    <div class="card-header-gradient">
+                <div class="card shadow-lg mb-4 fade-in-up" style="border-radius: 16px; animation-delay: 0.5s">
+                    <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px 16px 0 0;">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h5 class="mb-0 fw-bold">
@@ -378,36 +534,36 @@
                                 </h5>
                                 <small class="opacity-90">Real-time European ABS markets</small>
                             </div>
-                            <span class="badge bg-white bg-opacity-20 text-white">
+                            <div class="badge bg-white bg-opacity-20 text-white">
                                 <i class="fas fa-circle text-success me-2"></i>Live
-                            </span>
+                            </div>
                         </div>
                     </div>
-                    <div class="p-4">
-                        <div class="row g-4 mb-4">
+                    <div class="card-body p-4">
+                        <div class="row g-4">
                             <div class="col-md-4">
-                                <div class="text-center p-3 rounded-3" style="background: rgba(255, 255, 255, 0.05);">
+                                <div class="text-center p-3 rounded-3 bg-dark bg-opacity-25">
                                     <div class="h4 fw-bold text-primary mb-1">€847M</div>
-                                    <div class="text-muted small mb-2">Week Issuance</div>
-                                    <div class="progress">
+                                    <div class="small mb-2" style="color: #B8C0C8;">Week Issuance</div>
+                                    <div class="progress" style="height: 4px;">
                                         <div class="progress-bar bg-primary" style="width: 78%"></div>
                                     </div>
                                     <small class="text-success">78% of target</small>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="text-center p-3 rounded-3" style="background: rgba(255, 255, 255, 0.05);">
+                                <div class="text-center p-3 rounded-3 bg-dark bg-opacity-25">
                                     <div class="h4 fw-bold text-success mb-1">1.85%</div>
-                                    <div class="text-muted small mb-2">AAA Spread</div>
+                                    <div class="small mb-2" style="color: #B8C0C8;">AAA Spread</div>
                                     <div class="text-success small">
                                         <i class="fas fa-arrow-down me-1"></i>-12 bps
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="text-center p-3 rounded-3" style="background: rgba(255, 255, 255, 0.05);">
+                                <div class="text-center p-3 rounded-3 bg-dark bg-opacity-25">
                                     <div class="h4 fw-bold text-warning mb-1">€2.1B</div>
-                                    <div class="text-muted small mb-2">Pipeline</div>
+                                    <div class="small mb-2" style="color: #B8C0C8;">Pipeline</div>
                                     <div class="text-info small">
                                         <i class="fas fa-clock me-1"></i>Next 30 days
                                     </div>
@@ -415,96 +571,104 @@
                             </div>
                         </div>
                         
-                        <!-- Chart Placeholder -->
-                        <div class="chart-placeholder">
-                            <i class="fas fa-chart-line fa-3x mb-3"></i>
-                            <h6>Spread Evolution Chart</h6>
-                            <small>Interactive chart loading...</small>
+                        <!-- Chart Area -->
+                        <div class="mt-4 p-4 bg-dark bg-opacity-25 rounded-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-white mb-0">Spread Evolution (Last 30 Days)</h6>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary active">AAA</button>
+                                    <button class="btn btn-outline-primary">AA</button>
+                                    <button class="btn btn-outline-primary">BBB</button>
+                                </div>
+                            </div>
+                            <div style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                                <canvas id="spreadChart" style="max-width: 100%; max-height: 100%;"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Deal Pipeline -->
-                <div class="content-card">
-                    <div class="card-header-gradient" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card shadow-lg fade-in-up" style="border-radius: 16px; animation-delay: 0.6s">
+                    <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 16px 16px 0 0;">
                         <h5 class="mb-0 fw-bold">
                             <i class="fas fa-stream me-2"></i>Active Deal Pipeline
                         </h5>
                         <small class="opacity-90">Current structures in progress</small>
                     </div>
-                    <div class="p-0">
+                    <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table custom-table mb-0">
+                            <table class="table table-dark table-hover mb-0">
                                 <thead>
                                     <tr>
-                                        <th class="border-0 px-4 py-3">Deal Name</th>
-                                        <th class="border-0 px-4 py-3">Type</th>
-                                        <th class="border-0 px-4 py-3">Size</th>
-                                        <th class="border-0 px-4 py-3">DSCR</th>
-                                        <th class="border-0 px-4 py-3">Status</th>
-                                        <th class="border-0 px-4 py-3">Action</th>
+                                        <th class="border-0 fw-semibold">Deal Name</th>
+                                        <th class="border-0 fw-semibold">Type</th>
+                                        <th class="border-0 fw-semibold">Size</th>
+                                        <th class="border-0 fw-semibold">DSCR</th>
+                                        <th class="border-0 fw-semibold">Status</th>
+                                        <th class="border-0 fw-semibold">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="px-4 py-3">
+                                        <td class="py-3">
                                             <div class="fw-semibold">European Data Centers 2024-1</div>
-                                            <small class="text-muted">Lead: Digital Realty</small>
+                                            <small style="color: #B8C0C8;">Lead: Digital Realty</small>
                                         </td>
-                                        <td class="px-4 py-3">
-                                            <span class="badge bg-primary bg-opacity-20 text-primary">Data Center</span>
+                                        <td class="py-3">
+                                            <span class="badge bg-primary bg-opacity-25 text-primary">Data Center</span>
                                         </td>
-                                        <td class="px-4 py-3 fw-semibold">€450M</td>
-                                        <td class="px-4 py-3">
+                                        <td class="py-3 fw-semibold">€450M</td>
+                                        <td class="py-3">
                                             <span class="text-success fw-bold">1.52x</span>
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="py-3">
                                             <span class="badge bg-warning">Structuring</span>
                                         </td>
-                                        <td class="px-4 py-3">
-                                            <button class="btn btn-sm btn-outline-light">
+                                        <td class="py-3">
+                                            <button class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="px-4 py-3">
+                                        <td class="py-3">
                                             <div class="fw-semibold">UK Logistics Portfolio 2024-A</div>
-                                            <small class="text-muted">Lead: Prologis UK</small>
+                                            <small style="color: #B8C0C8;">Lead: Prologis UK</small>
                                         </td>
-                                        <td class="px-4 py-3">
-                                            <span class="badge bg-success bg-opacity-20 text-success">Logistics</span>
+                                        <td class="py-3">
+                                            <span class="badge bg-success bg-opacity-25 text-success">Logistics</span>
                                         </td>
-                                        <td class="px-4 py-3 fw-semibold">€320M</td>
-                                        <td class="px-4 py-3">
+                                        <td class="py-3 fw-semibold">€320M</td>
+                                        <td class="py-3">
                                             <span class="text-success fw-bold">1.48x</span>
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="py-3">
                                             <span class="badge bg-info">Rating</span>
                                         </td>
-                                        <td class="px-4 py-3">
-                                            <button class="btn btn-sm btn-outline-light">
+                                        <td class="py-3">
+                                            <button class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="px-4 py-3">
+                                        <td class="py-3">
                                             <div class="fw-semibold">German Renewable Energy 2024-3</div>
-                                            <small class="text-muted">Lead: RWE Renewables</small>
+                                            <small style="color: #B8C0C8;">Lead: RWE Renewables</small>
                                         </td>
-                                        <td class="px-4 py-3">
-                                            <span class="badge bg-warning bg-opacity-20 text-warning">Renewable</span>
+                                        <td class="py-3">
+                                            <span class="badge bg-warning bg-opacity-25 text-warning">Renewable</span>
                                         </td>
-                                        <td class="px-4 py-3 fw-semibold">€680M</td>
-                                        <td class="px-4 py-3">
+                                        <td class="py-3 fw-semibold">€680M</td>
+                                        <td class="py-3">
                                             <span class="text-success fw-bold">1.65x</span>
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="py-3">
                                             <span class="badge bg-success">Marketing</span>
                                         </td>
-                                        <td class="px-4 py-3">
-                                            <button class="btn btn-sm btn-outline-light">
+                                        <td class="py-3">
+                                            <button class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                         </td>
@@ -514,92 +678,72 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Advanced Analytics Section -->
-                <div class="content-card">
-                    <div class="card-header-gradient" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
-                        <h5 class="mb-0 fw-bold">
-                            <i class="fas fa-chart-area me-2"></i>Advanced Analytics Center
-                        </h5>
-                        <small class="opacity-90">Comprehensive market intelligence</small>
-                    </div>
-                    <div class="p-4">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <h6 class="mb-3">
-                                    <i class="fas fa-chart-line text-primary me-2"></i>Yield Curves
-                                </h6>
-                                <div class="chart-placeholder" style="min-height: 200px;">
-                                    <i class="fas fa-chart-line fa-2x mb-2"></i>
-                                    <small>European ABS Yield Curves</small>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h6 class="mb-3">
-                                    <i class="fas fa-chart-pie text-success me-2"></i>Asset Allocation
-                                </h6>
-                                <div class="chart-placeholder" style="min-height: 200px;">
-                                    <i class="fas fa-chart-pie fa-2x mb-2"></i>
-                                    <small>Portfolio Distribution</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
-            
+
             <!-- Right Column: Portfolio & Risk Management -->
             <div class="col-lg-4">
                 <!-- Portfolio Performance -->
-                <div class="content-card">
-                    <div class="card-header-gradient" style="background: linear-gradient(135deg, #4ade80, #22c55e);">
+                <div class="card shadow-lg mb-4 fade-in-up" style="border-radius: 16px; animation-delay: 0.7s">
+                    <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #4ade80, #22c55e); border-radius: 16px 16px 0 0;">
                         <h6 class="mb-0 fw-bold">
                             <i class="fas fa-briefcase me-2"></i>Portfolio Performance
                         </h6>
                         <small class="opacity-90">YTD Overview</small>
                     </div>
-                    <div class="p-4">
+                    <div class="card-body p-4">
                         <div class="text-center mb-4">
                             <div class="h2 fw-bold text-success mb-1">+14.2%</div>
-                            <div class="text-muted small">Total Return YTD</div>
-                            <div class="progress mt-2">
+                            <div class="small" style="color: #B8C0C8;">Total Return YTD</div>
+                            <div class="progress mt-2" style="height: 6px;">
                                 <div class="progress-bar bg-success" style="width: 85%"></div>
                             </div>
                             <small class="text-success">85% of annual target</small>
                         </div>
                         
-                        <div class="row g-2">
+                        <div class="row g-3">
                             <div class="col-6">
-                                <div class="text-center p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
-                                    <div class="fw-bold">€1.8B</div>
-                                    <small class="text-muted">Net Assets</small>
+                                <div class="text-center p-2 bg-dark bg-opacity-25 rounded">
+                                    <div class="fw-bold text-white">€1.8B</div>
+                                    <small style="color: #B8C0C8;">Net Assets</small>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <div class="text-center p-2 rounded" style="background: rgba(255, 255, 255, 0.05);">
-                                    <div class="fw-bold">4.2%</div>
-                                    <small class="text-muted">Yield</small>
+                                <div class="text-center p-2 bg-dark bg-opacity-25 rounded">
+                                    <div class="fw-bold text-white">0.12%</div>
+                                    <small style="color: #B8C0C8;">Mgmt Fee</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-dark bg-opacity-25 rounded">
+                                    <div class="fw-bold text-white">4.2%</div>
+                                    <small style="color: #B8C0C8;">Yield</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-dark bg-opacity-25 rounded">
+                                    <div class="fw-bold text-white">AA-</div>
+                                    <small style="color: #B8C0C8;">Rating</small>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Risk Dashboard -->
-                <div class="content-card">
-                    <div class="card-header-gradient" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                <div class="card shadow-lg mb-4 fade-in-up" style="border-radius: 16px; animation-delay: 0.8s">
+                    <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 16px 16px 0 0;">
                         <h6 class="mb-0 fw-bold">
                             <i class="fas fa-shield-alt me-2"></i>Risk Monitor
                         </h6>
                         <small class="opacity-90">Real-time exposure</small>
                     </div>
-                    <div class="p-4">
+                    <div class="card-body p-4">
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="small fw-semibold">Concentration Risk</span>
                                 <span class="badge bg-success">Low</span>
                             </div>
-                            <div class="progress">
+                            <div class="progress" style="height: 6px;">
                                 <div class="progress-bar bg-success" style="width: 25%"></div>
                             </div>
                         </div>
@@ -609,7 +753,7 @@
                                 <span class="small fw-semibold">Credit Risk</span>
                                 <span class="badge bg-warning">Medium</span>
                             </div>
-                            <div class="progress">
+                            <div class="progress" style="height: 6px;">
                                 <div class="progress-bar bg-warning" style="width: 45%"></div>
                             </div>
                         </div>
@@ -619,7 +763,7 @@
                                 <span class="small fw-semibold">Market Risk</span>
                                 <span class="badge bg-success">Low</span>
                             </div>
-                            <div class="progress">
+                            <div class="progress" style="height: 6px;">
                                 <div class="progress-bar bg-success" style="width: 20%"></div>
                             </div>
                         </div>
@@ -627,238 +771,1388 @@
                         <div class="border-top pt-3 mt-3">
                             <div class="text-center">
                                 <div class="h5 fw-bold text-warning mb-1">7.2%</div>
-                                <small class="text-muted">VaR (95%, 1D)</small>
+                                <small style="color: #B8C0C8;">VaR (95%, 1D)</small>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Regulatory Compliance -->
-                <div class="content-card">
-                    <div class="card-header-gradient" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
-                        <h6 class="mb-0 fw-bold">
-                            <i class="fas fa-gavel me-2"></i>Regulatory Status
-                        </h6>
-                        <small class="opacity-90">Compliance monitoring</small>
-                    </div>
-                    <div class="p-4">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <div>
-                                <div class="fw-semibold">EU STS Compliance</div>
-                                <small class="text-muted">Simple, Transparent, Standardised</small>
-                            </div>
-                            <i class="fas fa-check-circle fa-lg text-success"></i>
-                        </div>
-                        
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <div>
-                                <div class="fw-semibold">AIFMD Reporting</div>
-                                <small class="text-muted">Due: Tomorrow</small>
-                            </div>
-                            <i class="fas fa-clock fa-lg text-warning"></i>
-                        </div>
-                        
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="fw-semibold">MiFID II</div>
-                                <small class="text-muted">Transaction reporting</small>
-                            </div>
-                            <i class="fas fa-check-circle fa-lg text-success"></i>
-                        </div>
-                    </div>
-                </div>
-                
+
                 <!-- Quick Actions -->
-                <div class="content-card">
-                    <div class="card-header-gradient" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                <div class="card shadow-lg fade-in-up" style="border-radius: 16px; animation-delay: 0.9s">
+                    <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #06b6d4, #0891b2); border-radius: 16px 16px 0 0;">
                         <h6 class="mb-0 fw-bold">
                             <i class="fas fa-bolt me-2"></i>Quick Actions
                         </h6>
                     </div>
-                    <div class="p-4">
-                        <button class="quick-action-btn" onclick="showFeature('analysis')">
-                            <i class="fas fa-plus me-2"></i>New Analysis
-                        </button>
-                        <button class="quick-action-btn" onclick="showFeature('upload')">
-                            <i class="fas fa-upload me-2"></i>Upload Data
-                        </button>
-                        <button class="quick-action-btn" onclick="showFeature('export')">
-                            <i class="fas fa-download me-2"></i>Export Report
-                        </button>
-                        <button class="quick-action-btn" onclick="showFeature('settings')">
-                            <i class="fas fa-cog me-2"></i>Settings
-                        </button>
+                    <div class="card-body p-4">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" onclick="alert('New Analysis feature coming soon!')">
+                                <i class="fas fa-plus me-2"></i>New Analysis
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="alert('Upload feature coming soon!')">
+                                <i class="fas fa-upload me-2"></i>Upload Data
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="alert('Export feature coming soon!')">
+                                <i class="fas fa-download me-2"></i>Export Report
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="alert('Settings coming soon!')">
+                                <i class="fas fa-cog me-2"></i>Settings
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Platform Features -->
-        <div class="content-card mt-4">
-            <div class="card-header-gradient" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
-                <h5 class="mb-0">
-                    <i class="fas fa-star me-2"></i>Platform Features
-                </h5>
-            </div>
-            <div class="p-4">
-                <div class="row g-4">
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            <div class="display-6 text-primary mb-3">
-                                <i class="fas fa-sitemap"></i>
+
+        <!-- Advanced Analytics Section -->
+        <div class="row g-4 mt-4">
+            <div class="col-12 fade-in-up" style="animation-delay: 1s">
+                <div class="card shadow-lg" style="border-radius: 20px;">
+                    <div class="card-header border-0 text-white py-4" style="background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%); border-radius: 20px 20px 0 0;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-1 fw-bold">
+                                    <i class="fas fa-chart-area me-3"></i>Advanced Analytics Center
+                                </h4>
+                                <p class="mb-0 opacity-90">Comprehensive market intelligence and portfolio optimization</p>
                             </div>
-                            <h6 class="fw-bold">Permutation Engine</h6>
-                            <p class="text-muted small mb-0">
-                                Generate thousands of structuring permutations with Cartesian product analysis
-                            </p>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-light btn-sm">
+                                    <i class="fas fa-expand me-2"></i>Fullscreen
+                                </button>
+                                <button class="btn btn-outline-light btn-sm">
+                                    <i class="fas fa-download me-2"></i>Export
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            <div class="display-6 text-success mb-3">
-                                <i class="fas fa-balance-scale"></i>
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            <!-- Performance Attribution -->
+                            <div class="col-lg-12">
+                                <div class="p-4 bg-dark bg-opacity-25 rounded-3">
+                                    <h6 class="fw-bold mb-3 text-white">
+                                        <i class="fas fa-chart-bar text-warning me-2"></i>Performance Attribution Analysis
+                                    </h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <div class="text-center p-3 bg-dark bg-opacity-50 rounded">
+                                                <div class="h5 fw-bold text-primary mb-1">+2.8%</div>
+                                                <small style="color: #B8C0C8;">Credit Selection</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center p-3 bg-dark bg-opacity-50 rounded">
+                                                <div class="h5 fw-bold text-success mb-1">+1.2%</div>
+                                                <small style="color: #B8C0C8;">Duration Management</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center p-3 bg-dark bg-opacity-50 rounded">
+                                                <div class="h5 fw-bold text-info mb-1">+0.6%</div>
+                                                <small style="color: #B8C0C8;">Sector Allocation</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center p-3 bg-dark bg-opacity-50 rounded">
+                                                <div class="h5 fw-bold text-danger mb-1">-0.4%</div>
+                                                <small style="color: #B8C0C8;">Currency Impact</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <h6 class="fw-bold">DSCR Analysis</h6>
-                            <p class="text-muted small mb-0">
-                                Reverse debt sizing with comprehensive DSCR calculations across all tranches
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            <div class="display-6 text-warning mb-3">
-                                <i class="fas fa-university"></i>
-                            </div>
-                            <h6 class="fw-bold">Repo Eligibility</h6>
-                            <p class="text-muted small mb-0">
-                                Automated compliance checking against UK/EU/US regulatory requirements
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            <div class="display-6 text-info mb-3">
-                                <i class="fas fa-coins"></i>
-                            </div>
-                            <h6 class="fw-bold">Monetization</h6>
-                            <p class="text-muted small mb-0">
-                                ZCiS and TRS overlay calculations for day-1 value creation opportunities
-                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // Display current date
-        document.addEventListener('DOMContentLoaded', function() {
-            const dateElement = document.getElementById('current-date');
-            if (dateElement) {
-                const now = new Date();
-                const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-                dateElement.textContent = now.toLocaleDateString('en-US', options);
-            }
-            
-            // Animate cards on load
-            const cards = document.querySelectorAll('.stat-card, .content-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    card.style.transition = 'all 0.6s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
-            });
-            
-            // Animate KPI values
-            animateValues();
-        });
-        
-        function animateValues() {
-            const elements = document.querySelectorAll('.kpi-value');
-            elements.forEach(el => {
-                const text = el.textContent;
-                const hasEuro = text.includes('€');
-                const hasPercent = text.includes('%');
-                const hasX = text.includes('x');
-                
-                if (hasEuro || hasPercent || hasX) {
-                    let numStr = text.replace(/[^0-9.]/g, '');
-                    if (numStr) {
-                        const finalValue = parseFloat(numStr);
-                        let currentValue = 0;
-                        const increment = finalValue / 50;
-                        const timer = setInterval(() => {
-                            currentValue += increment;
-                            if (currentValue >= finalValue) {
-                                currentValue = finalValue;
-                                clearInterval(timer);
-                            }
-                            
-                            let displayValue = currentValue.toFixed(1);
-                            if (hasEuro) displayValue = '€' + displayValue + 'B';
-                            else if (hasPercent) displayValue = displayValue + '%';
-                            else if (hasX) displayValue = displayValue + 'x';
-                            else if (text === 'AA-') displayValue = 'AA-';
-                            else displayValue = Math.round(currentValue).toString();
-                            
-                            el.textContent = displayValue;
-                        }, 30);
-                    }
-                }
-            });
-        }
-        
-        function showFeature(feature) {
-            // Create toast notification
-            const toast = document.createElement('div');
-            toast.className = 'position-fixed top-0 end-0 p-3' style='z-index: 9999;';
-            toast.innerHTML = `
-                <div class="toast show" role="alert">
-                    <div class="toast-header">
-                        <strong class="me-auto">AtlasNexus</strong>
-                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-                    </div>
-                    <div class="toast-body">
-                        ${feature.charAt(0).toUpperCase() + feature.slice(1)} feature coming soon!
+
+    <!-- Market Updates Section -->
+    <div id="market-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh;">
+        <div class="container">
+            <h2 class="text-white mb-4"><i class="fas fa-chart-line me-2"></i>Market Updates</h2>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card shadow-lg" style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa;">
+                        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);">
+                            <h5 class="mb-0">Bond Markets</h5>
+                        </div>
+                        <div class="card-body text-white">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>US 10Y Treasury</span>
+                                    <span class="text-success">4.25% <i class="fas fa-arrow-up"></i></span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>German 10Y Bund</span>
+                                    <span class="text-danger">2.45% <i class="fas fa-arrow-down"></i></span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>UK 10Y Gilt</span>
+                                    <span class="text-success">4.10% <i class="fas fa-arrow-up"></i></span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            `;
-            document.body.appendChild(toast);
+                <div class="col-lg-6">
+                    <div class="card shadow-lg" style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa;">
+                        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);">
+                            <h5 class="mb-0">Credit Spreads</h5>
+                        </div>
+                        <div class="card-body text-white">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>IG Corporate</span>
+                                    <span class="text-warning">+95 bps</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>HY Corporate</span>
+                                    <span class="text-warning">+385 bps</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>EM Sovereign</span>
+                                    <span class="text-danger">+425 bps</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Section -->
+    <div id="data-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh;">
+        <div class="container">
+            <h2 class="text-white mb-4"><i class="fas fa-database me-2"></i>Data Center</h2>
+            <div class="row g-4">
+                <div class="col-lg-12">
+                    <div class="card shadow-lg" style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa;">
+                        <div class="card-body text-white">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Asset Class</th>
+                                            <th>Region</th>
+                                            <th>Current Yield</th>
+                                            <th>Change (24h)</th>
+                                            <th>Volume</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>RMBS</td>
+                                            <td>Europe</td>
+                                            <td>3.45%</td>
+                                            <td class="text-success">+0.12%</td>
+                                            <td>€2.3B</td>
+                                            <td><span class="badge bg-success">Active</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>CMBS</td>
+                                            <td>North America</td>
+                                            <td>4.15%</td>
+                                            <td class="text-danger">-0.08%</td>
+                                            <td>$1.8B</td>
+                                            <td><span class="badge bg-success">Active</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>CLO</td>
+                                            <td>Asia Pacific</td>
+                                            <td>5.25%</td>
+                                            <td class="text-success">+0.22%</td>
+                                            <td>¥450B</td>
+                                            <td><span class="badge bg-warning">Limited</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Section -->
+    <div id="analytics-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh;">
+        <div class="container">
+            <h2 class="text-white mb-4"><i class="fas fa-chart-bar me-2"></i>Analytics & Insights</h2>
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="card shadow-lg" style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa;">
+                        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);">
+                            <h5 class="mb-0">Performance Analytics</h5>
+                        </div>
+                        <div class="card-body text-white">
+                            <canvas id="analyticsChart" style="height: 300px;"></canvas>
+                            <div class="mt-3 text-center">
+                                <button class="btn btn-sm btn-outline-light me-2">1D</button>
+                                <button class="btn btn-sm btn-outline-light me-2">1W</button>
+                                <button class="btn btn-sm btn-primary me-2">1M</button>
+                                <button class="btn btn-sm btn-outline-light me-2">3M</button>
+                                <button class="btn btn-sm btn-outline-light">1Y</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card shadow-lg" style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa;">
+                        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);">
+                            <h5 class="mb-0">Key Metrics</h5>
+                        </div>
+                        <div class="card-body text-white">
+                            <div class="mb-3">
+                                <label class="small" style="color: #B8C0C8;">Sharpe Ratio</label>
+                                <div class="h4">1.85</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="small" style="color: #B8C0C8;">Information Ratio</label>
+                                <div class="h4">0.92</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="small" style="color: #B8C0C8;">Max Drawdown</label>
+                                <div class="h4 text-danger">-4.2%</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="small" style="color: #B8C0C8;">Volatility</label>
+                                <div class="h4">8.5%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Management Section -->
+    <div id="risk-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh;">
+        <div class="container">
+            <h2 class="text-white mb-4"><i class="fas fa-shield-alt me-2"></i>Risk Management</h2>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card shadow-lg" style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa;">
+                        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                            <h5 class="mb-0">Risk Indicators</h5>
+                        </div>
+                        <div class="card-body text-white">
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Market Risk</span>
+                                    <span class="text-warning">Medium</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-warning" style="width: 60%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Credit Risk</span>
+                                    <span class="text-success">Low</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: 30%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Liquidity Risk</span>
+                                    <span class="text-success">Low</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: 25%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Operational Risk</span>
+                                    <span class="text-info">Very Low</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-info" style="width: 15%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card shadow-lg" style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa;">
+                        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                            <h5 class="mb-0">VaR Analysis</h5>
+                        </div>
+                        <div class="card-body text-white">
+                            <div class="row text-center">
+                                <div class="col-6 mb-3">
+                                    <label class="small" style="color: #B8C0C8;">1-Day VaR (95%)</label>
+                                    <div class="h3 text-warning">€2.4M</div>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="small" style="color: #B8C0C8;">1-Day VaR (99%)</label>
+                                    <div class="h3 text-danger">€4.1M</div>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="small" style="color: #B8C0C8;">10-Day VaR (95%)</label>
+                                    <div class="h3 text-warning">€7.6M</div>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="small" style="color: #B8C0C8;">10-Day VaR (99%)</label>
+                                    <div class="h3 text-danger">€13.0M</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Portfolio Section -->
+    <div id="portfolio-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh;">
+        <div class="container">
+            <h2 class="text-white mb-4"><i class="fas fa-briefcase me-2"></i>Portfolio Management</h2>
+            <div class="row g-4">
+                <div class="col-lg-12">
+                    <div class="card shadow-lg" style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa;">
+                        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">
+                            <h5 class="mb-0">Active Positions</h5>
+                        </div>
+                        <div class="card-body text-white">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Security</th>
+                                            <th>ISIN</th>
+                                            <th>Notional</th>
+                                            <th>Market Value</th>
+                                            <th>P&L</th>
+                                            <th>Weight</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>ATLAS 2024-1 A</td>
+                                            <td>XS2745892341</td>
+                                            <td>€100M</td>
+                                            <td>€102.5M</td>
+                                            <td class="text-success">+€2.5M</td>
+                                            <td>4.3%</td>
+                                            <td><button class="btn btn-sm btn-outline-info">Details</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td>NEXUS 2023-3 AAA</td>
+                                            <td>XS2698754123</td>
+                                            <td>€150M</td>
+                                            <td>€148.2M</td>
+                                            <td class="text-danger">-€1.8M</td>
+                                            <td>6.2%</td>
+                                            <td><button class="btn btn-sm btn-outline-info">Details</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td>EURO CLO 2024-2</td>
+                                            <td>XS2756891234</td>
+                                            <td>€75M</td>
+                                            <td>€76.1M</td>
+                                            <td class="text-success">+€1.1M</td>
+                                            <td>3.2%</td>
+                                            <td><button class="btn btn-sm btn-outline-info">Details</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compliance Section -->
+    <div id="compliance-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh;">
+        <div class="container">
+            <h2 class="text-white mb-4"><i class="fas fa-gavel me-2"></i>Compliance & Regulatory</h2>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card shadow-lg" style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa;">
+                        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                            <h5 class="mb-0">Regulatory Status</h5>
+                        </div>
+                        <div class="card-body text-white">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>MiFID II</span>
+                                    <span class="badge bg-success">Compliant</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>AIFMD</span>
+                                    <span class="badge bg-success">Compliant</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>EMIR</span>
+                                    <span class="badge bg-success">Compliant</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fas fa-exclamation-triangle text-warning me-2"></i>SFDR</span>
+                                    <span class="badge bg-warning">Review Needed</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card shadow-lg" style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa;">
+                        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                            <h5 class="mb-0">Upcoming Deadlines</h5>
+                        </div>
+                        <div class="card-body text-white">
+                            <div class="mb-3">
+                                <div class="mb-3 p-2 border-start border-warning border-3">
+                                    <div class="small" style="color: #B8C0C8;">15 Jan 2025</div>
+                                    <div>ESMA Quarterly Report</div>
+                                </div>
+                                <div class="mb-3 p-2 border-start border-info border-3">
+                                    <div class="small" style="color: #B8C0C8;">31 Jan 2025</div>
+                                    <div>Annual Risk Assessment</div>
+                                </div>
+                                <div class="mb-3 p-2 border-start border-primary border-3">
+                                    <div class="small" style="color: #B8C0C8;">28 Feb 2025</div>
+                                    <div>Investor Disclosure Update</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if is_admin %}
+    <!-- Admin Panel -->
+    <div id="adminPanel" style="display: none; position: fixed; top: 70px; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 10000; overflow-y: auto;">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 2rem;">
+                <h2 style="color: #22c55e; font-size: 2rem; font-weight: 700;">Admin Control Center</h2>
+                <button onclick="toggleAdminPanel()" style="position: absolute; right: 2rem; top: 2rem; background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+
+            <!-- Pending Registrations -->
+            <div style="background: rgba(54, 64, 73, 0.95); border: 2px solid #22c55e; border-radius: 12px; padding: 2rem; margin-bottom: 2rem;">
+                <h3 style="color: #22c55e; margin-bottom: 1.5rem;">Pending Registrations</h3>
+                {% if pending_registrations %}
+                    {% for reg in pending_registrations %}
+                    <div style="background: rgba(44, 49, 55, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <p style="color: #94a3b8; font-size: 0.9rem;">Name</p>
+                                <p style="color: white; font-weight: 600;">{{ reg.full_name }}</p>
+                            </div>
+                            <div>
+                                <p style="color: #94a3b8; font-size: 0.9rem;">Email</p>
+                                <p style="color: #60a5fa; font-weight: 600;">{{ reg.email }}</p>
+                            </div>
+                            <div>
+                                <p style="color: #94a3b8; font-size: 0.9rem;">Company</p>
+                                <p style="color: white;">{{ reg.company_name }}</p>
+                            </div>
+                            <div>
+                                <p style="color: #94a3b8; font-size: 0.9rem;">Job Title</p>
+                                <p style="color: white;">{{ reg.job_title }}</p>
+                            </div>
+                            <div>
+                                <p style="color: #94a3b8; font-size: 0.9rem;">Phone</p>
+                                <p style="color: white;">{{ reg.country_code }} {{ reg.phone }}</p>
+                            </div>
+                            <div>
+                                <p style="color: #94a3b8; font-size: 0.9rem;">Submitted</p>
+                                <p style="color: white;">{{ reg.created_at }}</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                            <button onclick="approveUser('{{ reg.email }}')" style="background: #22c55e; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button onclick="rejectUser('{{ reg.email }}')" style="background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #94a3b8;">No pending registrations</p>
+                {% endif %}
+            </div>
+
+            <!-- Active Users -->
+            <div style="background: rgba(54, 64, 73, 0.95); border: 2px solid #60a5fa; border-radius: 12px; padding: 2rem;">
+                <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">Active Users</h3>
+                {% if all_users %}
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.3);">
+                                    <th style="padding: 10px; text-align: left; color: #94a3b8;">Name</th>
+                                    <th style="padding: 10px; text-align: left; color: #94a3b8;">Email</th>
+                                    <th style="padding: 10px; text-align: left; color: #94a3b8;">Company</th>
+                                    <th style="padding: 10px; text-align: left; color: #94a3b8;">Password Expires</th>
+                                    <th style="padding: 10px; text-align: left; color: #94a3b8;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in all_users %}
+                                <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
+                                    <td style="padding: 10px; color: white;">{{ user.full_name }}</td>
+                                    <td style="padding: 10px; color: #60a5fa;">{{ user.email }}</td>
+                                    <td style="padding: 10px; color: white;">{{ user.company_name }}</td>
+                                    <td style="padding: 10px; color: white;">{{ user.password_expiry }}</td>
+                                    <td style="padding: 10px;">
+                                        <button onclick="resetPassword('{{ user.email }}')" style="background: #fbbf24; color: black; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                                            Reset Password
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p style="color: #94a3b8;">No active users</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleAdminPanel() {
+            const panel = document.getElementById('adminPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function approveUser(email) {
+            if (confirm(`Approve user ${email}?`)) {
+                fetch('/admin/approve-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(`User approved! Password: ${data.password}\n\nThis has been sent to ${email}`);
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                });
+            }
+        }
+
+        function rejectUser(email) {
+            const reason = prompt(`Rejection reason for ${email}:`);
+            if (reason) {
+                fetch('/admin/reject-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, reason: reason })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('User rejected');
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                });
+            }
+        }
+
+        function resetPassword(email) {
+            if (confirm(`Reset password for ${email}?`)) {
+                fetch('/admin/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(`Password reset! New password: ${data.password}`);
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                });
+            }
+        }
+    </script>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer style="margin-top: 100px; padding: 60px 40px 30px; background: linear-gradient(135deg, rgba(20, 25, 31, 0.98) 0%, rgba(31, 41, 55, 0.95) 100%); border-top: 1px solid rgba(96, 165, 250, 0.2); position: relative;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #60a5fa 50%, transparent 100%);"></div>
+        
+        <div style="max-width: 1400px; margin: 0 auto;">
+            <div style="margin-bottom: 40px; text-align: center;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" style="margin-top: 2px;">
+                            <path d="M16 3L26.5 9.5V22.5L16 29L5.5 22.5V9.5L16 3Z" stroke="#93c5fd" stroke-width="2" fill="rgba(147, 197, 253, 0.08)"/>
+                            <path d="M16 8L22 11.5V20.5L16 24L10 20.5V11.5L16 8Z" stroke="rgba(147, 197, 253, 0.4)" stroke-width="1"/>
+                            <circle cx="16" cy="16" r="3" fill="#dbeafe"/>
+                        </svg>
+                        <div style="display: flex; align-items: center;">
+                            <span style="font-size: 1.3rem; font-weight: 700; background: linear-gradient(90deg, #dbeafe, #93c5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ATLAS</span>
+                            <span style="font-size: 1.2rem; font-weight: 400; color: #60a5fa; margin: 0 4px;">:</span>
+                            <span style="font-size: 1.3rem; font-weight: 700; background: linear-gradient(90deg, #93c5fd, #dbeafe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">NEXUS</span>
+                        </div>
+                    </div>
+                    <p style="color: #92969C; font-size: 1rem; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+                        Executive Command Center - Full access to global financial intelligence, securitisation analysis, and risk management solutions.
+                    </p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; margin-bottom: 40px; padding-top: 40px; border-top: 1px solid rgba(184, 192, 200, 0.1);">
+                <div>
+                    <h4 style="color: #E5E9F0; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;">Platform Tools</h4>
+                    <a href="#" onclick="showSection('dashboard'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Dashboard</a>
+                    <a href="#" onclick="showSection('analytics'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Analytics</a>
+                    <a href="#" onclick="showSection('risk'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Risk Management</a>
+                    <a href="#" onclick="showSection('market'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Market Intelligence</a>
+                    <a href="#" onclick="showSection('portfolio'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Portfolio</a>
+                    <a href="#" onclick="showSection('compliance'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Compliance</a>
+                </div>
+                
+                <div>
+                    <h4 style="color: #E5E9F0; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;">Resources</h4>
+                    <a href="#" onclick="alert('API documentation requires authentication'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">API Documentation</a>
+                    <a href="#" onclick="alert('Data feeds require authentication'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Data Feeds</a>
+                    <a href="#" onclick="alert('Research portal requires authentication'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Research Portal</a>
+                    <a href="#" onclick="alert('Training materials require authentication'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Training</a>
+                    <a href="#" onclick="window.open('https://status.atlasnexus.co.uk', '_blank'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">System Status</a>
+                </div>
+                
+                <div>
+                    <h4 style="color: #E5E9F0; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;">Legal & Compliance</h4>
+                    <a href="/privacy" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Privacy Policy</a>
+                    <a href="/terms" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Terms of Service</a>
+                    <a href="/compliance" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Regulatory Compliance</a>
+                    <a href="/data-protection" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Data Protection</a>
+                    <a href="/security" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Security Policy</a>
+                </div>
+                
+                <div>
+                    <h4 style="color: #E5E9F0; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;">Executive Support</h4>
+                    <span style="display: block; color: #92969C; font-size: 0.875rem; margin-bottom: 10px;">24/7 Priority Support</span>
+                    <a href="mailto:Support@AtlasNexus.co.uk" style="display: block; color: #60a5fa; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Support@AtlasNexus.co.uk</a>
+                    <span style="display: block; color: #92969C; font-size: 0.875rem; margin-bottom: 5px;">Direct Line:</span>
+                    <a href="tel:+442071234567" style="display: block; color: #60a5fa; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px;">+44 20 7123 4567</a>
+                    <a href="#" onclick="toggleAccount(); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Account Settings</a>
+                </div>
+            </div>
+
+            <div style="text-align: center; padding-top: 30px; border-top: 1px solid rgba(184, 192, 200, 0.1);">
+                <p style="color: #92969C; font-size: 0.875rem; margin: 0;">
+                    © 2024 AtlasNexus. All rights reserved. | Executive Access Level | Session Active
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    // Enhanced Data Integration with multiple sources
+    async function fetchLiveMarketData() {
+        try {
+            // Check if we have cached data from last 24 hours
+            const cachedData = localStorage.getItem('marketDataCache');
+            const cacheTime = localStorage.getItem('marketDataCacheTime');
+            const now = new Date().getTime();
             
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
+            // Use cache if less than 24 hours old
+            if (cachedData && cacheTime && (now - parseInt(cacheTime)) < 24 * 60 * 60 * 1000) {
+                const cached = JSON.parse(cachedData);
+                Object.assign(marketData, cached);
+                createTicker();
+                return;
+            }
+            
+            // Fetch live FX rates
+            const fxResponse = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+            const fxData = await fxResponse.json();
+            
+            // Fetch US Treasury yields from FRED (Federal Reserve Economic Data)
+            // Note: FRED provides daily updates, perfect for bonds
+            const fredApiKey = 'demo'; // Use 'demo' for testing, get free key at https://fred.stlouisfed.org/docs/api/api_key.html
+            const bondSymbols = {
+                'DGS2': 'US 2Y',  // 2-Year Treasury
+                'DGS5': 'US 5Y',  // 5-Year Treasury
+                'DGS10': 'US 10Y' // 10-Year Treasury
+            };
+            
+            // Fetch SOFR rate (replaces LIBOR)
+            try {
+                const sofrResponse = await fetch(`https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&api_key=${fredApiKey}&file_type=json&limit=1&sort_order=desc`);
+                const sofrData = await sofrResponse.json();
+                if (sofrData.observations && sofrData.observations[0]) {
+                    marketData['SOFR'].value = parseFloat(sofrData.observations[0].value);
+                }
+            } catch (e) {
+                console.log('SOFR data not available');
+            }
+            
+            // Fetch ECB rates (European Central Bank provides free data)
+            try {
+                const ecbResponse = await fetch('https://api.frankfurter.app/latest?from=EUR');
+                const ecbData = await ecbResponse.json();
+                // ECB main refinancing rate (approximation)
+                marketData['ECB RATE'].value = 4.00; // ECB publishes rates on their website
+            } catch (e) {
+                console.log('ECB data not available');
+            }
+            
+            // Bank of England base rate (from UK government data)
+            // Note: BOE updates rates monthly, we'll use static value updated manually
+            marketData['BOE RATE'].value = 5.25;
+            
+            // SONIA (Sterling Overnight Index Average) - UK equivalent of SOFR
+            marketData['SONIA'].value = 5.18;
+            
+            // Update FX rates with live data
+            if (fxData && fxData.rates) {
+                marketData['GBP/USD'].value = (1 / fxData.rates.GBP).toFixed(4);
+                marketData['EUR/USD'].value = (1 / fxData.rates.EUR).toFixed(4);
+                marketData['USD/JPY'].value = fxData.rates.JPY;
+                marketData['EUR/GBP'].value = (fxData.rates.GBP / fxData.rates.EUR).toFixed(4);
+            }
+            
+            // Fetch credit spreads (using approximations based on indices)
+            // IG (Investment Grade) and HY (High Yield) spreads
+            try {
+                // These would typically come from iBoxx indices or ICE BofA indices
+                // Using realistic current market values
+                marketData['IG SPREAD'].value = 1.45;
+                marketData['HY SPREAD'].value = 4.25;
+                marketData['CMBS AAA'].value = 1.45;
+                marketData['CLO AAA'].value = 1.75;
+            } catch (e) {
+                console.log('Credit spread data not available');
+            }
+            
+            // Fetch commodity prices
+            try {
+                // Gold price from exchangerate-api (they provide XAU rates)
+                if (fxData && fxData.rates && fxData.rates.XAU) {
+                    marketData['GOLD'].value = (1 / fxData.rates.XAU).toFixed(2);
+                }
+            } catch (e) {
+                console.log('Gold price not available');
+            }
+            
+            // Cache the data for 24 hours
+            localStorage.setItem('marketDataCache', JSON.stringify(marketData));
+            localStorage.setItem('marketDataCacheTime', now.toString());
+            
+            // Recreate ticker with updated data
+            createTicker();
+            
+        } catch (error) {
+            console.log('Using fallback market data:', error);
+        }
+    }
+    
+    // Fetch live data on load and every 30 seconds
+    fetchLiveMarketData();
+    setInterval(fetchLiveMarketData, 30000);
+    
+    // Perfect Ticker Drag Functionality - Pause at exact position and resume after 2 seconds
+    function initTickerDrag() {
+        const ticker = document.getElementById('marketTicker');
+        const container = document.getElementById('tickerContainer');
+        
+        if (!ticker || !container) return;
+        
+        let isDragging = false;
+        let startX = 0;
+        let scrollPosition = 0;
+        let resumeTimeout = null;
+        let animationDuration = 180; // seconds
+        // Account for initial animation delay of -3s
+        let animationStartTime = Date.now() - 3000;
+        let pausedAt = 0;
+        
+        // Calculate current position based on animation progress
+        function getCurrentPosition() {
+            const elapsed = (Date.now() - animationStartTime) / 1000; // seconds
+            const progress = (elapsed % animationDuration) / animationDuration;
+            const tickerWidth = ticker.scrollWidth / 2; // Half because content is duplicated
+            return -progress * tickerWidth;
         }
         
-        // Real-time updates simulation
-        setInterval(() => {
-            // Update random values slightly
-            const spreads = document.querySelectorAll('.text-success, .text-danger');
-            spreads.forEach(el => {
-                if (el.textContent.includes('bps') || el.textContent.includes('%')) {
-                    const change = (Math.random() - 0.5) * 0.1;
-                    const currentVal = parseFloat(el.textContent) || 0;
-                    const newVal = (currentVal + change).toFixed(2);
-                    if (change > 0) {
-                        el.className = 'text-success small';
-                        el.innerHTML = `<i class="fas fa-arrow-up me-1"></i>+${Math.abs(newVal)}%`;
-                    } else {
-                        el.className = 'text-danger small';
-                        el.innerHTML = `<i class="fas fa-arrow-down me-1"></i>${newVal}%`;
+        // Start dragging
+        function startDrag(e) {
+            e.preventDefault();
+            isDragging = true;
+            
+            // Clear any pending resume
+            if (resumeTimeout) {
+                clearTimeout(resumeTimeout);
+                resumeTimeout = null;
+            }
+            
+            // Get current animation position
+            const currentPos = getCurrentPosition();
+            
+            // Stop the CSS animation and apply current position
+            ticker.style.animation = 'none';
+            ticker.style.transform = `translateX(${currentPos}px)`;
+            ticker.classList.add('paused');
+            container.classList.add('dragging');
+            
+            // Store drag start position
+            scrollPosition = currentPos;
+            startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            
+            // Store when we paused
+            pausedAt = currentPos;
+        }
+        
+        // During drag
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            const x = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const walk = x - startX;
+            const newPosition = scrollPosition + walk;
+            
+            // Apply the new position
+            ticker.style.transform = `translateX(${newPosition}px)`;
+        }
+        
+        // Stop dragging
+        function stopDrag(e) {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            container.classList.remove('dragging');
+            
+            // Get the final position after drag
+            const transform = window.getComputedStyle(ticker).transform;
+            const matrix = new DOMMatrix(transform);
+            const finalPosition = matrix.m41;
+            
+            // Keep it paused for 2 seconds
+            resumeTimeout = setTimeout(() => {
+                ticker.classList.remove('paused');
+                
+                // Calculate the progress based on final position
+                const tickerWidth = ticker.scrollWidth / 2;
+                let normalizedPos = finalPosition % tickerWidth;
+                
+                // Ensure negative value for leftward scroll
+                if (normalizedPos > 0) {
+                    normalizedPos -= tickerWidth;
+                }
+                
+                // Calculate animation delay to start from this position
+                const progress = Math.abs(normalizedPos) / tickerWidth;
+                const delay = -progress * animationDuration;
+                
+                // Apply fresh animation with calculated delay
+                ticker.style.transform = '';
+                ticker.style.animation = `scroll ${animationDuration}s linear infinite`;
+                ticker.style.animationDelay = `${delay}s`;
+                
+                // Update animation start time for future calculations
+                animationStartTime = Date.now() + (delay * 1000);
+            }, 2000); // Resume after 2 seconds
+        }
+        
+        // Event listeners
+        container.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('mouseleave', stopDrag);
+        
+        // Touch events for mobile
+        container.addEventListener('touchstart', startDrag, { passive: false });
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('touchend', stopDrag);
+        
+        // Prevent text selection while dragging
+        container.addEventListener('selectstart', e => {
+            if (isDragging) e.preventDefault();
+        });
+    }
+    
+    // Initialize drag functionality after DOM loads
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initTickerDrag, 100);
+    });
+    // Market Data for Ticker (will be updated with live data)
+    let marketData = {
+        // BONDS
+        'US 10Y': { value: 4.67, change24h: 0.03, change7d: -0.05, change30d: 0.15 },
+        'UK 10Y': { value: 4.21, change24h: -0.02, change7d: 0.08, change30d: -0.12 },
+        'DE 10Y': { value: 2.45, change24h: 0.01, change7d: -0.12, change30d: 0.08 },
+        'US 5Y': { value: 4.42, change24h: 0.02, change7d: -0.08, change30d: 0.22 },
+        'US 2Y': { value: 4.88, change24h: -0.01, change7d: 0.05, change30d: 0.18 },
+        'JP 10Y': { value: 0.95, change24h: 0.01, change7d: 0.03, change30d: 0.08 },
+        
+        // CENTRAL BANKS
+        'FED RATE': { value: 5.50, change24h: 0, change7d: 0, change30d: 0.25 },
+        'BOE RATE': { value: 5.25, change24h: 0, change7d: 0, change30d: 0 },
+        'ECB RATE': { value: 4.00, change24h: 0, change7d: 0, change30d: -0.25 },
+        'BOJ RATE': { value: 0.10, change24h: 0, change7d: 0, change30d: 0.10 },
+        'SNB RATE': { value: 1.75, change24h: 0, change7d: 0, change30d: 0 },
+        
+        // REFERENCE RATES
+        'SOFR': { value: 5.32, change24h: -0.01, change7d: 0.02, change30d: 0.18 },
+        'SONIA': { value: 5.18, change24h: 0, change7d: 0.01, change30d: 0.05 },
+        'ESTR': { value: 3.89, change24h: 0.01, change7d: -0.02, change30d: 0.08 },
+        'TONAR': { value: 0.08, change24h: 0, change7d: 0.01, change30d: 0.02 },
+        
+        // SECURITISATION
+        'RMBS AAA': { value: 1.25, change24h: -0.01, change7d: 0.04, change30d: -0.06 },
+        'CMBS AAA': { value: 1.45, change24h: -0.02, change7d: 0.03, change30d: -0.05 },
+        'CLO AAA': { value: 1.75, change24h: -0.03, change7d: 0.06, change30d: -0.10 },
+        'ABS AAA': { value: 1.15, change24h: 0.01, change7d: -0.02, change30d: 0.05 },
+        'IG SPREAD': { value: 1.45, change24h: -0.02, change7d: 0.05, change30d: -0.08 },
+        'HY SPREAD': { value: 4.25, change24h: 0.08, change7d: -0.15, change30d: 0.25 },
+        
+        // FX
+        'GBP/USD': { value: 1.2745, change24h: -0.18, change7d: 1.23, change30d: -1.85 },
+        'EUR/USD': { value: 1.0842, change24h: 0.11, change7d: -0.82, change30d: 1.34 },
+        'USD/JPY': { value: 149.85, change24h: 0.25, change7d: -1.15, change30d: 2.45 },
+        'EUR/GBP': { value: 0.8507, change24h: 0.29, change7d: -0.45, change30d: 0.85 },
+        'AUD/USD': { value: 0.6524, change24h: -0.15, change7d: 0.95, change30d: -1.25 },
+        'USD/CHF': { value: 0.8756, change24h: 0.08, change7d: -0.35, change30d: 0.65 },
+        
+        // EQUITIES
+        'S&P 500': { value: 4567.89, change24h: 0.51, change7d: -1.47, change30d: 2.73 },
+        'FTSE 100': { value: 7543.21, change24h: -0.21, change7d: 0.61, change30d: -0.31 },
+        'DAX': { value: 16245.67, change24h: 0.35, change7d: -0.89, change30d: 1.95 },
+        'NIKKEI': { value: 33156.89, change24h: -0.45, change7d: 1.23, change30d: 3.45 },
+        'VIX': { value: 18.45, change24h: -2.35, change7d: 8.45, change30d: -12.65 },
+        
+        // COMMODITIES
+        'GOLD': { value: 2034.50, change24h: -0.28, change7d: 1.15, change30d: -0.61 },
+        'SILVER': { value: 23.45, change24h: -0.85, change7d: 2.35, change30d: -1.95 },
+        'OIL WTI': { value: 78.65, change24h: 1.25, change7d: -2.85, change30d: 4.65 },
+        'OIL BRENT': { value: 83.45, change24h: 1.35, change7d: -2.95, change30d: 4.85 }
+    };
+
+    // Create ticker content
+    function createTicker() {
+        const ticker = document.getElementById('marketTicker');
+        let content = '';
+        
+        // Create two identical sets for seamless looping
+        for (let i = 0; i < 2; i++) {
+            // BONDS
+            content += '<span class="ticker-section-header">BONDS</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['US 10Y', 'UK 10Y', 'DE 10Y', 'US 5Y', 'US 2Y', 'JP 10Y'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+            
+            // CENTRAL BANKS
+            content += '<span class="ticker-section-header">CENTRAL BANKS</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['FED RATE', 'BOE RATE', 'ECB RATE', 'BOJ RATE', 'SNB RATE'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+            
+            // REFERENCE RATES
+            content += '<span class="ticker-section-header">REFERENCE RATES</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['SOFR', 'SONIA', 'ESTR', 'TONAR'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+            
+            // SECURITISATION
+            content += '<span class="ticker-section-header">SECURITISATION</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['RMBS AAA', 'CMBS AAA', 'CLO AAA', 'ABS AAA', 'IG SPREAD', 'HY SPREAD'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+            
+            // FX
+            content += '<span class="ticker-section-header">FX</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['GBP/USD', 'EUR/USD', 'USD/JPY', 'EUR/GBP', 'AUD/USD', 'USD/CHF'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+            
+            // EQUITIES
+            content += '<span class="ticker-section-header">EQUITIES</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['S&P 500', 'FTSE 100', 'DAX', 'NIKKEI', 'VIX'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+            
+            // COMMODITIES
+            content += '<span class="ticker-section-header">COMMODITIES</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['GOLD', 'SILVER', 'OIL WTI', 'OIL BRENT'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+        }
+        
+        ticker.innerHTML = content;
+    }
+
+    function createTickerItem(symbol, data) {
+        const formatValue = (val) => {
+            if (symbol.includes('/')) return val.toFixed(4);
+            else if (symbol.includes('JPY')) return val.toFixed(2);
+            else if (symbol.includes('RATE') || symbol.includes('SPREAD') || symbol.includes('AAA') || symbol.includes('SOFR') || symbol.includes('SONIA') || symbol.includes('ESTR') || symbol.includes('TONAR')) return val.toFixed(2) + '%';
+            else if (symbol.includes('GOLD') || symbol.includes('SILVER') || symbol.includes('OIL')) return '$' + val.toFixed(2);
+            else if (symbol.includes('S&P') || symbol.includes('FTSE') || symbol.includes('DAX') || symbol.includes('NIKKEI') || symbol.includes('VIX')) return val.toFixed(2);
+            else return val.toFixed(2) + '%';
+        };
+        
+        const getChangeColor = (change) => {
+            if (change > 0) return '#22c55e';
+            if (change < 0) return '#ef4444';
+            return '#94a3b8';
+        };
+        
+        const formatChange = (change) => {
+            return (change > 0 ? '+' : '') + change.toFixed(2) + '%';
+        };
+        
+        return `
+            <div class="ticker-item" style="display: inline-flex; align-items: center; gap: 8px; margin: 0 12px;">
+                <span class="ticker-symbol" style="color: #dbeafe; font-weight: 600;">${symbol}:</span>
+                <span class="ticker-value" style="color: #fff; font-weight: 500;">${formatValue(data.value)}</span>
+                <span style="color: #64748b; font-size: 0.7rem; margin-left: 4px;">24h</span>
+                <span style="color: ${getChangeColor(data.change24h)}; font-size: 0.8rem; font-weight: 500;">${formatChange(data.change24h)}</span>
+                <span style="color: #64748b; font-size: 0.7rem;">7d</span>
+                <span style="color: ${getChangeColor(data.change7d)}; font-size: 0.8rem; font-weight: 500;">${formatChange(data.change7d)}</span>
+                <span style="color: #64748b; font-size: 0.7rem;">30d</span>
+                <span style="color: ${getChangeColor(data.change30d)}; font-size: 0.8rem; font-weight: 500;">${formatChange(data.change30d)}</span>
+            </div>
+            <span class="ticker-separator" style="color: #475569; margin: 0 8px;">●</span>
+        `;
+    }
+
+    // Create ticker content on page load
+    createTicker();
+
+    // Set current date
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+
+    // Animation on load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate counters
+        animateCounter('aumCounter', 0, 2.4, 'B', 2000);
+        animateCounter('dealsCounter', 0, 127, '', 2000);
+        
+        // Initialize Chart
+        const ctx = document.getElementById('spreadChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 30}, (_, i) => `Day ${i+1}`),
+                    datasets: [{
+                        label: 'AAA Spread',
+                        data: Array.from({length: 30}, () => Math.random() * 0.5 + 1.5),
+                        borderColor: '#60a5fa',
+                        backgroundColor: 'rgba(96, 165, 250, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', maxTicksLimit: 10 }
+                        }
                     }
                 }
             });
-        }, 15000);
+        }
+    });
+
+    function animateCounter(id, start, end, suffix, duration) {
+        const element = document.getElementById(id);
+        if (!element) return;
+        
+        const prefix = '€';
+        let startTime = null;
+        
+        function animate(currentTime) {
+            if (startTime === null) startTime = currentTime;
+            const timeElapsed = currentTime - startTime;
+            const progress = Math.min(timeElapsed / duration, 1);
+            
+            const currentValue = start + (end - start) * easeOutQuart(progress);
+            element.textContent = prefix + currentValue.toFixed(1) + suffix;
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        }
+        
+        requestAnimationFrame(animate);
+    }
+
+    function easeOutQuart(t) {
+        return 1 - (--t) * t * t * t;
+    }
+    
+    // Toggle Navigation Toolbar
+    function toggleNavToolbar() {
+        const toolbar = document.getElementById('navToolbar');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const mainContainer = document.querySelector('.main-container');
+        
+        if (toolbar.style.height === '0px' || !toolbar.style.height) {
+            toolbar.style.height = '50px';
+            toggleIcon.className = 'fas fa-chevron-up';
+            mainContainer.style.marginTop = '165px'; // Adjust for toolbar
+        } else {
+            toolbar.style.height = '0';
+            toggleIcon.className = 'fas fa-chevron-down';
+            mainContainer.style.marginTop = '115px'; // Normal margin
+        }
+    }
+    
+    // Show section based on navigation
+    function showSection(section) {
+        // Hide all sections
+        document.getElementById('main-dashboard').style.display = 'none';
+        document.getElementById('market-section').style.display = 'none';
+        document.getElementById('data-section').style.display = 'none';
+        document.getElementById('analytics-section').style.display = 'none';
+        document.getElementById('risk-section').style.display = 'none';
+        document.getElementById('portfolio-section').style.display = 'none';
+        document.getElementById('compliance-section').style.display = 'none';
+        
+        // Remove active state from all buttons
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.style.background = 'transparent';
+            btn.style.color = '#60a5fa';
+        });
+        
+        // Show selected section and highlight active button
+        if (section === 'dashboard') {
+            document.getElementById('main-dashboard').style.display = 'block';
+            document.querySelector('.dashboard-btn').style.background = 'linear-gradient(90deg, #60a5fa, #3b82f6)';
+            document.querySelector('.dashboard-btn').style.color = 'white';
+        } else {
+            document.getElementById(section + '-section').style.display = 'block';
+            // Highlight active button
+            event.target.style.background = 'linear-gradient(90deg, #60a5fa, #3b82f6)';
+            event.target.style.color = 'white';
+        }
+    }
+    
+    // Toggle Account dropdown
+    function toggleAccount() {
+        alert('Account settings coming soon!');
+    }
+    
+    // Optimized FRED API Integration with intelligent update frequencies
+    async function fetchEnhancedFREDData() {
+        const fredApiKey = '06d8ad927adcea880c39dc648df3d02f';
+        const baseUrl = 'https://api.stlouisfed.org/fred/series/observations';
+        
+        // FRED API Rate Limits:
+        // - 120 requests per minute
+        // - 1000 requests per day without registration
+        // - With API key: unlimited daily requests
+        
+        // Data Update Frequencies from FRED:
+        // Daily Updates (fetch once per day):
+        const dailySeries = {
+            'DGS2': 'US 2Y',         // 2-Year Treasury - Updated daily at 3:30 PM ET
+            'DGS5': 'US 5Y',         // 5-Year Treasury - Updated daily at 3:30 PM ET  
+            'DGS10': 'US 10Y',       // 10-Year Treasury - Updated daily at 3:30 PM ET
+            'DGS30': 'US 30Y',       // 30-Year Treasury - Updated daily at 3:30 PM ET
+            'SOFR': 'SOFR',          // SOFR - Updated daily at 8:00 AM ET
+            'DFF': 'FED RATE',       // Federal Funds Rate - Updated daily
+            'DPRIME': 'PRIME RATE',  // Bank Prime Loan Rate - Updated daily
+        };
+        
+        // Weekly Updates (fetch once per week):
+        const weeklySeries = {
+            'BAMLH0A0HYM2': 'HY SPREAD',  // High Yield Spread - Updated weekly
+            'BAMLC0A0CM': 'IG SPREAD',    // Investment Grade Spread - Updated weekly
+            'MORTGAGE30US': 'US 30Y MTG', // 30-Year Mortgage Rate - Updated weekly (Thursdays)
+            'MORTGAGE15US': 'US 15Y MTG', // 15-Year Mortgage Rate - Updated weekly (Thursdays)
+        };
+        
+        // Monthly Updates (fetch once per month):
+        const monthlySeries = {
+            'UNRATE': 'US UNEMP',     // Unemployment Rate - First Friday of month
+            'CPIAUCSL': 'US CPI',     // Consumer Price Index - Mid-month
+            'PPIACO': 'US PPI',       // Producer Price Index - Mid-month
+            'HOUST': 'HOUSING',       // Housing Starts - Third week of month
+        };
+        
+        // Available Additional FRED Series (50+ data points):
+        // Bond Markets: T1YIE (1Y Inflation), T5YIFR (5Y Forward Inflation), TEDRATE (TED Spread)
+        // Credit Markets: DEXUSEU (USD/EUR), DEXUSUK (USD/GBP), DEXJPUS (JPY/USD)
+        // Economic Indicators: GDP, PAYEMS (Nonfarm Payrolls), INDPRO (Industrial Production)
+        // Money Supply: M1SL, M2SL, BOGMBASE
+        // Interest Rates: TB3MS (3-Month T-Bill), TB6MS (6-Month T-Bill)
+        // Real Estate: CSUSHPISA (Case-Shiller Index), PERMIT (Building Permits)
+        
+        const now = new Date();
+        const today = now.toDateString();
+        const thisWeek = `week-${Math.floor(now.getTime() / (7 * 24 * 60 * 60 * 1000))}`;
+        const thisMonth = `${now.getFullYear()}-${now.getMonth()}`;
+        
+        // Check cache timestamps
+        const dailyCache = localStorage.getItem('fredDailyCache');
+        const dailyCacheDate = localStorage.getItem('fredDailyCacheDate');
+        const weeklyCache = localStorage.getItem('fredWeeklyCache');
+        const weeklyCacheWeek = localStorage.getItem('fredWeeklyCacheWeek');
+        const monthlyCache = localStorage.getItem('fredMonthlyCache');
+        const monthlyCacheMonth = localStorage.getItem('fredMonthlyCacheMonth');
+        
+        let dataToFetch = {};
+        
+        // Determine what needs updating
+        if (!dailyCache || dailyCacheDate !== today) {
+            Object.assign(dataToFetch, dailySeries);
+        }
+        if (!weeklyCache || weeklyCacheWeek !== thisWeek) {
+            Object.assign(dataToFetch, weeklySeries);
+        }
+        if (!monthlyCache || monthlyCacheMonth !== thisMonth) {
+            Object.assign(dataToFetch, monthlySeries);
+        };
+        
+        // Only fetch if we have data that needs updating
+        if (Object.keys(dataToFetch).length === 0) {
+            console.log('All FRED data is up-to-date, using cache');
+            // Load from cache
+            if (dailyCache) Object.assign(marketData, JSON.parse(dailyCache));
+            if (weeklyCache) Object.assign(marketData, JSON.parse(weeklyCache));
+            if (monthlyCache) Object.assign(marketData, JSON.parse(monthlyCache));
+            return;
+        }
+        
+        console.log(`Fetching ${Object.keys(dataToFetch).length} FRED data points...`);
+        
+        try {
+            const fetchedData = {};
+            let requestCount = 0;
+            
+            // Batch requests with delay to respect rate limits
+            for (const [seriesId, dataKey] of Object.entries(dataToFetch)) {
+                // Add delay every 10 requests to stay well under 120/minute limit
+                if (requestCount > 0 && requestCount % 10 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+                }
+                
+                const url = `${baseUrl}?series_id=${seriesId}&api_key=${fredApiKey}&file_type=json&limit=1&sort_order=desc`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.observations && data.observations[0]) {
+                    const value = parseFloat(data.observations[0].value);
+                    fetchedData[dataKey] = { value: value, timestamp: data.observations[0].date };
+                    
+                    if (marketData[dataKey]) {
+                        marketData[dataKey].value = value;
+                    } else {
+                        marketData[dataKey] = { value: value, change24h: 0, change7d: 0, change30d: 0 };
+                    }
+                }
+                
+                requestCount++;
+            }
+            
+            // Save to appropriate caches
+            if (Object.keys(dailySeries).some(key => dataToFetch[key])) {
+                const dailyData = {};
+                Object.keys(dailySeries).forEach(key => {
+                    if (fetchedData[dailySeries[key]]) {
+                        dailyData[dailySeries[key]] = fetchedData[dailySeries[key]];
+                    }
+                });
+                localStorage.setItem('fredDailyCache', JSON.stringify(dailyData));
+                localStorage.setItem('fredDailyCacheDate', today);
+            }
+            
+            if (Object.keys(weeklySeries).some(key => dataToFetch[key])) {
+                const weeklyData = {};
+                Object.keys(weeklySeries).forEach(key => {
+                    if (fetchedData[weeklySeries[key]]) {
+                        weeklyData[weeklySeries[key]] = fetchedData[weeklySeries[key]];
+                    }
+                });
+                localStorage.setItem('fredWeeklyCache', JSON.stringify(weeklyData));
+                localStorage.setItem('fredWeeklyCacheWeek', thisWeek);
+            }
+            
+            if (Object.keys(monthlySeries).some(key => dataToFetch[key])) {
+                const monthlyData = {};
+                Object.keys(monthlySeries).forEach(key => {
+                    if (fetchedData[monthlySeries[key]]) {
+                        monthlyData[monthlySeries[key]] = fetchedData[monthlySeries[key]];
+                    }
+                });
+                localStorage.setItem('fredMonthlyCache', JSON.stringify(monthlyData));
+                localStorage.setItem('fredMonthlyCacheMonth', thisMonth);
+            }
+            
+            console.log(`FRED data updated: ${Object.keys(fetchedData).length} series fetched`);
+            createTicker(); // Refresh ticker with new data
+            
+        } catch (error) {
+            console.error('Error fetching FRED data:', error);
+            // Load from cache if available
+            if (dailyCache) Object.assign(marketData, JSON.parse(dailyCache));
+            if (weeklyCache) Object.assign(marketData, JSON.parse(weeklyCache));
+            if (monthlyCache) Object.assign(marketData, JSON.parse(monthlyCache));
+        }
+    }
+    
+    // Intelligent update schedule based on data freshness needs:
+    // - Check for daily updates every hour (treasuries update at 3:30 PM ET)
+    // - Weekly data checked daily
+    // - Monthly data checked weekly
+    setInterval(fetchEnhancedFREDData, 60 * 60 * 1000); // Check every hour
+    
+    // Fetch on load
+    fetchEnhancedFREDData();
     </script>
 </body>
 </html>
