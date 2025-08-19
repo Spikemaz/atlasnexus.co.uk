@@ -1348,6 +1348,14 @@
                     <p style="color: #94a3b8;">No active users</p>
                 {% endif %}
             </div>
+            
+            <!-- IP Management Section -->
+            <div style="background: rgba(54, 64, 73, 0.95); border: 2px solid #ef4444; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                <h3 style="color: #ef4444; margin-bottom: 1.5rem;">IP Lockout Management</h3>
+                <div id="ipManagementContent">
+                    <p style="color: #94a3b8;">Loading IP data...</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1355,6 +1363,145 @@
         function toggleAdminPanel() {
             const panel = document.getElementById('adminPanel');
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            if (panel.style.display === 'block') {
+                loadIPManagement();
+            }
+        }
+        
+        function loadIPManagement() {
+            fetch('/admin/ip-management')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        displayIPData(data.data);
+                    }
+                })
+                .catch(error => console.error('Error loading IP data:', error));
+        }
+        
+        function displayIPData(ipData) {
+            const container = document.getElementById('ipManagementContent');
+            
+            if (ipData.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8;">No IP lockouts currently active</p>';
+                return;
+            }
+            
+            let html = `
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(239, 68, 68, 0.3);">
+                                <th style="padding: 10px; text-align: left; color: #94a3b8;">IP Address</th>
+                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Status</th>
+                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Reason</th>
+                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Failed Passwords</th>
+                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Time Remaining</th>
+                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            ipData.forEach(ip => {
+                const statusColor = ip.status === 'permanent' ? '#ef4444' : '#f59e0b';
+                const statusText = ip.status === 'permanent' ? 'PERMANENT BAN' : 'TEMPORARY BLOCK';
+                
+                html += `
+                    <tr style="border-bottom: 1px solid rgba(239, 68, 68, 0.1);">
+                        <td style="padding: 10px; color: white; font-family: monospace;">${ip.ip}</td>
+                        <td style="padding: 10px;">
+                            <span style="color: ${statusColor}; font-weight: 600;">${statusText}</span>
+                        </td>
+                        <td style="padding: 10px; color: #94a3b8; font-size: 0.9rem;">${ip.reason}</td>
+                        <td style="padding: 10px; color: #ef4444; font-size: 0.85rem;">
+                            ${ip.failed_passwords ? ip.failed_passwords.join(', ') : 'N/A'}
+                        </td>
+                        <td style="padding: 10px; color: #f59e0b;">
+                            ${ip.remaining_time || (ip.status === 'permanent' ? 'PERMANENT' : 'Expired')}
+                        </td>
+                        <td style="padding: 10px;">
+                            <button onclick="unbanIP('${ip.ip}')" style="background: #22c55e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+                                Unban
+                            </button>
+                            ${ip.status !== 'permanent' ? `
+                                <button onclick="extendBan('${ip.ip}')" style="background: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+                                    Extend
+                                </button>
+                                <button onclick="permanentBan('${ip.ip}')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                    Permanent
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        function unbanIP(ip) {
+            if (confirm(`Unban IP address ${ip}?`)) {
+                fetch('/admin/manage-ip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip: ip, action: 'unban' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(data.message);
+                        loadIPManagement();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                });
+            }
+        }
+        
+        function extendBan(ip) {
+            const days = prompt(`Extend ban for ${ip} by how many days? (1-30)`);
+            if (days && !isNaN(days) && days >= 1 && days <= 30) {
+                fetch('/admin/manage-ip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip: ip, action: 'extend', duration_days: days })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(data.message);
+                        loadIPManagement();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                });
+            }
+        }
+        
+        function permanentBan(ip) {
+            if (confirm(`Permanently ban IP address ${ip}? This cannot be undone through the timeout.`)) {
+                fetch('/admin/manage-ip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip: ip, action: 'permanent' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(data.message);
+                        loadIPManagement();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                });
+            }
         }
 
         function approveUser(email) {

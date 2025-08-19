@@ -23,6 +23,7 @@ import time
 
 # ==================== IP LOCKOUT TRACKING ====================
 LOCKOUT_FILE = 'ip_lockouts.json'
+ATTEMPT_LOG_FILE = 'ip_attempts_log.json'
 
 def load_lockouts():
     """Load IP lockout data from file"""
@@ -31,17 +32,8 @@ def load_lockouts():
     try:
         with open(LOCKOUT_FILE, 'r') as f:
             data = json.load(f)
-            # Clean expired entries
-            now = datetime.now()
-            cleaned = {}
-            for ip, info in data.items():
-                if 'permanent' in info and info['permanent']:
-                    cleaned[ip] = info
-                elif 'locked_until' in info:
-                    locked_until = datetime.fromisoformat(info['locked_until'])
-                    if locked_until > now:
-                        cleaned[ip] = info
-            return cleaned
+            # Don't auto-clean, keep all records for admin panel
+            return data
     except:
         return {}
 
@@ -54,8 +46,51 @@ def save_lockouts(lockouts):
     except:
         return False
 
+def load_attempt_logs():
+    """Load password attempt logs"""
+    if not os.path.exists(ATTEMPT_LOG_FILE):
+        return {}
+    try:
+        with open(ATTEMPT_LOG_FILE, 'r') as f:
+            return json.load(f)
+    except:
+        return {}
+
+def save_attempt_logs(logs):
+    """Save password attempt logs"""
+    try:
+        with open(ATTEMPT_LOG_FILE, 'w') as f:
+            json.dump(logs, f, indent=2, default=str)
+        return True
+    except:
+        return False
+
+def log_failed_attempt(ip_address, password_attempted, attempt_type='site_auth'):
+    """Log a failed password attempt"""
+    logs = load_attempt_logs()
+    if ip_address not in logs:
+        logs[ip_address] = {
+            'attempts': [],
+            'total_attempts': 0,
+            'last_attempt': None
+        }
+    
+    logs[ip_address]['attempts'].append({
+        'password': password_attempted,
+        'type': attempt_type,
+        'timestamp': datetime.now().isoformat()
+    })
+    logs[ip_address]['total_attempts'] += 1
+    logs[ip_address]['last_attempt'] = datetime.now().isoformat()
+    
+    # Keep only last 50 attempts per IP to prevent file bloat
+    if len(logs[ip_address]['attempts']) > 50:
+        logs[ip_address]['attempts'] = logs[ip_address]['attempts'][-50:]
+    
+    save_attempt_logs(logs)
+
 def check_ip_lockout(ip_address):
-    """Check if an IP is locked out (persistent across sessions)"""
+    """Check if an IP is locked out"""
     lockouts = load_lockouts()
     if ip_address not in lockouts:
         return None
@@ -64,50 +99,83 @@ def check_ip_lockout(ip_address):
     
     # Check permanent blacklist
     if info.get('permanent'):
-        return {'type': 'permanent', 'ip': ip_address}
+        return {'type': 'permanent', 'ip': ip_address, 'info': info}
     
-    # Check 24-hour lockout
+    # Check timed lockout
     if 'locked_until' in info:
         locked_until = datetime.fromisoformat(info['locked_until'])
         if datetime.now() < locked_until:
             remaining = (locked_until - datetime.now()).total_seconds()
+            lockout_type = info.get('lockout_type', 'blocked_24h')
             return {
-                'type': 'blocked_24h',
+                'type': lockout_type,
                 'locked_until': locked_until,
                 'remaining_seconds': int(remaining),
-                'reference_code': info.get('reference_code', 'REF-UNKNOWN')
+                'reference_code': info.get('reference_code', 'REF-UNKNOWN'),
+                'info': info
             }
-        else:
-            # 24-hour lockout expired - apply permanent blacklist
-            info['permanent'] = True
-            del info['locked_until']
-            lockouts[ip_address] = info
-            save_lockouts(lockouts)
-            return {'type': 'permanent', 'ip': ip_address}
     
     return None
 
-def apply_ip_lockout(ip_address, lockout_type='24h'):
-    """Apply a lockout to an IP address"""
+def apply_ip_lockout(ip_address, lockout_type='24h', reason='', failed_passwords=None, duration_hours=24):
+    """Apply a lockout to an IP address with detailed logging"""
     lockouts = load_lockouts()
     
-    if lockout_type == '24h':
-        # Calculate exactly 24 hours from now
-        locked_until = datetime.now() + timedelta(hours=24)
-        ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
-        lockouts[ip_address] = {
-            'locked_until': locked_until.isoformat(),
-            'reference_code': ref_code,
-            'locked_at': datetime.now().isoformat()
-        }
-    elif lockout_type == 'permanent':
+    if lockout_type == 'permanent':
         lockouts[ip_address] = {
             'permanent': True,
-            'locked_at': datetime.now().isoformat()
+            'locked_at': datetime.now().isoformat(),
+            'reason': reason,
+            'failed_passwords': failed_passwords or []
+        }
+    else:
+        # Timed lockout (30min, 24h, or custom)
+        locked_until = datetime.now() + timedelta(hours=duration_hours)
+        ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        
+        # Preserve existing data if updating
+        existing = lockouts.get(ip_address, {})
+        lockouts[ip_address] = {
+            'locked_until': locked_until.isoformat(),
+            'lockout_type': lockout_type,
+            'reference_code': ref_code,
+            'locked_at': datetime.now().isoformat(),
+            'duration_hours': duration_hours,
+            'reason': reason,
+            'failed_passwords': failed_passwords or existing.get('failed_passwords', [])
         }
     
     save_lockouts(lockouts)
     return lockouts[ip_address]
+
+def modify_ip_ban(ip_address, action, duration_days=None):
+    """Modify an IP ban - unban, extend, or make permanent"""
+    lockouts = load_lockouts()
+    
+    if action == 'unban':
+        if ip_address in lockouts:
+            del lockouts[ip_address]
+            save_lockouts(lockouts)
+            return True
+    
+    elif action == 'extend' and duration_days:
+        if ip_address in lockouts:
+            locked_until = datetime.now() + timedelta(days=duration_days)
+            lockouts[ip_address]['locked_until'] = locked_until.isoformat()
+            lockouts[ip_address]['duration_days'] = duration_days
+            lockouts[ip_address]['permanent'] = False
+            save_lockouts(lockouts)
+            return True
+    
+    elif action == 'permanent':
+        if ip_address in lockouts:
+            lockouts[ip_address]['permanent'] = True
+            if 'locked_until' in lockouts[ip_address]:
+                del lockouts[ip_address]['locked_until']
+            save_lockouts(lockouts)
+            return True
+    
+    return False
 
 # ==================== CONFIGURATION ====================
 # Auto-detect environment
@@ -397,6 +465,13 @@ def index():
                                  blocked_until=ip_lockout['locked_until'],
                                  is_24h_lockout=True,
                                  reference_code=ip_lockout['reference_code'])
+        elif ip_lockout['type'] == 'blocked_30min':
+            # 30-minute block from failed passwords
+            return render_template('Gate1.html',
+                                 state='blocked_30min',
+                                 blocked_until=ip_lockout['locked_until'],
+                                 remaining_seconds=ip_lockout['remaining_seconds'],
+                                 reference_code=ip_lockout['reference_code'])
     
     # Also check session-based lockout for backwards compatibility
     lockout_24h = session.get(f'lockout_24h_{ip_address}')
@@ -521,28 +596,33 @@ def site_auth():
         
         return jsonify({'status': 'success', 'redirect': url_for('secure_login')}), 200
     
-    # Failed attempt
+    # Failed attempt - log it
+    log_failed_attempt(ip_address, password, 'site_auth')
     attempts_left = MAX_ATTEMPTS_BEFORE_BLOCK - attempt_count
     
-    if attempt_count >= MAX_ATTEMPTS_BEFORE_BLACKLIST:
-        # Permanent blacklist (IP-based)
-        apply_ip_lockout(ip_address, 'permanent')
-        session[f'permanent_block_{ip_address}'] = True  # Keep for backwards compatibility
-        return jsonify({
-            'status': 'blacklisted',
-            'message': 'Access permanently denied',
-            'redirect': url_for('index')
-        }), 403
-    elif attempt_count >= MAX_ATTEMPTS_BEFORE_BLOCK:
-        # Temporary block
+    if attempt_count >= MAX_ATTEMPTS_BEFORE_BLOCK:
+        # Get all failed passwords for this session
+        logs = load_attempt_logs()
+        recent_attempts = []
+        if ip_address in logs:
+            # Get last 3 attempts
+            recent_attempts = [a['password'] for a in logs[ip_address]['attempts'][-3:]]
+        
+        # Apply 30-minute block (not permanent, just 30 minutes)
+        apply_ip_lockout(ip_address, 'blocked_30min', 
+                        reason='3 failed password attempts',
+                        failed_passwords=recent_attempts,
+                        duration_hours=0.5)  # 30 minutes
+        
         blocked_until = datetime.now() + timedelta(minutes=BLOCK_DURATION_MINUTES)
         session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
-        # Generate and store reference code once
-        if not session.get(f'reference_code_{ip_address}'):
-            import random
-            import string
+        
+        # Generate reference code
+        ref_code = session.get(f'reference_code_{ip_address}')
+        if not ref_code:
             ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
             session[f'reference_code_{ip_address}'] = ref_code
+        
         return jsonify({
             'status': 'blocked',
             'message': f'Too many attempts. Blocked for {BLOCK_DURATION_MINUTES} minutes',
@@ -591,7 +671,7 @@ def blocked():
 
 @app.route('/unlock', methods=['POST'])
 def unlock():
-    """Handle global unlock attempts"""
+    """Handle global unlock attempts - only ONE attempt allowed"""
     ip_address = request.remote_addr
     unlock_code = request.json.get('code', '')
     
@@ -607,8 +687,14 @@ def unlock():
             save_lockouts(lockouts)
         return jsonify({'status': 'success', 'redirect': '/'})
     else:
-        # Wrong code = immediate 24-hour lockout (IP-based)
-        apply_ip_lockout(ip_address, '24h')
+        # Wrong override code = immediate 24-hour IP ban
+        log_failed_attempt(ip_address, unlock_code, 'override_attempt')
+        
+        apply_ip_lockout(ip_address, 'blocked_24h',
+                        reason='Failed override attempt',
+                        failed_passwords=[unlock_code],
+                        duration_hours=24)
+        
         session[f'lockout_24h_{ip_address}'] = (datetime.now() + timedelta(hours=LOCKOUT_DURATION_HOURS)).isoformat()
         return jsonify({
             'status': 'lockout',
@@ -1470,6 +1556,104 @@ def test_email():
         </body>
         </html>
         """
+
+@app.route('/admin/ip-management')
+def admin_ip_management():
+    """Get all IP lockout data for admin panel"""
+    ip_address = request.remote_addr
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    # Load all lockout data
+    lockouts = load_lockouts()
+    attempt_logs = load_attempt_logs()
+    
+    # Format data for frontend
+    ip_data = []
+    for ip, info in lockouts.items():
+        # Calculate remaining time if applicable
+        remaining_time = None
+        if 'locked_until' in info and not info.get('permanent'):
+            locked_until = datetime.fromisoformat(info['locked_until'])
+            if datetime.now() < locked_until:
+                remaining_time = str(locked_until - datetime.now()).split('.')[0]
+        
+        # Get attempt history
+        attempts = []
+        if ip in attempt_logs:
+            attempts = attempt_logs[ip].get('attempts', [])[-10:]  # Last 10 attempts
+        
+        ip_data.append({
+            'ip': ip,
+            'status': 'permanent' if info.get('permanent') else 'temporary',
+            'locked_at': info.get('locked_at'),
+            'locked_until': info.get('locked_until'),
+            'remaining_time': remaining_time,
+            'reason': info.get('reason', 'Unknown'),
+            'failed_passwords': info.get('failed_passwords', []),
+            'reference_code': info.get('reference_code'),
+            'attempt_history': attempts,
+            'total_attempts': attempt_logs.get(ip, {}).get('total_attempts', 0)
+        })
+    
+    return jsonify({'status': 'success', 'data': ip_data})
+
+@app.route('/admin/manage-ip', methods=['POST'])
+def admin_manage_ip():
+    """Manage IP bans - unban, extend, or make permanent"""
+    ip_address = request.remote_addr
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    target_ip = request.json.get('ip')
+    action = request.json.get('action')  # 'unban', 'extend', 'permanent'
+    duration_days = request.json.get('duration_days')  # For extend action
+    
+    if action == 'unban':
+        success = modify_ip_ban(target_ip, 'unban')
+        if success:
+            # Log admin action
+            admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
+            admin_actions[str(len(admin_actions))] = {
+                'admin': session.get(f'username_{ip_address}'),
+                'action': f'Unbanned IP: {target_ip}',
+                'timestamp': datetime.now().isoformat()
+            }
+            save_json_db(ADMIN_ACTIONS_FILE, admin_actions)
+            return jsonify({'status': 'success', 'message': f'IP {target_ip} unbanned'})
+    
+    elif action == 'extend':
+        if duration_days:
+            success = modify_ip_ban(target_ip, 'extend', int(duration_days))
+            if success:
+                # Log admin action
+                admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
+                admin_actions[str(len(admin_actions))] = {
+                    'admin': session.get(f'username_{ip_address}'),
+                    'action': f'Extended ban for IP {target_ip} by {duration_days} days',
+                    'timestamp': datetime.now().isoformat()
+                }
+                save_json_db(ADMIN_ACTIONS_FILE, admin_actions)
+                return jsonify({'status': 'success', 'message': f'Ban extended for {duration_days} days'})
+    
+    elif action == 'permanent':
+        success = modify_ip_ban(target_ip, 'permanent')
+        if success:
+            # Log admin action
+            admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
+            admin_actions[str(len(admin_actions))] = {
+                'admin': session.get(f'username_{ip_address}'),
+                'action': f'Permanently banned IP: {target_ip}',
+                'timestamp': datetime.now().isoformat()
+            }
+            save_json_db(ADMIN_ACTIONS_FILE, admin_actions)
+            return jsonify({'status': 'success', 'message': f'IP {target_ip} permanently banned'})
+    
+    return jsonify({'status': 'error', 'message': 'Invalid action'}), 400
 
 @app.route('/logout')
 def logout():

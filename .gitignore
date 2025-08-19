@@ -17,5 +17,6 @@ templates/temp/*
 test_*
 cookies*.txt
 
-# IP lockout tracking file
+# IP lockout tracking files
 ip_lockouts.json
+ip_attempts_log.json
