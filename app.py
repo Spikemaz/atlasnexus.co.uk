@@ -223,6 +223,19 @@ def save_json_db(file_path, data):
     with open(file_path, 'w') as f:
         json.dump(data, f, indent=2, default=str)
 
+def get_base_url():
+    """Get the correct base URL for emails based on environment"""
+    if IS_LOCAL:
+        # For local testing, use localhost (users can access via network IP if needed)
+        # You can set LOCAL_BASE_URL env variable to override (e.g., http://192.168.1.100:5000/)
+        return os.environ.get('LOCAL_BASE_URL', 'http://localhost:5000/')
+    elif IS_VERCEL or IS_PRODUCTION:
+        # On Vercel/production, always use the live domain
+        return 'https://atlasnexus.co.uk/'
+    else:
+        # Fallback
+        return 'https://atlasnexus.co.uk/'
+
 def generate_verification_token():
     """Generate a secure verification token"""
     return secrets.token_urlsafe(32)
@@ -774,7 +787,8 @@ def register():
         save_json_db(REGISTRATIONS_FILE, registrations)
         
         # Send verification email
-        verification_link = f"{request.host_url}verify-email?token={data['verification_token']}&email={data['email']}"
+        base_url = get_base_url()
+        verification_link = f"{base_url}verify-email?token={data['verification_token']}&email={data['email']}"
         
         email_html = f"""
     <html>
@@ -802,8 +816,8 @@ def register():
         save_json_db(REGISTRATIONS_FILE, registrations)
         
         # Notify admin of new registration with approval/reject buttons
-        approve_link = f"{request.host_url}admin/quick-approve?token={approval_token}&email={data['email']}"
-        reject_link = f"{request.host_url}admin/quick-reject?token={approval_token}&email={data['email']}"
+        approve_link = f"{base_url}admin/quick-approve?token={approval_token}&email={data['email']}"
+        reject_link = f"{base_url}admin/quick-reject?token={approval_token}&email={data['email']}"
         
         admin_html = f"""
     <html>
@@ -875,7 +889,7 @@ def register():
                         Or review in the admin panel:
                     </p>
                     <div style="text-align: center;">
-                        <a href="{request.host_url}dashboard" style="color: #3b82f6; text-decoration: none; font-size: 14px;">
+                        <a href="{base_url}dashboard" style="color: #3b82f6; text-decoration: none; font-size: 14px;">
                             Open Admin Dashboard →
                         </a>
                     </div>
@@ -921,6 +935,22 @@ def awaiting_verification():
     
     email = session.get(f'registration_pending_{ip_address}')
     return render_template('awaiting_verification.html', email=email)
+
+@app.route('/check-verification-status')
+def check_verification_status():
+    """Check if user's email is verified"""
+    ip_address = request.remote_addr
+    pending_email = session.get(f'registration_pending_{ip_address}')
+    
+    if not pending_email:
+        return jsonify({'verified': False})
+    
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    if pending_email in registrations:
+        is_verified = registrations[pending_email].get('email_verified', False)
+        return jsonify({'verified': is_verified})
+    
+    return jsonify({'verified': False})
 
 @app.route('/verify-email')
 def verify_email():
@@ -1079,7 +1109,7 @@ def admin_approve_user():
                     <p><strong>Password:</strong> {password}</p>
                     <p style="color: #666; font-size: 14px;">This password expires in 30 days</p>
                 </div>
-                <a href="{request.host_url}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
+                <a href="{get_base_url()}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
                 <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
                 <p style="color: #999; font-size: 12px;">For security, please change your password after first login.</p>
             </div>
@@ -1153,7 +1183,7 @@ def admin_quick_approve():
                     <p><strong>Password:</strong> <code style="background: #e5e7eb; padding: 4px 8px; border-radius: 4px; font-size: 16px;">{password}</code></p>
                     <p style="color: #666; font-size: 14px; margin-top: 10px;">⏱ This password expires in 30 days</p>
                 </div>
-                <a href="{request.host_url}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
+                <a href="{get_base_url()}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
                 <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
                 <p style="color: #999; font-size: 12px;">Please save this password securely. For security, we recommend changing it after your first login.</p>
             </div>
