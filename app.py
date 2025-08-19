@@ -172,8 +172,13 @@ def kill_port_5000():
 
 # ==================== DATABASE ====================
 # Simple file-based database for registrations
-DATA_DIR = Path('data')
-DATA_DIR.mkdir(exist_ok=True)
+# Use /tmp on Vercel (writable), local data folder otherwise
+if IS_VERCEL or IS_PRODUCTION:
+    DATA_DIR = Path('/tmp')
+else:
+    DATA_DIR = Path('data')
+    DATA_DIR.mkdir(exist_ok=True)
+    
 REGISTRATIONS_FILE = DATA_DIR / 'registrations.json'
 USERS_FILE = DATA_DIR / 'users.json'
 ADMIN_ACTIONS_FILE = DATA_DIR / 'admin_actions.json'
