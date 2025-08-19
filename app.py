@@ -22,8 +22,14 @@ import threading
 import time
 
 # ==================== IP LOCKOUT TRACKING ====================
-LOCKOUT_FILE = 'ip_lockouts.json'
-ATTEMPT_LOG_FILE = 'ip_attempts_log.json'
+# On Vercel/production, use /tmp directory (writable)
+# On local, use current directory
+if os.environ.get('VERCEL') or os.environ.get('APP_ENV', '').lower() in ['production', 'prod']:
+    LOCKOUT_FILE = '/tmp/ip_lockouts.json'
+    ATTEMPT_LOG_FILE = '/tmp/ip_attempts_log.json'
+else:
+    LOCKOUT_FILE = 'ip_lockouts.json'
+    ATTEMPT_LOG_FILE = 'ip_attempts_log.json'
 
 def load_lockouts():
     """Load IP lockout data from file"""
@@ -121,6 +127,9 @@ def apply_ip_lockout(ip_address, lockout_type='24h', reason='', failed_passwords
     """Apply a lockout to an IP address with detailed logging"""
     lockouts = load_lockouts()
     
+    # Debug logging
+    print(f"[LOCKOUT] Applying {lockout_type} to IP {ip_address} for {duration_hours} hours. Reason: {reason}")
+    
     if lockout_type == 'permanent':
         lockouts[ip_address] = {
             'permanent': True,
@@ -145,7 +154,8 @@ def apply_ip_lockout(ip_address, lockout_type='24h', reason='', failed_passwords
             'failed_passwords': failed_passwords or existing.get('failed_passwords', [])
         }
     
-    save_lockouts(lockouts)
+    success = save_lockouts(lockouts)
+    print(f"[LOCKOUT] Save status: {success}, File: {LOCKOUT_FILE}")
     return lockouts[ip_address]
 
 def modify_ip_ban(ip_address, action, duration_days=None):
@@ -176,6 +186,23 @@ def modify_ip_ban(ip_address, action, duration_days=None):
             return True
     
     return False
+
+# ==================== HELPER FUNCTIONS ====================
+def get_real_ip():
+    """Get the real IP address, handling proxies and CDNs"""
+    # Check various headers that proxies/CDNs use
+    if request.headers.get('X-Forwarded-For'):
+        # X-Forwarded-For can contain multiple IPs, get the first (client) one
+        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
+    elif request.headers.get('X-Real-IP'):
+        return request.headers.get('X-Real-IP')
+    elif request.headers.get('CF-Connecting-IP'):  # Cloudflare
+        return request.headers.get('CF-Connecting-IP')
+    elif request.headers.get('X-Client-IP'):
+        return request.headers.get('X-Client-IP')
+    else:
+        # Fallback to remote_addr
+        return request.remote_addr
 
 # ==================== CONFIGURATION ====================
 # Auto-detect environment
@@ -451,8 +478,11 @@ app.config['DEBUG'] = DEBUG
 @app.route('/')
 def index():
     """Gate 1 - Site Authentication"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     session.permanent = True
+    
+    # Debug log the detected IP
+    print(f"[DEBUG] Detected IP: {ip_address}, Headers: X-Forwarded-For={request.headers.get('X-Forwarded-For')}, X-Real-IP={request.headers.get('X-Real-IP')}")
     
     # Check IP-based lockout (persistent across sessions/cookies)
     ip_lockout = check_ip_lockout(ip_address)
@@ -541,7 +571,7 @@ def index():
 @app.route('/site-auth', methods=['POST'])
 def site_auth():
     """Handle site authentication attempts"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     password = request.form.get('site_password', '').strip()
     
     # Check if already blocked (IP-based)
@@ -637,7 +667,7 @@ def site_auth():
 @app.route('/blocked')
 def blocked():
     """Handle blocked page with hidden unlock"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     
     # Check for unlock code in request
     unlock_code = request.args.get('unlock_code', '')
@@ -672,7 +702,7 @@ def blocked():
 @app.route('/unlock', methods=['POST'])
 def unlock():
     """Handle global unlock attempts - only ONE attempt allowed"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     unlock_code = request.json.get('code', '')
     
     if unlock_code == GLOBAL_UNLOCK_CODE:
@@ -705,7 +735,7 @@ def unlock():
 @app.route('/secure-login')
 def secure_login():
     """Gate 2 - User Authentication"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     
     # Debug logging
     if IS_LOCAL:
@@ -731,7 +761,7 @@ def companies_house_search():
     import requests
     import time
     
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     
     # Verify site authentication
     if not session.get(f'site_authenticated_{ip_address}'):
@@ -942,7 +972,7 @@ def companies_house_search():
 def register():
     """Handle user registration"""
     try:
-        ip_address = request.remote_addr
+        ip_address = get_real_ip()
         
         # Verify site authentication first
         if not session.get(f'site_authenticated_{ip_address}'):
@@ -1118,7 +1148,7 @@ def register():
 @app.route('/awaiting-verification')
 def awaiting_verification():
     """Show awaiting verification page"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     
     # Verify site authentication
     if not session.get(f'site_authenticated_{ip_address}'):
@@ -1130,7 +1160,7 @@ def awaiting_verification():
 @app.route('/check-verification-status')
 def check_verification_status():
     """Check if user's email is verified"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     pending_email = session.get(f'registration_pending_{ip_address}')
     
     if not pending_email:
@@ -1169,7 +1199,7 @@ def verify_email():
 @app.route('/auth', methods=['POST'])
 def auth():
     """Handle user authentication"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     
     # Verify site authentication first
     if not session.get(f'site_authenticated_{ip_address}'):
@@ -1207,7 +1237,7 @@ def auth():
 @app.route('/dashboard')
 def dashboard():
     """Main dashboard"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     
     # Verify both authentications
     if not session.get(f'site_authenticated_{ip_address}'):
@@ -1242,7 +1272,7 @@ def dashboard():
 @app.route('/admin/approve-user', methods=['POST'])
 def admin_approve_user():
     """Admin approve user"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     
     # Verify admin access
     if not session.get(f'is_admin_{ip_address}'):
@@ -1464,7 +1494,7 @@ def admin_quick_reject():
 @app.route('/admin/reject-user', methods=['POST'])
 def admin_reject_user():
     """Admin reject user"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     
     # Verify admin access
     if not session.get(f'is_admin_{ip_address}'):
@@ -1500,7 +1530,7 @@ def admin_reject_user():
 @app.route('/test-email')
 def test_email():
     """Test email configuration"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     
     # Only allow admin to test
     if not session.get(f'is_admin_{ip_address}'):
@@ -1560,7 +1590,7 @@ def test_email():
 @app.route('/admin/ip-management')
 def admin_ip_management():
     """Get all IP lockout data for admin panel"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     
     # Verify admin access
     if not session.get(f'is_admin_{ip_address}'):
@@ -1603,7 +1633,7 @@ def admin_ip_management():
 @app.route('/admin/manage-ip', methods=['POST'])
 def admin_manage_ip():
     """Manage IP bans - unban, extend, or make permanent"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     
     # Verify admin access
     if not session.get(f'is_admin_{ip_address}'):
@@ -1658,7 +1688,7 @@ def admin_manage_ip():
 @app.route('/logout')
 def logout():
     """Clear session and logout"""
-    ip_address = request.remote_addr
+    ip_address = get_real_ip()
     
     # Clear user authentication only
     session.pop(f'user_authenticated_{ip_address}', None)
