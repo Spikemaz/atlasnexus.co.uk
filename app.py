@@ -743,15 +743,29 @@ def unlock():
     unlock_code = request.json.get('code', '')
     
     if unlock_code == GLOBAL_UNLOCK_CODE:
-        # Clear ALL session data for this IP and remove from IP lockout file
+        # Clear ALL session data for this IP
         for key in list(session.keys()):
             if ip_address in key:
                 session.pop(key, None)
-        # Also remove from IP lockout file
+        
+        # Remove from IP lockout file
         lockouts = load_lockouts()
         if ip_address in lockouts:
             del lockouts[ip_address]
             save_lockouts(lockouts)
+        
+        # Clear password attempts
+        clear_ip_attempts(ip_address)
+        
+        # Reset all counters and timers in session
+        session[f'attempt_count_{ip_address}'] = 0
+        session.pop(f'blocked_until_{ip_address}', None)
+        session.pop(f'lockout_24h_{ip_address}', None)
+        session.pop(f'permanent_block_{ip_address}', None)
+        session.pop(f'reference_code_{ip_address}', None)
+        
+        print(f"[OVERRIDE] Successfully cleared all blocks for IP {ip_address}")
+        
         return jsonify({'status': 'success', 'redirect': '/'})
     else:
         # Wrong override code = immediate 24-hour IP ban
