@@ -1295,34 +1295,34 @@
 
             <!-- Market Status -->
             <div class="market-status">
-                <div class="status-indicator"></div>
-                <span class="status-text">Markets Closed - Next Open: London 08:00 GMT</span>
+                <div class="status-indicator" id="marketStatusIndicator"></div>
+                <span class="status-text" id="marketStatusText">Checking market status...</span>
             </div>
 
             <!-- Market Tickers -->
-            <div class="market-tickers">
+            <div class="market-tickers" id="marketTickersSection">
                 <div class="ticker-card">
-                    <div class="ticker-symbol">S&P 500</div>
-                    <div class="ticker-value">4,567.89</div>
-                    <div class="ticker-change positive">+0.36%</div>
+                    <div class="ticker-symbol">AAA CLO</div>
+                    <div class="ticker-value" id="aaaValue">Loading...</div>
+                    <div class="ticker-change" id="aaaChange">-</div>
                 </div>
                 <div class="ticker-card">
-                    <div class="ticker-symbol">10Y Treasury</div>
-                    <div class="ticker-value">4.67%</div>
-                    <div class="ticker-change negative">-1.07%</div>
+                    <div class="ticker-symbol">IG SPREAD</div>
+                    <div class="ticker-value" id="igValue">Loading...</div>
+                    <div class="ticker-change" id="igChange">-</div>
                 </div>
                 <div class="ticker-card">
-                    <div class="ticker-symbol">VIX</div>
-                    <div class="ticker-value">18.45</div>
-                    <div class="ticker-change positive">+0.56%</div>
+                    <div class="ticker-symbol">HY SPREAD</div>
+                    <div class="ticker-value" id="hyValue">Loading...</div>
+                    <div class="ticker-change" id="hyChange">-</div>
                 </div>
             </div>
 
             <!-- Market Insight -->
             <div class="market-insight">
                 <h3 class="insight-title">Today's Market Insight</h3>
-                <p class="insight-content">
-                    Central banks maintain hawkish stance as inflation remains elevated. Credit spreads tightening across IG and HY markets, with particular strength in financial sectors. European sovereigns outperforming amid ECB policy expectations.
+                <p class="insight-content" id="marketInsight">
+                    Loading market insights...
                 </p>
             </div>
 
@@ -1827,6 +1827,143 @@
         // Fetch live data on load and every 30 seconds
         fetchLiveMarketData();
         setInterval(fetchLiveMarketData, 30000);
+        
+        // Update market status
+        function updateMarketStatus() {
+            const now = new Date();
+            const day = now.getUTCDay();
+            const hour = now.getUTCHours();
+            const minute = now.getUTCMinutes();
+            const time = hour + minute / 60;
+            
+            let marketsOpen = [];
+            let nextOpen = null;
+            let allClosed = true;
+            
+            // Check UK market (8:00 - 16:30 GMT, Mon-Fri)
+            const ukOpen = day >= 1 && day <= 5 && time >= 8 && time < 16.5;
+            if (ukOpen) {
+                marketsOpen.push('London');
+                allClosed = false;
+            }
+            
+            // Check US market (14:30 - 21:00 GMT, Mon-Fri)
+            const usOpen = day >= 1 && day <= 5 && time >= 14.5 && time < 21;
+            if (usOpen) {
+                marketsOpen.push('New York');
+                allClosed = false;
+            }
+            
+            // Check EU market (8:00 - 16:30 CET = 7:00 - 15:30 GMT, Mon-Fri)
+            const euOpen = day >= 1 && day <= 5 && time >= 7 && time < 15.5;
+            if (euOpen) {
+                marketsOpen.push('Frankfurt');
+                allClosed = false;
+            }
+            
+            const statusIndicator = document.getElementById('marketStatusIndicator');
+            const statusText = document.getElementById('marketStatusText');
+            
+            if (statusIndicator && statusText) {
+                if (allClosed) {
+                    // Markets closed - red pulse
+                    statusIndicator.style.background = '#ef4444';
+                    statusIndicator.style.animation = 'pulse 2s infinite';
+                    
+                    // Calculate next open
+                    if (day === 0 || day === 6 || (day === 5 && time >= 21)) {
+                        // Weekend or Friday after close
+                        nextOpen = 'Monday 07:00 GMT (Frankfurt)';
+                    } else if (time < 7) {
+                        nextOpen = 'Today 07:00 GMT (Frankfurt)';
+                    } else if (time < 8) {
+                        nextOpen = 'Today 08:00 GMT (London)';
+                    } else if (time < 14.5) {
+                        nextOpen = 'Today 14:30 GMT (New York)';
+                    } else {
+                        nextOpen = 'Tomorrow 07:00 GMT (Frankfurt)';
+                    }
+                    
+                    statusText.textContent = `Markets Closed - Next Open: ${nextOpen}`;
+                } else {
+                    // Markets open - green pulse
+                    statusIndicator.style.background = '#22c55e';
+                    statusIndicator.style.animation = 'pulse 2s infinite';
+                    statusText.textContent = `Markets Open: ${marketsOpen.join(', ')}`;
+                }
+            }
+        }
+        
+        // Market insights rotation
+        const marketInsights = [
+            "CLO issuance reaches record levels in Q4 as spreads tighten amid strong investor demand. AAA tranches trading at historical lows with robust coverage ratios.",
+            "European ABS markets show resilience as ECB maintains supportive stance. Prime RMBS spreads compress further with strong bid from institutional investors.",
+            "Credit markets rally as inflation data surprises to the downside. Investment grade spreads tighten 15bps week-over-week with financials outperforming.",
+            "Structured credit sees increased allocation from pension funds seeking yield. Mezzanine tranches experience strongest demand in two years.",
+            "Bank capital issuance accelerates ahead of year-end. AT1 bonds find strong support from Asian investors despite regulatory concerns.",
+            "Securitization pipeline builds with £2.5bn of UK RMBS expected before month-end. Cover pool quality remains strong with low LTV ratios.",
+            "High yield market stabilizes after recent volatility. European HY spreads trade 50bps tighter as default expectations moderate.",
+            "Commercial real estate CLOs gain traction as office sector shows signs of bottoming. Senior tranches remain well-bid despite sector headwinds.",
+            "Sterling credit outperforms as BoE signals pause in rate cycle. UK corporates see strongest foreign demand since 2021.",
+            "Synthetic securitization volumes surge as banks optimize capital. Significant risk transfer deals dominate issuance calendar."
+        ];
+        
+        function loadRandomInsight() {
+            const insight = marketInsights[Math.floor(Math.random() * marketInsights.length)];
+            const insightElement = document.getElementById('marketInsight');
+            if (insightElement) {
+                insightElement.textContent = insight;
+            }
+        }
+        
+        // Update securitization metrics from ticker data
+        function updateMarketCards() {
+            // Pull data from the marketData object
+            const aaaData = marketData['AAA CLO'];
+            const igData = marketData['IG SPREAD'];
+            const hyData = marketData['HY SPREAD'];
+            
+            if (aaaData) {
+                const aaaValue = document.getElementById('aaaValue');
+                if (aaaValue) aaaValue.textContent = aaaData.value.toFixed(2) + '%';
+                const aaaChange = document.getElementById('aaaChange');
+                if (aaaChange) {
+                    aaaChange.textContent = (aaaData.change24h > 0 ? '+' : '') + aaaData.change24h.toFixed(2) + '%';
+                    aaaChange.className = 'ticker-change ' + (aaaData.change24h >= 0 ? 'positive' : 'negative');
+                }
+            }
+            
+            if (igData) {
+                const igValue = document.getElementById('igValue');
+                if (igValue) igValue.textContent = igData.value.toFixed(2) + '%';
+                const igChange = document.getElementById('igChange');
+                if (igChange) {
+                    igChange.textContent = (igData.change24h > 0 ? '+' : '') + igData.change24h.toFixed(2) + '%';
+                    igChange.className = 'ticker-change ' + (igData.change24h >= 0 ? 'positive' : 'negative');
+                }
+            }
+            
+            if (hyData) {
+                const hyValue = document.getElementById('hyValue');
+                if (hyValue) hyValue.textContent = hyData.value.toFixed(2) + '%';
+                const hyChange = document.getElementById('hyChange');
+                if (hyChange) {
+                    hyChange.textContent = (hyData.change24h > 0 ? '+' : '') + hyData.change24h.toFixed(2) + '%';
+                    hyChange.className = 'ticker-change ' + (hyData.change24h >= 0 ? 'positive' : 'negative');
+                }
+            }
+        }
+        
+        // Initialize on page load
+        updateMarketStatus();
+        loadRandomInsight();
+        updateMarketCards();
+        
+        // Update market status every minute
+        setInterval(updateMarketStatus, 60000);
+        
+        // Update market cards when data changes
+        setInterval(updateMarketCards, 5000);
 
         // Password field visual feedback
         const passwordInput = document.getElementById('passwordInput');
@@ -1972,6 +2109,10 @@
                 showStyledAlert('Registration successful! Check your email for verification.', 'success');
                 return;
             }
+            
+            // Set 10-minute countdown (600 seconds)
+            let timeRemaining = 600;
+            
             loginCard.innerHTML = `
                 <div class="verification-screen" style="text-align: center; padding: 3rem;">
                     <div style="width: 100px; height: 100px; margin: 0 auto 2rem; border-radius: 50%; background: linear-gradient(135deg, rgba(96, 165, 250, 0.2) 0%, rgba(96, 165, 250, 0.1) 100%); display: flex; align-items: center; justify-content: center;">
@@ -1980,10 +2121,22 @@
                         </svg>
                     </div>
                     
-                    <h2 style="font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--pure-white); margin-bottom: 1rem;">Check Your Email</h2>
+                    <h2 style="font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--pure-white); margin-bottom: 1rem;">Verify Your Email</h2>
+                    
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 1.5rem; margin: 2rem 0;">
+                        <div style="color: #ef4444; font-size: 1rem; margin-bottom: 0.75rem; font-weight: 600;">
+                            ⚠️ Time Remaining to Verify
+                        </div>
+                        <div id="verificationCountdown" style="font-size: 2.5rem; font-weight: 700; color: #ef4444; font-family: monospace;">
+                            10:00
+                        </div>
+                        <div style="color: #fbbf24; font-size: 0.875rem; margin-top: 0.75rem;">
+                            Your registration will be cancelled if not verified in time
+                        </div>
+                    </div>
                     
                     <p style="color: var(--silver-light); font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem;">
-                        Your registration has been submitted successfully. We've sent a verification email to:
+                        We've sent a verification email to:
                     </p>
                     
                     <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 10px; padding: 1rem; margin: 2rem 0;">
@@ -2028,6 +2181,66 @@
                     </button>
                 </div>
             `;
+            
+            // Start countdown timer
+            const countdownInterval = setInterval(() => {
+                timeRemaining--;
+                
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                const countdownElement = document.getElementById('verificationCountdown');
+                if (countdownElement) {
+                    countdownElement.textContent = display;
+                    
+                    // Change color as time runs out
+                    if (timeRemaining <= 120) { // Last 2 minutes
+                        countdownElement.style.color = '#dc2626'; // Darker red
+                    } else if (timeRemaining <= 300) { // Last 5 minutes
+                        countdownElement.style.color = '#ef4444'; // Red
+                    }
+                }
+                
+                // When timer expires
+                if (timeRemaining <= 0) {
+                    clearInterval(countdownInterval);
+                    loginCard.innerHTML = `
+                        <div class="verification-screen" style="text-align: center; padding: 3rem;">
+                            <div style="width: 100px; height: 100px; margin: 0 auto 2rem; border-radius: 50%; background: rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center;">
+                                <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="15" y1="9" x2="9" y2="15"/>
+                                    <line x1="9" y1="9" x2="15" y2="15"/>
+                                </svg>
+                            </div>
+                            
+                            <h2 style="font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: #ef4444; margin-bottom: 1rem;">Registration Expired</h2>
+                            
+                            <p style="color: var(--silver-light); font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem;">
+                                Your registration has expired because the email was not verified within 10 minutes.
+                            </p>
+                            
+                            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 1rem; margin: 2rem 0;">
+                                <div style="color: #ef4444; font-size: 0.9rem;">
+                                    The registration for <strong>${email}</strong> has been cancelled.
+                                </div>
+                            </div>
+                            
+                            <button onclick="location.reload()" style="background: linear-gradient(135deg, var(--platinum-gold) 0%, #3b82f6 100%); color: var(--pure-white); border: none; padding: 12px 30px; border-radius: 10px; font-weight: 600; cursor: pointer; margin-top: 1rem;">
+                                Try Again
+                            </button>
+                        </div>
+                    `;
+                    
+                    // Notify backend that registration expired
+                    fetch('/registration-expired', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email })
+                    });
+                }
+            }, 1000);
             
             // Start checking verification status automatically
             startVerificationCheck();

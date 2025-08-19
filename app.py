@@ -1239,6 +1239,31 @@ def awaiting_verification():
     email = session.get(f'registration_pending_{ip_address}')
     return render_template('awaiting_verification.html', email=email)
 
+@app.route('/registration-expired', methods=['POST'])
+def registration_expired():
+    """Handle expired registrations"""
+    data = request.get_json()
+    email = data.get('email', '').lower()
+    
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    
+    if email in registrations:
+        # Move to expired registrations
+        expired = load_json_db('data/expired_registrations.json')
+        expired[email] = registrations[email]
+        expired[email]['expired_at'] = datetime.now().isoformat()
+        expired[email]['reason'] = 'Email not verified within 10 minutes'
+        save_json_db('data/expired_registrations.json', expired)
+        
+        # Remove from active registrations
+        del registrations[email]
+        save_json_db(REGISTRATIONS_FILE, registrations)
+        
+        print(f"[REGISTRATION] Expired registration for {email} - not verified within 10 minutes")
+        return jsonify({'status': 'success'})
+    
+    return jsonify({'status': 'not_found'})
+
 @app.route('/check-verification-status')
 def check_verification_status():
     """Check if user's email is verified"""
@@ -1790,6 +1815,101 @@ def logout():
     session.pop(f'username_{ip_address}', None)
     
     return redirect(url_for('secure_login'))
+
+@app.route('/admin/comprehensive-data')
+def admin_comprehensive_data():
+    """Get ALL user interaction data for admin panel"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    # Load all data sources
+    lockouts = load_lockouts()
+    attempt_logs = load_attempt_logs()
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    expired_registrations = load_json_db('data/expired_registrations.json')
+    
+    # Compile comprehensive data
+    data = {
+        'ip_lockouts': lockouts,
+        'login_attempts': attempt_logs,
+        'active_registrations': registrations,
+        'expired_registrations': expired_registrations,
+        'statistics': {
+            'total_locked_ips': len(lockouts),
+            'total_login_attempts': sum(log.get('total_attempts', 0) for log in attempt_logs.values()),
+            'active_registrations': len(registrations),
+            'expired_registrations': len(expired_registrations),
+            'verified_users': sum(1 for r in registrations.values() if r.get('email_verified')),
+            'pending_verification': sum(1 for r in registrations.values() if not r.get('email_verified')),
+            'approved_users': sum(1 for r in registrations.values() if r.get('admin_approved'))
+        }
+    }
+    
+    return jsonify({'status': 'success', 'data': data})
+
+@app.route('/admin/delete-data', methods=['POST'])
+def admin_delete_data():
+    """Delete specific data from the system"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    data_type = data.get('type')
+    identifier = data.get('identifier')
+    
+    try:
+        if data_type == 'ip_lockout':
+            lockouts = load_lockouts()
+            if identifier in lockouts:
+                del lockouts[identifier]
+                save_lockouts(lockouts)
+                print(f"[ADMIN] Deleted IP lockout for {identifier}")
+                
+        elif data_type == 'login_attempt':
+            attempts = load_attempt_logs()
+            if identifier in attempts:
+                del attempts[identifier]
+                save_attempt_logs(attempts)
+                print(f"[ADMIN] Deleted login attempts for {identifier}")
+                
+        elif data_type == 'registration':
+            registrations = load_json_db(REGISTRATIONS_FILE)
+            if identifier in registrations:
+                del registrations[identifier]
+                save_json_db(REGISTRATIONS_FILE, registrations)
+                print(f"[ADMIN] Deleted registration for {identifier}")
+                
+        elif data_type == 'expired_registration':
+            expired = load_json_db('data/expired_registrations.json')
+            if identifier in expired:
+                del expired[identifier]
+                save_json_db('data/expired_registrations.json', expired)
+                print(f"[ADMIN] Deleted expired registration for {identifier}")
+                
+        elif data_type == 'all_attempts':
+            # Clear all login attempts
+            save_attempt_logs({})
+            print(f"[ADMIN] Cleared all login attempts")
+            
+        elif data_type == 'all_lockouts':
+            # Clear all IP lockouts
+            save_lockouts({})
+            print(f"[ADMIN] Cleared all IP lockouts")
+            
+        else:
+            return jsonify({'status': 'error', 'message': 'Invalid data type'})
+        
+        return jsonify({'status': 'success', 'message': f'Deleted {data_type}: {identifier}'})
+        
+    except Exception as e:
+        print(f"[ADMIN ERROR] Failed to delete {data_type} {identifier}: {e}")
+        return jsonify({'status': 'error', 'message': str(e)})
 
 @app.route('/terms')
 def terms():

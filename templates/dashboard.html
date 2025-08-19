@@ -1349,37 +1349,292 @@
                 {% endif %}
             </div>
             
-            <!-- IP Management Section -->
-            <div style="background: rgba(54, 64, 73, 0.95); border: 2px solid #ef4444; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
-                <h3 style="color: #ef4444; margin-bottom: 1.5rem;">IP Lockout Management</h3>
-                <div id="ipManagementContent">
-                    <p style="color: #94a3b8;">Loading IP data...</p>
+            <!-- Comprehensive Admin Control Panel -->
+            <div style="margin-top: 2rem;">
+                <!-- Tab Navigation -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #364049;">
+                    <button onclick="showAdminTab('overview')" class="admin-tab active" style="background: transparent; color: #60a5fa; border: none; padding: 10px 20px; cursor: pointer; border-bottom: 3px solid #60a5fa;">Overview</button>
+                    <button onclick="showAdminTab('registrations')" class="admin-tab" style="background: transparent; color: #94a3b8; border: none; padding: 10px 20px; cursor: pointer;">Registrations</button>
+                    <button onclick="showAdminTab('lockouts')" class="admin-tab" style="background: transparent; color: #94a3b8; border: none; padding: 10px 20px; cursor: pointer;">IP Lockouts</button>
+                    <button onclick="showAdminTab('attempts')" class="admin-tab" style="background: transparent; color: #94a3b8; border: none; padding: 10px 20px; cursor: pointer;">Login Attempts</button>
+                    <button onclick="showAdminTab('expired')" class="admin-tab" style="background: transparent; color: #94a3b8; border: none; padding: 10px 20px; cursor: pointer;">Expired</button>
+                </div>
+                
+                <!-- Tab Content -->
+                <div id="adminTabContent">
+                    <p style="color: #94a3b8;">Loading admin data...</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let currentIPData = []; // Store IP data globally for details view
+        let comprehensiveData = {}; // Store all admin data
+        let currentTab = 'overview';
         
         function toggleAdminPanel() {
             const panel = document.getElementById('adminPanel');
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
             if (panel.style.display === 'block') {
-                loadIPManagement();
+                loadComprehensiveData();
             }
         }
         
-        function loadIPManagement() {
-            fetch('/admin/ip-management')
+        function loadComprehensiveData() {
+            fetch('/admin/comprehensive-data')
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        currentIPData = data.data; // Store for later use
-                        displayIPData(data.data);
+                        comprehensiveData = data.data;
+                        showAdminTab(currentTab);
                     }
                 })
-                .catch(error => console.error('Error loading IP data:', error));
+                .catch(error => console.error('Error loading admin data:', error));
+        }
+        
+        function showAdminTab(tab) {
+            currentTab = tab;
+            
+            // Update tab styling
+            document.querySelectorAll('.admin-tab').forEach(btn => {
+                btn.style.color = '#94a3b8';
+                btn.style.borderBottom = 'none';
+                btn.classList.remove('active');
+            });
+            event.target.style.color = '#60a5fa';
+            event.target.style.borderBottom = '3px solid #60a5fa';
+            event.target.classList.add('active');
+            
+            const content = document.getElementById('adminTabContent');
+            
+            switch(tab) {
+                case 'overview':
+                    showOverview(content);
+                    break;
+                case 'registrations':
+                    showRegistrations(content);
+                    break;
+                case 'lockouts':
+                    showLockouts(content);
+                    break;
+                case 'attempts':
+                    showAttempts(content);
+                    break;
+                case 'expired':
+                    showExpired(content);
+                    break;
+            }
+        }
+        
+        function showOverview(container) {
+            const stats = comprehensiveData.statistics || {};
+            container.innerHTML = `
+                <div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">
+                    <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">System Overview</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div style="background: rgba(96, 165, 250, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(96, 165, 250, 0.3);">
+                            <div style="color: #94a3b8; font-size: 0.9rem;">Locked IPs</div>
+                            <div style="color: #ef4444; font-size: 2rem; font-weight: bold;">${stats.total_locked_ips || 0}</div>
+                        </div>
+                        <div style="background: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);">
+                            <div style="color: #94a3b8; font-size: 0.9rem;">Active Registrations</div>
+                            <div style="color: #22c55e; font-size: 2rem; font-weight: bold;">${stats.active_registrations || 0}</div>
+                        </div>
+                        <div style="background: rgba(251, 191, 36, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.3);">
+                            <div style="color: #94a3b8; font-size: 0.9rem;">Pending Verification</div>
+                            <div style="color: #fbbf24; font-size: 2rem; font-weight: bold;">${stats.pending_verification || 0}</div>
+                        </div>
+                        <div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                            <div style="color: #94a3b8; font-size: 0.9rem;">Expired Registrations</div>
+                            <div style="color: #ef4444; font-size: 2rem; font-weight: bold;">${stats.expired_registrations || 0}</div>
+                        </div>
+                        <div style="background: rgba(147, 51, 234, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(147, 51, 234, 0.3);">
+                            <div style="color: #94a3b8; font-size: 0.9rem;">Total Login Attempts</div>
+                            <div style="color: #9333ea; font-size: 2rem; font-weight: bold;">${stats.total_login_attempts || 0}</div>
+                        </div>
+                        <div style="background: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);">
+                            <div style="color: #94a3b8; font-size: 0.9rem;">Approved Users</div>
+                            <div style="color: #22c55e; font-size: 2rem; font-weight: bold;">${stats.approved_users || 0}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function showRegistrations(container) {
+            const regs = comprehensiveData.active_registrations || {};
+            let html = `
+                <div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">
+                    <h3 style="color: #22c55e; margin-bottom: 1.5rem;">Active Registrations</h3>
+            `;
+            
+            if (Object.keys(regs).length === 0) {
+                html += '<p style="color: #94a3b8;">No active registrations</p>';
+            } else {
+                html += '<div style="overflow-x: auto;"><table style="width: 100%; color: #e2e8f0;">';
+                html += '<thead><tr style="border-bottom: 2px solid #475569;">';
+                html += '<th style="padding: 10px; text-align: left;">Email</th>';
+                html += '<th style="padding: 10px; text-align: left;">Name</th>';
+                html += '<th style="padding: 10px; text-align: left;">Company</th>';
+                html += '<th style="padding: 10px; text-align: left;">Verified</th>';
+                html += '<th style="padding: 10px; text-align: left;">Approved</th>';
+                html += '<th style="padding: 10px; text-align: left;">Actions</th>';
+                html += '</tr></thead><tbody>';
+                
+                for (const [email, data] of Object.entries(regs)) {
+                    html += '<tr style="border-bottom: 1px solid #364049;">';
+                    html += `<td style="padding: 10px;">${email}</td>`;
+                    html += `<td style="padding: 10px;">${data.full_name || '-'}</td>`;
+                    html += `<td style="padding: 10px;">${data.company_name || '-'}</td>`;
+                    html += `<td style="padding: 10px;">${data.email_verified ? '✅' : '❌'}</td>`;
+                    html += `<td style="padding: 10px;">${data.admin_approved ? '✅' : '❌'}</td>`;
+                    html += `<td style="padding: 10px;">
+                        <button onclick="deleteData('registration', '${email}')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-right: 5px;">Delete</button>
+                        ${!data.admin_approved ? `<button onclick="approveUser('${email}')" style="background: #22c55e; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Approve</button>` : ''}
+                    </td>`;
+                    html += '</tr>';
+                }
+                html += '</tbody></table></div>';
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        function showLockouts(container) {
+            const lockouts = comprehensiveData.ip_lockouts || {};
+            let html = `
+                <div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">
+                    <h3 style="color: #ef4444; margin-bottom: 1.5rem;">IP Lockouts</h3>
+                    <button onclick="deleteData('all_lockouts', null)" style="background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px;">Clear All Lockouts</button>
+            `;
+            
+            if (Object.keys(lockouts).length === 0) {
+                html += '<p style="color: #94a3b8;">No IP lockouts</p>';
+            } else {
+                html += '<div style="overflow-x: auto;"><table style="width: 100%; color: #e2e8f0;">';
+                html += '<thead><tr style="border-bottom: 2px solid #475569;">';
+                html += '<th style="padding: 10px; text-align: left;">IP Address</th>';
+                html += '<th style="padding: 10px; text-align: left;">Type</th>';
+                html += '<th style="padding: 10px; text-align: left;">Reason</th>';
+                html += '<th style="padding: 10px; text-align: left;">Locked Until</th>';
+                html += '<th style="padding: 10px; text-align: left;">Actions</th>';
+                html += '</tr></thead><tbody>';
+                
+                for (const [ip, data] of Object.entries(lockouts)) {
+                    html += '<tr style="border-bottom: 1px solid #364049;">';
+                    html += `<td style="padding: 10px; font-family: monospace;">${ip}</td>`;
+                    html += `<td style="padding: 10px;">${data.permanent ? 'Permanent' : 'Temporary'}</td>`;
+                    html += `<td style="padding: 10px;">${data.reason || '-'}</td>`;
+                    html += `<td style="padding: 10px;">${data.locked_until || 'Permanent'}</td>`;
+                    html += `<td style="padding: 10px;">
+                        <button onclick="deleteData('ip_lockout', '${ip}')" style="background: #22c55e; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Unblock</button>
+                    </td>`;
+                    html += '</tr>';
+                }
+                html += '</tbody></table></div>';
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        function showAttempts(container) {
+            const attempts = comprehensiveData.login_attempts || {};
+            let html = `
+                <div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">
+                    <h3 style="color: #9333ea; margin-bottom: 1.5rem;">Login Attempts</h3>
+                    <button onclick="deleteData('all_attempts', null)" style="background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px;">Clear All Attempts</button>
+            `;
+            
+            if (Object.keys(attempts).length === 0) {
+                html += '<p style="color: #94a3b8;">No login attempts logged</p>';
+            } else {
+                html += '<div style="overflow-x: auto;"><table style="width: 100%; color: #e2e8f0;">';
+                html += '<thead><tr style="border-bottom: 2px solid #475569;">';
+                html += '<th style="padding: 10px; text-align: left;">IP Address</th>';
+                html += '<th style="padding: 10px; text-align: left;">Total Attempts</th>';
+                html += '<th style="padding: 10px; text-align: left;">Last Attempt</th>';
+                html += '<th style="padding: 10px; text-align: left;">Actions</th>';
+                html += '</tr></thead><tbody>';
+                
+                for (const [ip, data] of Object.entries(attempts)) {
+                    html += '<tr style="border-bottom: 1px solid #364049;">';
+                    html += `<td style="padding: 10px; font-family: monospace;">${ip}</td>`;
+                    html += `<td style="padding: 10px;">${data.total_attempts || 0}</td>`;
+                    html += `<td style="padding: 10px;">${data.last_attempt || '-'}</td>`;
+                    html += `<td style="padding: 10px;">
+                        <button onclick="deleteData('login_attempt', '${ip}')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Delete</button>
+                    </td>`;
+                    html += '</tr>';
+                }
+                html += '</tbody></table></div>';
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        function showExpired(container) {
+            const expired = comprehensiveData.expired_registrations || {};
+            let html = `
+                <div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">
+                    <h3 style="color: #ef4444; margin-bottom: 1.5rem;">Expired Registrations</h3>
+            `;
+            
+            if (Object.keys(expired).length === 0) {
+                html += '<p style="color: #94a3b8;">No expired registrations</p>';
+            } else {
+                html += '<div style="overflow-x: auto;"><table style="width: 100%; color: #e2e8f0;">';
+                html += '<thead><tr style="border-bottom: 2px solid #475569;">';
+                html += '<th style="padding: 10px; text-align: left;">Email</th>';
+                html += '<th style="padding: 10px; text-align: left;">Name</th>';
+                html += '<th style="padding: 10px; text-align: left;">Expired At</th>';
+                html += '<th style="padding: 10px; text-align: left;">Reason</th>';
+                html += '<th style="padding: 10px; text-align: left;">Actions</th>';
+                html += '</tr></thead><tbody>';
+                
+                for (const [email, data] of Object.entries(expired)) {
+                    html += '<tr style="border-bottom: 1px solid #364049;">';
+                    html += `<td style="padding: 10px;">${email}</td>`;
+                    html += `<td style="padding: 10px;">${data.full_name || '-'}</td>`;
+                    html += `<td style="padding: 10px;">${data.expired_at || '-'}</td>`;
+                    html += `<td style="padding: 10px;">${data.reason || '-'}</td>`;
+                    html += `<td style="padding: 10px;">
+                        <button onclick="deleteData('expired_registration', '${email}')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Delete</button>
+                    </td>`;
+                    html += '</tr>';
+                }
+                html += '</tbody></table></div>';
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        function deleteData(type, identifier) {
+            if (type.startsWith('all_') && !confirm(`Are you sure you want to clear ALL ${type.replace('all_', '')}?`)) {
+                return;
+            }
+            if (!type.startsWith('all_') && !confirm(`Are you sure you want to delete ${identifier}?`)) {
+                return;
+            }
+            
+            fetch('/admin/delete-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: type, identifier: identifier })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Deleted successfully');
+                    loadComprehensiveData();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error deleting data:', error));
         }
         
         function showIPDetails(ipAddress) {
