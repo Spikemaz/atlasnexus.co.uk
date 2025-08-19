@@ -86,7 +86,7 @@ def audit_project():
     allowed_templates = {
         'Gate1.html',
         'Gate2.html',
-        'Dashboard.html',
+        'dashboard.html',
         '404.html',
         'terms.html',
         'privacy.html',
@@ -1009,14 +1009,14 @@ def dashboard():
             if reg.get('email_verified') and not reg.get('admin_approved')
         ]
         
-        return render_template('Dashboard.html', 
+        return render_template('dashboard.html', 
                              username=username,
                              is_admin=is_admin,
                              pending_registrations=pending_registrations,
                              all_users=list(users.values()),
                              admin_actions=list(admin_actions.values()) if isinstance(admin_actions, dict) else admin_actions)
     
-    return render_template('Dashboard.html', username=username, is_admin=False)
+    return render_template('dashboard.html', username=username, is_admin=False)
 
 @app.route('/admin/approve-user', methods=['POST'])
 def admin_approve_user():
