@@ -2267,9 +2267,9 @@
         'JP 10Y': { value: 0.95, change24h: 0.01, change7d: 0.03, change30d: 0.08 },
         
         // CENTRAL BANKS
-        'FED RATE': { value: 5.50, change24h: 0, change7d: 0, change30d: 0.25 },
-        'BOE RATE': { value: 5.25, change24h: 0, change7d: 0, change30d: 0 },
-        'ECB RATE': { value: 4.00, change24h: 0, change7d: 0, change30d: -0.25 },
+        'FED RATE': { value: 5.50, change24h: 0, change7d: 0, change30d: 0.25, history: [5.25, 5.25, 5.50, 5.50] },
+        'BOE RATE': { value: 5.25, change24h: 0, change7d: 0, change30d: 0, history: [5.00, 5.00, 5.25, 5.25] },
+        'ECB RATE': { value: 4.00, change24h: 0, change7d: 0, change30d: -0.25, history: [4.50, 4.25, 4.00, 4.00] },
         'BOJ RATE': { value: 0.10, change24h: 0, change7d: 0, change30d: 0.10 },
         'SNB RATE': { value: 1.75, change24h: 0, change7d: 0, change30d: 0 },
         
@@ -2396,6 +2396,26 @@
             return (change > 0 ? '+' : '') + change.toFixed(2) + '%';
         };
         
+        // Special handling for central bank rates with history
+        if ((symbol === 'FED RATE' || symbol === 'BOE RATE' || symbol === 'ECB RATE') && data.history) {
+            return `
+                <div class="ticker-item" style="display: inline-flex; align-items: center; gap: 8px; margin: 0 12px;">
+                    <span class="ticker-symbol" style="color: #dbeafe; font-weight: 600;">${symbol}:</span>
+                    <span class="ticker-value" style="color: #fff; font-weight: 500;">${formatValue(data.value)}</span>
+                    <span style="color: #64748b; font-size: 0.65rem; margin-left: 8px;">History:</span>
+                    ${data.history.map((rate, i) => `
+                        <span style="color: ${i === data.history.length - 1 ? '#fbbf24' : '#94a3b8'}; font-size: 0.75rem; font-weight: ${i === data.history.length - 1 ? '600' : '400'};">
+                            ${rate.toFixed(2)}%
+                        </span>
+                    `).join('')}
+                    <span style="color: #64748b; font-size: 0.65rem;">|</span>
+                    <span style="color: ${getChangeColor(data.change30d)}; font-size: 0.75rem;">30d: ${formatChange(data.change30d)}</span>
+                </div>
+                <span class="ticker-separator" style="color: #475569; margin: 0 8px;">●</span>
+            `;
+        }
+        
+        // Regular ticker item
         return `
             <div class="ticker-item" style="display: inline-flex; align-items: center; gap: 8px; margin: 0 12px;">
                 <span class="ticker-symbol" style="color: #dbeafe; font-weight: 600;">${symbol}:</span>
