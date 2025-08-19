@@ -2494,6 +2494,9 @@
 
         // View market preview
         function viewMarketPreview() {
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+            
             // Create market intelligence preview overlay
             const previewOverlay = document.createElement('div');
             previewOverlay.id = 'marketPreviewOverlay';
@@ -2506,6 +2509,7 @@
                 background: #0a0e1a;
                 z-index: 10000;
                 overflow-y: auto;
+                overflow-x: hidden;
                 animation: fadeIn 0.5s ease;
             `;
             
@@ -2613,7 +2617,7 @@
                     <div id="loginPrompt" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); background: rgba(30, 41, 59, 0.98); border: 2px solid var(--platinum-gold); border-radius: 12px; padding: 2rem 3rem; text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; z-index: 10002;">
                         <h3 style="color: var(--platinum-gold); font-size: 1.5rem; margin-bottom: 1rem;">Access Full Intelligence</h3>
                         <p style="color: var(--silver-light); margin-bottom: 1.5rem;">Login to access real-time data, advanced analytics, and proprietary research</p>
-                        <button onclick="closeMarketPreview(); showLogin();" style="background: linear-gradient(135deg, var(--platinum-gold) 0%, #3b82f6 100%); color: var(--pure-white); border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1.1rem;">
+                        <button onclick="closeMarketPreview(); showLoginOnly();" style="background: linear-gradient(135deg, var(--platinum-gold) 0%, #3b82f6 100%); color: var(--pure-white); border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1.1rem;">
                             Login to Continue
                         </button>
                     </div>
@@ -2638,7 +2642,11 @@
             const overlay = document.getElementById('marketPreviewOverlay');
             if (overlay) {
                 overlay.style.animation = 'fadeOut 0.3s ease';
-                setTimeout(() => overlay.remove(), 300);
+                setTimeout(() => {
+                    overlay.remove();
+                    // Restore body scroll
+                    document.body.style.overflow = '';
+                }, 300);
             }
         }
 
