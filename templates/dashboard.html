@@ -172,7 +172,8 @@
             border-top: 1px solid rgba(96, 165, 250, 0.3);
             border-bottom: 1px solid rgba(96, 165, 250, 0.3);
             padding: 12px 0;
-            height: 45px;
+            min-height: 45px;
+            height: auto;
             z-index: 999;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
@@ -453,13 +454,13 @@
                                 <div class="row g-2">
                                     <div class="col-6">
                                         <div class="text-center">
-                                            <div class="h2 fw-bold mb-0" id="aumCounter">€0B</div>
+                                            <div class="h2 fw-bold mb-0" id="aumCounter">€127.5B</div>
                                             <small class="opacity-75">Assets Under Management</small>
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <div class="text-center">
-                                            <div class="h2 fw-bold mb-0" id="dealsCounter">0</div>
+                                            <div class="h2 fw-bold mb-0" id="dealsCounter">342</div>
                                             <small class="opacity-75">Active Structures</small>
                                         </div>
                                     </div>
@@ -1296,6 +1297,10 @@
                                 <p style="color: #94a3b8; font-size: 0.9rem;">Submitted</p>
                                 <p style="color: white;">{{ reg.created_at }}</p>
                             </div>
+                            <div>
+                                <p style="color: #94a3b8; font-size: 0.9rem;">Generated Password</p>
+                                <p style="color: #fbbf24; font-weight: 600; font-family: monospace;">{{ reg.generated_password }}</p>
+                            </div>
                         </div>
                         <div style="display: flex; gap: 1rem; margin-top: 1rem;">
                             <button onclick="approveUser('{{ reg.email }}')" style="background: #22c55e; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
@@ -1323,7 +1328,10 @@
                                     <th style="padding: 10px; text-align: left; color: #94a3b8;">Name</th>
                                     <th style="padding: 10px; text-align: left; color: #94a3b8;">Email</th>
                                     <th style="padding: 10px; text-align: left; color: #94a3b8;">Company</th>
-                                    <th style="padding: 10px; text-align: left; color: #94a3b8;">Password Expires</th>
+                                    <th style="padding: 10px; text-align: left; color: #94a3b8;">Login Count</th>
+                                    <th style="padding: 10px; text-align: left; color: #94a3b8;">Total Time</th>
+                                    <th style="padding: 10px; text-align: left; color: #94a3b8;">Last Login</th>
+                                    <th style="padding: 10px; text-align: left; color: #94a3b8;">Password</th>
                                     <th style="padding: 10px; text-align: left; color: #94a3b8;">Actions</th>
                                 </tr>
                             </thead>
@@ -1333,7 +1341,22 @@
                                     <td style="padding: 10px; color: white;">{{ user.full_name }}</td>
                                     <td style="padding: 10px; color: #60a5fa;">{{ user.email }}</td>
                                     <td style="padding: 10px; color: white;">{{ user.company_name }}</td>
-                                    <td style="padding: 10px; color: white;">{{ user.password_expiry }}</td>
+                                    <td style="padding: 10px; color: #22c55e; font-weight: 600;">{{ user.login_count|default(0) }}</td>
+                                    <td style="padding: 10px; color: white;">
+                                        {% if user.total_login_time %}
+                                            {{ (user.total_login_time / 3600)|round(1) }} hrs
+                                        {% else %}
+                                            0 hrs
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding: 10px; color: white;">
+                                        {% if user.last_login %}
+                                            {{ user.last_login|truncate(19, True, '') }}
+                                        {% else %}
+                                            Never
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding: 10px; color: #fbbf24; font-family: monospace; font-size: 0.85rem;">{{ user.password }}</td>
                                     <td style="padding: 10px;">
                                         <button onclick="resetPassword('{{ user.email }}')" style="background: #fbbf24; color: black; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
                                             Reset Password
@@ -2208,12 +2231,13 @@
             
             function animate() {
                 if (!isDragging) {
-                    dashboardTickerPosition -= 0.3; // Slower smooth scroll speed
+                    dashboardTickerPosition -= 0.5; // Faster smooth scroll speed
                     
                     const tickerWidth = ticker.scrollWidth / 2;
                     
+                    // Seamless endless scrolling without jumping
                     if (Math.abs(dashboardTickerPosition) >= tickerWidth) {
-                        dashboardTickerPosition = dashboardTickerPosition % tickerWidth;
+                        dashboardTickerPosition = 0;
                     }
                     
                     ticker.style.transform = `translateX(${dashboardTickerPosition}px)`;
@@ -2535,7 +2559,10 @@
     }
     
     // Create ticker content on page load
-    createTicker();
+    document.addEventListener('DOMContentLoaded', () => {
+        createTicker();
+        startAutoScroll();
+    });
 
     // Set current date
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB', { 
@@ -2548,8 +2575,8 @@
     // Animation on load
     document.addEventListener('DOMContentLoaded', function() {
         // Animate counters
-        animateCounter('aumCounter', 0, 2.4, 'B', 2000);
-        animateCounter('dealsCounter', 0, 127, '', 2000);
+        animateCounter('aumCounter', 0, 127.5, 'B', 2000);
+        animateCounter('dealsCounter', 0, 342, '', 2000);
         
         // Initialize Chart
         const ctx = document.getElementById('spreadChart');

@@ -1049,6 +1049,9 @@ def register():
             return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
         
         # Get form data
+        # Generate a secure password for the user
+        generated_password = generate_secure_password()
+        
         data = {
             'email': request.form.get('email', '').strip().lower(),
             'full_name': request.form.get('fullname', '').strip(),
@@ -1057,8 +1060,8 @@ def register():
             'company_name': request.form.get('company_name', '').strip(),
             'company_number': request.form.get('company_number', '').strip(),
             'job_title': request.form.get('job_title', '').strip(),
-            'personal_address': request.form.get('personal_address', '').strip(),
             'business_address': request.form.get('business_address', '').strip(),
+            'generated_password': generated_password,  # Store the generated password
             'verification_token': generate_verification_token(),
             'email_verified': False,
             'admin_approved': False,
@@ -1331,8 +1334,31 @@ def auth():
         if user.get('password') == password:
             expiry = datetime.fromisoformat(user.get('password_expiry', '2000-01-01'))
             if datetime.now() < expiry:
+                # Track login
+                current_time = datetime.now()
+                user['last_login'] = current_time.isoformat()
+                user['login_count'] = user.get('login_count', 0) + 1
+                
+                # Add to login history
+                if 'login_history' not in user:
+                    user['login_history'] = []
+                user['login_history'].append({
+                    'timestamp': current_time.isoformat(),
+                    'ip_address': ip_address
+                })
+                # Keep only last 50 logins
+                user['login_history'] = user['login_history'][-50:]
+                
+                # Store login session start time
+                session[f'login_start_time_{ip_address}'] = current_time.isoformat()
+                
+                # Save updated user data
+                users[email] = user
+                save_json_db(USERS_FILE, users)
+                
                 session[f'user_authenticated_{ip_address}'] = True
                 session[f'username_{ip_address}'] = user.get('full_name', email)
+                session[f'user_email_{ip_address}'] = email
                 session[f'access_level_{ip_address}'] = 'user'
                 return jsonify({'status': 'success', 'redirect': url_for('dashboard')})
             else:
@@ -1393,8 +1419,8 @@ def admin_approve_user():
     if email not in registrations:
         return jsonify({'status': 'error', 'message': 'Registration not found'}), 404
     
-    # Generate password
-    password = generate_secure_password()
+    # Use the pre-generated password or create a new one if missing
+    password = registrations[email].get('generated_password', generate_secure_password())
     password_expiry = datetime.now() + timedelta(days=30)
     
     # Create user account
@@ -1405,6 +1431,10 @@ def admin_approve_user():
         'password_expiry': password_expiry.isoformat(),
         'admin_approved': True,
         'approved_at': datetime.now().isoformat(),
+        'login_count': 0,
+        'total_login_time': 0,
+        'last_login': None,
+        'login_history': [],
         'approved_by': 'spikemaz8@aol.com'
     }
     save_json_db(USERS_FILE, users)
@@ -1477,8 +1507,8 @@ def admin_quick_approve():
         </html>
         """, 400
     
-    # Generate password
-    password = generate_secure_password()
+    # Use the pre-generated password or create a new one if missing
+    password = registrations[email].get('generated_password', generate_secure_password())
     password_expiry = datetime.now() + timedelta(days=30)
     
     # Create user account
@@ -1489,6 +1519,10 @@ def admin_quick_approve():
         'password_expiry': password_expiry.isoformat(),
         'admin_approved': True,
         'approved_at': datetime.now().isoformat(),
+        'login_count': 0,
+        'total_login_time': 0,
+        'last_login': None,
+        'login_history': [],
         'approved_by': 'email_approval'
     }
     save_json_db(USERS_FILE, users)
@@ -1810,9 +1844,24 @@ def logout():
     """Clear session and logout"""
     ip_address = get_real_ip()
     
+    # Calculate session duration if user was logged in
+    if session.get(f'user_email_{ip_address}') and session.get(f'login_start_time_{ip_address}'):
+        email = session.get(f'user_email_{ip_address}')
+        login_start = datetime.fromisoformat(session.get(f'login_start_time_{ip_address}'))
+        session_duration = (datetime.now() - login_start).total_seconds()
+        
+        # Update user's total login time
+        users = load_json_db(USERS_FILE)
+        if email in users:
+            users[email]['total_login_time'] = users[email].get('total_login_time', 0) + session_duration
+            users[email]['last_logout'] = datetime.now().isoformat()
+            save_json_db(USERS_FILE, users)
+    
     # Clear user authentication only
     session.pop(f'user_authenticated_{ip_address}', None)
     session.pop(f'username_{ip_address}', None)
+    session.pop(f'user_email_{ip_address}', None)
+    session.pop(f'login_start_time_{ip_address}', None)
     
     return redirect(url_for('secure_login'))
 
