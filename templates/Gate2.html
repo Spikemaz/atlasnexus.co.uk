@@ -1888,6 +1888,12 @@
             const container = document.getElementById('tickerContainer');
             container.classList.add('dragging');
             
+            // Clear any pending resume timeout
+            if (window.tickerResumeTimeout) {
+                clearTimeout(window.tickerResumeTimeout);
+                window.tickerResumeTimeout = null;
+            }
+            
             // Cancel auto-scroll
             if (tickerAnimationId) {
                 cancelAnimationFrame(tickerAnimationId);
@@ -1940,8 +1946,13 @@
             // Re-enable smooth transitions
             ticker.style.transition = 'transform 0.5s linear';
             
+            // Clear any existing resume timeout
+            if (window.tickerResumeTimeout) {
+                clearTimeout(window.tickerResumeTimeout);
+            }
+            
             // Resume auto-scroll after a delay
-            setTimeout(() => {
+            window.tickerResumeTimeout = setTimeout(() => {
                 if (!isDragging) {
                     startAutoScroll();
                 }
@@ -1980,8 +1991,6 @@
                                 ${rate.toFixed(2)}%
                             </span>
                         `).join('')}
-                        <span style="color: #64748b; font-size: 0.65rem;">|</span>
-                        <span style="color: ${getChangeColor(data.change30d)}; font-size: 0.75rem;">30d: ${formatChange(data.change30d)}</span>
                     </div>
                     <span class="ticker-separator" style="color: #475569; margin: 0 8px;">●</span>
                 `;

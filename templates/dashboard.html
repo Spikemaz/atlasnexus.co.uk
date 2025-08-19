@@ -2166,8 +2166,20 @@
                 resumeTimeout = null;
             }
             
-            // Get current animation position
-            const currentPos = getCurrentPosition();
+            // Get current position - either from animation or current transform
+            let currentPos;
+            if (ticker.style.animation && ticker.style.animation !== 'none') {
+                currentPos = getCurrentPosition();
+            } else {
+                // If animation is stopped, get position from transform
+                const transform = window.getComputedStyle(ticker).transform;
+                if (transform !== 'none') {
+                    const matrix = new DOMMatrix(transform);
+                    currentPos = matrix.m41;
+                } else {
+                    currentPos = 0;
+                }
+            }
             
             // Stop the CSS animation and apply current position
             ticker.style.animation = 'none';
@@ -2207,6 +2219,11 @@
             const transform = window.getComputedStyle(ticker).transform;
             const matrix = new DOMMatrix(transform);
             const finalPosition = matrix.m41;
+            
+            // Clear any existing resume timeout
+            if (resumeTimeout) {
+                clearTimeout(resumeTimeout);
+            }
             
             // Keep it paused for 2 seconds
             resumeTimeout = setTimeout(() => {
@@ -2427,8 +2444,6 @@
                             ${rate.toFixed(2)}%
                         </span>
                     `).join('')}
-                    <span style="color: #64748b; font-size: 0.65rem;">|</span>
-                    <span style="color: ${getChangeColor(data.change30d)}; font-size: 0.75rem;">30d: ${formatChange(data.change30d)}</span>
                 </div>
                 <span class="ticker-separator" style="color: #475569; margin: 0 8px;">●</span>
             `;
