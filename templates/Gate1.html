@@ -387,10 +387,28 @@
         }
         
         .auth-title {
-            color: #fff;
-            font-size: 2rem;
             margin-bottom: 1.5rem;
-            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        .animated-gradient {
+            animation: gradientShift 3s ease infinite;
+            background-size: 200% 200%;
         }
         
         .auth-subtitle {
@@ -887,7 +905,11 @@
     <div class="main-content">
         <div class="auth-wrapper">
             <div class="auth-container">
-                <h1 class="auth-title">AtlasNexus</h1>
+                <h1 class="auth-title">
+                    <span class="animated-gradient" style="font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif; font-size: 2rem; font-weight: 700; background: linear-gradient(90deg, #60a5fa, #93c5fd, #dbeafe, #93c5fd, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% 200%;">ATLAS</span>
+                    <span style="font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif; font-size: 1.8rem; font-weight: 400; color: #60a5fa;">:</span>
+                    <span class="animated-gradient" style="font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif; font-size: 2rem; font-weight: 700; background: linear-gradient(90deg, #dbeafe, #93c5fd, #60a5fa, #93c5fd, #dbeafe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% 200%;">NEXUS</span>
+                </h1>
             
             <form id="authForm" method="POST" action="/site-auth" autocomplete="off">
                 <input type="text" 
