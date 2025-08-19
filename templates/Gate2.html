@@ -1778,7 +1778,6 @@
         }
         
         function startDrag(e) {
-            console.log('StartDrag called');
             isDragging = true;
             const container = document.getElementById('tickerContainer');
             const ticker = document.getElementById('marketTicker');
@@ -1953,7 +1952,6 @@
             ticker.innerHTML = singleContent + singleContent + singleContent;
             
             // Setup drag functionality (only once)
-            console.log('Adding event listeners in createTicker');
             container.addEventListener('mousedown', startDrag);
             document.addEventListener('mousemove', drag);
             document.addEventListener('mouseup', stopDrag);
