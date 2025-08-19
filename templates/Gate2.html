@@ -1886,6 +1886,7 @@
         function startDrag(e) {
             isDragging = true;
             const container = document.getElementById('tickerContainer');
+            const ticker = document.getElementById('marketTicker');
             container.classList.add('dragging');
             
             // Clear any pending resume timeout
@@ -1900,16 +1901,17 @@
                 tickerAnimationId = null;
             }
             
-            startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-            const ticker = document.getElementById('marketTicker');
+            // Always get current position from the actual transform
             const currentTransform = window.getComputedStyle(ticker).transform;
             if (currentTransform !== 'none') {
                 const matrix = new DOMMatrix(currentTransform);
-                scrollLeft = matrix.m41; // Get current X translation
+                tickerPosition = matrix.m41; // Update global position
+                scrollLeft = tickerPosition;
             } else {
                 scrollLeft = tickerPosition;
             }
             
+            startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
             e.preventDefault();
         }
         
@@ -1942,6 +1944,13 @@
             const container = document.getElementById('tickerContainer');
             const ticker = document.getElementById('marketTicker');
             container.classList.remove('dragging');
+            
+            // Save the final position
+            const currentTransform = window.getComputedStyle(ticker).transform;
+            if (currentTransform !== 'none') {
+                const matrix = new DOMMatrix(currentTransform);
+                tickerPosition = matrix.m41;
+            }
             
             // Re-enable smooth transitions
             ticker.style.transition = 'transform 0.5s linear';
