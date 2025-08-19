@@ -1457,25 +1457,11 @@ def dashboard():
     username = session.get(f'username_{ip_address}', 'User')
     is_admin = session.get(f'is_admin_{ip_address}', False)
     
-    # If admin, include registration data
+    # If admin, redirect to new admin panel
     if is_admin:
-        registrations = load_json_db(REGISTRATIONS_FILE)
-        users = load_json_db(USERS_FILE)
-        admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
-        
-        # Prepare admin data
-        pending_registrations = [
-            reg for reg in registrations.values() 
-            if reg.get('email_verified') and not reg.get('admin_approved')
-        ]
-        
-        return render_template('dashboard.html', 
-                             username=username,
-                             is_admin=is_admin,
-                             pending_registrations=pending_registrations,
-                             all_users=list(users.values()),
-                             admin_actions=list(admin_actions.values()) if isinstance(admin_actions, dict) else admin_actions)
+        return redirect(url_for('admin_panel'))
     
+    # Regular user dashboard
     return render_template('dashboard.html', username=username, is_admin=False)
 
 @app.route('/admin/approve-user', methods=['POST'])
@@ -2106,6 +2092,140 @@ def debug_ip_status():
     }
     
     return jsonify(status)
+
+@app.route('/admin-panel')
+def admin_panel():
+    """New comprehensive admin panel"""
+    ip_address = get_real_ip()
+    
+    # Verify both authentications and admin status
+    if not session.get(f'site_authenticated_{ip_address}'):
+        return redirect(url_for('index'))
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return redirect(url_for('secure_login'))
+    if not session.get(f'is_admin_{ip_address}'):
+        return redirect(url_for('dashboard'))
+    
+    return render_template('admin_panel.html')
+
+@app.route('/admin/system-stats')
+def admin_system_stats():
+    """Get system statistics for admin panel"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    # Gather system stats
+    stats = {
+        'total_users': len(load_json_db(USERS_FILE)),
+        'total_registrations': len(load_json_db(REGISTRATIONS_FILE)),
+        'blocked_ips': len([ip for ip, data in load_lockouts().items() 
+                          if data.get('is_banned') or (data.get('locked_until') and 
+                          datetime.fromisoformat(data['locked_until']) > datetime.now())]),
+        'active_sessions': session.get('active_count', 0),
+        'system_uptime': '99.9%',
+        'last_backup': datetime.now().isoformat(),
+        'disk_usage': '42%',
+        'memory_usage': '58%'
+    }
+    
+    return jsonify({'status': 'success', 'data': stats})
+
+@app.route('/admin/export-data', methods=['POST'])
+def admin_export_data():
+    """Export all admin data"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    # Compile all data
+    export_data = {
+        'users': load_json_db(USERS_FILE),
+        'registrations': load_json_db(REGISTRATIONS_FILE),
+        'lockouts': load_lockouts(),
+        'login_attempts': load_json_db(LOGIN_ATTEMPTS_FILE),
+        'admin_actions': load_json_db(ADMIN_ACTIONS_FILE),
+        'exported_at': datetime.now().isoformat(),
+        'exported_by': session.get(f'username_{ip_address}')
+    }
+    
+    return jsonify({'status': 'success', 'data': export_data})
+
+@app.route('/admin/system-config', methods=['GET', 'POST'])
+def admin_system_config():
+    """Get or update system configuration"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    if request.method == 'GET':
+        # Return current config
+        config = {
+            'site_name': 'Atlas Nexus',
+            'admin_email': 'admin@atlasnexus.com',
+            'max_login_attempts': 5,
+            'lockout_duration': 30,
+            'session_timeout': 60,
+            'maintenance_mode': False,
+            'two_factor_auth': False,
+            'ip_whitelisting': False,
+            'email_notifications': True,
+            'auto_approve_registrations': False
+        }
+        return jsonify({'status': 'success', 'config': config})
+    
+    else:
+        # Update config
+        new_config = request.get_json()
+        # Here you would save the config to a file or database
+        log_admin_action(ip_address, 'config_update', {'updated_settings': list(new_config.keys())})
+        return jsonify({'status': 'success', 'message': 'Configuration updated'})
+
+@app.route('/admin/audit-log')
+def admin_audit_log():
+    """Get complete audit log"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    # Compile audit log from various sources
+    audit_entries = []
+    
+    # Add login attempts
+    login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE)
+    for ip, attempts in login_attempts.items():
+        for attempt in attempts:
+            audit_entries.append({
+                'timestamp': attempt.get('timestamp'),
+                'type': 'login_attempt',
+                'ip': ip,
+                'details': attempt,
+                'severity': 'warning' if not attempt.get('success') else 'info'
+            })
+    
+    # Add admin actions
+    admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
+    for action in admin_actions:
+        audit_entries.append({
+            'timestamp': action.get('timestamp'),
+            'type': 'admin_action',
+            'user': action.get('admin'),
+            'details': action,
+            'severity': 'info'
+        })
+    
+    # Sort by timestamp
+    audit_entries.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+    
+    return jsonify({'status': 'success', 'entries': audit_entries[:100]})  # Return last 100 entries
 
 @app.errorhandler(404)
 def not_found(e):

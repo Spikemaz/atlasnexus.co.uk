@@ -241,7 +241,7 @@
 
         /* Main Container */
         .main-container {
-            margin-top: 115px; /* Account for header + ticker */
+            margin-top: 165px; /* Account for header + ticker + toolbar */
             padding: 2rem;
             max-width: 1400px;
             margin-left: auto;
@@ -378,7 +378,7 @@
     </div>
     
     <!-- Collapsible Navigation Toolbar -->
-    <div id="navToolbar" style="position: fixed; top: 115px; left: 0; right: 0; background: linear-gradient(90deg, #1e293b 0%, #334155 100%); border-bottom: 1px solid rgba(96, 165, 250, 0.3); z-index: 998; transition: all 0.3s ease; overflow: hidden; height: 0;">
+    <div id="navToolbar" style="position: fixed; top: 115px; left: 0; right: 0; background: linear-gradient(90deg, #1e293b 0%, #334155 100%); border-bottom: 1px solid rgba(96, 165, 250, 0.3); z-index: 998; transition: all 0.3s ease; overflow: hidden; height: 50px;">
         <div style="display: flex; justify-content: center; align-items: center; gap: 2rem; padding: 10px 0;">
             <button class="nav-btn dashboard-btn" onclick="showSection('dashboard')" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
                 <i class="fas fa-home me-2"></i>Dashboard
@@ -409,7 +409,7 @@
     
     <!-- Toggle Button for Toolbar -->
     <button id="toggleToolbar" onclick="toggleNavToolbar()" style="position: fixed; top: 115px; right: 20px; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 8px 12px; border-radius: 0 0 6px 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; z-index: 999; transition: all 0.3s;">
-        <i class="fas fa-chevron-down" id="toggleIcon"></i> Tools
+        <i class="fas fa-chevron-up" id="toggleIcon"></i> Tools
     </button>
 
     <!-- Main Dashboard Content -->
@@ -804,7 +804,7 @@
                 </div>
 
                 <!-- Quick Actions -->
-                <div class="card shadow-lg fade-in-up" style="border-radius: 16px; animation-delay: 0.9s">
+                <div class="card shadow-lg fade-in-up mb-4" style="border-radius: 16px; animation-delay: 0.9s">
                     <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #06b6d4, #0891b2); border-radius: 16px 16px 0 0;">
                         <h6 class="mb-0 fw-bold">
                             <i class="fas fa-bolt me-2"></i>Quick Actions
@@ -825,6 +825,56 @@
                                 <i class="fas fa-cog me-2"></i>Settings
                             </button>
                         </div>
+                    </div>
+                </div>
+                
+                <!-- Securitisation Engine Widget -->
+                <div class="card shadow-lg fade-in-up" style="border-radius: 16px; animation-delay: 1.0s">
+                    <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-radius: 16px 16px 0 0;">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-cogs me-2"></i>Securitisation Engine
+                        </h6>
+                        <small class="opacity-90">Permutation Analysis</small>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <div class="h3 fw-bold text-primary mb-1" id="dashboard-perm-count">0</div>
+                            <div class="small" style="color: #B8C0C8;">Total Permutations</div>
+                        </div>
+                        
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-success bg-opacity-10 rounded">
+                                    <div class="fw-bold text-success" id="dashboard-viable-count">0</div>
+                                    <small style="color: #22c55e;">Viable</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-danger bg-opacity-10 rounded">
+                                    <div class="fw-bold text-danger" id="dashboard-invalid-count">0</div>
+                                    <small style="color: #ef4444;">Invalid</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border-top pt-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-semibold">Best IRR Found</span>
+                                <span class="badge bg-success" id="dashboard-best-irr">-</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-semibold">Avg WACD</span>
+                                <span class="badge bg-info" id="dashboard-avg-wacd">-</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small fw-semibold">Status</span>
+                                <span class="badge bg-secondary" id="dashboard-engine-status">Ready</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary w-100" onclick="showSection('permutation')">
+                            <i class="fas fa-rocket me-2"></i>Launch Engine
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1263,9 +1313,9 @@
         <div style="max-width: 1800px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
                 <h2 style="color: #60a5fa; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">
-                    <i class="fas fa-cogs"></i> Permutation Engine Command Centre
+                    <i class="fas fa-cogs"></i> Securitisation Permutation Engine
                 </h2>
-                <p style="color: #94a3b8; text-align: center; margin-bottom: 2rem;">Advanced Permutation Analysis & Optimization System</p>
+                <p style="color: #94a3b8; text-align: center; margin-bottom: 2rem;">Advanced Securitisation Permutation Generator & Analysis System</p>
                 
                 <!-- Control Panel -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
@@ -1521,7 +1571,17 @@
                                 <p style="color: #fbbf24; font-weight: 600; font-family: monospace;">{{ reg.generated_password }}</p>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <div style="margin-top: 1rem;">
+                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Select Account Type:</label>
+                            <select id="accountType_{{ reg.email|replace('@', '_')|replace('.', '_') }}" style="background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 12px; border-radius: 6px; width: 100%; margin-bottom: 1rem;">
+                                <option value="external" selected>External - Client Access</option>
+                                <option value="investor">Investor - Portfolio Access</option>
+                                <option value="execution">Execution - Trading Access</option>
+                                <option value="internal">Internal - Team Member</option>
+                                <option value="admin">Admin - Full Control</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 1rem;">
                             <button onclick="approveUser('{{ reg.email }}')" style="background: #22c55e; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
                                 <i class="fas fa-check"></i> Approve
                             </button>
@@ -2136,16 +2196,31 @@
         }
 
         function approveUser(email) {
-            if (confirm(`Approve user ${email}?`)) {
+            // Get the selected account type
+            const selectId = 'accountType_' + email.replace('@', '_').replace(/\./g, '_');
+            const accountType = document.getElementById(selectId).value;
+            
+            const accountTypeNames = {
+                'external': 'External Client',
+                'investor': 'Investor',
+                'execution': 'Execution Trader',
+                'internal': 'Internal Team',
+                'admin': 'Administrator'
+            };
+            
+            if (confirm(`Approve ${email} as ${accountTypeNames[accountType]}?`)) {
                 fetch('/admin/approve-user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email })
+                    body: JSON.stringify({ 
+                        email: email,
+                        account_type: accountType
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        alert(`User approved! Password: ${data.password}\n\nThis has been sent to ${email}`);
+                        alert(`User approved as ${accountTypeNames[accountType]}!\n\nPassword: ${data.password}\n\nThis has been sent to ${email}`);
                         window.location.reload();
                     } else {
                         alert('Error: ' + data.message);
@@ -2564,10 +2639,8 @@
         startAutoScroll();
     }
     
-    // Initialize drag functionality after DOM loads
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(initTickerDrag, 100);
-    });
+    // Initialize drag functionality is called from createTicker
+    // Removed duplicate DOMContentLoaded listener
     // Variables already defined at top of script
     
     
@@ -2777,22 +2850,21 @@
         ticker.innerHTML = content;
     }
     
-    // Create ticker content on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        createTicker();
-        startAutoScroll();
-    });
-
-    // Set current date
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-    });
-
-    // Animation on load
+    // Initialize everything on page load
     document.addEventListener('DOMContentLoaded', function() {
+        // Create and initialize ticker
+        createTicker();
+        
+        // Set current date
+        const currentDateElement = document.getElementById('currentDate');
+        if (currentDateElement) {
+            currentDateElement.textContent = new Date().toLocaleDateString('en-GB', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
         // Animate counters
         animateCounter('aumCounter', 0, 127.5, 'B', 2000);
         animateCounter('dealsCounter', 0, 342, '', 2000);
@@ -3317,6 +3389,336 @@
     
     function visualizePermutationResults() {
         alert('Visualization functionality will be implemented based on your specific requirements.');
+    }
+    
+    // Securitisation Engine Functions
+    let currentInputMode = 'manual';
+    let securitisationEngine = {
+        status: 'stopped',
+        permutations: [],
+        validCount: 0,
+        invalidCount: 0,
+        currentIndex: 0,
+        totalPermutations: 0,
+        bestIRR: 0
+    };
+    
+    function setInputMode(mode) {
+        currentInputMode = mode;
+        
+        // Update button states
+        document.querySelectorAll('.input-mode-btn').forEach(btn => {
+            btn.style.background = 'rgba(96, 165, 250, 0.2)';
+            btn.style.color = '#60a5fa';
+        });
+        
+        const activeBtn = document.getElementById('mode-' + mode);
+        if (activeBtn) {
+            activeBtn.style.background = 'linear-gradient(90deg, #60a5fa, #3b82f6)';
+            activeBtn.style.color = 'white';
+        }
+        
+        // Show/hide input containers
+        const sections = ['project', 'senior', 'mezz', 'equity'];
+        sections.forEach(section => {
+            document.getElementById('manual-' + section)?.style.display = 'none';
+            document.getElementById('range-' + section)?.style.display = 'none';
+            document.getElementById('lowhigh-' + section)?.style.display = 'none';
+            
+            const activeContainer = document.getElementById(mode + '-' + section);
+            if (activeContainer) {
+                activeContainer.style.display = 'block';
+            }
+        });
+    }
+    
+    function generatePermutations() {
+        // Reset engine state
+        securitisationEngine.status = 'running';
+        securitisationEngine.permutations = [];
+        securitisationEngine.validCount = 0;
+        securitisationEngine.invalidCount = 0;
+        securitisationEngine.currentIndex = 0;
+        securitisationEngine.bestIRR = 0;
+        
+        // Update UI
+        document.getElementById('perm-status').textContent = 'Generating';
+        document.getElementById('perm-status').style.color = '#f59e0b';
+        
+        // Get input values based on mode
+        let inputs = collectInputValues();
+        
+        // Generate all permutations
+        let permutations = generateAllPermutations(inputs);
+        securitisationEngine.totalPermutations = permutations.length;
+        
+        // Limit to max permutations
+        const maxPerms = parseInt(document.getElementById('sec-max-perms').value) || 1000;
+        if (permutations.length > maxPerms) {
+            permutations = permutations.slice(0, maxPerms);
+        }
+        
+        // Process permutations
+        processPermutations(permutations);
+    }
+    
+    function collectInputValues() {
+        let inputs = {};
+        
+        if (currentInputMode === 'manual') {
+            // Collect manual input values
+            const capexValues = document.getElementById('sec-capex-manual')?.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+            const opexValues = document.getElementById('sec-opex-manual')?.value.split(',').map(v => parseFloat(v.trim())/100).filter(v => !isNaN(v));
+            const rentValues = document.getElementById('sec-rent-manual')?.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+            const seniorDSCR = document.getElementById('sec-senior-dscr-manual')?.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+            const seniorCoupon = document.getElementById('sec-senior-coupon-manual')?.value.split(',').map(v => parseFloat(v.trim())/100).filter(v => !isNaN(v));
+            const seniorTenor = document.getElementById('sec-senior-tenor-manual')?.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+            const mezzDSCR = document.getElementById('sec-mezz-dscr-manual')?.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+            const mezzCoupon = document.getElementById('sec-mezz-coupon-manual')?.value.split(',').map(v => parseFloat(v.trim())/100).filter(v => !isNaN(v));
+            const equityIRR = document.getElementById('sec-equity-irr-manual')?.value.split(',').map(v => parseFloat(v.trim())/100).filter(v => !isNaN(v));
+            
+            inputs = {
+                capex: capexValues.length ? capexValues : [7500000, 10000000],
+                opex: opexValues.length ? opexValues : [0.15, 0.20, 0.25],
+                rent: rentValues.length ? rentValues : [120, 140, 160, 180],
+                seniorDSCR: seniorDSCR.length ? seniorDSCR : [1.5, 1.55, 1.6],
+                seniorCoupon: seniorCoupon.length ? seniorCoupon : [0.03, 0.035, 0.04],
+                seniorTenor: seniorTenor.length ? seniorTenor : [5, 7, 10],
+                mezzDSCR: mezzDSCR.length ? mezzDSCR : [1.1, 1.15, 1.2],
+                mezzCoupon: mezzCoupon.length ? mezzCoupon : [0.06, 0.065, 0.07],
+                equityIRR: equityIRR.length ? equityIRR : [0.14, 0.15, 0.16]
+            };
+        } else if (currentInputMode === 'range') {
+            // Generate values from range inputs
+            inputs = generateRangeValues();
+        } else if (currentInputMode === 'lowhigh') {
+            // Generate values from low/high boundaries
+            inputs = generateLowHighValues();
+        }
+        
+        return inputs;
+    }
+    
+    function generateAllPermutations(inputs) {
+        let permutations = [];
+        
+        // Generate cartesian product of all input arrays
+        const keys = Object.keys(inputs);
+        const values = Object.values(inputs);
+        
+        function cartesian(arr) {
+            return arr.reduce((a, b) => a.flatMap(d => b.map(e => [d, e].flat())));
+        }
+        
+        if (values.length > 0) {
+            const combinations = cartesian(values);
+            combinations.forEach(combo => {
+                let perm = {};
+                keys.forEach((key, index) => {
+                    perm[key] = Array.isArray(combo) ? combo[index] : combo;
+                });
+                permutations.push(perm);
+            });
+        }
+        
+        return permutations;
+    }
+    
+    function processPermutations(permutations) {
+        const tbody = document.getElementById('perm-results-body');
+        tbody.innerHTML = '';
+        
+        permutations.forEach((perm, index) => {
+            // Calculate derived values
+            const annualRent = perm.rent * 12;
+            const netIncome = annualRent * (1 - perm.opex);
+            
+            // Calculate senior debt
+            const seniorDebtService = netIncome / perm.seniorDSCR;
+            const seniorDebt = seniorDebtService / perm.seniorCoupon;
+            
+            // Calculate mezz debt
+            const remainingNOI = netIncome - seniorDebtService;
+            const mezzDebtService = remainingNOI / perm.mezzDSCR;
+            const mezzDebt = mezzDebtService / perm.mezzCoupon;
+            
+            // Calculate equity
+            const totalDebt = seniorDebt + mezzDebt;
+            const equity = Math.max(0, perm.capex - totalDebt);
+            
+            // Calculate metrics
+            const leverage = totalDebt / perm.capex;
+            const wacd = (seniorDebt * perm.seniorCoupon + mezzDebt * perm.mezzCoupon) / totalDebt;
+            const irr = perm.equityIRR;
+            
+            // Check viability
+            const isViable = leverage <= 0.85 && equity > 0 && wacd < 0.08;
+            
+            if (isViable) {
+                securitisationEngine.validCount++;
+                if (irr > securitisationEngine.bestIRR) {
+                    securitisationEngine.bestIRR = irr;
+                }
+            } else {
+                securitisationEngine.invalidCount++;
+            }
+            
+            // Add to table
+            const row = tbody.insertRow();
+            row.style.borderBottom = '1px solid #364049';
+            row.innerHTML = `
+                <td style="padding: 8px;">${index + 1}</td>
+                <td style="padding: 8px;">£${perm.capex.toLocaleString()}</td>
+                <td style="padding: 8px;">${(perm.opex * 100).toFixed(1)}%</td>
+                <td style="padding: 8px;">£${perm.rent.toLocaleString()}</td>
+                <td style="padding: 8px;">${perm.seniorDSCR.toFixed(2)}</td>
+                <td style="padding: 8px;">${(perm.seniorCoupon * 100).toFixed(2)}%</td>
+                <td style="padding: 8px;">£${seniorDebt.toLocaleString('en-GB', {maximumFractionDigits: 0})}</td>
+                <td style="padding: 8px;">${perm.mezzDSCR.toFixed(2)}</td>
+                <td style="padding: 8px;">${(perm.mezzCoupon * 100).toFixed(2)}%</td>
+                <td style="padding: 8px;">£${mezzDebt.toLocaleString('en-GB', {maximumFractionDigits: 0})}</td>
+                <td style="padding: 8px;">£${equity.toLocaleString('en-GB', {maximumFractionDigits: 0})}</td>
+                <td style="padding: 8px;">${(irr * 100).toFixed(2)}%</td>
+                <td style="padding: 8px;">${(wacd * 100).toFixed(2)}%</td>
+                <td style="padding: 8px; color: ${isViable ? '#22c55e' : '#ef4444'};">${isViable ? 'Viable' : 'Invalid'}</td>
+            `;
+            
+            // Update progress
+            updateProgress(index + 1, permutations.length);
+        });
+        
+        // Complete
+        securitisationEngine.status = 'completed';
+        document.getElementById('perm-status').textContent = 'Completed';
+        document.getElementById('perm-status').style.color = '#22c55e';
+        document.getElementById('perm-best-irr').textContent = (securitisationEngine.bestIRR * 100).toFixed(2) + '%';
+    }
+    
+    function updateProgress(current, total) {
+        const percent = (current / total * 100).toFixed(1);
+        document.getElementById('perm-progress-bar').style.width = percent + '%';
+        document.getElementById('perm-progress-percent').textContent = percent + '%';
+        document.getElementById('perm-progress-text').textContent = `${current} / ${total}`;
+        document.getElementById('perm-valid-count').textContent = securitisationEngine.validCount;
+        document.getElementById('perm-invalid-count').textContent = securitisationEngine.invalidCount;
+        
+        // Update dashboard widget
+        updateDashboardWidget();
+    }
+    
+    function updateDashboardWidget() {
+        // Update dashboard widget values if they exist
+        const dashboardPermCount = document.getElementById('dashboard-perm-count');
+        const dashboardViableCount = document.getElementById('dashboard-viable-count');
+        const dashboardInvalidCount = document.getElementById('dashboard-invalid-count');
+        const dashboardBestIRR = document.getElementById('dashboard-best-irr');
+        const dashboardEngineStatus = document.getElementById('dashboard-engine-status');
+        
+        if (dashboardPermCount) {
+            dashboardPermCount.textContent = securitisationEngine.totalPermutations || 0;
+        }
+        if (dashboardViableCount) {
+            dashboardViableCount.textContent = securitisationEngine.validCount || 0;
+        }
+        if (dashboardInvalidCount) {
+            dashboardInvalidCount.textContent = securitisationEngine.invalidCount || 0;
+        }
+        if (dashboardBestIRR) {
+            dashboardBestIRR.textContent = securitisationEngine.bestIRR > 0 ? 
+                (securitisationEngine.bestIRR * 100).toFixed(2) + '%' : '-';
+        }
+        if (dashboardEngineStatus) {
+            dashboardEngineStatus.textContent = securitisationEngine.status === 'running' ? 'Processing' : 
+                                                 securitisationEngine.status === 'completed' ? 'Completed' : 'Ready';
+            dashboardEngineStatus.className = 'badge ' + 
+                (securitisationEngine.status === 'running' ? 'bg-warning' : 
+                 securitisationEngine.status === 'completed' ? 'bg-success' : 'bg-secondary');
+        }
+    }
+    
+    function pauseGeneration() {
+        if (securitisationEngine.status === 'running') {
+            securitisationEngine.status = 'paused';
+            document.getElementById('perm-status').textContent = 'Paused';
+            document.getElementById('perm-status').style.color = '#f59e0b';
+        }
+    }
+    
+    function stopGeneration() {
+        securitisationEngine.status = 'stopped';
+        document.getElementById('perm-status').textContent = 'Stopped';
+        document.getElementById('perm-status').style.color = '#ef4444';
+    }
+    
+    function resetEngine() {
+        securitisationEngine = {
+            status: 'stopped',
+            permutations: [],
+            validCount: 0,
+            invalidCount: 0,
+            currentIndex: 0,
+            totalPermutations: 0,
+            bestIRR: 0
+        };
+        
+        document.getElementById('perm-status').textContent = 'Ready';
+        document.getElementById('perm-status').style.color = '#22c55e';
+        document.getElementById('perm-progress-bar').style.width = '0%';
+        document.getElementById('perm-progress-percent').textContent = '';
+        document.getElementById('perm-progress-text').textContent = '0 / 0';
+        document.getElementById('perm-valid-count').textContent = '0';
+        document.getElementById('perm-invalid-count').textContent = '0';
+        document.getElementById('perm-best-irr').textContent = '-';
+        document.getElementById('perm-results-body').innerHTML = `
+            <tr>
+                <td colspan="14" style="padding: 20px; text-align: center; color: #94a3b8;">
+                    No permutations generated yet. Configure parameters and click "Generate Permutations" to start.
+                </td>
+            </tr>
+        `;
+    }
+    
+    function exportToExcel() {
+        alert('Excel export will be implemented to save all permutation results.');
+    }
+    
+    function exportToCSV() {
+        alert('CSV export will be implemented to save all permutation results.');
+    }
+    
+    function filterResults() {
+        alert('Filter functionality will be implemented to filter viable/invalid results.');
+    }
+    
+    function generateRangeValues() {
+        // Implementation for range mode value generation
+        return {
+            capex: [],
+            opex: [],
+            rent: [],
+            seniorDSCR: [],
+            seniorCoupon: [],
+            seniorTenor: [],
+            mezzDSCR: [],
+            mezzCoupon: [],
+            equityIRR: []
+        };
+    }
+    
+    function generateLowHighValues() {
+        // Implementation for low/high mode value generation
+        const numScenarios = parseInt(document.getElementById('sec-num-scenarios')?.value) || 10;
+        return {
+            capex: [],
+            opex: [],
+            rent: [],
+            seniorDSCR: [],
+            seniorCoupon: [],
+            seniorTenor: [],
+            mezzDSCR: [],
+            mezzCoupon: [],
+            equityIRR: []
+        };
     }
     </script>
 </body>
