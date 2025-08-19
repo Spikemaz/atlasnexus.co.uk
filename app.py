@@ -445,31 +445,49 @@ def generate_secure_password():
     chars = string.ascii_letters + string.digits + '!@#$%^&*'
     return ''.join(random.choice(chars) for _ in range(12))
 
-def send_email(to_email, subject, html_content):
-    """Send email notification"""
+def send_email(to_email, subject, html_content, retry_count=2):
+    """Send email notification with retry logic"""
     if not EMAIL_CONFIG['sender_password']:
         print(f"[EMAIL] Would send to {to_email}: {subject}")
         return True  # Simulate success in development
     
-    try:
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = subject
-        msg['From'] = EMAIL_CONFIG['sender_email']
-        msg['To'] = to_email
-        
-        html_part = MIMEText(html_content, 'html')
-        msg.attach(html_part)
-        
-        with smtplib.SMTP(EMAIL_CONFIG['smtp_server'], EMAIL_CONFIG['smtp_port']) as server:
-            server.starttls()
-            server.login(EMAIL_CONFIG['sender_email'], EMAIL_CONFIG['sender_password'])
-            server.send_message(msg)
-        
-        print(f"[EMAIL] Sent successfully to {to_email}")
-        return True
-    except Exception as e:
-        print(f"[EMAIL ERROR] Failed to send to {to_email}: {e}")
-        return False
+    for attempt in range(retry_count + 1):
+        try:
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = subject
+            msg['From'] = EMAIL_CONFIG['sender_email']
+            msg['To'] = to_email
+            
+            html_part = MIMEText(html_content, 'html')
+            msg.attach(html_part)
+            
+            # Use a timeout and explicit connection handling
+            server = smtplib.SMTP(EMAIL_CONFIG['smtp_server'], EMAIL_CONFIG['smtp_port'], timeout=10)
+            try:
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+                server.login(EMAIL_CONFIG['sender_email'], EMAIL_CONFIG['sender_password'])
+                server.send_message(msg)
+                server.quit()
+                print(f"[EMAIL] Sent successfully to {to_email} (attempt {attempt + 1})")
+                return True
+            finally:
+                try:
+                    server.quit()
+                except:
+                    pass
+                    
+        except smtplib.SMTPAuthenticationError as e:
+            print(f"[EMAIL ERROR] Authentication failed: {e}")
+            break  # Don't retry auth errors
+        except Exception as e:
+            print(f"[EMAIL ERROR] Attempt {attempt + 1} failed to send to {to_email}: {e}")
+            if attempt < retry_count:
+                time.sleep(1)  # Wait 1 second before retry
+                continue
+            
+    return False
 
 def send_email_async(to_email, subject, html_content):
     """Send email asynchronously in background thread"""
@@ -1078,7 +1096,13 @@ def register():
     </html>
     """
         
-        send_email_async(data['email'], 'AtlasNexus - Verify Your Email', email_html)
+        # Send verification email immediately (synchronously for reliability)
+        print(f"[REGISTRATION] Sending verification email to {data['email']}...")
+        email_sent = send_email(data['email'], 'AtlasNexus - Verify Your Email', email_html)
+        if email_sent:
+            print(f"[REGISTRATION] ✓ Verification email sent successfully to {data['email']}")
+        else:
+            print(f"[REGISTRATION] ✗ Failed to send verification email to {data['email']}")
         
         # Generate approval token for email-based approval
         approval_token = generate_verification_token()
@@ -1179,7 +1203,13 @@ def register():
     </html>
     """
     
-        send_email_async(EMAIL_CONFIG['admin_email'], 'New Registration - Action Required', admin_html)
+        # Send admin notification immediately
+        print(f"[REGISTRATION] Sending admin notification for {data['email']}...")
+        admin_sent = send_email(EMAIL_CONFIG['admin_email'], 'New Registration - Action Required', admin_html)
+        if admin_sent:
+            print(f"[REGISTRATION] ✓ Admin notification sent successfully")
+        else:
+            print(f"[REGISTRATION] ✗ Failed to send admin notification for {data['email']}")
         
         # Store registration in session for awaiting page
         session[f'registration_pending_{ip_address}'] = data['email']
