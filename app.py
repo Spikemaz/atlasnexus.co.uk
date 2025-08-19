@@ -294,7 +294,8 @@ def audit_project():
         'data-protection.html',
         'security.html',
         'contact.html',
-        'awaiting_verification.html'  # Added for registration system
+        'awaiting_verification.html',  # Added for registration system
+        'registration-submitted.html'  # Added for new registration flow
     }
     
     # Files that should NEVER exist (delete immediately)
@@ -1219,7 +1220,7 @@ def register():
         
         return jsonify({
             'status': 'success',
-            'redirect': '/awaiting-verification'
+            'redirect': f'/registration-submitted?email={data["email"]}'
         })
     except Exception as e:
         print(f"[REGISTRATION ERROR] {str(e)}")
@@ -1229,6 +1230,16 @@ def register():
             'status': 'error',
             'message': 'Registration failed. Please try again.'
         }), 500
+
+@app.route('/registration-submitted')
+def registration_submitted():
+    """Show registration submitted page with next steps"""
+    email = request.args.get('email', '')
+    if not email:
+        return redirect(url_for('secure_login'))
+    
+    # Pass email to template
+    return render_template('registration-submitted.html', email=email)
 
 @app.route('/awaiting-verification')
 def awaiting_verification():
@@ -1267,18 +1278,76 @@ def registration_expired():
     
     return jsonify({'status': 'not_found'})
 
-@app.route('/check-verification-status')
+@app.route('/resend-verification', methods=['POST'])
+def resend_verification():
+    """Resend verification email"""
+    data = request.get_json()
+    email = data.get('email', '').lower()
+    
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email required'}), 400
+    
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    if email not in registrations:
+        return jsonify({'status': 'error', 'message': 'Registration not found'}), 404
+    
+    registration = registrations[email]
+    
+    # Check if already verified
+    if registration.get('email_verified'):
+        return jsonify({'status': 'error', 'message': 'Email already verified'}), 400
+    
+    # Generate new verification token
+    new_token = generate_verification_token()
+    registrations[email]['verification_token'] = new_token
+    save_json_db(REGISTRATIONS_FILE, registrations)
+    
+    # Send new verification email
+    base_url = get_base_url()
+    verification_link = f"{base_url}verify-email?token={new_token}&email={email}"
+    
+    email_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                <h2 style="color: #333;">Verification Email (Resent)</h2>
+                <p>Please click the link below to verify your email address:</p>
+                <div style="margin: 20px 0; padding: 20px; background: #f0f9ff; border-radius: 8px; border: 2px solid #3b82f6;">
+                    <a href="{verification_link}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                        Verify Email Address
+                    </a>
+                </div>
+                <p style="color: #666; font-size: 14px;">This link expires in 24 hours.</p>
+                <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>
+            </div>
+        </body>
+    </html>
+    """
+    
+    email_sent = send_email(email, 'Email Verification - AtlasNexus (Resent)', email_html)
+    
+    if email_sent:
+        return jsonify({'status': 'success', 'message': 'Verification email resent'})
+    else:
+        return jsonify({'status': 'error', 'message': 'Failed to send email'}), 500
+
+@app.route('/check-verification-status', methods=['GET', 'POST'])
 def check_verification_status():
     """Check if user's email is verified"""
-    ip_address = get_real_ip()
-    pending_email = session.get(f'registration_pending_{ip_address}')
+    # Handle both GET and POST
+    if request.method == 'POST':
+        data = request.get_json()
+        email = data.get('email', '').lower()
+    else:
+        ip_address = get_real_ip()
+        email = session.get(f'registration_pending_{ip_address}')
     
-    if not pending_email:
+    if not email:
         return jsonify({'verified': False})
     
     registrations = load_json_db(REGISTRATIONS_FILE)
-    if pending_email in registrations:
-        is_verified = registrations[pending_email].get('email_verified', False)
+    if email in registrations:
+        is_verified = registrations[email].get('email_verified', False)
         return jsonify({'verified': is_verified})
     
     return jsonify({'verified': False})

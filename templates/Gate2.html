@@ -2346,8 +2346,13 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    // Show awaiting verification screen instead of redirect
-                    showAwaitingVerification(formData.get('email'));
+                    // Redirect to the new registration-submitted page
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        // Fallback to showing awaiting verification
+                        showAwaitingVerification(formData.get('email'));
+                    }
                 } else {
                     // Re-enable button on error
                     submitButton.disabled = false;
