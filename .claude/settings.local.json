@@ -29,7 +29,8 @@
       "Bash(cmd:*)",
       "WebFetch(domain:atlasnexus-securitization-p2e68vwi4-marcus-moores-projects.vercel.app)",
       "Bash(/dev/null)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(dir:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"
