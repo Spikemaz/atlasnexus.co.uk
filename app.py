@@ -1652,6 +1652,11 @@ def admin_ip_management():
     lockouts = load_lockouts()
     attempt_logs = load_attempt_logs()
     
+    # Debug logging
+    print(f"[ADMIN] IP Management accessed by {ip_address}")
+    print(f"[ADMIN] Found {len(lockouts)} locked IPs")
+    print(f"[ADMIN] Found {len(attempt_logs)} IPs with attempts")
+    
     # Format data for frontend
     ip_data = []
     for ip, info in lockouts.items():
@@ -1785,6 +1790,46 @@ def security():
 def contact():
     """Contact page"""
     return render_template('contact.html')
+
+@app.route('/debug/ip-status')
+def debug_ip_status():
+    """Debug endpoint to check current IP status"""
+    ip_address = get_real_ip()
+    lockouts = load_lockouts()
+    attempts = load_attempt_logs()
+    
+    ip_lockout_info = lockouts.get(ip_address, {})
+    ip_attempts_info = attempts.get(ip_address, {})
+    
+    # Check if lockout is still active
+    is_active = False
+    if ip_lockout_info:
+        if ip_lockout_info.get('permanent'):
+            is_active = True
+        elif 'locked_until' in ip_lockout_info:
+            locked_until = datetime.fromisoformat(ip_lockout_info['locked_until'])
+            is_active = datetime.now() < locked_until
+            if is_active:
+                remaining = locked_until - datetime.now()
+                ip_lockout_info['time_remaining'] = str(remaining)
+    
+    status = {
+        'your_ip': ip_address,
+        'is_locked': ip_address in lockouts,
+        'is_active': is_active,
+        'lockout_info': ip_lockout_info,
+        'attempts_info': ip_attempts_info,
+        'total_locked_ips': len(lockouts),
+        'all_locked_ips': list(lockouts.keys()),
+        'headers': {
+            'X-Forwarded-For': request.headers.get('X-Forwarded-For'),
+            'X-Real-IP': request.headers.get('X-Real-IP'),
+            'CF-Connecting-IP': request.headers.get('CF-Connecting-IP'),
+            'Remote-Addr': request.remote_addr
+        }
+    }
+    
+    return jsonify(status)
 
 @app.errorhandler(404)
 def not_found(e):
