@@ -1104,9 +1104,9 @@ def register():
         print(f"[REGISTRATION] Sending verification email to {data['email']}...")
         email_sent = send_email(data['email'], 'AtlasNexus - Verify Your Email', email_html)
         if email_sent:
-            print(f"[REGISTRATION] ✓ Verification email sent successfully to {data['email']}")
+            print(f"[REGISTRATION] Verification email sent successfully to {data['email']}")
         else:
-            print(f"[REGISTRATION] ✗ Failed to send verification email to {data['email']}")
+            print(f"[REGISTRATION] Failed to send verification email to {data['email']}")
         
         # Generate approval token for email-based approval
         approval_token = generate_verification_token()
@@ -1164,7 +1164,7 @@ def register():
                             <td style="padding: 8px 0; color: #666;">Email Verified:</td>
                             <td style="padding: 8px 0;">
                                 <span style="color: {'#22c55e' if data.get('email_verified') else '#ef4444'}; font-weight: 600;">
-                                    {'✓ Yes' if data.get('email_verified') else '✗ Pending'}
+                                    {'Yes' if data.get('email_verified') else 'Pending'}
                                 </span>
                             </td>
                         </tr>
@@ -1184,7 +1184,7 @@ def register():
                     </p>
                     
                     <a href="{approve_link}" style="display: inline-block; background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 14px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 0 10px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);">
-                        ✓ APPROVE APPLICATION
+                        APPROVE APPLICATION
                     </a>
                     
                     <a href="{reject_link}" style="display: inline-block; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 14px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 0 10px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
@@ -1218,9 +1218,9 @@ def register():
         print(f"[REGISTRATION] Sending admin notification for {data['email']}...")
         admin_sent = send_email(EMAIL_CONFIG['admin_email'], 'New Registration - Action Required', admin_html)
         if admin_sent:
-            print(f"[REGISTRATION] ✓ Admin notification sent successfully")
+            print(f"[REGISTRATION] Admin notification sent successfully")
         else:
-            print(f"[REGISTRATION] ✗ Failed to send admin notification for {data['email']}")
+            print(f"[REGISTRATION] Failed to send admin notification for {data['email']}")
         
         # Store registration in session for awaiting page
         session[f'registration_pending_{ip_address}'] = data['email']
@@ -1599,7 +1599,7 @@ def admin_quick_approve():
     <html>
         <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
             <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
-                <h2 style="color: #22c55e;">✓ Application Approved!</h2>
+                <h2 style="color: #22c55e;">Application Approved!</h2>
                 <p>Congratulations! Your email has been verified and your application has been approved by our admin team.</p>
                 <p>Welcome to AtlasNexus - Your institutional securitisation platform.</p>
                 <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border: 2px solid #3b82f6; margin: 20px 0;">
@@ -1623,7 +1623,7 @@ def admin_quick_approve():
     <html>
     <body style="background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%); color: white; font-family: Arial; padding: 50px; text-align: center; min-height: 100vh;">
         <div style="max-width: 600px; margin: 0 auto; background: rgba(44, 49, 55, 0.95); padding: 40px; border-radius: 20px; border: 2px solid #22c55e;">
-            <h1 style="color: #22c55e; font-size: 3rem;">✓</h1>
+            <h1 style="color: #22c55e; font-size: 3rem;">APPROVED</h1>
             <h2 style="color: #22c55e;">Application Approved!</h2>
             <p style="font-size: 18px; margin: 20px 0;">User <strong>{email}</strong> has been approved.</p>
             <div style="background: rgba(34, 197, 94, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
@@ -1752,7 +1752,7 @@ def test_email():
                     <p>Port: 587</p>
                     <p>Sender: """ + EMAIL_CONFIG['sender_email'] + """</p>
                 </div>
-                <p style="color: #22c55e; font-weight: bold;">✓ If you received this email, your configuration is working!</p>
+                <p style="color: #22c55e; font-weight: bold;">If you received this email, your configuration is working!</p>
             </div>
         </body>
     </html>
@@ -1764,7 +1764,7 @@ def test_email():
         return f"""
         <html>
         <body style="background: #1a1a1a; color: white; font-family: Arial; padding: 50px; text-align: center;">
-            <h1 style="color: #22c55e;">✓ Email Sent Successfully!</h1>
+            <h1 style="color: #22c55e;">Email Sent Successfully!</h1>
             <p>Check your email at: {EMAIL_CONFIG['admin_email']}</p>
             <p style="margin-top: 30px;">
                 <a href="/dashboard" style="background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Back to Dashboard</a>
@@ -2186,6 +2186,139 @@ def admin_system_config():
         # Here you would save the config to a file or database
         log_admin_action(ip_address, 'config_update', {'updated_settings': list(new_config.keys())})
         return jsonify({'status': 'success', 'message': 'Configuration updated'})
+
+@app.route('/securitization-engine')
+def securitization_engine():
+    """Securitization/Permutation Engine - Admin only"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'site_authenticated_{ip_address}'):
+        return redirect(url_for('index'))
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return redirect(url_for('secure_login'))
+    if not session.get(f'is_admin_{ip_address}'):
+        # Non-admins get view-only access
+        return render_template('securitisation_engine.html', 
+                             is_admin=False, 
+                             username=session.get(f'username_{ip_address}'))
+    
+    return render_template('securitisation_engine.html', 
+                         is_admin=True,
+                         username=session.get(f'username_{ip_address}'))
+
+@app.route('/api/securitization/run', methods=['POST'])
+def run_securitization():
+    """Run securitization calculations - Admin only"""
+    ip_address = get_real_ip()
+    
+    # Only admins can run calculations
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    data = request.get_json()
+    
+    # Here you would integrate with your Table 6 Excel calculations
+    # For now, return a sample result
+    result = {
+        'status': 'success',
+        'output': {
+            'id': f'SEC_{datetime.now().strftime("%Y%m%d_%H%M%S")}',
+            'timestamp': datetime.now().isoformat(),
+            'calculations': 'Hidden - Proprietary Algorithm',
+            'results': {
+                'total_securities': data.get('securities', 100),
+                'risk_rating': 'AAA',
+                'expected_return': '8.5%',
+                'volatility': '12.3%',
+                'sharpe_ratio': 1.42,
+                'tranches': [
+                    {'name': 'Senior', 'size': '70%', 'rating': 'AAA'},
+                    {'name': 'Mezzanine', 'size': '20%', 'rating': 'BBB'},
+                    {'name': 'Equity', 'size': '10%', 'rating': 'NR'}
+                ]
+            }
+        }
+    }
+    
+    # Log the calculation
+    log_admin_action(ip_address, 'securitization_run', {'result_id': result['output']['id']})
+    
+    return jsonify(result)
+
+@app.route('/api/securitization/history')
+def securitization_history():
+    """Get calculation history - Available to all authenticated users"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+    
+    # Return calculation history (view-only for non-admins)
+    history = [
+        {
+            'id': 'SEC_20250119_143022',
+            'timestamp': '2025-01-19T14:30:22',
+            'type': 'CDO Analysis',
+            'status': 'Complete',
+            'viewable': True
+        },
+        {
+            'id': 'SEC_20250119_121500',
+            'timestamp': '2025-01-19T12:15:00',
+            'type': 'MBS Structuring',
+            'status': 'Complete',
+            'viewable': True
+        }
+    ]
+    
+    return jsonify({'status': 'success', 'history': history})
+
+@app.route('/api/securitization/view/<result_id>')
+def view_securitization_result(result_id):
+    """View specific result - Available to authenticated users"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+    
+    # Return sanitized result (no formulas or calculations shown)
+    result = {
+        'id': result_id,
+        'timestamp': datetime.now().isoformat(),
+        'output': {
+            'summary': 'Securitization Complete',
+            'metrics': {
+                'total_value': '$100,000,000',
+                'weighted_average_life': '5.2 years',
+                'credit_enhancement': '15%'
+            }
+        }
+    }
+    
+    return jsonify({'status': 'success', 'result': result})
+
+@app.route('/api/securitization/check-access')
+def check_securitization_access():
+    """Check user's access level for securitization engine"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    # Determine role based on admin status
+    if session.get(f'is_admin_{ip_address}'):
+        role = 'admin'
+    else:
+        # You can add logic here to distinguish between internal and external teams
+        # For now, all non-admins are considered internal
+        role = 'internal'
+    
+    return jsonify({
+        'status': 'success',
+        'role': role,
+        'username': session.get(f'username_{ip_address}')
+    })
 
 @app.route('/admin/audit-log')
 def admin_audit_log():

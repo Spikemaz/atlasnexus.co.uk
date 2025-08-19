@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Center - Atlas Nexus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #1a1f3a 0%, #0f1428 100%);
+            border-right: 1px solid rgba(255, 215, 0, 0.1);
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            text-align: center;
+            padding: 0 2rem 2rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .logo p {
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-section {
+            margin-bottom: 2rem;
+        }
+
+        .nav-section-title {
+            padding: 0 2rem;
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 2rem;
+            color: #b0b0b0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 215, 0, 0.05);
+            color: #ffd700;
+        }
+
+        .nav-item.active {
+            background: rgba(255, 215, 0, 0.1);
+            color: #ffd700;
+            border-left: 3px solid #ffd700;
+        }
+
+        .nav-item i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: #ff4444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.9) 0%, rgba(15, 20, 40, 0.9) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #0a0e27;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4444 0%, #ff6666 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 68, 68, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffd700;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.6) 0%, rgba(15, 20, 40, 0.6) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon.users { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+        .stat-icon.security { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .stat-icon.activity { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .stat-icon.performance { background: rgba(155, 89, 182, 0.2); color: #9b59b6; }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-change {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .stat-change.positive {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+
+        .stat-change.negative {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+
+        .content-section {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.6) 0%, rgba(15, 20, 40, 0.6) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #ffd700;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.05);
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ffd700;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.2);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #b0b0b0;
+        }
+
+        tr:hover {
+            background: rgba(255, 215, 0, 0.02);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+
+        .status-pending {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+        }
+
+        .status-banned {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .action-edit {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+
+        .action-edit:hover {
+            background: rgba(52, 152, 219, 0.3);
+        }
+
+        .action-delete {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+
+        .action-delete:hover {
+            background: rgba(231, 76, 60, 0.3);
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .filter-select {
+            padding: 0.8rem 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .alert-warning {
+            background: rgba(241, 196, 15, 0.1);
+            border: 1px solid rgba(241, 196, 15, 0.3);
+            color: #f1c40f;
+        }
+
+        .alert-danger {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+        }
+
+        .alert-info {
+            background: rgba(52, 152, 219, 0.1);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            color: #3498db;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 215, 0, 0.2);
+            border-top-color: #ffd700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>ATLAS NEXUS</h1>
+            <p>Admin Control Center</p>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Main</div>
+            <a class="nav-item active" data-page="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+            <a href="/securitization-engine" class="nav-item">
+                <i class="fas fa-calculator"></i>
+                Securitization Engine
+            </a>
+            <a class="nav-item" data-page="analytics">
+                <i class="fas fa-chart-line"></i>
+                Analytics
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">User Management</div>
+            <a class="nav-item" data-page="users">
+                <i class="fas fa-users"></i>
+                All Users
+                <span class="nav-badge" id="userCount">0</span>
+            </a>
+            <a class="nav-item" data-page="registrations">
+                <i class="fas fa-user-plus"></i>
+                Registrations
+                <span class="nav-badge" id="pendingCount">0</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Security</div>
+            <a class="nav-item" data-page="ip-management">
+                <i class="fas fa-network-wired"></i>
+                IP Management
+            </a>
+            <a class="nav-item" data-page="login-attempts">
+                <i class="fas fa-sign-in-alt"></i>
+                Login Attempts
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Quick Actions</div>
+            <a class="nav-item" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i>
+                Refresh Data
+            </a>
+            <a class="nav-item" href="/dashboard">
+                <i class="fas fa-external-link-alt"></i>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="header-top">
+                <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="refreshData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <div id="alertContainer"></div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="dashboardContent" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon users">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-value" id="totalUsers">0</div>
+                    <div class="stat-label">Total Users</div>
+                    <span class="stat-change positive">System Active</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon security">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="stat-value" id="blockedIPs">0</div>
+                    <div class="stat-label">Blocked IPs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon activity">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="stat-value" id="activeNow">0</div>
+                    <div class="stat-label">Pending Registrations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon performance">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="stat-value">99.9%</div>
+                    <div class="stat-label">Uptime</div>
+                    <span class="stat-change positive">Stable</span>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Activity</h2>
+                </div>
+                <div class="table-container">
+                    <table id="activityTable">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>IP Address</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activityTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem;">Loading activity data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Management Content -->
+        <div id="usersContent" class="tab-content" style="display: none;">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">User Management</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Username</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 2rem;">Loading users...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registrations Content -->
+        <div id="registrationsContent" class="tab-content" style="display: none;">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Pending Registrations</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registrationsTableBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 2rem;">No pending registrations</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- IP Management Content -->
+        <div id="ipManagementContent" class="tab-content" style="display: none;">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">IP Address Management</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>IP Address</th>
+                                <th>Failed Attempts</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ipTableBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 2rem;">Loading IP data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize admin panel
+        let currentPage = 'dashboard';
+        let adminData = {};
+
+        // Navigation handling
+        document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.dataset.page;
+                switchPage(page);
+            });
+        });
+
+        function switchPage(page) {
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
+
+            // Hide all content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+
+            // Show selected content
+            const contentId = page + 'Content';
+            const content = document.getElementById(contentId);
+            if (content) {
+                content.style.display = 'block';
+            }
+
+            // Update page title
+            updatePageTitle(page);
+            currentPage = page;
+
+            // Load page-specific data
+            loadPageData(page);
+        }
+
+        function updatePageTitle(page) {
+            const titles = {
+                'dashboard': 'Dashboard Overview',
+                'analytics': 'Analytics & Insights',
+                'users': 'User Management',
+                'registrations': 'Registration Management',
+                'ip-management': 'IP Address Management',
+                'login-attempts': 'Login Attempts'
+            };
+            document.getElementById('pageTitle').textContent = titles[page] || 'Admin Panel';
+        }
+
+        function loadPageData(page) {
+            switch(page) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'users':
+                    loadUsersData();
+                    break;
+                case 'registrations':
+                    loadRegistrationsData();
+                    break;
+                case 'ip-management':
+                    loadIPData();
+                    break;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/admin/comprehensive-data');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    adminData = data.data;
+                    updateDashboardStats();
+                    updateActivityTable();
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showAlert('Failed to load dashboard data', 'danger');
+            }
+        }
+
+        async function loadUsersData() {
+            try {
+                const response = await fetch('/admin/comprehensive-data');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const users = data.data.users || {};
+                    updateUsersTable(users);
+                }
+            } catch (error) {
+                console.error('Error loading users data:', error);
+            }
+        }
+
+        async function loadRegistrationsData() {
+            try {
+                const response = await fetch('/admin/comprehensive-data');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const registrations = data.data.registrations || {};
+                    updateRegistrationsTable(registrations);
+                }
+            } catch (error) {
+                console.error('Error loading registrations:', error);
+            }
+        }
+
+        async function loadIPData() {
+            try {
+                const response = await fetch('/admin/ip-management');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateIPTable(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading IP data:', error);
+            }
+        }
+
+        function updateDashboardStats() {
+            const users = Object.keys(adminData.users || {}).length;
+            const blocked = Object.keys(adminData.lockouts || {}).filter(ip => {
+                const lockout = adminData.lockouts[ip];
+                return lockout.is_banned || (lockout.locked_until && new Date(lockout.locked_until) > new Date());
+            }).length;
+            
+            const pending = Object.keys(adminData.registrations || {}).filter(email => {
+                return adminData.registrations[email].status === 'pending';
+            }).length;
+            
+            document.getElementById('totalUsers').textContent = users;
+            document.getElementById('blockedIPs').textContent = blocked;
+            document.getElementById('activeNow').textContent = pending;
+            document.getElementById('userCount').textContent = users;
+            document.getElementById('pendingCount').textContent = pending;
+        }
+
+        function updateActivityTable() {
+            const tbody = document.getElementById('activityTableBody');
+            const activities = [];
+            
+            // Combine different activity sources
+            Object.entries(adminData.login_attempts || {}).forEach(([ip, attempts]) => {
+                attempts.forEach(attempt => {
+                    activities.push({
+                        time: new Date(attempt.timestamp),
+                        user: attempt.email || 'Unknown',
+                        action: attempt.success ? 'Login Success' : 'Login Failed',
+                        ip: ip,
+                        status: attempt.success ? 'success' : 'failed'
+                    });
+                });
+            });
+            
+            // Sort by time
+            activities.sort((a, b) => b.time - a.time);
+            
+            // Display top 10
+            tbody.innerHTML = activities.slice(0, 10).map(activity => `
+                <tr>
+                    <td>${activity.time.toLocaleString()}</td>
+                    <td>${activity.user}</td>
+                    <td>${activity.action}</td>
+                    <td>${activity.ip}</td>
+                    <td><span class="status-badge ${activity.status === 'success' ? 'status-active' : 'status-banned'}">${activity.status}</span></td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" style="text-align: center;">No recent activity</td></tr>';
+        }
+
+        function updateUsersTable(users) {
+            const tbody = document.getElementById('usersTableBody');
+            
+            if (Object.keys(users).length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem;">No users found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = Object.entries(users).map(([email, user]) => `
+                <tr>
+                    <td>${email}</td>
+                    <td>${user.username || 'N/A'}</td>
+                    <td><span class="status-badge status-active">Active</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn action-edit" onclick="editUser('${email}')">Edit</button>
+                            <button class="action-btn action-delete" onclick="deleteUser('${email}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateRegistrationsTable(registrations) {
+            const tbody = document.getElementById('registrationsTableBody');
+            const pending = Object.entries(registrations).filter(([_, reg]) => reg.status === 'pending');
+            
+            if (pending.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem;">No pending registrations</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = pending.map(([email, reg]) => `
+                <tr>
+                    <td>${email}</td>
+                    <td>${new Date(reg.timestamp).toLocaleDateString()}</td>
+                    <td><span class="status-badge status-pending">Pending</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn action-edit" onclick="approveUser('${email}')">Approve</button>
+                            <button class="action-btn action-delete" onclick="rejectUser('${email}')">Reject</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateIPTable(ipData) {
+            const tbody = document.getElementById('ipTableBody');
+            
+            if (Object.keys(ipData).length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem;">No IP data found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = Object.entries(ipData).map(([ip, data]) => {
+                const status = data.is_banned ? 'banned' : 'active';
+                return `
+                    <tr>
+                        <td>${ip}</td>
+                        <td>${data.failed_attempts || 0}</td>
+                        <td><span class="status-badge status-${status}">${status}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                ${status === 'banned' ? 
+                                    `<button class="action-btn action-edit" onclick="unbanIP('${ip}')">Unban</button>` :
+                                    `<button class="action-btn action-delete" onclick="banIP('${ip}')">Ban</button>`
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function approveUser(email) {
+            try {
+                const response = await fetch('/admin/approve-user', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('User approved successfully', 'success');
+                    loadRegistrationsData();
+                }
+            } catch (error) {
+                showAlert('Error approving user', 'danger');
+            }
+        }
+
+        async function rejectUser(email) {
+            const reason = prompt('Enter rejection reason:');
+            if (!reason) return;
+            
+            try {
+                const response = await fetch('/admin/reject-user', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, reason})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('User rejected', 'success');
+                    loadRegistrationsData();
+                }
+            } catch (error) {
+                showAlert('Error rejecting user', 'danger');
+            }
+        }
+
+        async function deleteUser(email) {
+            if (!confirm(`Delete user: ${email}?`)) return;
+            
+            try {
+                const response = await fetch('/admin/delete-data', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({type: 'user', identifier: email})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('User deleted', 'success');
+                    loadUsersData();
+                }
+            } catch (error) {
+                showAlert('Error deleting user', 'danger');
+            }
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+            alertContainer.appendChild(alert);
+            
+            setTimeout(() => alert.remove(), 5000);
+        }
+
+        async function refreshData() {
+            showAlert('Refreshing data...', 'info');
+            loadPageData(currentPage);
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboardData();
+        });
+    </script>
+</body>
+</html>
