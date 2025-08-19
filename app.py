@@ -19,6 +19,95 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import threading
+import time
+
+# ==================== IP LOCKOUT TRACKING ====================
+LOCKOUT_FILE = 'ip_lockouts.json'
+
+def load_lockouts():
+    """Load IP lockout data from file"""
+    if not os.path.exists(LOCKOUT_FILE):
+        return {}
+    try:
+        with open(LOCKOUT_FILE, 'r') as f:
+            data = json.load(f)
+            # Clean expired entries
+            now = datetime.now()
+            cleaned = {}
+            for ip, info in data.items():
+                if 'permanent' in info and info['permanent']:
+                    cleaned[ip] = info
+                elif 'locked_until' in info:
+                    locked_until = datetime.fromisoformat(info['locked_until'])
+                    if locked_until > now:
+                        cleaned[ip] = info
+            return cleaned
+    except:
+        return {}
+
+def save_lockouts(lockouts):
+    """Save IP lockout data to file"""
+    try:
+        with open(LOCKOUT_FILE, 'w') as f:
+            json.dump(lockouts, f, indent=2, default=str)
+        return True
+    except:
+        return False
+
+def check_ip_lockout(ip_address):
+    """Check if an IP is locked out (persistent across sessions)"""
+    lockouts = load_lockouts()
+    if ip_address not in lockouts:
+        return None
+    
+    info = lockouts[ip_address]
+    
+    # Check permanent blacklist
+    if info.get('permanent'):
+        return {'type': 'permanent', 'ip': ip_address}
+    
+    # Check 24-hour lockout
+    if 'locked_until' in info:
+        locked_until = datetime.fromisoformat(info['locked_until'])
+        if datetime.now() < locked_until:
+            remaining = (locked_until - datetime.now()).total_seconds()
+            return {
+                'type': 'blocked_24h',
+                'locked_until': locked_until,
+                'remaining_seconds': int(remaining),
+                'reference_code': info.get('reference_code', 'REF-UNKNOWN')
+            }
+        else:
+            # 24-hour lockout expired - apply permanent blacklist
+            info['permanent'] = True
+            del info['locked_until']
+            lockouts[ip_address] = info
+            save_lockouts(lockouts)
+            return {'type': 'permanent', 'ip': ip_address}
+    
+    return None
+
+def apply_ip_lockout(ip_address, lockout_type='24h'):
+    """Apply a lockout to an IP address"""
+    lockouts = load_lockouts()
+    
+    if lockout_type == '24h':
+        # Calculate exactly 24 hours from now
+        locked_until = datetime.now() + timedelta(hours=24)
+        ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        lockouts[ip_address] = {
+            'locked_until': locked_until.isoformat(),
+            'reference_code': ref_code,
+            'locked_at': datetime.now().isoformat()
+        }
+    elif lockout_type == 'permanent':
+        lockouts[ip_address] = {
+            'permanent': True,
+            'locked_at': datetime.now().isoformat()
+        }
+    
+    save_lockouts(lockouts)
+    return lockouts[ip_address]
 
 # ==================== CONFIGURATION ====================
 # Auto-detect environment
@@ -297,19 +386,27 @@ def index():
     ip_address = request.remote_addr
     session.permanent = True
     
-    # Check for 24-hour lockout
+    # Check IP-based lockout (persistent across sessions/cookies)
+    ip_lockout = check_ip_lockout(ip_address)
+    if ip_lockout:
+        if ip_lockout['type'] == 'permanent':
+            return render_template('Gate1.html', state='blackscreen', ip_address=ip_address)
+        elif ip_lockout['type'] == 'blocked_24h':
+            return render_template('Gate1.html', 
+                                 state='blocked_24h',
+                                 blocked_until=ip_lockout['locked_until'],
+                                 is_24h_lockout=True,
+                                 reference_code=ip_lockout['reference_code'])
+    
+    # Also check session-based lockout for backwards compatibility
     lockout_24h = session.get(f'lockout_24h_{ip_address}')
     if lockout_24h:
         if isinstance(lockout_24h, str):
             lockout_24h = datetime.fromisoformat(lockout_24h)
         if datetime.now() < lockout_24h:
-            # Get or generate reference code for 24h lockout
-            ref_code = session.get(f'reference_code_{ip_address}')
-            if not ref_code:
-                import random
-                import string
-                ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
-                session[f'reference_code_{ip_address}'] = ref_code
+            # Migrate to IP-based lockout
+            ref_code = session.get(f'reference_code_{ip_address}', 'REF-MIGRATED')
+            apply_ip_lockout(ip_address, '24h')
             return render_template('Gate1.html', 
                                  state='blocked_24h',
                                  blocked_until=lockout_24h,
@@ -317,11 +414,12 @@ def index():
                                  reference_code=ref_code)
         else:
             # 24-hour lockout expired - apply permanent blackscreen
-            session[f'permanent_block_{ip_address}'] = True
+            apply_ip_lockout(ip_address, 'permanent')
             return render_template('Gate1.html', state='blackscreen', ip_address=ip_address)
     
-    # Check for permanent blacklist
+    # Check for permanent blacklist in session (migrate to IP-based)
     if session.get(f'permanent_block_{ip_address}'):
+        apply_ip_lockout(ip_address, 'permanent')
         return render_template('Gate1.html', state='blackscreen', ip_address=ip_address)
     
     # Check for global unlock attempt
@@ -371,8 +469,9 @@ def site_auth():
     ip_address = request.remote_addr
     password = request.form.get('site_password', '').strip()
     
-    # Check if already blocked
-    if session.get(f'permanent_block_{ip_address}'):
+    # Check if already blocked (IP-based)
+    ip_lockout = check_ip_lockout(ip_address)
+    if ip_lockout and ip_lockout['type'] == 'permanent':
         return jsonify({'status': 'error', 'message': 'Access permanently denied'}), 403
     
     blocked_until = session.get(f'blocked_until_{ip_address}')
@@ -426,8 +525,9 @@ def site_auth():
     attempts_left = MAX_ATTEMPTS_BEFORE_BLOCK - attempt_count
     
     if attempt_count >= MAX_ATTEMPTS_BEFORE_BLACKLIST:
-        # Permanent blacklist
-        session[f'permanent_block_{ip_address}'] = True
+        # Permanent blacklist (IP-based)
+        apply_ip_lockout(ip_address, 'permanent')
+        session[f'permanent_block_{ip_address}'] = True  # Keep for backwards compatibility
         return jsonify({
             'status': 'blacklisted',
             'message': 'Access permanently denied',
@@ -496,15 +596,20 @@ def unlock():
     unlock_code = request.json.get('code', '')
     
     if unlock_code == GLOBAL_UNLOCK_CODE:
-        # Clear ALL session data for this IP
+        # Clear ALL session data for this IP and remove from IP lockout file
         for key in list(session.keys()):
             if ip_address in key:
                 session.pop(key, None)
+        # Also remove from IP lockout file
+        lockouts = load_lockouts()
+        if ip_address in lockouts:
+            del lockouts[ip_address]
+            save_lockouts(lockouts)
         return jsonify({'status': 'success', 'redirect': '/'})
     else:
-        # Wrong code = immediate 24-hour lockout (only 1 attempt allowed)
-        lockout_until = datetime.now() + timedelta(hours=LOCKOUT_DURATION_HOURS)
-        session[f'lockout_24h_{ip_address}'] = lockout_until.isoformat()
+        # Wrong code = immediate 24-hour lockout (IP-based)
+        apply_ip_lockout(ip_address, '24h')
+        session[f'lockout_24h_{ip_address}'] = (datetime.now() + timedelta(hours=LOCKOUT_DURATION_HOURS)).isoformat()
         return jsonify({
             'status': 'lockout',
             'message': '24-hour lockout applied',
