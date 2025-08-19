@@ -1171,6 +1171,13 @@ def register():
                     </table>
                 </div>
                 
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #ffc107;">
+                    <p style="color: #856404; margin: 0; font-size: 14px;">
+                        <strong>📝 Note:</strong> A secure password has been generated for this user. 
+                        It will only be sent to them after email verification AND your approval.
+                    </p>
+                </div>
+                
                 <div style="text-align: center; margin: 30px 0;">
                     <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
                         Click one of the buttons below to approve or reject this application directly from your email:
@@ -1607,7 +1614,8 @@ def admin_quick_approve():
         <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
             <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
                 <h2 style="color: #22c55e;">✓ Application Approved!</h2>
-                <p>Welcome to AtlasNexus! Your account has been approved.</p>
+                <p>Congratulations! Your email has been verified and your application has been approved by our admin team.</p>
+                <p>Welcome to AtlasNexus - Your institutional securitisation platform.</p>
                 <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border: 2px solid #3b82f6; margin: 20px 0;">
                     <h3 style="color: #1e40af; margin-top: 0;">Your Login Credentials:</h3>
                     <p><strong>Email:</strong> {email}</p>

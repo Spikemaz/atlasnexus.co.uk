@@ -3081,6 +3081,243 @@
     
     // Fetch on load
     fetchEnhancedFREDData();
+    
+    // Permutation Engine Functions
+    let permutationEngine = {
+        status: 'stopped',
+        startTime: null,
+        timer: null,
+        progress: 0,
+        currentIteration: 0,
+        totalIterations: 0
+    };
+    
+    function startPermutationEngine() {
+        if (permutationEngine.status === 'running') return;
+        
+        // Get all input values
+        const datasetSize = document.getElementById('perm-dataset-size').value || 1000;
+        const iterations = document.getElementById('perm-iterations').value || 100;
+        const sampleRate = document.getElementById('perm-sample-rate').value || 100;
+        const confidence = document.getElementById('perm-confidence').value;
+        const permType = document.getElementById('perm-type').value;
+        const optimization = document.getElementById('perm-optimization').value;
+        const mode = document.getElementById('perm-mode').value;
+        
+        // Update engine state
+        permutationEngine.status = 'running';
+        permutationEngine.startTime = Date.now();
+        permutationEngine.totalIterations = iterations;
+        permutationEngine.currentIteration = 0;
+        permutationEngine.progress = 0;
+        
+        // Update UI
+        document.getElementById('perm-status').textContent = 'Running';
+        document.getElementById('perm-status').style.color = '#f59e0b';
+        document.getElementById('perm-current-iterations').textContent = `0 / ${iterations}`;
+        
+        // Start timer
+        permutationEngine.timer = setInterval(updatePermutationTimer, 1000);
+        
+        // Simulate processing
+        simulatePermutationProcessing();
+        
+        // Log to results
+        const resultsDiv = document.getElementById('perm-results');
+        resultsDiv.innerHTML = `
+            <div style="color: #60a5fa; margin-bottom: 1rem;">
+                <strong>Engine Started</strong><br>
+                Configuration: ${permType} permutation using ${optimization}<br>
+                Dataset Size: ${datasetSize} | Iterations: ${iterations} | Sample Rate: ${sampleRate}%<br>
+                Processing Mode: ${mode} | Confidence Level: ${confidence}%
+            </div>
+            <div id="perm-live-results" style="color: #94a3b8; font-family: monospace; font-size: 0.9rem;">
+                Processing...
+            </div>
+        `;
+    }
+    
+    function pausePermutationEngine() {
+        if (permutationEngine.status !== 'running') return;
+        
+        permutationEngine.status = 'paused';
+        clearInterval(permutationEngine.timer);
+        
+        document.getElementById('perm-status').textContent = 'Paused';
+        document.getElementById('perm-status').style.color = '#f59e0b';
+    }
+    
+    function stopPermutationEngine() {
+        permutationEngine.status = 'stopped';
+        clearInterval(permutationEngine.timer);
+        
+        document.getElementById('perm-status').textContent = 'Stopped';
+        document.getElementById('perm-status').style.color = '#ef4444';
+        
+        // Final results
+        if (permutationEngine.currentIteration > 0) {
+            showPermutationResults();
+        }
+    }
+    
+    function resetPermutationEngine() {
+        // Stop engine
+        stopPermutationEngine();
+        
+        // Reset all values
+        permutationEngine = {
+            status: 'stopped',
+            startTime: null,
+            timer: null,
+            progress: 0,
+            currentIteration: 0,
+            totalIterations: 0
+        };
+        
+        // Reset UI
+        document.getElementById('perm-status').textContent = 'Ready';
+        document.getElementById('perm-status').style.color = '#22c55e';
+        document.getElementById('perm-progress-bar').style.width = '0%';
+        document.getElementById('perm-progress-percent').textContent = '0%';
+        document.getElementById('perm-current-iterations').textContent = '0 / 0';
+        document.getElementById('perm-time').textContent = '00:00:00';
+        document.getElementById('perm-eta').textContent = '--:--:--';
+        document.getElementById('perm-results').innerHTML = '<p style="color: #94a3b8; text-align: center;">No results yet. Configure parameters and start the engine.</p>';
+        
+        // Clear all inputs
+        document.querySelectorAll('#permutation-section input').forEach(input => {
+            if (input.type === 'number' || input.type === 'text') {
+                input.value = '';
+            }
+        });
+    }
+    
+    function updatePermutationTimer() {
+        if (!permutationEngine.startTime) return;
+        
+        const elapsed = Date.now() - permutationEngine.startTime;
+        const hours = Math.floor(elapsed / 3600000);
+        const minutes = Math.floor((elapsed % 3600000) / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        
+        document.getElementById('perm-time').textContent = 
+            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Calculate ETA
+        if (permutationEngine.currentIteration > 0) {
+            const avgTimePerIteration = elapsed / permutationEngine.currentIteration;
+            const remainingIterations = permutationEngine.totalIterations - permutationEngine.currentIteration;
+            const remainingTime = avgTimePerIteration * remainingIterations;
+            
+            const etaHours = Math.floor(remainingTime / 3600000);
+            const etaMinutes = Math.floor((remainingTime % 3600000) / 60000);
+            const etaSeconds = Math.floor((remainingTime % 60000) / 1000);
+            
+            document.getElementById('perm-eta').textContent = 
+                `${etaHours.toString().padStart(2, '0')}:${etaMinutes.toString().padStart(2, '0')}:${etaSeconds.toString().padStart(2, '0')}`;
+        }
+    }
+    
+    function simulatePermutationProcessing() {
+        if (permutationEngine.status !== 'running') return;
+        
+        // Increment iteration
+        permutationEngine.currentIteration++;
+        
+        // Update progress
+        permutationEngine.progress = (permutationEngine.currentIteration / permutationEngine.totalIterations) * 100;
+        document.getElementById('perm-progress-bar').style.width = permutationEngine.progress + '%';
+        document.getElementById('perm-progress-percent').textContent = Math.round(permutationEngine.progress) + '%';
+        document.getElementById('perm-current-iterations').textContent = 
+            `${permutationEngine.currentIteration} / ${permutationEngine.totalIterations}`;
+        
+        // Simulate live results
+        const liveResults = document.getElementById('perm-live-results');
+        if (liveResults) {
+            const result = Math.random() * 1000;
+            liveResults.innerHTML += `<br>Iteration ${permutationEngine.currentIteration}: Result = ${result.toFixed(4)}`;
+            
+            // Keep only last 10 results visible
+            const lines = liveResults.innerHTML.split('<br>');
+            if (lines.length > 11) {
+                liveResults.innerHTML = lines.slice(-11).join('<br>');
+            }
+        }
+        
+        // Continue or complete
+        if (permutationEngine.currentIteration < permutationEngine.totalIterations) {
+            setTimeout(() => simulatePermutationProcessing(), 100); // Simulate processing delay
+        } else {
+            // Processing complete
+            permutationEngine.status = 'completed';
+            clearInterval(permutationEngine.timer);
+            document.getElementById('perm-status').textContent = 'Completed';
+            document.getElementById('perm-status').style.color = '#22c55e';
+            showPermutationResults();
+        }
+    }
+    
+    function showPermutationResults() {
+        const resultsDiv = document.getElementById('perm-results');
+        const elapsed = Date.now() - permutationEngine.startTime;
+        const elapsedSeconds = (elapsed / 1000).toFixed(2);
+        
+        // Generate mock results
+        const results = {
+            totalPermutations: Math.floor(Math.random() * 1000000) + 100000,
+            optimalSolution: (Math.random() * 100).toFixed(4),
+            convergenceRate: (Math.random() * 100).toFixed(2),
+            efficiency: (85 + Math.random() * 15).toFixed(2),
+            memoryUsed: (Math.random() * 500 + 100).toFixed(2)
+        };
+        
+        resultsDiv.innerHTML = `
+            <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid #22c55e; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                <h4 style="color: #22c55e; margin-bottom: 0.5rem;">Processing Complete</h4>
+                <p style="color: #94a3b8;">Completed ${permutationEngine.currentIteration} iterations in ${elapsedSeconds} seconds</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">
+                    <p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Total Permutations</p>
+                    <p style="color: white; font-size: 1.5rem; font-weight: 600;">${results.totalPermutations.toLocaleString()}</p>
+                </div>
+                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">
+                    <p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Optimal Solution</p>
+                    <p style="color: white; font-size: 1.5rem; font-weight: 600;">${results.optimalSolution}</p>
+                </div>
+                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">
+                    <p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Convergence Rate</p>
+                    <p style="color: white; font-size: 1.5rem; font-weight: 600;">${results.convergenceRate}%</p>
+                </div>
+                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">
+                    <p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Efficiency</p>
+                    <p style="color: white; font-size: 1.5rem; font-weight: 600;">${results.efficiency}%</p>
+                </div>
+                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">
+                    <p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Memory Used</p>
+                    <p style="color: white; font-size: 1.5rem; font-weight: 600;">${results.memoryUsed} MB</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1rem; padding: 1rem; background: rgba(30, 41, 59, 0.5); border-radius: 8px;">
+                <button onclick="exportPermutationResults()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-right: 10px;">
+                    <i class="fas fa-download"></i> Export Results
+                </button>
+                <button onclick="visualizePermutationResults()" style="background: linear-gradient(90deg, #8b5cf6, #7c3aed); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                    <i class="fas fa-chart-bar"></i> Visualize
+                </button>
+            </div>
+        `;
+    }
+    
+    function exportPermutationResults() {
+        alert('Export functionality will be implemented based on your specific requirements.');
+    }
+    
+    function visualizePermutationResults() {
+        alert('Visualization functionality will be implemented based on your specific requirements.');
+    }
     </script>
 </body>
 </html>
