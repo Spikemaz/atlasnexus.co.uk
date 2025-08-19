@@ -154,7 +154,8 @@ def apply_ip_lockout(ip_address, lockout_type='24h', reason='', failed_passwords
         }
     else:
         # Timed lockout (30min, 24h, or custom)
-        locked_until = datetime.now() + timedelta(hours=duration_hours)
+        # Add 59 seconds to ensure full time display (e.g., 23:59:59 shows as 24 hours)
+        locked_until = datetime.now() + timedelta(hours=duration_hours, seconds=59)
         ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
         
         # Preserve existing data if updating
@@ -610,7 +611,7 @@ def site_auth():
     if password == 'TIMEOUT_TRIGGER_BLOCK_NOW':
         # Force block due to timeout
         session[f'attempt_count_{ip_address}'] = MAX_ATTEMPTS_BEFORE_BLOCK
-        blocked_until = datetime.now() + timedelta(minutes=BLOCK_DURATION_MINUTES)
+        blocked_until = datetime.now() + timedelta(minutes=BLOCK_DURATION_MINUTES, seconds=59)
         session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
         # Generate reference code
         import random
@@ -681,7 +682,7 @@ def site_auth():
             lockouts[ip_address]['additional_info'] = additional_info
             save_lockouts(lockouts)
         
-        blocked_until = datetime.now() + timedelta(minutes=BLOCK_DURATION_MINUTES)
+        blocked_until = datetime.now() + timedelta(minutes=BLOCK_DURATION_MINUTES, seconds=59)
         session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
         
         # Generate reference code
@@ -776,7 +777,7 @@ def unlock():
                         failed_passwords=[unlock_code],
                         duration_hours=24)
         
-        session[f'lockout_24h_{ip_address}'] = (datetime.now() + timedelta(hours=LOCKOUT_DURATION_HOURS)).isoformat()
+        session[f'lockout_24h_{ip_address}'] = (datetime.now() + timedelta(hours=LOCKOUT_DURATION_HOURS, seconds=59)).isoformat()
         return jsonify({
             'status': 'lockout',
             'message': '24-hour lockout applied',
