@@ -2256,6 +2256,9 @@
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(initTickerDrag, 100);
     });
+    // Ticker initialization flag
+    let tickerInitialized = false;
+    
     // Market Data for Ticker (will be updated with live data)
     let marketData = {
         // BONDS
@@ -2312,6 +2315,16 @@
     // Create ticker content
     function createTicker() {
         const ticker = document.getElementById('marketTicker');
+        const container = document.getElementById('tickerContainer');
+        if (!ticker || !container) return;
+        
+        // Prevent multiple initializations
+        if (tickerInitialized) {
+            // Just update content without re-adding event listeners
+            updateTickerContent();
+            return;
+        }
+        
         let content = '';
         
         // Create two identical sets for seamless looping
@@ -2374,6 +2387,12 @@
         }
         
         ticker.innerHTML = content;
+        
+        // Initialize drag functionality only once
+        if (!tickerInitialized) {
+            initTickerDrag();
+            tickerInitialized = true;
+        }
     }
 
     function createTickerItem(symbol, data) {
@@ -2431,6 +2450,75 @@
         `;
     }
 
+    // Function to update ticker content without reinitializing
+    function updateTickerContent() {
+        const ticker = document.getElementById('marketTicker');
+        if (!ticker) return;
+        
+        let content = '';
+        
+        // Create two identical sets for seamless looping
+        for (let i = 0; i < 2; i++) {
+            // BONDS
+            content += '<span class="ticker-section-header">BONDS</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['US 10Y', 'UK 10Y', 'DE 10Y', 'US 5Y', 'US 2Y', 'JP 10Y'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+            
+            // CENTRAL BANKS
+            content += '<span class="ticker-section-header">CENTRAL BANKS</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['FED RATE', 'BOE RATE', 'ECB RATE', 'BOJ RATE', 'SNB RATE'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+            
+            // REFERENCE RATES
+            content += '<span class="ticker-section-header">REFERENCE RATES</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['SOFR', 'SONIA', 'ESTR', 'TONAR'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+            
+            // SECURITISATION
+            content += '<span class="ticker-section-header">SECURITISATION</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['IG SPREAD', 'HY SPREAD', 'CMBS AAA', 'RMBS AAA', 'CLO AAA'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+            
+            // FX
+            content += '<span class="ticker-section-header">FX</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['GBP/USD', 'EUR/USD', 'USD/JPY', 'EUR/GBP'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+            
+            // COMMODITIES
+            content += '<span class="ticker-section-header">COMMODITIES</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['GOLD', 'SILVER', 'OIL'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+            
+            // INDICES
+            content += '<span class="ticker-section-header">INDICES</span>';
+            content += '<span class="ticker-separator">●</span>';
+            ['S&P 500', 'FTSE 100', 'DAX', 'NIKKEI', 'VIX'].forEach(key => {
+                const data = marketData[key];
+                content += createTickerItem(key, data);
+            });
+        }
+        
+        ticker.innerHTML = content;
+    }
+    
     // Create ticker content on page load
     createTicker();
 
