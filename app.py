@@ -775,8 +775,8 @@ def register():
         
         # Send verification email
         verification_link = f"{request.host_url}verify-email?token={data['verification_token']}&email={data['email']}"
-    
-    email_html = f"""
+        
+        email_html = f"""
     <html>
         <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
             <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">

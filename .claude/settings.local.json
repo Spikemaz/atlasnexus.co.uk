@@ -26,7 +26,8 @@
       "Bash(mv:*)",
       "Bash(taskkill:*)",
       "WebFetch(domain:atlasnexus.co.uk)",
-      "Bash(cmd:*)"
+      "Bash(cmd:*)",
+      "WebFetch(domain:atlasnexus-securitization-p2e68vwi4-marcus-moores-projects.vercel.app)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"
