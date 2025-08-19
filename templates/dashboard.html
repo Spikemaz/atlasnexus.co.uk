@@ -2154,7 +2154,7 @@
             
             function animate() {
                 if (!isDragging) {
-                    dashboardTickerPosition -= 0.5;
+                    dashboardTickerPosition -= 0.3; // Slower smooth scroll speed
                     
                     const tickerWidth = ticker.scrollWidth / 2;
                     
@@ -2205,7 +2205,7 @@
             
             e.preventDefault();
             const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-            const walk = (x - startX) * 1.5;
+            const walk = x - startX; // Direct 1:1 movement
             
             dashboardTickerPosition = scrollLeft + walk;
             
@@ -2250,14 +2250,14 @@
         
         // Event listeners
         container.addEventListener('mousedown', startDrag);
-        container.addEventListener('mousemove', drag);
-        container.addEventListener('mouseup', stopDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
         container.addEventListener('mouseleave', stopDrag);
         
         // Touch events for mobile
         container.addEventListener('touchstart', startDrag);
-        container.addEventListener('touchmove', drag);
-        container.addEventListener('touchend', stopDrag);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', stopDrag);
         
         // Prevent text selection while dragging
         container.addEventListener('selectstart', e => {

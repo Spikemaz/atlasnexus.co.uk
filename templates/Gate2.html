@@ -1835,14 +1835,14 @@
             
             // Setup drag functionality (only once)
             container.addEventListener('mousedown', startDrag);
-            container.addEventListener('mousemove', drag);
-            container.addEventListener('mouseup', stopDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
             container.addEventListener('mouseleave', stopDrag);
             
             // Touch events for mobile
             container.addEventListener('touchstart', startDrag);
-            container.addEventListener('touchmove', drag);
-            container.addEventListener('touchend', stopDrag);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('touchend', stopDrag);
             
             // Mark as initialized
             tickerInitialized = true;
@@ -1865,7 +1865,7 @@
             // Smooth continuous animation
             function animate() {
                 if (!isDragging) {
-                    tickerPosition -= 0.5; // Smooth scroll speed
+                    tickerPosition -= 0.3; // Slower smooth scroll speed
                     
                     // Get actual width of one set of content
                     const tickerWidth = ticker.scrollWidth / 3;
@@ -1921,7 +1921,7 @@
             e.preventDefault();
             const ticker = document.getElementById('marketTicker');
             const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-            const walk = (x - startX) * 1.5; // Scroll speed multiplier
+            const walk = x - startX; // Direct 1:1 movement
             
             tickerPosition = scrollLeft + walk;
             
