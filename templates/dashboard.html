@@ -2171,6 +2171,7 @@
         }
         
         function startDrag(e) {
+            console.log('Dashboard StartDrag called');
             isDragging = true;
             container.classList.add('dragging');
             
@@ -2249,6 +2250,7 @@
         }
         
         // Event listeners
+        console.log('Adding dashboard event listeners');
         container.addEventListener('mousedown', startDrag);
         document.addEventListener('mousemove', drag);
         document.addEventListener('mouseup', stopDrag);

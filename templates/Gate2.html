@@ -1744,6 +1744,125 @@
         let scrollLeft = 0;
         let tickerInitialized = false;
         
+        // Define drag functions first (before createTicker)
+        function startAutoScroll() {
+            if (isDragging) return;
+            
+            const ticker = document.getElementById('marketTicker');
+            if (!ticker) return;
+            
+            // Cancel any existing animation
+            if (tickerAnimationId) {
+                cancelAnimationFrame(tickerAnimationId);
+            }
+            
+            // Smooth continuous animation
+            function animate() {
+                if (!isDragging) {
+                    tickerPosition -= 0.3; // Slower smooth scroll speed
+                    
+                    // Get actual width of one set of content
+                    const tickerWidth = ticker.scrollWidth / 3;
+                    
+                    // Reset position for endless loop
+                    if (Math.abs(tickerPosition) >= tickerWidth) {
+                        tickerPosition = tickerPosition % tickerWidth;
+                    }
+                    
+                    ticker.style.transform = `translateX(${tickerPosition}px)`;
+                    tickerAnimationId = requestAnimationFrame(animate);
+                }
+            }
+            
+            animate();
+        }
+        
+        function startDrag(e) {
+            console.log('StartDrag called');
+            isDragging = true;
+            const container = document.getElementById('tickerContainer');
+            const ticker = document.getElementById('marketTicker');
+            container.classList.add('dragging');
+            
+            // Clear any pending resume timeout
+            if (window.tickerResumeTimeout) {
+                clearTimeout(window.tickerResumeTimeout);
+                window.tickerResumeTimeout = null;
+            }
+            
+            // Cancel auto-scroll
+            if (tickerAnimationId) {
+                cancelAnimationFrame(tickerAnimationId);
+                tickerAnimationId = null;
+            }
+            
+            // Always get current position from the actual transform
+            const currentTransform = window.getComputedStyle(ticker).transform;
+            if (currentTransform !== 'none') {
+                const matrix = new DOMMatrix(currentTransform);
+                tickerPosition = matrix.m41; // Update global position
+                scrollLeft = tickerPosition;
+            } else {
+                scrollLeft = tickerPosition;
+            }
+            
+            startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+            e.preventDefault();
+        }
+        
+        function drag(e) {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            const ticker = document.getElementById('marketTicker');
+            const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+            const walk = x - startX; // Direct 1:1 movement
+            
+            tickerPosition = scrollLeft + walk;
+            
+            // Handle endless scrolling boundaries
+            const tickerWidth = ticker.scrollWidth / 3;
+            if (tickerPosition > 0) {
+                tickerPosition = -tickerWidth + (tickerPosition % tickerWidth);
+            } else if (Math.abs(tickerPosition) >= tickerWidth * 2) {
+                tickerPosition = tickerPosition % tickerWidth;
+            }
+            
+            ticker.style.transition = 'none'; // Remove transition for immediate response
+            ticker.style.transform = `translateX(${tickerPosition}px)`;
+        }
+        
+        function stopDrag() {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            const container = document.getElementById('tickerContainer');
+            const ticker = document.getElementById('marketTicker');
+            container.classList.remove('dragging');
+            
+            // Save the final position
+            const currentTransform = window.getComputedStyle(ticker).transform;
+            if (currentTransform !== 'none') {
+                const matrix = new DOMMatrix(currentTransform);
+                tickerPosition = matrix.m41;
+            }
+            
+            // Re-enable smooth transitions
+            ticker.style.transition = 'transform 0.5s linear';
+            
+            // Clear any existing resume timeout
+            if (window.tickerResumeTimeout) {
+                clearTimeout(window.tickerResumeTimeout);
+            }
+            
+            // Resume auto-scroll after a delay
+            window.tickerResumeTimeout = setTimeout(() => {
+                if (!isDragging) {
+                    startAutoScroll();
+                }
+            }, 2000);
+        }
+        
         // Create ticker content
         function createTicker() {
             const ticker = document.getElementById('marketTicker');
@@ -1834,6 +1953,7 @@
             ticker.innerHTML = singleContent + singleContent + singleContent;
             
             // Setup drag functionality (only once)
+            console.log('Adding event listeners in createTicker');
             container.addEventListener('mousedown', startDrag);
             document.addEventListener('mousemove', drag);
             document.addEventListener('mouseup', stopDrag);
@@ -1849,123 +1969,6 @@
             
             // Start auto-scroll
             startAutoScroll();
-        }
-        
-        function startAutoScroll() {
-            if (isDragging) return;
-            
-            const ticker = document.getElementById('marketTicker');
-            if (!ticker) return;
-            
-            // Cancel any existing animation
-            if (tickerAnimationId) {
-                cancelAnimationFrame(tickerAnimationId);
-            }
-            
-            // Smooth continuous animation
-            function animate() {
-                if (!isDragging) {
-                    tickerPosition -= 0.3; // Slower smooth scroll speed
-                    
-                    // Get actual width of one set of content
-                    const tickerWidth = ticker.scrollWidth / 3;
-                    
-                    // Reset position for endless loop
-                    if (Math.abs(tickerPosition) >= tickerWidth) {
-                        tickerPosition = tickerPosition % tickerWidth;
-                    }
-                    
-                    ticker.style.transform = `translateX(${tickerPosition}px)`;
-                    tickerAnimationId = requestAnimationFrame(animate);
-                }
-            }
-            
-            animate();
-        }
-        
-        function startDrag(e) {
-            isDragging = true;
-            const container = document.getElementById('tickerContainer');
-            const ticker = document.getElementById('marketTicker');
-            container.classList.add('dragging');
-            
-            // Clear any pending resume timeout
-            if (window.tickerResumeTimeout) {
-                clearTimeout(window.tickerResumeTimeout);
-                window.tickerResumeTimeout = null;
-            }
-            
-            // Cancel auto-scroll
-            if (tickerAnimationId) {
-                cancelAnimationFrame(tickerAnimationId);
-                tickerAnimationId = null;
-            }
-            
-            // Always get current position from the actual transform
-            const currentTransform = window.getComputedStyle(ticker).transform;
-            if (currentTransform !== 'none') {
-                const matrix = new DOMMatrix(currentTransform);
-                tickerPosition = matrix.m41; // Update global position
-                scrollLeft = tickerPosition;
-            } else {
-                scrollLeft = tickerPosition;
-            }
-            
-            startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-            e.preventDefault();
-        }
-        
-        function drag(e) {
-            if (!isDragging) return;
-            
-            e.preventDefault();
-            const ticker = document.getElementById('marketTicker');
-            const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-            const walk = x - startX; // Direct 1:1 movement
-            
-            tickerPosition = scrollLeft + walk;
-            
-            // Handle endless scrolling boundaries
-            const tickerWidth = ticker.scrollWidth / 3;
-            if (tickerPosition > 0) {
-                tickerPosition = -tickerWidth + (tickerPosition % tickerWidth);
-            } else if (Math.abs(tickerPosition) >= tickerWidth * 2) {
-                tickerPosition = tickerPosition % tickerWidth;
-            }
-            
-            ticker.style.transition = 'none'; // Remove transition for immediate response
-            ticker.style.transform = `translateX(${tickerPosition}px)`;
-        }
-        
-        function stopDrag() {
-            if (!isDragging) return;
-            
-            isDragging = false;
-            const container = document.getElementById('tickerContainer');
-            const ticker = document.getElementById('marketTicker');
-            container.classList.remove('dragging');
-            
-            // Save the final position
-            const currentTransform = window.getComputedStyle(ticker).transform;
-            if (currentTransform !== 'none') {
-                const matrix = new DOMMatrix(currentTransform);
-                tickerPosition = matrix.m41;
-            }
-            
-            // Re-enable smooth transitions
-            ticker.style.transition = 'transform 0.5s linear';
-            
-            // Clear any existing resume timeout
-            if (window.tickerResumeTimeout) {
-                clearTimeout(window.tickerResumeTimeout);
-            }
-            
-            // Resume auto-scroll after a delay
-            window.tickerResumeTimeout = setTimeout(() => {
-                if (!isDragging) {
-                    startAutoScroll();
-                }
-            }, 2000);
         }
 
         function createTickerItem(symbol, data) {
