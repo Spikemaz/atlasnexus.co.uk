@@ -82,7 +82,8 @@
         .steps {
             list-style: none;
             counter-reset: step;
-            margin: 2rem 0;
+            margin: 2rem auto;
+            max-width: 450px;
         }
         .step {
             position: relative;
@@ -189,7 +190,7 @@
             </li>
             <li class="step" id="step2">
                 <div class="step-title">Verify Email Address</div>
-                <div class="step-desc">Click the link in your email (24 hour expiry)</div>
+                <div class="step-desc">Click the link in your email (1 hour expiry)</div>
             </li>
             <li class="step">
                 <div class="step-title">Admin Review</div>
@@ -202,7 +203,7 @@
         </ol>
 
         <div class="warning">
-            ⚠️ <strong>Important:</strong> Verify your email within 24 hours or registration expires
+            ⚠️ <strong>Important:</strong> Verify your email within 1 hour or registration expires
         </div>
 
         <div class="buttons">
@@ -307,8 +308,36 @@
             return false;
         }
 
+        let lastResendTime = 0;
+        
         function resendEmail() {
             const btn = event.target;
+            const now = Date.now();
+            const timeSinceLastSend = now - lastResendTime;
+            const oneMinute = 60000; // 60 seconds in milliseconds
+            
+            // Check if 1 minute has passed since last send
+            if (timeSinceLastSend < oneMinute) {
+                const secondsRemaining = Math.ceil((oneMinute - timeSinceLastSend) / 1000);
+                btn.textContent = `Wait ${secondsRemaining}s`;
+                btn.disabled = true;
+                
+                // Update button every second
+                const interval = setInterval(() => {
+                    const timeLeft = Math.ceil((oneMinute - (Date.now() - lastResendTime)) / 1000);
+                    if (timeLeft > 0) {
+                        btn.textContent = `Wait ${timeLeft}s`;
+                    } else {
+                        clearInterval(interval);
+                        btn.textContent = 'Resend Email';
+                        btn.disabled = false;
+                    }
+                }, 1000);
+                return;
+            }
+            
+            // Proceed with sending
+            lastResendTime = now;
             btn.disabled = true;
             btn.textContent = 'Sending...';
             
@@ -322,14 +351,30 @@
                 if (data.status === 'success') {
                     btn.textContent = '✓ Email Sent';
                     btn.style.background = '#22C55E';
+                    
+                    // Reset button after 3 seconds but keep the rate limit
+                    setTimeout(() => {
+                        btn.style.background = '';
+                        btn.textContent = 'Resend Email';
+                        btn.disabled = false;
+                    }, 3000);
+                } else if (data.message && data.message.includes('wait')) {
+                    // Server-side rate limiting message
+                    btn.textContent = data.message;
+                    setTimeout(() => {
+                        btn.textContent = 'Resend Email';
+                        btn.disabled = false;
+                    }, 5000);
                 } else {
                     btn.textContent = 'Failed - Try Again';
                     btn.disabled = false;
+                    lastResendTime = 0; // Reset on failure
                 }
             })
             .catch(() => {
                 btn.textContent = 'Error - Try Again';
                 btn.disabled = false;
+                lastResendTime = 0; // Reset on error
             });
         }
 

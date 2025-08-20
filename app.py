@@ -385,6 +385,7 @@ else:
 REGISTRATIONS_FILE = DATA_DIR / 'registrations.json'
 USERS_FILE = DATA_DIR / 'users.json'
 ADMIN_ACTIONS_FILE = DATA_DIR / 'admin_actions.json'
+LOGIN_ATTEMPTS_FILE = DATA_DIR / 'login_attempts.json'
 
 # Email configuration - Try to import from email_config.py first
 try:
@@ -1093,10 +1094,13 @@ def register():
             <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
                 <h2 style="color: #333;">Welcome to AtlasNexus</h2>
                 <p>Thank you for registering. Please verify your email address to continue.</p>
+                <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <p style="color: #856404; margin: 0; font-weight: bold;">⚠️ Important: This link expires in 1 hour!</p>
+                </div>
                 <a href="{verification_link}" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Verify Email</a>
                 <p style="color: #666; font-size: 14px;">If the button doesn't work, copy this link: {verification_link}</p>
                 <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-                <p style="color: #999; font-size: 12px;">Once verified, your application will be reviewed within 24 hours.</p>
+                <p style="color: #999; font-size: 12px;">Once verified, your application will be reviewed. Link expires 1 hour after registration.</p>
             </div>
         </body>
     </html>
@@ -1289,9 +1293,10 @@ def registration_expired():
 
 @app.route('/resend-verification', methods=['POST'])
 def resend_verification():
-    """Resend verification email"""
+    """Resend verification email with rate limiting (1 per minute)"""
     data = request.get_json()
     email = data.get('email', '').lower()
+    ip_address = get_real_ip()
     
     if not email:
         return jsonify({'status': 'error', 'message': 'Email required'}), 400
@@ -1305,6 +1310,25 @@ def resend_verification():
     # Check if already verified
     if registration.get('email_verified'):
         return jsonify({'status': 'error', 'message': 'Email already verified'}), 400
+    
+    # Check rate limiting - 1 per minute per email
+    last_resend = registration.get('last_resend_time')
+    if last_resend:
+        last_resend_time = datetime.fromisoformat(last_resend)
+        time_since_last = datetime.now() - last_resend_time
+        
+        if time_since_last < timedelta(minutes=1):
+            seconds_to_wait = 60 - int(time_since_last.total_seconds())
+            return jsonify({
+                'status': 'error', 
+                'message': f'Please wait {seconds_to_wait} seconds before resending'
+            }), 429
+    
+    # Update last resend time
+    registrations[email]['last_resend_time'] = datetime.now().isoformat()
+    
+    # Reset created_at to give them another hour
+    registrations[email]['created_at'] = datetime.now().isoformat()
     
     # Generate new verification token
     new_token = generate_verification_token()
@@ -1321,12 +1345,15 @@ def resend_verification():
             <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
                 <h2 style="color: #333;">Verification Email (Resent)</h2>
                 <p>Please click the link below to verify your email address:</p>
+                <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <p style="color: #856404; margin: 0; font-weight: bold;">⚠️ Important: This link expires in 1 hour!</p>
+                </div>
                 <div style="margin: 20px 0; padding: 20px; background: #f0f9ff; border-radius: 8px; border: 2px solid #3b82f6;">
                     <a href="{verification_link}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
                         Verify Email Address
                     </a>
                 </div>
-                <p style="color: #666; font-size: 14px;">This link expires in 24 hours.</p>
+                <p style="color: #666; font-size: 14px;">This link expires in 1 hour from now.</p>
                 <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>
             </div>
         </body>
@@ -1378,6 +1405,82 @@ def verify_email():
     registrations = load_json_db(REGISTRATIONS_FILE)
     
     if email in registrations and registrations[email]['verification_token'] == token:
+        # Check if verification link has expired (1 hour)
+        created_at = registrations[email].get('created_at')
+        if created_at:
+            created_time = datetime.fromisoformat(created_at)
+            time_elapsed = datetime.now() - created_time
+            
+            if time_elapsed > timedelta(hours=1):
+                # Link has expired - show error message
+                return f"""
+                <html>
+                <head>
+                    <title>Verification Link Expired</title>
+                    <style>
+                        body {{
+                            font-family: Arial, sans-serif;
+                            background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%);
+                            color: white;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            min-height: 100vh;
+                            margin: 0;
+                        }}
+                        .container {{
+                            background: rgba(44, 49, 55, 0.95);
+                            border: 1px solid rgba(239, 68, 68, 0.3);
+                            border-radius: 16px;
+                            padding: 3rem;
+                            max-width: 500px;
+                            text-align: center;
+                        }}
+                        h1 {{
+                            color: #ef4444;
+                            margin-bottom: 1rem;
+                        }}
+                        p {{
+                            color: #b0b0b0;
+                            margin-bottom: 2rem;
+                        }}
+                        .buttons {{
+                            display: flex;
+                            gap: 1rem;
+                            justify-content: center;
+                        }}
+                        .btn {{
+                            padding: 0.875rem 1.5rem;
+                            border-radius: 10px;
+                            text-decoration: none;
+                            display: inline-block;
+                            font-weight: 600;
+                        }}
+                        .btn-primary {{
+                            background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
+                            color: #1A1D23;
+                        }}
+                        .btn-secondary {{
+                            background: rgba(146, 150, 156, 0.1);
+                            border: 1px solid #92969C;
+                            color: #b0b0b0;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>⏱️ Verification Link Expired</h1>
+                        <p>This verification link has expired. Links are only valid for 1 hour after registration.</p>
+                        <p>Please register again or contact support if you need assistance.</p>
+                        <div class="buttons">
+                            <a href="/secure-login" class="btn btn-secondary">Back to Login</a>
+                            <a href="/" class="btn btn-primary">Register Again</a>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """, 400
+        
         registrations[email]['email_verified'] = True
         registrations[email]['verified_at'] = datetime.now().isoformat()
         save_json_db(REGISTRATIONS_FILE, registrations)
@@ -1416,11 +1519,21 @@ def verify_email():
                 users[email]['password_sent'] = True
                 save_json_db(USERS_FILE, users)
         
-        # Redirect to login with success message
-        session['email_verified'] = True
-        return redirect(url_for('secure_login'))
+        # Check if user is approved
+        if registrations[email].get('admin_approved'):
+            # User is both verified and approved - can go to login
+            session['email_verified'] = True
+            return redirect(url_for('secure_login'))
+        else:
+            # User is verified but NOT approved - show waiting page
+            return render_template('awaiting_verification.html', 
+                                 message="Email verified! Your account is awaiting admin approval.",
+                                 status="pending_approval")
     
-    return redirect(url_for('secure_login'))
+    # Invalid token
+    return render_template('awaiting_verification.html', 
+                         message="Invalid verification link.",
+                         status="error")
 
 @app.route('/auth', methods=['POST'])
 def auth():
@@ -1437,9 +1550,41 @@ def auth():
     # Check for admin user
     if email == 'spikemaz8@aol.com' and password == 'SpikeMaz':
         session[f'user_authenticated_{ip_address}'] = True
-        session[f'username_{ip_address}'] = 'Spikemaz8'
+        session[f'username_{ip_address}'] = 'Admin'
+        session[f'user_email_{ip_address}'] = email
         session[f'access_level_{ip_address}'] = 'admin'
         session[f'is_admin_{ip_address}'] = True
+        
+        # Track admin login in login attempts
+        login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE)
+        if ip_address not in login_attempts:
+            login_attempts[ip_address] = []
+        login_attempts[ip_address].append({
+            'email': email,
+            'timestamp': datetime.now().isoformat(),
+            'success': True,
+            'user_type': 'admin'
+        })
+        save_json_db(LOGIN_ATTEMPTS_FILE, login_attempts)
+        
+        # Also ensure admin is in users file for tracking
+        users = load_json_db(USERS_FILE)
+        if email not in users:
+            users[email] = {
+                'email': email,
+                'username': 'Admin',
+                'full_name': 'Administrator',
+                'account_type': 'admin',
+                'created_at': datetime.now().isoformat(),
+                'is_admin': True,
+                'admin_approved': True
+            }
+        
+        # Update last login
+        users[email]['last_login'] = datetime.now().isoformat()
+        users[email]['login_count'] = users[email].get('login_count', 0) + 1
+        save_json_db(USERS_FILE, users)
+        
         return jsonify({'status': 'success', 'redirect': url_for('dashboard')})
     
     # Check approved users
@@ -1472,15 +1617,43 @@ def auth():
                 users[email] = user
                 save_json_db(USERS_FILE, users)
                 
+                # Track successful login attempt
+                login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE)
+                if ip_address not in login_attempts:
+                    login_attempts[ip_address] = []
+                login_attempts[ip_address].append({
+                    'email': email,
+                    'timestamp': current_time.isoformat(),
+                    'success': True,
+                    'user_type': user.get('account_type', 'external')
+                })
+                save_json_db(LOGIN_ATTEMPTS_FILE, login_attempts)
+                
                 session[f'user_authenticated_{ip_address}'] = True
                 session[f'username_{ip_address}'] = user.get('full_name', email)
                 session[f'user_email_{ip_address}'] = email
                 session[f'access_level_{ip_address}'] = 'user'
+                
+                # Check if user is actually an admin
+                if user.get('account_type') == 'admin':
+                    session[f'is_admin_{ip_address}'] = True
+                
                 return jsonify({'status': 'success', 'redirect': url_for('dashboard')})
             else:
                 return jsonify({'status': 'error', 'message': 'Password expired. Contact admin.'}), 401
     
-    # Failed authentication
+    # Failed authentication - track it
+    login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE)
+    if ip_address not in login_attempts:
+        login_attempts[ip_address] = []
+    login_attempts[ip_address].append({
+        'email': email,
+        'timestamp': datetime.now().isoformat(),
+        'success': False,
+        'reason': 'Invalid credentials'
+    })
+    save_json_db(LOGIN_ATTEMPTS_FILE, login_attempts)
+    
     return jsonify({'status': 'error', 'message': 'Invalid credentials or account not approved'}), 401
 
 @app.route('/dashboard')
