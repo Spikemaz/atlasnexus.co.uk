@@ -919,9 +919,9 @@
             let filtered = Object.entries(allRegistrations);
             
             if (filter === 'pending') {
-                filtered = filtered.filter(([_, reg]) => !reg.email_verified && !reg.admin_approved);
+                filtered = filtered.filter(([_, reg]) => !reg.admin_approved);
             } else if (filter === 'verified') {
-                filtered = filtered.filter(([_, reg]) => reg.email_verified && !reg.admin_approved);
+                filtered = filtered.filter(([_, reg]) => reg.email_verified);
             } else if (filter === 'approved') {
                 filtered = filtered.filter(([_, reg]) => reg.admin_approved);
             }
