@@ -2215,7 +2215,7 @@ def admin_comprehensive_data():
                 'verified_users': sum(1 for r in registrations.values() if r.get('email_verified')) if isinstance(registrations, dict) else 0,
                 'pending_verification': sum(1 for r in registrations.values() if not r.get('email_verified')) if isinstance(registrations, dict) else 0,
                 'approved_users': sum(1 for r in registrations.values() if r.get('admin_approved')) if isinstance(registrations, dict) else 0,
-                'pending_approval': sum(1 for r in registrations.values() if r.get('email_verified') and not r.get('admin_approved')) if isinstance(registrations, dict) else 0
+                'pending_approval': sum(1 for r in registrations.values() if not r.get('admin_approved')) if isinstance(registrations, dict) else 0
             }
         }
         
