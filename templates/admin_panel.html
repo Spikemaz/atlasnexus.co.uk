@@ -548,7 +548,7 @@
         <!-- Dashboard Content -->
         <div id="dashboardContent" class="tab-content active">
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card" style="cursor: pointer;" onclick="document.querySelector('[data-page=users]').click()">
                     <div class="stat-icon users">
                         <i class="fas fa-users"></i>
                     </div>
@@ -556,7 +556,7 @@
                     <div class="stat-label">Total Users</div>
                     <span class="stat-change positive">System Active</span>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" style="cursor: pointer;" onclick="document.querySelector('[data-page=ip-management]').click()">
                     <div class="stat-icon security">
                         <i class="fas fa-shield-alt"></i>
                     </div>
