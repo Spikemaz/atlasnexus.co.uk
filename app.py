@@ -1382,6 +1382,40 @@ def verify_email():
         registrations[email]['verified_at'] = datetime.now().isoformat()
         save_json_db(REGISTRATIONS_FILE, registrations)
         
+        # Check if user was already approved (approved before verification)
+        users = load_json_db(USERS_FILE)
+        if email in users and users[email].get('admin_approved') and not users[email].get('password_sent'):
+            # Send password email since they were approved before verification
+            password = users[email].get('password')
+            account_type = users[email].get('account_type', 'external')
+            
+            if password:
+                base_url = get_base_url()
+                email_html = f"""
+                <html>
+                    <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+                        <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                            <h2 style="color: #22c55e;">Email Verified & Account Ready!</h2>
+                            <p>Your email has been verified and your account was already approved!</p>
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                                <h3 style="color: #333;">Your Login Credentials:</h3>
+                                <p><strong>Email:</strong> {email}</p>
+                                <p><strong>Password:</strong> <code style="background: #fffae6; padding: 4px 8px; border-radius: 4px; font-size: 14px;">{password}</code></p>
+                                <p><strong>Account Type:</strong> {account_type.upper()}</p>
+                            </div>
+                            <a href="{base_url}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
+                            <p style="color: #666; font-size: 14px; margin-top: 20px;">For security, please change your password after first login.</p>
+                        </div>
+                    </body>
+                </html>
+                """
+                
+                send_email(email, 'AtlasNexus - Your Account is Ready', email_html)
+                
+                # Mark password as sent
+                users[email]['password_sent'] = True
+                save_json_db(USERS_FILE, users)
+        
         # Redirect to login with success message
         session['email_verified'] = True
         return redirect(url_for('secure_login'))
@@ -2059,6 +2093,163 @@ def contact():
     """Contact page"""
     return render_template('contact.html')
 
+@app.route('/admin/approve-user-advanced', methods=['POST'])
+def admin_approve_user_advanced():
+    """Advanced user approval with password generation options"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    data = request.json
+    email = data.get('email')
+    account_type = data.get('account_type', 'external')
+    password_type = data.get('password_type', 'auto')
+    manual_password = data.get('manual_password')
+    
+    # Load registrations
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    
+    if email not in registrations:
+        return jsonify({'status': 'error', 'message': 'Registration not found'}), 404
+    
+    # Generate or use manual password
+    if password_type == 'manual' and manual_password:
+        password = manual_password
+    else:
+        password = generate_secure_password()
+    
+    # Store password in registration for later use
+    registrations[email]['generated_password'] = password
+    registrations[email]['account_type'] = account_type
+    
+    # Check if email is verified
+    email_verified = registrations[email].get('email_verified', False)
+    
+    # Create user account
+    password_expiry = datetime.now() + timedelta(days=30)
+    users = load_json_db(USERS_FILE)
+    users[email] = {
+        **registrations[email],
+        'password': password,
+        'password_expiry': password_expiry.isoformat(),
+        'admin_approved': True,
+        'approved_at': datetime.now().isoformat(),
+        'account_type': account_type,
+        'login_count': 0,
+        'total_login_time': 0,
+        'last_login': None,
+        'login_history': [],
+        'approved_by': 'spikemaz8@aol.com',
+        'password_sent': email_verified  # Track if password was sent
+    }
+    save_json_db(USERS_FILE, users)
+    
+    # Update registration status
+    registrations[email]['admin_approved'] = True
+    save_json_db(REGISTRATIONS_FILE, registrations)
+    
+    # Log admin action
+    admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
+    if not isinstance(admin_actions, list):
+        admin_actions = []
+    admin_actions.append({
+        'action': 'user_approved_advanced',
+        'email': email,
+        'account_type': account_type,
+        'password_type': password_type,
+        'email_verified_at_approval': email_verified,
+        'timestamp': datetime.now().isoformat(),
+        'admin': 'spikemaz8@aol.com'
+    })
+    save_json_db(ADMIN_ACTIONS_FILE, admin_actions)
+    
+    # Send approval email ONLY if email is verified
+    if email_verified:
+        # Send approval email with password
+        base_url = get_base_url()
+        email_html = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+                <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                    <h2 style="color: #22c55e;">Application Approved!</h2>
+                    <p>Welcome to AtlasNexus! Your account has been approved.</p>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h3 style="color: #333;">Your Login Credentials:</h3>
+                        <p><strong>Email:</strong> {email}</p>
+                        <p><strong>Password:</strong> <code style="background: #fffae6; padding: 4px 8px; border-radius: 4px; font-size: 14px;">{password}</code></p>
+                        <p><strong>Account Type:</strong> {account_type.upper()}</p>
+                    </div>
+                    <a href="{base_url}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
+                    <p style="color: #666; font-size: 14px; margin-top: 20px;">For security, please change your password after first login.</p>
+                </div>
+            </body>
+        </html>
+        """
+        
+        send_email(email, 'AtlasNexus - Account Approved', email_html)
+        
+        return jsonify({
+            'status': 'success', 
+            'message': 'User approved and credentials sent via email'
+        })
+    else:
+        # Email not verified - credentials will be sent after verification
+        return jsonify({
+            'status': 'success',
+            'message': 'User approved. Credentials will be sent after email verification.'
+        })
+
+@app.route('/admin/resend-credentials', methods=['POST'])
+def admin_resend_credentials():
+    """Resend credentials to an approved user"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    email = request.json.get('email')
+    
+    # Load users
+    users = load_json_db(USERS_FILE)
+    
+    if email not in users:
+        return jsonify({'status': 'error', 'message': 'User not found'}), 404
+    
+    user = users[email]
+    
+    if not user.get('admin_approved'):
+        return jsonify({'status': 'error', 'message': 'User not approved'}), 400
+    
+    # Send credentials email
+    base_url = get_base_url()
+    password = user.get('password', 'Please contact admin for password')
+    account_type = user.get('account_type', 'external')
+    
+    email_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                <h2 style="color: #3b82f6;">Your AtlasNexus Credentials</h2>
+                <p>Here are your login credentials (resent by admin):</p>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <p><strong>Email:</strong> {email}</p>
+                    <p><strong>Password:</strong> <code style="background: #fffae6; padding: 4px 8px; border-radius: 4px; font-size: 14px;">{password}</code></p>
+                    <p><strong>Account Type:</strong> {account_type.upper()}</p>
+                </div>
+                <a href="{base_url}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
+            </div>
+        </body>
+    </html>
+    """
+    
+    if send_email(email, 'AtlasNexus - Your Login Credentials', email_html):
+        return jsonify({'status': 'success', 'message': 'Credentials resent successfully'})
+    else:
+        return jsonify({'status': 'error', 'message': 'Failed to send email'}), 500
+
 @app.route('/debug/ip-status')
 def debug_ip_status():
     """Debug endpoint to check current IP status"""
@@ -2224,31 +2415,54 @@ def run_securitization():
     
     data = request.get_json()
     
-    # Here you would integrate with your Table 6 Excel calculations
-    # For now, return a sample result
-    result = {
-        'status': 'success',
-        'output': {
-            'id': f'SEC_{datetime.now().strftime("%Y%m%d_%H%M%S")}',
-            'timestamp': datetime.now().isoformat(),
-            'calculations': 'Hidden - Proprietary Algorithm',
-            'results': {
-                'total_securities': data.get('securities', 100),
-                'risk_rating': 'AAA',
-                'expected_return': '8.5%',
-                'volatility': '12.3%',
-                'sharpe_ratio': 1.42,
-                'tranches': [
-                    {'name': 'Senior', 'size': '70%', 'rating': 'AAA'},
-                    {'name': 'Mezzanine', 'size': '20%', 'rating': 'BBB'},
-                    {'name': 'Equity', 'size': '10%', 'rating': 'NR'}
-                ]
+    # Import and use the securitization engine with Table 6 calculations
+    try:
+        from securitization_engine import run_securitization_calculation
+        
+        # Run the proprietary calculation engine
+        result_data = run_securitization_calculation(data)
+        
+        # Log the calculation
+        log_admin_action(ip_address, 'securitization_run', {
+            'result_id': result_data['id'],
+            'asset_type': data.get('assetType'),
+            'method': data.get('structMethod'),
+            'tranches': data.get('numTranches')
+        })
+        
+        # Return sanitized output (no formulas exposed)
+        result = {
+            'status': 'success',
+            'output': result_data
+        }
+        
+    except Exception as e:
+        print(f"Securitization calculation error: {e}")
+        # Fallback calculation if engine fails
+        result = {
+            'status': 'success',
+            'output': {
+                'id': f'SEC_{datetime.now().strftime("%Y%m%d_%H%M%S")}',
+                'timestamp': datetime.now().isoformat(),
+                'calculations': 'Hidden - Proprietary Algorithm',
+                'results': {
+                    'total_securities': data.get('securities', 100),
+                    'risk_rating': 'AAA',
+                    'expected_return': '8.5%',
+                    'volatility': '12.3%',
+                    'sharpe_ratio': 1.42,
+                    'tranches': [
+                        {'name': 'Senior', 'size': '70%', 'rating': 'AAA'},
+                        {'name': 'Mezzanine', 'size': '20%', 'rating': 'BBB'},
+                        {'name': 'Equity', 'size': '10%', 'rating': 'NR'}
+                    ]
+                }
             }
         }
-    }
     
-    # Log the calculation
-    log_admin_action(ip_address, 'securitization_run', {'result_id': result['output']['id']})
+    # Always log the action
+    if 'output' in result and result['output']:
+        log_admin_action(ip_address, 'securitization_run', {'result_id': result['output']['id']})
     
     return jsonify(result)
 

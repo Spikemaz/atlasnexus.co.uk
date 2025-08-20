@@ -157,6 +157,22 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
         }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #b0b0b0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #e0e0e0;
+        }
+        
+        .btn-sm {
+            padding: 0.3rem 0.8rem !important;
+            font-size: 0.85rem !important;
+        }
 
         .btn-danger {
             background: linear-gradient(135deg, #ff4444 0%, #ff6666 100%);
@@ -518,6 +534,9 @@
             <div class="header-top">
                 <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
                 <div class="header-actions">
+                    <a href="/dashboard" class="btn btn-primary">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
                     <button class="btn btn-secondary" onclick="refreshData()">
                         <i class="fas fa-sync-alt"></i> Refresh
                     </button>
@@ -616,21 +635,32 @@
         <div id="registrationsContent" class="tab-content" style="display: none;">
             <div class="content-section">
                 <div class="section-header">
-                    <h2 class="section-title">Pending Registrations</h2>
+                    <h2 class="section-title">All Registrations</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-sm" onclick="filterRegistrations('all')" id="filterAll">All</button>
+                        <button class="btn btn-sm" onclick="filterRegistrations('pending')" id="filterPending">Pending</button>
+                        <button class="btn btn-sm" onclick="filterRegistrations('verified')" id="filterVerified">Verified</button>
+                        <button class="btn btn-sm" onclick="filterRegistrations('approved')" id="filterApproved">Approved</button>
+                    </div>
                 </div>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>Email</th>
-                                <th>Date</th>
+                                <th>Full Name</th>
+                                <th>Company</th>
+                                <th>IP Address</th>
+                                <th>Registered</th>
+                                <th>Email Verified</th>
+                                <th>Account Type</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="registrationsTableBody">
                             <tr>
-                                <td colspan="4" style="text-align: center; padding: 2rem;">No pending registrations</td>
+                                <td colspan="9" style="text-align: center; padding: 2rem;">Loading registrations...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -865,28 +895,93 @@
             `).join('');
         }
 
+        let allRegistrations = {};
+        let currentFilter = 'all';
+
         function updateRegistrationsTable(registrations) {
+            allRegistrations = registrations;
+            filterRegistrations(currentFilter);
+        }
+
+        function filterRegistrations(filter) {
+            currentFilter = filter;
             const tbody = document.getElementById('registrationsTableBody');
-            const pending = Object.entries(registrations).filter(([_, reg]) => reg.status === 'pending');
             
-            if (pending.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem;">No pending registrations</td></tr>';
+            // Update filter buttons
+            document.querySelectorAll('[id^="filter"]').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+            document.getElementById('filter' + filter.charAt(0).toUpperCase() + filter.slice(1)).classList.remove('btn-secondary');
+            document.getElementById('filter' + filter.charAt(0).toUpperCase() + filter.slice(1)).classList.add('btn-primary');
+            
+            let filtered = Object.entries(allRegistrations);
+            
+            if (filter === 'pending') {
+                filtered = filtered.filter(([_, reg]) => !reg.email_verified && !reg.admin_approved);
+            } else if (filter === 'verified') {
+                filtered = filtered.filter(([_, reg]) => reg.email_verified && !reg.admin_approved);
+            } else if (filter === 'approved') {
+                filtered = filtered.filter(([_, reg]) => reg.admin_approved);
+            }
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem;">No ${filter} registrations</td></tr>`;
                 return;
             }
             
-            tbody.innerHTML = pending.map(([email, reg]) => `
-                <tr>
-                    <td>${email}</td>
-                    <td>${new Date(reg.timestamp).toLocaleDateString()}</td>
-                    <td><span class="status-badge status-pending">Pending</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="action-btn action-edit" onclick="approveUser('${email}')">Approve</button>
-                            <button class="action-btn action-delete" onclick="rejectUser('${email}')">Reject</button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = filtered.map(([email, reg]) => {
+                const verifiedBadge = reg.email_verified ? 
+                    '<span class="status-badge status-active">✓ Verified</span>' : 
+                    '<span class="status-badge status-pending">Pending</span>';
+                
+                const approvedBadge = reg.admin_approved ? 
+                    '<span class="status-badge status-active">Approved</span>' : 
+                    '<span class="status-badge status-pending">Awaiting</span>';
+                
+                const accountType = reg.account_type || 'external';
+                const hasPassword = reg.generated_password ? '✓' : '✗';
+                
+                return `
+                    <tr>
+                        <td style="font-weight: 600;">${email}</td>
+                        <td>${reg.full_name || 'N/A'}</td>
+                        <td>${reg.company_name || 'N/A'}</td>
+                        <td><code style="color: #3498db;">${reg.ip_address || 'Unknown'}</code></td>
+                        <td>${new Date(reg.created_at || reg.timestamp).toLocaleString()}</td>
+                        <td>${verifiedBadge}</td>
+                        <td>
+                            <select class="form-select-sm" id="accountType_${email}" style="padding: 0.25rem; border-radius: 4px; background: rgba(255,255,255,0.05); color: #ffd700; border: 1px solid rgba(255,215,0,0.3);">
+                                <option value="external" ${accountType === 'external' ? 'selected' : ''}>External</option>
+                                <option value="internal" ${accountType === 'internal' ? 'selected' : ''}>Internal</option>
+                                <option value="admin" ${accountType === 'admin' ? 'selected' : ''}>Admin</option>
+                            </select>
+                        </td>
+                        <td>${approvedBadge}</td>
+                        <td>
+                            <div class="action-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                ${!reg.admin_approved ? `
+                                    <button class="action-btn action-edit" onclick="approveUserAdvanced('${email}')" title="Approve with settings">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                ` : ''}
+                                <button class="action-btn" style="background: #3498db;" onclick="showUserDetails('${email}')" title="View full details">
+                                    <i class="fas fa-eye"></i> Details
+                                </button>
+                                ${!reg.admin_approved ? `
+                                    <button class="action-btn action-delete" onclick="rejectUser('${email}')" title="Reject application">
+                                        <i class="fas fa-times"></i> Reject
+                                    </button>
+                                ` : `
+                                    <button class="action-btn" style="background: #9b59b6;" onclick="resendCredentials('${email}')" title="Resend credentials">
+                                        <i class="fas fa-envelope"></i> Resend
+                                    </button>
+                                `}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function updateIPTable(ipData) {
@@ -917,9 +1012,221 @@
             }).join('');
         }
 
-        async function approveUser(email) {
+        async function approveUserAdvanced(email) {
+            const reg = allRegistrations[email];
+            const accountType = document.getElementById(`accountType_${email}`).value;
+            
+            // Create approval modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.8); display: flex;
+                align-items: center; justify-content: center; z-index: 9999;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: #1a1f3a; border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%;">
+                    <h3 style="color: #ffd700; margin-bottom: 1.5rem;">Approve User: ${email}</h3>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: #888; display: block; margin-bottom: 0.5rem;">Account Type:</label>
+                        <select id="modalAccountType" style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); color: #ffd700; border: 1px solid rgba(255,215,0,0.3); border-radius: 4px;">
+                            <option value="external" ${accountType === 'external' ? 'selected' : ''}>External</option>
+                            <option value="internal" ${accountType === 'internal' ? 'selected' : ''}>Internal</option>
+                            <option value="admin" ${accountType === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: #888; display: block; margin-bottom: 0.5rem;">Password Generation:</label>
+                        <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem;">
+                            <label style="color: #b0b0b0;">
+                                <input type="radio" name="pwdGen" value="auto" checked> Auto Generate
+                            </label>
+                            <label style="color: #b0b0b0;">
+                                <input type="radio" name="pwdGen" value="manual"> Set Manually
+                            </label>
+                        </div>
+                        <input type="text" id="manualPassword" placeholder="Enter password (if manual)" 
+                               style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); 
+                                      color: white; border: 1px solid rgba(255,215,0,0.3); 
+                                      border-radius: 4px; display: none;">
+                        <div id="generatedPassword" style="margin-top: 0.5rem; padding: 0.5rem; 
+                                background: rgba(46,204,113,0.1); border-radius: 4px; 
+                                color: #2ecc71; display: none;">
+                            Password will be generated automatically
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(241,196,15,0.1); 
+                                border: 1px solid rgba(241,196,15,0.3); border-radius: 8px;">
+                        <p style="color: #f1c40f; margin: 0;">
+                            <strong>⚠️ Important:</strong><br>
+                            ${reg.email_verified ? 
+                                '✅ Email is verified - Password will be sent immediately upon approval' : 
+                                '⏳ Email NOT verified - Password will be sent AFTER email verification'}
+                        </p>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button onclick="this.closest('[style*=\"position: fixed\"]').remove()" 
+                                style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); 
+                                       color: #888; border: 1px solid #888; border-radius: 4px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="confirmApproval('${email}')" 
+                                style="padding: 0.5rem 1rem; background: #2ecc71; 
+                                       color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Confirm Approval
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Handle password type selection
+            modal.querySelectorAll('input[name="pwdGen"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    const manualInput = document.getElementById('manualPassword');
+                    const genDiv = document.getElementById('generatedPassword');
+                    if (e.target.value === 'manual') {
+                        manualInput.style.display = 'block';
+                        genDiv.style.display = 'none';
+                    } else {
+                        manualInput.style.display = 'none';
+                        genDiv.style.display = 'block';
+                    }
+                });
+            });
+            
+            // Show generated password div by default
+            document.getElementById('generatedPassword').style.display = 'block';
+        }
+        
+        async function confirmApproval(email) {
+            const accountType = document.getElementById('modalAccountType').value;
+            const pwdType = document.querySelector('input[name="pwdGen"]:checked').value;
+            const manualPassword = document.getElementById('manualPassword').value;
+            
+            const payload = {
+                email,
+                account_type: accountType,
+                password_type: pwdType,
+                manual_password: pwdType === 'manual' ? manualPassword : null
+            };
+            
             try {
-                const response = await fetch('/admin/approve-user', {
+                const response = await fetch('/admin/approve-user-advanced', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert(`User approved successfully! ${data.message || ''}`, 'success');
+                    document.querySelector('[style*="position: fixed"]').remove();
+                    loadRegistrationsData();
+                } else {
+                    showAlert(data.message || 'Error approving user', 'danger');
+                }
+            } catch (error) {
+                showAlert('Error approving user', 'danger');
+            }
+        }
+        
+        function showUserDetails(email) {
+            const reg = allRegistrations[email];
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.8); display: flex;
+                align-items: center; justify-content: center; z-index: 9999;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: #1a1f3a; border: 1px solid rgba(255,215,0,0.3); 
+                            border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; 
+                            max-height: 80vh; overflow-y: auto;">
+                    <h3 style="color: #ffd700; margin-bottom: 1.5rem;">User Details: ${email}</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">Full Name:</label>
+                            <p style="color: #e0e0e0; margin-bottom: 1rem;">${reg.full_name || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">Company:</label>
+                            <p style="color: #e0e0e0; margin-bottom: 1rem;">${reg.company_name || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">Job Title:</label>
+                            <p style="color: #e0e0e0; margin-bottom: 1rem;">${reg.job_title || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">Phone:</label>
+                            <p style="color: #e0e0e0; margin-bottom: 1rem;">${reg.phone || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">Company Number:</label>
+                            <p style="color: #e0e0e0; margin-bottom: 1rem;">${reg.company_number || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">IP Address:</label>
+                            <p style="color: #3498db; margin-bottom: 1rem;"><code>${reg.ip_address || 'Unknown'}</code></p>
+                        </div>
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">Registered:</label>
+                            <p style="color: #e0e0e0; margin-bottom: 1rem;">${new Date(reg.created_at || reg.timestamp).toLocaleString()}</p>
+                        </div>
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">Email Verified:</label>
+                            <p style="color: ${reg.email_verified ? '#2ecc71' : '#e74c3c'}; margin-bottom: 1rem;">
+                                ${reg.email_verified ? '✅ Yes' : '❌ No'}
+                            </p>
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label style="color: #888; font-size: 0.85rem;">Business Address:</label>
+                            <p style="color: #e0e0e0; margin-bottom: 1rem;">${reg.business_address || 'N/A'}</p>
+                        </div>
+                        ${reg.generated_password ? `
+                            <div style="grid-column: 1 / -1; padding: 1rem; background: rgba(46,204,113,0.1); 
+                                        border: 1px solid rgba(46,204,113,0.3); border-radius: 8px;">
+                                <label style="color: #2ecc71; font-size: 0.85rem;">Generated Password:</label>
+                                <p style="color: #2ecc71; font-family: monospace; margin: 0.5rem 0 0 0;">
+                                    ${reg.generated_password}
+                                </p>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                        <button onclick="this.closest('[style*=\"position: fixed\"]').remove()" 
+                                style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); 
+                                       color: #888; border: 1px solid #888; border-radius: 4px; cursor: pointer;">
+                            Close
+                        </button>
+                        ${!reg.admin_approved ? `
+                            <button onclick="this.closest('[style*=\"position: fixed\"]').remove(); approveUserAdvanced('${email}')" 
+                                    style="padding: 0.5rem 1rem; background: #2ecc71; 
+                                           color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                Approve User
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        async function resendCredentials(email) {
+            if (!confirm(`Resend credentials to ${email}?`)) return;
+            
+            try {
+                const response = await fetch('/admin/resend-credentials', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({email})
@@ -927,11 +1234,12 @@
                 
                 const data = await response.json();
                 if (data.status === 'success') {
-                    showAlert('User approved successfully', 'success');
-                    loadRegistrationsData();
+                    showAlert('Credentials resent successfully', 'success');
+                } else {
+                    showAlert(data.message || 'Error resending credentials', 'danger');
                 }
             } catch (error) {
-                showAlert('Error approving user', 'danger');
+                showAlert('Error resending credentials', 'danger');
             }
         }
 

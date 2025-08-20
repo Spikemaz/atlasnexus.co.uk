@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Securitization Engine - Atlas Nexus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.9) 0%, rgba(15, 20, 40, 0.9) 100%);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 1.5rem 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .logo p {
+            font-size: 0.9rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 0.25rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .role-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .role-admin {
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .role-internal {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .engine-panel, .output-panel {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.6) 0%, rgba(15, 20, 40, 0.6) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            color: #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .panel-title i {
+            font-size: 1.3rem;
+        }
+
+        .access-denied {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            color: #e74c3c;
+        }
+
+        .access-denied i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            color: #ffd700;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .parameter-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .parameter-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #0a0e27;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffd700;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .output-container {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            min-height: 300px;
+            position: relative;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .output-meta {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .output-content {
+            font-family: 'Courier New', monospace;
+            color: #2ecc71;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .output-empty {
+            text-align: center;
+            color: #666;
+            padding: 3rem;
+        }
+
+        .security-notice {
+            background: rgba(241, 196, 15, 0.1);
+            border: 1px solid rgba(241, 196, 15, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .security-notice i {
+            color: #f1c40f;
+            font-size: 1.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab:hover {
+            color: #ffd700;
+        }
+
+        .tab.active {
+            color: #ffd700;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #ffd700;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            z-index: 10;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 215, 0, 0.2);
+            border-top-color: #ffd700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>ATLAS NEXUS</h1>
+                <p>Securitization Engine (Table 6)</p>
+            </div>
+            <div class="user-info">
+                <span class="role-badge" id="userRole">{{ 'ADMIN' if is_admin else 'USER' }}</span>
+                <a href="/dashboard" style="color: #ffd700; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Engine Control Panel -->
+        <div class="engine-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <i class="fas fa-cogs"></i>
+                    Engine Control
+                </h2>
+            </div>
+
+            <div id="engineContent">
+                {% if is_admin %}
+                <!-- Admin Controls -->
+                <div class="security-notice">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <strong>Secure Mode Active</strong><br>
+                        <span style="font-size: 0.9rem;">Table 6 calculations are encrypted and hidden from output</span>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">Securitization Parameters (Table 6)</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Asset Type</label>
+                        <select class="form-select" id="assetType" onchange="updateAssetDefaults()">
+                            <option value="mbs">Mortgage-Backed Securities (MBS)</option>
+                            <option value="abs">Asset-Backed Securities (ABS)</option>
+                            <option value="cdo">Collateralized Debt Obligations (CDO)</option>
+                            <option value="clo">Collateralized Loan Obligations (CLO)</option>
+                            <option value="cmbs">Commercial MBS (CMBS)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label class="form-label">Pool Principal ($)</label>
+                            <input type="number" class="form-input" id="poolPrincipal" value="100000000" min="1000000" step="1000000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Weighted Avg Coupon (%)</label>
+                            <input type="number" class="form-input" id="wac" value="5.5" min="0" max="20" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Weighted Avg Maturity (Years)</label>
+                            <input type="number" class="form-input" id="wam" value="15" min="1" max="30" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Number of Loans</label>
+                            <input type="number" class="form-input" id="numLoans" value="1000" min="1">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Pool Data JSON (Advanced - From Table 6)</label>
+                        <textarea class="form-textarea" id="poolData" placeholder='{"principal": 100000000, "wac": 0.055, "wam": 15, "loans": 1000}'></textarea>
+                    </div>
+
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label class="form-label">Structuring Method</label>
+                            <select class="form-select" id="structMethod">
+                                <option value="waterfall">Waterfall (Senior/Sub)</option>
+                                <option value="prorata">Pro-Rata</option>
+                                <option value="sequential">Sequential Pay</option>
+                                <option value="revolving">Revolving Structure</option>
+                                <option value="custom">Custom Algorithm</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Number of Tranches</label>
+                            <select class="form-select" id="numTranches" onchange="updateTranchePreview()">
+                                <option value="2">2 (Senior/Equity)</option>
+                                <option value="3" selected>3 (Senior/Mezz/Equity)</option>
+                                <option value="4">4 (Super Sr/Sr/Mezz/Eq)</option>
+                                <option value="5">5 (Custom Structure)</option>
+                                <option value="6">6 (Complex CDO)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Target Rating</label>
+                            <select class="form-select" id="targetRating">
+                                <option value="AAA">AAA (Highest)</option>
+                                <option value="AA">AA</option>
+                                <option value="A">A</option>
+                                <option value="BBB">BBB (Investment Grade)</option>
+                                <option value="BB">BB (Speculative)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Prepayment Speed (CPR %)</label>
+                            <input type="number" class="form-input" id="cpr" value="6" min="0" max="100" step="1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">Credit Enhancement</h3>
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label class="form-label">Overcollateralization (%)</label>
+                            <input type="number" class="form-input" id="oc" value="5" min="0" max="50" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Excess Spread (%)</label>
+                            <input type="number" class="form-input" id="excessSpread" value="2" min="0" max="10" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Reserve Account (%)</label>
+                            <input type="number" class="form-input" id="reserve" value="1" min="0" max="10" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Subordination Level (%)</label>
+                            <input type="number" class="form-input" id="subordination" value="10" min="0" max="50" step="1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">Risk & Compliance Settings</h3>
+                    
+                    <div class="parameter-item">
+                        <input type="checkbox" id="optimize" checked>
+                        <label for="optimize">Optimize Capital Structure</label>
+                    </div>
+                    <div class="parameter-item">
+                        <input type="checkbox" id="stressTest" checked>
+                        <label for="stressTest">Run Stress Tests</label>
+                    </div>
+                    <div class="parameter-item">
+                        <input type="checkbox" id="regulatory">
+                        <label for="regulatory">Generate Regulatory Reports</label>
+                    </div>
+                    <div class="parameter-item">
+                        <input type="checkbox" id="encrypt" checked>
+                        <label for="encrypt">Hide Proprietary Calculations</label>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="runSecuritization()">
+                        <i class="fas fa-play"></i> Run Calculation
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearInputs()">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                </div>
+                {% else %}
+                <!-- Non-Admin View -->
+                <div class="access-denied">
+                    <i class="fas fa-eye"></i>
+                    <h3>View-Only Access</h3>
+                    <p>You can view calculation outputs but cannot run the engine</p>
+                    <p style="margin-top: 1rem; font-size: 0.9rem;">Contact admin to request calculations</p>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="refreshOutputs()">
+                        <i class="fas fa-sync"></i> Refresh Outputs
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Output Panel -->
+        <div class="output-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <i class="fas fa-chart-line"></i>
+                    Output Results
+                </h2>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('current')">Current Output</button>
+                <button class="tab" onclick="switchTab('history')">History</button>
+            </div>
+
+            <div id="currentTab" class="tab-content">
+                <div class="output-container">
+                    <div class="loading-overlay" id="outputLoader">
+                        <div class="loader"></div>
+                    </div>
+                    <div class="output-header">
+                        <span class="output-meta">Result ID: <span id="resultId">-</span></span>
+                        <span class="output-meta">Generated: <span id="resultTime">-</span></span>
+                    </div>
+                    <div class="output-content" id="outputContent">
+                        <div class="output-empty">
+                            <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <p>No output generated yet</p>
+                            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Run a calculation to see results here</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="copyOutput()">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <button class="btn btn-secondary" onclick="downloadOutput()">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                </div>
+            </div>
+
+            <div id="historyTab" class="tab-content" style="display: none;">
+                <div id="historyList" style="max-height: 400px; overflow-y: auto;">
+                    <!-- History items will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentOutput = null;
+
+        async function runSecuritization() {
+            const loader = document.getElementById('outputLoader');
+            loader.classList.add('active');
+            
+            // Collect all the input parameters
+            const poolDataJSON = document.getElementById('poolData').value;
+            let poolDataObj = {};
+            
+            // Try to parse JSON pool data, or build from individual fields
+            if (poolDataJSON) {
+                try {
+                    poolDataObj = JSON.parse(poolDataJSON);
+                } catch (e) {
+                    // If not valid JSON, build from individual fields
+                    poolDataObj = {
+                        principal: parseFloat(document.getElementById('poolPrincipal').value),
+                        wac: parseFloat(document.getElementById('wac').value) / 100,
+                        wam: parseFloat(document.getElementById('wam').value),
+                        numLoans: parseInt(document.getElementById('numLoans').value),
+                        cpr: parseFloat(document.getElementById('cpr').value) / 100,
+                        oc: parseFloat(document.getElementById('oc').value) / 100,
+                        excessSpread: parseFloat(document.getElementById('excessSpread').value) / 100,
+                        reserve: parseFloat(document.getElementById('reserve').value) / 100,
+                        subordination: parseFloat(document.getElementById('subordination').value) / 100
+                    };
+                }
+            } else {
+                // Build from individual fields
+                poolDataObj = {
+                    principal: parseFloat(document.getElementById('poolPrincipal').value),
+                    wac: parseFloat(document.getElementById('wac').value) / 100,
+                    wam: parseFloat(document.getElementById('wam').value),
+                    numLoans: parseInt(document.getElementById('numLoans').value),
+                    cpr: parseFloat(document.getElementById('cpr').value) / 100,
+                    oc: parseFloat(document.getElementById('oc').value) / 100,
+                    excessSpread: parseFloat(document.getElementById('excessSpread').value) / 100,
+                    reserve: parseFloat(document.getElementById('reserve').value) / 100,
+                    subordination: parseFloat(document.getElementById('subordination').value) / 100
+                };
+            }
+            
+            const params = {
+                assetType: document.getElementById('assetType').value,
+                poolData: poolDataObj,
+                structMethod: document.getElementById('structMethod').value,
+                numTranches: document.getElementById('numTranches').value,
+                targetRating: document.getElementById('targetRating').value,
+                optimize: document.getElementById('optimize').checked,
+                stressTest: document.getElementById('stressTest').checked,
+                regulatory: document.getElementById('regulatory').checked,
+                encrypt: document.getElementById('encrypt').checked
+            };
+            
+            try {
+                const response = await fetch('/api/securitization/run', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(params)
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    displayOutput(data.output);
+                } else {
+                    alert('Calculation failed: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Calculation error:', error);
+                alert('Error running calculation');
+            } finally {
+                loader.classList.remove('active');
+            }
+        }
+
+        function displayOutput(result) {
+            currentOutput = result;
+            
+            document.getElementById('resultId').textContent = result.id || 'N/A';
+            document.getElementById('resultTime').textContent = new Date().toLocaleString();
+            
+            const outputContent = document.getElementById('outputContent');
+            
+            // Display sanitized results (no formulas shown)
+            let outputHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <strong style="color: #ffd700;">Securitization Results:</strong>
+                </div>
+            `;
+            
+            if (result.results) {
+                outputHTML += `
+                    <div style="color: #2ecc71;">
+                        <p>Total Securities: ${result.results.total_securities}</p>
+                        <p>Risk Rating: ${result.results.risk_rating}</p>
+                        <p>Expected Return: ${result.results.expected_return}</p>
+                        <p>Volatility: ${result.results.volatility}</p>
+                        <p>Sharpe Ratio: ${result.results.sharpe_ratio}</p>
+                        
+                        <div style="margin-top: 1rem;">
+                            <strong>Tranches:</strong>
+                            ${result.results.tranches.map(t => `
+                                <div style="margin-left: 1rem; margin-top: 0.5rem;">
+                                    ${t.name}: ${t.size} (${t.rating})
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            outputContent.innerHTML = outputHTML;
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            document.getElementById(tab + 'Tab').style.display = 'block';
+            
+            if (tab === 'history') {
+                loadHistory();
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/securitization/history');
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.history) {
+                    const historyList = document.getElementById('historyList');
+                    
+                    if (data.history.length === 0) {
+                        historyList.innerHTML = '<p style="text-align: center; color: #666;">No history available</p>';
+                    } else {
+                        historyList.innerHTML = data.history.map(item => `
+                            <div style="padding: 1rem; border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer;" onclick="loadHistoryItem('${item.id}')">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <strong style="color: #ffd700;">${item.id}</strong>
+                                    <span style="color: #888; font-size: 0.9rem;">${new Date(item.timestamp).toLocaleString()}</span>
+                                </div>
+                                <div style="color: #888; margin-top: 0.5rem;">
+                                    Type: ${item.type} | Status: ${item.status}
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        async function loadHistoryItem(id) {
+            try {
+                const response = await fetch(`/api/securitization/view/${id}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // Switch to current tab and display the result
+                    document.querySelector('.tab').click();
+                    displayOutput(data.result);
+                }
+            } catch (error) {
+                console.error('Error loading history item:', error);
+            }
+        }
+
+        function copyOutput() {
+            if (!currentOutput) {
+                alert('No output to copy');
+                return;
+            }
+            
+            const text = JSON.stringify(currentOutput.results, null, 2);
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Output copied to clipboard');
+            });
+        }
+
+        function downloadOutput() {
+            if (!currentOutput) {
+                alert('No output to download');
+                return;
+            }
+            
+            const text = JSON.stringify(currentOutput, null, 2);
+            const blob = new Blob([text], {type: 'application/json'});
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `securitization_${currentOutput.id || 'result'}.json`;
+            a.click();
+        }
+
+        function clearInputs() {
+            document.getElementById('poolData').value = '';
+            document.getElementById('poolPrincipal').value = '100000000';
+            document.getElementById('wac').value = '5.5';
+            document.getElementById('wam').value = '15';
+            document.getElementById('numLoans').value = '1000';
+            document.getElementById('numTranches').value = '3';
+            document.getElementById('cpr').value = '6';
+            document.getElementById('oc').value = '5';
+            document.getElementById('excessSpread').value = '2';
+            document.getElementById('reserve').value = '1';
+            document.getElementById('subordination').value = '10';
+        }
+
+        function refreshOutputs() {
+            loadHistory();
+        }
+
+        function updateAssetDefaults() {
+            const assetType = document.getElementById('assetType').value;
+            
+            // Set default values based on asset type
+            const defaults = {
+                'mbs': { wac: 5.5, wam: 15, cpr: 6, loans: 1000 },
+                'abs': { wac: 7.5, wam: 5, cpr: 10, loans: 5000 },
+                'cdo': { wac: 8.5, wam: 7, cpr: 2, loans: 100 },
+                'clo': { wac: 6.5, wam: 6, cpr: 3, loans: 200 },
+                'cmbs': { wac: 5.0, wam: 10, cpr: 1, loans: 50 }
+            };
+            
+            const def = defaults[assetType];
+            if (def) {
+                document.getElementById('wac').value = def.wac;
+                document.getElementById('wam').value = def.wam;
+                document.getElementById('cpr').value = def.cpr;
+                document.getElementById('numLoans').value = def.loans;
+            }
+        }
+
+        function updateTranchePreview() {
+            const numTranches = document.getElementById('numTranches').value;
+            // Could add a preview of tranche structure here
+            console.log(`Structuring ${numTranches} tranches`);
+        }
+
+        function buildPoolDataFromFields() {
+            // Helper to build pool data JSON from form fields
+            const data = {
+                principal: parseFloat(document.getElementById('poolPrincipal').value),
+                wac: parseFloat(document.getElementById('wac').value) / 100,
+                wam: parseFloat(document.getElementById('wam').value),
+                numLoans: parseInt(document.getElementById('numLoans').value),
+                cpr: parseFloat(document.getElementById('cpr').value) / 100,
+                oc: parseFloat(document.getElementById('oc').value) / 100,
+                excessSpread: parseFloat(document.getElementById('excessSpread').value) / 100,
+                reserve: parseFloat(document.getElementById('reserve').value) / 100,
+                subordination: parseFloat(document.getElementById('subordination').value) / 100
+            };
+            
+            // Update the JSON field
+            document.getElementById('poolData').value = JSON.stringify(data, null, 2);
+        }
+
+        // Load history on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            {% if not is_admin %}
+            loadHistory();
+            {% endif %}
+        });
+    </script>
+</body>
+</html>
