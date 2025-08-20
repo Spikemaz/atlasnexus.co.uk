@@ -1083,12 +1083,12 @@ def register():
         data = {
             'email': request.form.get('email', '').strip().lower(),
             'full_name': request.form.get('fullname', '').strip(),
-            'phone': request.form.get('phone', '').strip(),
+            'phone': request.form.get('phone_number', '').strip(),  # Fixed: phone_number
             'country_code': request.form.get('country_code', '').strip(),
-            'company_name': request.form.get('company_name', '').strip(),
+            'company_name': request.form.get('company', '').strip(),  # Fixed: company
             'company_number': request.form.get('company_number', '').strip(),
             'job_title': request.form.get('job_title', '').strip(),
-            'business_address': request.form.get('business_address', '').strip(),
+            'business_address': request.form.get('address', '').strip(),  # Fixed: address
             'generated_password': generated_password,  # Store the generated password
             'verification_token': generate_verification_token(),
             'email_verified': False,

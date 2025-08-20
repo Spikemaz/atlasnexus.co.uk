@@ -830,7 +830,8 @@
             }).length;
             
             const pending = Object.keys(adminData.registrations || {}).filter(email => {
-                return adminData.registrations[email].status === 'pending';
+                const reg = adminData.registrations[email];
+                return reg.email_verified && !reg.admin_approved;
             }).length;
             
             document.getElementById('totalUsers').textContent = users;
@@ -1140,6 +1141,7 @@
             const reg = allRegistrations[email];
             
             const modal = document.createElement('div');
+            modal.id = 'userDetailsModal';
             modal.style.cssText = `
                 position: fixed; top: 0; left: 0; right: 0; bottom: 0;
                 background: rgba(0,0,0,0.8); display: flex;
@@ -1203,7 +1205,7 @@
                     </div>
                     
                     <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-                        <button onclick="this.closest('[style*=\"position: fixed\"]').remove()" 
+                        <button onclick="document.getElementById('userDetailsModal').remove()" 
                                 style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); 
                                        color: #888; border: 1px solid #888; border-radius: 4px; cursor: pointer;">
                             Close
