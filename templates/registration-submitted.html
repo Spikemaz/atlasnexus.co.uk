@@ -210,21 +210,102 @@
             <a href="/secure-login" class="btn btn-primary">Return to Login</a>
         </div>
 
-        <div class="timer">
-            Redirecting to login in <span class="countdown" id="countdown">60</span> seconds
+        <div class="login-section">
+            <div class="section-divider"></div>
+            <h3>Already Verified & Approved?</h3>
+            <p style="color: #92969C; margin-bottom: 1.5rem;">Login below once your account is activated</p>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <input type="email" id="loginEmail" name="email" placeholder="Email Address" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" name="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Login to Dashboard</button>
+            </form>
+            
+            <div id="loginMessage" style="margin-top: 1rem; text-align: center; display: none;"></div>
         </div>
     </div>
 
+    <style>
+        .login-section {
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+        }
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(146, 150, 156, 0.3), transparent);
+            margin-bottom: 2rem;
+        }
+        .login-section h3 {
+            color: var(--pearl-grey);
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(146, 150, 156, 0.3);
+            border-radius: 8px;
+            color: var(--pearl-grey);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--platinum-gold);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .form-group input::placeholder {
+            color: #92969C;
+        }
+    </style>
+
     <script>
-        let seconds = 60;
-        const timer = setInterval(() => {
-            seconds--;
-            document.getElementById('countdown').textContent = seconds;
-            if (seconds <= 0) {
-                clearInterval(timer);
-                window.location.href = '/secure-login';
-            }
-        }, 1000);
+        function handleLogin(event) {
+            event.preventDefault();
+            const form = event.target;
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const messageDiv = document.getElementById('loginMessage');
+            
+            // Show loading
+            messageDiv.style.display = 'block';
+            messageDiv.style.color = '#60a5fa';
+            messageDiv.innerHTML = 'Logging in...';
+            
+            fetch('/auth', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    messageDiv.style.color = '#22C55E';
+                    messageDiv.innerHTML = '✓ Login successful! Redirecting...';
+                    setTimeout(() => {
+                        window.location.href = data.redirect || '/dashboard';
+                    }, 1500);
+                } else {
+                    messageDiv.style.color = '#ef4444';
+                    messageDiv.innerHTML = data.message || 'Login failed. Account may not be activated yet.';
+                }
+            })
+            .catch(error => {
+                messageDiv.style.color = '#ef4444';
+                messageDiv.innerHTML = 'Connection error. Please try again.';
+            });
+            
+            return false;
+        }
 
         function resendEmail() {
             const btn = event.target;
@@ -252,8 +333,8 @@
             });
         }
 
-        // Check verification status
-        setInterval(() => {
+        // Check verification status every 5 seconds
+        let verificationCheckInterval = setInterval(() => {
             fetch('/check-verification-status', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -263,9 +344,35 @@
             .then(data => {
                 if (data.verified) {
                     document.getElementById('step2').classList.add('completed');
-                    setTimeout(() => window.location.href = '/secure-login', 3000);
+                    // Update message instead of redirecting
+                    const emailBox = document.querySelector('.email-box');
+                    emailBox.innerHTML = `
+                        <strong style="color: #22C55E;">✅ Email Verified!</strong>
+                        <div class="email-display">{{ email }}</div>
+                        <p style="color: var(--silver-light); font-size: 0.95rem;">
+                            Awaiting admin approval...
+                        </p>
+                    `;
                 }
-            });
+                
+                // Check if also approved
+                if (data.approved) {
+                    document.getElementById('step2').classList.add('completed');
+                    document.querySelector('.step:nth-child(3)').classList.add('completed');
+                    document.querySelector('.step:nth-child(4)').classList.add('completed');
+                    
+                    // Update login section
+                    const loginSection = document.querySelector('.login-section h3');
+                    if (loginSection) {
+                        loginSection.innerHTML = '🎉 Your Account is Active!';
+                        loginSection.style.color = '#22C55E';
+                    }
+                    
+                    // Stop checking once approved
+                    clearInterval(verificationCheckInterval);
+                }
+            })
+            .catch(err => console.log('Status check failed:', err));
         }, 5000);
     </script>
 </body>

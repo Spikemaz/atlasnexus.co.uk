@@ -295,7 +295,9 @@ def audit_project():
         'security.html',
         'contact.html',
         'awaiting_verification.html',  # Added for registration system
-        'registration-submitted.html'  # Added for new registration flow
+        'registration-submitted.html',  # Added for new registration flow
+        'admin_panel.html',  # Admin control panel
+        'securitisation_engine.html'  # Securitization/Permutation engine
     }
     
     # Files that should NEVER exist (delete immediately)
@@ -1355,9 +1357,13 @@ def check_verification_status():
     registrations = load_json_db(REGISTRATIONS_FILE)
     if email in registrations:
         is_verified = registrations[email].get('email_verified', False)
-        return jsonify({'verified': is_verified})
+        is_approved = registrations[email].get('admin_approved', False)
+        return jsonify({
+            'verified': is_verified,
+            'approved': is_approved
+        })
     
-    return jsonify({'verified': False})
+    return jsonify({'verified': False, 'approved': False})
 
 @app.route('/verify-email')
 def verify_email():
