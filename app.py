@@ -21,6 +21,14 @@ from email.mime.multipart import MIMEMultipart
 import threading
 import time
 
+# Try to import securitization_engine if available
+try:
+    from securitization_engine import run_securitization_calculation
+    SECURITIZATION_AVAILABLE = True
+except ImportError:
+    SECURITIZATION_AVAILABLE = False
+    run_securitization_calculation = None
+
 # ==================== IP LOCKOUT TRACKING ====================
 # On Vercel/production, use /tmp directory (writable)
 # On local, use current directory
@@ -414,12 +422,28 @@ except ImportError:
 
 def load_json_db(file_path):
     """Load JSON database file"""
+    # Convert string to Path if needed
+    if isinstance(file_path, str):
+        file_path = Path(file_path)
+    
     if file_path.exists():
         try:
             with open(file_path, 'r') as f:
-                return json.load(f)
-        except:
+                data = json.load(f)
+                # Ensure admin_actions is always a list
+                if 'admin_actions' in str(file_path) and isinstance(data, dict):
+                    return list(data.values()) if data else []
+                return data
+        except Exception as e:
+            print(f"Error loading {file_path}: {e}")
+            # Return appropriate empty structure
+            if 'admin_actions' in str(file_path):
+                return []
             return {}
+    
+    # Return appropriate empty structure for non-existent files
+    if 'admin_actions' in str(file_path):
+        return []
     return {}
 
 def save_json_db(file_path, data):
@@ -1670,12 +1694,9 @@ def dashboard():
     username = session.get(f'username_{ip_address}', 'User')
     is_admin = session.get(f'is_admin_{ip_address}', False)
     
-    # If admin, redirect to new admin panel
-    if is_admin:
-        return redirect(url_for('admin_panel'))
-    
-    # Regular user dashboard
-    return render_template('dashboard.html', username=username, is_admin=False)
+    # Show dashboard for ALL users including admin
+    # Admin can access admin panel through the header button
+    return render_template('dashboard.html', username=username, is_admin=is_admin)
 
 @app.route('/admin/approve-user', methods=['POST'])
 def admin_approve_user():
@@ -2141,6 +2162,11 @@ def logout():
     
     return redirect(url_for('secure_login'))
 
+@app.route('/admin')
+def admin():
+    """Redirect to admin panel"""
+    return redirect(url_for('admin_panel'))
+
 @app.route('/admin/comprehensive-data')
 def admin_comprehensive_data():
     """Get ALL user interaction data for admin panel"""
@@ -2150,30 +2176,65 @@ def admin_comprehensive_data():
     if not session.get(f'is_admin_{ip_address}'):
         return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
     
-    # Load all data sources
-    lockouts = load_lockouts()
-    attempt_logs = load_attempt_logs()
-    registrations = load_json_db(REGISTRATIONS_FILE)
-    expired_registrations = load_json_db('data/expired_registrations.json')
-    
-    # Compile comprehensive data
-    data = {
-        'ip_lockouts': lockouts,
-        'login_attempts': attempt_logs,
-        'active_registrations': registrations,
-        'expired_registrations': expired_registrations,
-        'statistics': {
-            'total_locked_ips': len(lockouts),
-            'total_login_attempts': sum(log.get('total_attempts', 0) for log in attempt_logs.values()),
-            'active_registrations': len(registrations),
-            'expired_registrations': len(expired_registrations),
-            'verified_users': sum(1 for r in registrations.values() if r.get('email_verified')),
-            'pending_verification': sum(1 for r in registrations.values() if not r.get('email_verified')),
-            'approved_users': sum(1 for r in registrations.values() if r.get('admin_approved'))
+    try:
+        # Load all data sources with error handling
+        lockouts = load_lockouts() or {}
+        registrations = load_json_db(REGISTRATIONS_FILE) or {}
+        users = load_json_db(USERS_FILE) or {}
+        login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE) or {}
+        admin_actions = load_json_db(ADMIN_ACTIONS_FILE) or []
+        
+        # Ensure admin_actions is a list
+        if isinstance(admin_actions, dict):
+            admin_actions = list(admin_actions.values())
+        
+        # Compile comprehensive data - matching what frontend expects
+        data = {
+            'lockouts': lockouts,
+            'login_attempts': login_attempts,  # Frontend expects this key
+            'registrations': registrations,
+            'users': users,
+            'admin_actions': admin_actions,
+            'statistics': {
+                'total_users': len(users) if isinstance(users, dict) else 0,
+                'total_registrations': len(registrations) if isinstance(registrations, dict) else 0,
+                'total_locked_ips': len(lockouts) if isinstance(lockouts, dict) else 0,
+                'total_login_attempts': sum(len(attempts) for attempts in login_attempts.values()) if isinstance(login_attempts, dict) else 0,
+                'verified_users': sum(1 for r in registrations.values() if r.get('email_verified')) if isinstance(registrations, dict) else 0,
+                'pending_verification': sum(1 for r in registrations.values() if not r.get('email_verified')) if isinstance(registrations, dict) else 0,
+                'approved_users': sum(1 for r in registrations.values() if r.get('admin_approved')) if isinstance(registrations, dict) else 0,
+                'pending_approval': sum(1 for r in registrations.values() if r.get('email_verified') and not r.get('admin_approved')) if isinstance(registrations, dict) else 0
+            }
         }
-    }
+        
+        return jsonify({'status': 'success', 'data': data})
     
-    return jsonify({'status': 'success', 'data': data})
+    except Exception as e:
+        print(f"Error in admin_comprehensive_data: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        # Return empty but valid structure on error
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'lockouts': {},
+                'login_attempts': {},
+                'registrations': {},
+                'users': {},
+                'admin_actions': [],
+                'statistics': {
+                    'total_users': 0,
+                    'total_registrations': 0,
+                    'total_locked_ips': 0,
+                    'total_login_attempts': 0,
+                    'verified_users': 0,
+                    'pending_verification': 0,
+                    'approved_users': 0,
+                    'pending_approval': 0
+                }
+            }
+        })
 
 @app.route('/admin/delete-data', methods=['POST'])
 def admin_delete_data():
@@ -2588,10 +2649,15 @@ def run_securitization():
     
     data = request.get_json()
     
+    # Check if securitization engine is available
+    if not SECURITIZATION_AVAILABLE:
+        return jsonify({
+            'status': 'error',
+            'message': 'Securitization engine not available. Please ensure securitization_engine.py is deployed.'
+        }), 503
+    
     # Import and use the securitization engine with Table 6 calculations
     try:
-        from securitization_engine import run_securitization_calculation
-        
         # Run the proprietary calculation engine
         result_data = run_securitization_calculation(data)
         

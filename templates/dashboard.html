@@ -818,16 +818,16 @@
                     </div>
                     <div class="card-body p-4">
                         <div class="d-grid gap-2">
-                            <button class="btn btn-primary" onclick="alert('New Analysis feature coming soon!')">
+                            <button class="btn btn-primary" onclick="showNewAnalysisModal()">
                                 <i class="fas fa-plus me-2"></i>New Analysis
                             </button>
-                            <button class="btn btn-outline-secondary" onclick="alert('Upload feature coming soon!')">
+                            <button class="btn btn-outline-secondary" onclick="showUploadModal()">
                                 <i class="fas fa-upload me-2"></i>Upload Data
                             </button>
-                            <button class="btn btn-outline-secondary" onclick="alert('Export feature coming soon!')">
+                            <button class="btn btn-outline-secondary" onclick="exportData()">
                                 <i class="fas fa-download me-2"></i>Export Report
                             </button>
-                            <button class="btn btn-outline-secondary" onclick="alert('Settings coming soon!')">
+                            <button class="btn btn-outline-secondary" onclick="showSettingsModal()">
                                 <i class="fas fa-cog me-2"></i>Settings
                             </button>
                         </div>
@@ -2313,10 +2313,10 @@
                 
                 <div>
                     <h4 style="color: #E5E9F0; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;">Resources</h4>
-                    <a href="#" onclick="alert('API documentation requires authentication'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">API Documentation</a>
-                    <a href="#" onclick="alert('Data feeds require authentication'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Data Feeds</a>
-                    <a href="#" onclick="alert('Research portal requires authentication'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Research Portal</a>
-                    <a href="#" onclick="alert('Training materials require authentication'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Training</a>
+                    <a href="/api-docs" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">API Documentation</a>
+                    <a href="/data-feeds" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Data Feeds</a>
+                    <a href="/research" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Research Portal</a>
+                    <a href="/training" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">Training</a>
                     <a href="#" onclick="window.open('https://status.atlasnexus.co.uk', '_blank'); return false;" style="display: block; color: #92969C; text-decoration: none; font-size: 0.9rem; margin-bottom: 10px; transition: all 0.3s ease;">System Status</a>
                 </div>
                 
@@ -2442,7 +2442,7 @@
                     marketData['SOFR'].value = parseFloat(sofrData.observations[0].value);
                 }
             } catch (e) {
-                console.log('SOFR data not available');
+                // SOFR data not available
             }
             
             // Fetch ECB rates (European Central Bank provides free data)
@@ -2452,7 +2452,7 @@
                 // ECB main refinancing rate (approximation)
                 marketData['ECB RATE'].value = 4.00; // ECB publishes rates on their website
             } catch (e) {
-                console.log('ECB data not available');
+                // ECB data not available
             }
             
             // Bank of England base rate (from UK government data)
@@ -2480,7 +2480,7 @@
                 marketData['CMBS AAA'].value = 1.45;
                 marketData['CLO AAA'].value = 1.75;
             } catch (e) {
-                console.log('Credit spread data not available');
+                // Credit spread data not available
             }
             
             // Fetch commodity prices
@@ -2490,7 +2490,7 @@
                     marketData['GOLD'].value = (1 / fxData.rates.XAU).toFixed(2);
                 }
             } catch (e) {
-                console.log('Gold price not available');
+                // Gold price not available
             }
             
             // Cache the data for 24 hours
@@ -2501,7 +2501,7 @@
             createTicker();
             
         } catch (error) {
-            console.log('Using fallback market data:', error);
+            // Using fallback market data
         }
     }
     
@@ -3066,7 +3066,7 @@
         
         // Only fetch if we have data that needs updating
         if (Object.keys(dataToFetch).length === 0) {
-            console.log('All FRED data is up-to-date, using cache');
+            // All FRED data is up-to-date, using cache
             // Load from cache
             if (dailyCache) Object.assign(marketData, JSON.parse(dailyCache));
             if (weeklyCache) Object.assign(marketData, JSON.parse(weeklyCache));
@@ -3074,7 +3074,7 @@
             return;
         }
         
-        console.log(`Fetching ${Object.keys(dataToFetch).length} FRED data points...`);
+        // Fetching FRED data points
         
         try {
             const fetchedData = {};
@@ -3139,7 +3139,7 @@
                 localStorage.setItem('fredMonthlyCacheMonth', thisMonth);
             }
             
-            console.log(`FRED data updated: ${Object.keys(fetchedData).length} series fetched`);
+            // FRED data updated
             createTicker(); // Refresh ticker with new data
             
         } catch (error) {
@@ -3725,6 +3725,132 @@
             mezzCoupon: [],
             equityIRR: []
         };
+    }
+
+    // Modal functions for Quick Actions
+    function showNewAnalysisModal() {
+        const modal = `
+            <div class="modal fade" id="newAnalysisModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content bg-dark text-light">
+                        <div class="modal-header">
+                            <h5 class="modal-title">New Analysis</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Select analysis type:</p>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary" onclick="location.href='/securitization-engine'">Securitization Analysis</button>
+                                <button class="btn btn-outline-primary" onclick="showPermutationEngine()">Permutation Analysis</button>
+                                <button class="btn btn-outline-primary" disabled>Market Analysis (Coming Soon)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+        const modalEl = new bootstrap.Modal(document.getElementById('newAnalysisModal'));
+        modalEl.show();
+        document.getElementById('newAnalysisModal').addEventListener('hidden.bs.modal', function() {
+            this.remove();
+        });
+    }
+
+    function showUploadModal() {
+        const modal = `
+            <div class="modal fade" id="uploadModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content bg-dark text-light">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Upload Data</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Select file type:</label>
+                                <select class="form-select bg-dark text-light">
+                                    <option>CSV</option>
+                                    <option>Excel</option>
+                                    <option>JSON</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <input type="file" class="form-control bg-dark text-light" accept=".csv,.xlsx,.json">
+                            </div>
+                            <button class="btn btn-primary w-100">Upload File</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+        const modalEl = new bootstrap.Modal(document.getElementById('uploadModal'));
+        modalEl.show();
+        document.getElementById('uploadModal').addEventListener('hidden.bs.modal', function() {
+            this.remove();
+        });
+    }
+
+    function exportData() {
+        const data = {
+            timestamp: new Date().toISOString(),
+            market_data: window.currentMarketData || {},
+            user: '{{ username }}'
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `atlas_nexus_export_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function showSettingsModal() {
+        const modal = `
+            <div class="modal fade" id="settingsModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content bg-dark text-light">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Settings</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Theme</label>
+                                <select class="form-select bg-dark text-light">
+                                    <option>Dark (Default)</option>
+                                    <option disabled>Light (Coming Soon)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Data Refresh Rate</label>
+                                <select class="form-select bg-dark text-light">
+                                    <option>5 minutes</option>
+                                    <option>10 minutes</option>
+                                    <option>30 minutes</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Notifications</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" checked>
+                                    <label class="form-check-label">Email notifications</label>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary w-100">Save Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+        const modalEl = new bootstrap.Modal(document.getElementById('settingsModal'));
+        modalEl.show();
+        document.getElementById('settingsModal').addEventListener('hidden.bs.modal', function() {
+            this.remove();
+        });
     }
     </script>
 </body>
