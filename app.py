@@ -469,9 +469,21 @@ def generate_verification_token():
     return secrets.token_urlsafe(32)
 
 def generate_secure_password():
-    """Generate a secure password"""
-    chars = string.ascii_letters + string.digits + '!@#$%^&*'
-    return ''.join(random.choice(chars) for _ in range(12))
+    """Generate a secure password in format: word + 5 digits"""
+    # List of simple memorable words
+    words = [
+        'rabbit', 'tiger', 'eagle', 'falcon', 'dragon', 'phoenix', 
+        'thunder', 'storm', 'ocean', 'mountain', 'forest', 'desert',
+        'silver', 'golden', 'crystal', 'diamond', 'shadow', 'bright',
+        'swift', 'strong', 'brave', 'noble', 'royal', 'mystic',
+        'alpha', 'delta', 'gamma', 'omega', 'sigma', 'nexus'
+    ]
+    
+    # Pick a random word and 5 random digits
+    word = random.choice(words)
+    digits = ''.join(str(random.randint(0, 9)) for _ in range(5))
+    
+    return f"{word}{digits}"
 
 def send_email(to_email, subject, html_content, retry_count=2):
     """Send email notification with retry logic"""
@@ -2523,6 +2535,44 @@ def debug_ip_status():
     }
     
     return jsonify(status)
+
+@app.route('/admin/update-password', methods=['POST'])
+def admin_update_password():
+    """Update user password"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    data = request.get_json()
+    email = data.get('email')
+    new_password = data.get('password')
+    
+    if not email or not new_password:
+        return jsonify({'status': 'error', 'message': 'Email and password required'}), 400
+    
+    # Update in registrations
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    if email in registrations:
+        registrations[email]['generated_password'] = new_password
+        save_json_db(REGISTRATIONS_FILE, registrations)
+    
+    # Update in users if they exist
+    users = load_json_db(USERS_FILE)
+    if email in users:
+        users[email]['password'] = new_password
+        # Reset password expiry to 90 days from now
+        users[email]['password_expiry'] = (datetime.now() + timedelta(days=90)).isoformat()
+        save_json_db(USERS_FILE, users)
+    
+    # Log the action
+    log_admin_action(ip_address, 'password_update', {
+        'user_email': email,
+        'admin_email': session.get(f'user_email_{ip_address}')
+    })
+    
+    return jsonify({'status': 'success', 'message': 'Password updated successfully'})
 
 @app.route('/admin-panel')
 def admin_panel():

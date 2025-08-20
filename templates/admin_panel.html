@@ -563,7 +563,7 @@
                     <div class="stat-value" id="blockedIPs">0</div>
                     <div class="stat-label">Blocked IPs</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" style="cursor: pointer;" onclick="document.querySelector('[data-page=registrations]').click()">
                     <div class="stat-icon activity">
                         <i class="fas fa-bolt"></i>
                     </div>
@@ -831,7 +831,7 @@
             
             const pending = Object.keys(adminData.registrations || {}).filter(email => {
                 const reg = adminData.registrations[email];
-                return reg.email_verified && !reg.admin_approved;
+                return !reg.admin_approved;
             }).length;
             
             document.getElementById('totalUsers').textContent = users;
@@ -1193,15 +1193,27 @@
                             <label style="color: #888; font-size: 0.85rem;">Business Address:</label>
                             <p style="color: #e0e0e0; margin-bottom: 1rem;">${reg.business_address || 'N/A'}</p>
                         </div>
-                        ${reg.generated_password ? `
-                            <div style="grid-column: 1 / -1; padding: 1rem; background: rgba(46,204,113,0.1); 
-                                        border: 1px solid rgba(46,204,113,0.3); border-radius: 8px;">
-                                <label style="color: #2ecc71; font-size: 0.85rem;">Generated Password:</label>
-                                <p style="color: #2ecc71; font-family: monospace; margin: 0.5rem 0 0 0;">
-                                    ${reg.generated_password}
-                                </p>
+                        <div style="grid-column: 1 / -1; padding: 1rem; background: rgba(46,204,113,0.1); 
+                                    border: 1px solid rgba(46,204,113,0.3); border-radius: 8px;">
+                            <label style="color: #2ecc71; font-size: 0.85rem;">Password:</label>
+                            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
+                                <input type="text" id="userPassword_${email.replace(/[@.]/g, '_')}" 
+                                       value="${reg.generated_password || 'No password set'}" 
+                                       style="flex: 1; padding: 0.5rem; background: rgba(255,255,255,0.1); 
+                                              color: #2ecc71; border: 1px solid rgba(46,204,113,0.3); 
+                                              border-radius: 4px; font-family: monospace;">
+                                <button onclick="generateNewPassword('${email}')" 
+                                        style="padding: 0.5rem 1rem; background: #3498db; color: white; 
+                                               border: none; border-radius: 4px; cursor: pointer;">
+                                    Generate New
+                                </button>
+                                <button onclick="updateUserPassword('${email}')" 
+                                        style="padding: 0.5rem 1rem; background: #2ecc71; color: white; 
+                                               border: none; border-radius: 4px; cursor: pointer;">
+                                    Save
+                                </button>
                             </div>
-                        ` : ''}
+                        </div>
                     </div>
                     
                     <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
@@ -1222,6 +1234,56 @@
             `;
             
             document.body.appendChild(modal);
+        }
+        
+        function generateNewPassword(email) {
+            // List of words for password generation
+            const words = [
+                'rabbit', 'tiger', 'eagle', 'falcon', 'dragon', 'phoenix', 
+                'thunder', 'storm', 'ocean', 'mountain', 'forest', 'desert',
+                'silver', 'golden', 'crystal', 'diamond', 'shadow', 'bright',
+                'swift', 'strong', 'brave', 'noble', 'royal', 'mystic',
+                'alpha', 'delta', 'gamma', 'omega', 'sigma', 'nexus'
+            ];
+            
+            const word = words[Math.floor(Math.random() * words.length)];
+            const digits = Math.floor(Math.random() * 90000) + 10000; // 5 digits
+            const newPassword = word + digits;
+            
+            const inputId = 'userPassword_' + email.replace(/[@.]/g, '_');
+            document.getElementById(inputId).value = newPassword;
+        }
+        
+        async function updateUserPassword(email) {
+            const inputId = 'userPassword_' + email.replace(/[@.]/g, '_');
+            const newPassword = document.getElementById(inputId).value;
+            
+            if (!newPassword || newPassword === 'No password set') {
+                showAlert('Please enter a valid password', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/admin/update-password', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password: newPassword})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('Password updated successfully', 'success');
+                    // Update local data
+                    if (allRegistrations[email]) {
+                        allRegistrations[email].generated_password = newPassword;
+                    }
+                } else {
+                    showAlert(data.message || 'Failed to update password', 'danger');
+                }
+            } catch (error) {
+                console.error('Error updating password:', error);
+                showAlert('Error updating password', 'danger');
+            }
         }
         
         async function resendCredentials(email) {
