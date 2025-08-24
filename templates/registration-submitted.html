@@ -277,8 +277,8 @@
             
             // Only start interval if not already verified
             if (!emailVerified) {
-                // Start checking verification status every 3 seconds for faster updates
-                verificationCheckInterval = setInterval(checkVerificationStatus, 3000);
+                // Start checking verification status every 5 seconds
+                verificationCheckInterval = setInterval(checkVerificationStatus, 5000);
                 
                 // Stop checking after 1 hour
                 setTimeout(() => {
