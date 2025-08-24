@@ -278,36 +278,72 @@
         // Check verification status periodically
         let verificationCheckInterval;
         let emailVerified = false;
+        const userEmail = '{{ email }}';
+        
+        // Check localStorage for existing verification status
+        const storageKey = `verification_${userEmail}`;
+        const storageTimeKey = `verification_time_${userEmail}`;
+        let savedStatus = localStorage.getItem(storageKey);
+        const savedTime = localStorage.getItem(storageTimeKey);
+        
+        // Clear old verification data (older than 7 days)
+        if (savedTime) {
+            const daysSince = (Date.now() - parseInt(savedTime)) / (1000 * 60 * 60 * 24);
+            if (daysSince > 7) {
+                localStorage.removeItem(storageKey);
+                localStorage.removeItem(storageTimeKey);
+                savedStatus = null;
+            }
+        }
+        
+        function updateUIForVerified() {
+            // Update step 2 to completed
+            const step2 = document.getElementById('step2');
+            if (step2) {
+                step2.classList.add('completed');
+            }
+            
+            // Replace resend button with Complete button
+            const buttons = document.querySelector('.buttons');
+            if (buttons) {
+                const resendBtn = buttons.querySelector('.btn-secondary');
+                if (resendBtn) {
+                    resendBtn.textContent = 'Complete';
+                    resendBtn.style.background = 'linear-gradient(135deg, #059669 0%, #22C55E 100%)';
+                    resendBtn.style.color = 'white';
+                    resendBtn.style.border = 'none';
+                    resendBtn.onclick = null;
+                    resendBtn.disabled = true;
+                }
+            }
+        }
+        
+        // If already verified (from localStorage), update UI immediately
+        if (savedStatus === 'verified') {
+            emailVerified = true;
+            // Wait for DOM to load then update UI
+            document.addEventListener('DOMContentLoaded', function() {
+                updateUIForVerified();
+            });
+        }
         
         function checkVerificationStatus() {
             fetch('/check-verification-status', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email: '{{ email }}'})
+                body: JSON.stringify({email: userEmail})
             })
             .then(response => response.json())
             .then(data => {
                 if (data.verified && !emailVerified) {
                     emailVerified = true;
-                    // Update step 2 to completed
-                    const step2 = document.getElementById('step2');
-                    if (step2) {
-                        step2.classList.add('completed');
-                    }
                     
-                    // Replace resend button with Complete button
-                    const buttons = document.querySelector('.buttons');
-                    if (buttons) {
-                        const resendBtn = buttons.querySelector('.btn-secondary');
-                        if (resendBtn) {
-                            resendBtn.textContent = 'Complete';
-                            resendBtn.style.background = 'linear-gradient(135deg, #059669 0%, #22C55E 100%)';
-                            resendBtn.style.color = 'white';
-                            resendBtn.style.border = 'none';
-                            resendBtn.onclick = null;
-                            resendBtn.disabled = true;
-                        }
-                    }
+                    // Save to localStorage with timestamp
+                    localStorage.setItem(storageKey, 'verified');
+                    localStorage.setItem(storageTimeKey, Date.now().toString());
+                    
+                    // Update UI
+                    updateUIForVerified();
                     
                     // Clear the interval
                     if (verificationCheckInterval) {
@@ -316,6 +352,16 @@
                     
                     // Show success notification
                     showNotification('✓ Email verified successfully! Awaiting admin approval.', 'success');
+                }
+                
+                // Also check if approved (for future status updates)
+                if (data.approved) {
+                    localStorage.setItem(storageKey, 'approved');
+                    // Update step 3 if needed
+                    const step3 = document.querySelector('.step:nth-child(3)');
+                    if (step3 && !step3.classList.contains('completed')) {
+                        step3.classList.add('completed');
+                    }
                 }
             })
             .catch(error => console.log('Verification check failed:', error));
@@ -345,15 +391,23 @@
             setTimeout(() => notification.remove(), 5000);
         }
         
-        // Start checking verification status every 5 seconds
-        verificationCheckInterval = setInterval(checkVerificationStatus, 5000);
-        
-        // Stop checking after 1 hour
-        setTimeout(() => {
-            if (verificationCheckInterval) {
-                clearInterval(verificationCheckInterval);
+        // Check status immediately on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            checkVerificationStatus();
+            
+            // Only start interval if not already verified
+            if (!emailVerified) {
+                // Start checking verification status every 5 seconds
+                verificationCheckInterval = setInterval(checkVerificationStatus, 5000);
+                
+                // Stop checking after 1 hour
+                setTimeout(() => {
+                    if (verificationCheckInterval) {
+                        clearInterval(verificationCheckInterval);
+                    }
+                }, 3600000); // 1 hour
             }
-        }, 3600000); // 1 hour
+        });
         
         function handleLogin(event) {
             event.preventDefault();
