@@ -713,6 +713,9 @@
             position: absolute;
             opacity: 0;
             cursor: pointer;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
 
         .remember-checkbox input:checked ~ .checkbox-icon {
@@ -2114,6 +2117,27 @@
         // Fetch live data on load and every 30 seconds
         fetchLiveMarketData();
         setInterval(fetchLiveMarketData, 30000);
+        
+        // Fix checkbox clicking functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make checkbox divs fully clickable
+            const checkboxDivs = document.querySelectorAll('.remember-checkbox');
+            checkboxDivs.forEach(function(checkboxDiv) {
+                // Add click handler to the checkbox container
+                checkboxDiv.style.cursor = 'pointer';
+                checkboxDiv.addEventListener('click', function(e) {
+                    // Find the checkbox input inside this div
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    if (checkbox && e.target !== checkbox) {
+                        // Toggle checkbox if clicking the div or checkmark icon (not the input itself)
+                        checkbox.checked = !checkbox.checked;
+                        // Trigger change event for any listeners
+                        checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
         
         // Update market status
         function updateMarketStatus() {
