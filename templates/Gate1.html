@@ -192,7 +192,12 @@
             })
             .then(r => r.json())
             .then(data => {
-                if (data.status === 'success') window.location.href = data.redirect;
+                if (data.status === 'success') {
+                    // Clear all localStorage data on successful override
+                    localStorage.removeItem('attemptCount');
+                    localStorage.removeItem('countdownStart');
+                    window.location.href = data.redirect;
+                }
                 else if (data.status === 'lockout') {
                     alert('24-hour lockout applied');
                     window.location.href = data.redirect;

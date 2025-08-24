@@ -160,7 +160,7 @@
             gap: 0.5rem;
         }
 
-        /* Market Ticker */
+        /* Market Ticker - Working version from Gate2 */
         .market-ticker-container {
             position: fixed;
             top: 70px;
@@ -172,19 +172,23 @@
             border-top: 1px solid rgba(96, 165, 250, 0.3);
             border-bottom: 1px solid rgba(96, 165, 250, 0.3);
             padding: 12px 0;
-            min-height: 45px;
+            cursor: grab;
+            user-select: none;
             height: auto;
+            min-height: 45px;
             z-index: 999;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .market-ticker-container.dragging {
+            cursor: grabbing;
         }
 
         .market-ticker {
             display: flex;
             width: max-content;
-            animation: scroll 180s linear infinite; /* Even slower for better readability */
-            cursor: grab;
-            /* Start with content already shifted to hide initial gap */
-            animation-delay: -3s;
+            will-change: transform;
+            transition: transform 0.5s linear;
             padding-left: 0;
             margin-left: 0;
         }
@@ -193,15 +197,20 @@
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
-        
-        .market-ticker.paused {
-            animation-play-state: paused !important;
-        }
-        
-        .market-ticker-container.dragging {
-            cursor: grabbing;
-        }
 
+        .ticker-content {
+            display: flex;
+            width: max-content;
+        }
+        
+        .ticker-group {
+            display: flex;
+            gap: 2rem;
+            padding-right: 2rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
         .ticker-item {
             display: inline-flex;
             align-items: center;
@@ -234,6 +243,32 @@
             letter-spacing: 0.1em;
         }
 
+        .ticker-symbol {
+            font-weight: 700;
+            color: #93c5fd !important;
+            font-size: 0.85rem;
+            font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+        
+        .ticker-value {
+            color: #ffffff !important;
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+            display: inline-block;
+        }
+        
+        .ticker-section-header {
+            display: inline-block;
+            padding: 0 1rem;
+            color: #60a5fa;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
         .ticker-separator {
             color: rgba(96, 165, 250, 0.4);
             margin: 0 0.5rem;
@@ -437,7 +472,6 @@
                                             <span class="animated-atlas-nexus" style="font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif; font-size: 1.1rem; font-weight: 700; background: linear-gradient(90deg, #dbeafe, #93c5fd, #60a5fa, #93c5fd, #dbeafe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% 200%;">ATLAS</span>
                                             <span style="font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif; font-size: 1rem; font-weight: 400; color: #60a5fa; margin: 0 4px;">:</span>
                                             <span class="animated-atlas-nexus" style="font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif; font-size: 1.1rem; font-weight: 700; background: linear-gradient(90deg, #93c5fd, #dbeafe, #60a5fa, #dbeafe, #93c5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% 200%;">NEXUS</span>
-                                            <span style="font-family: 'SF Pro Text', -apple-system, system-ui, sans-serif; font-size: 0.95rem; font-weight: 400; color: #B8C0C8; margin-left: 8px;">Long Income Platform</span>
                                         </p>
                                     </div>
                                 </div>
@@ -449,7 +483,7 @@
                                     </div>
                                     <div class="col-auto">
                                         <div class="badge bg-info bg-opacity-90 text-white px-3 py-2">
-                                            <i class="fas fa-user-tie me-2"></i>Executive Access
+                                            <i class="fas fa-user-tie me-2"></i>{{ account_type }} Access
                                         </div>
                                     </div>
                                     <div class="col-auto">
@@ -2341,7 +2375,7 @@
 
             <div style="text-align: center; padding-top: 30px; border-top: 1px solid rgba(184, 192, 200, 0.1);">
                 <p style="color: #92969C; font-size: 0.875rem; margin: 0;">
-                    © 2024 AtlasNexus. All rights reserved. | Executive Access Level | Session Active
+                    © 2024 AtlasNexus. All rights reserved. | {{ account_type }} Access Level | Session Active
                 </p>
             </div>
         </div>
@@ -2352,58 +2386,173 @@
     <script>
     // Global variables - must be defined before any functions that use them
     let tickerInitialized = false;
-    let dashboardTickerPosition = 0;
-    let dashboardTickerAnimationId = null;
+    let tickerPosition = 0;
+    let tickerAnimationId = null;
+    let isDragging = false;
+    let startX = 0;
+    let scrollLeft = 0;
     
     // Market Data for Ticker (must be defined before any functions that use it)
     let marketData = {
-        // BONDS
+        // Government Bonds
         'US 10Y': { value: 4.67, change24h: 0.03, change7d: -0.05, change30d: 0.15 },
         'UK 10Y': { value: 4.21, change24h: -0.02, change7d: 0.08, change30d: -0.12 },
         'DE 10Y': { value: 2.45, change24h: 0.01, change7d: -0.12, change30d: 0.08 },
-        'US 5Y': { value: 4.42, change24h: 0.02, change7d: -0.08, change30d: 0.22 },
-        'US 2Y': { value: 4.38, change24h: -0.01, change7d: -0.03, change30d: 0.18 },
-        'JP 10Y': { value: 0.95, change24h: 0.01, change7d: 0.02, change30d: 0.05 },
+        'US 5Y': { value: 4.34, change24h: 0.02, change7d: -0.03, change30d: 0.12 },
+        'US 2Y': { value: 4.89, change24h: 0.01, change7d: -0.02, change30d: 0.08 },
         
-        // CENTRAL BANKS
+        // Central Bank Rates
         'FED RATE': { value: 5.50, change24h: 0, change7d: 0, change30d: 0.25, history: [5.25, 5.25, 5.50, 5.50] },
         'BOE RATE': { value: 5.25, change24h: 0, change7d: 0, change30d: 0, history: [5.00, 5.00, 5.25, 5.25] },
         'ECB RATE': { value: 4.00, change24h: 0, change7d: 0, change30d: -0.25, history: [4.50, 4.25, 4.00, 4.00] },
-        'BOJ RATE': { value: -0.10, change24h: 0, change7d: 0, change30d: 0 },
-        'SNB RATE': { value: 1.50, change24h: 0, change7d: 0, change30d: -0.25 },
         
-        // REFERENCE RATES
-        'SOFR': { value: 5.45, change24h: 0.01, change7d: 0.03, change30d: 0.05 },
-        'SONIA': { value: 5.18, change24h: -0.01, change7d: 0.02, change30d: -0.05 },
-        'ESTR': { value: 3.91, change24h: 0, change7d: -0.02, change30d: -0.12 },
-        'TONAR': { value: -0.02, change24h: 0, change7d: 0, change30d: 0 },
+        // Reference Rates
+        'SOFR': { value: 5.32, change24h: -0.01, change7d: 0.02, change30d: 0.18 },
+        'SONIA': { value: 5.18, change24h: 0, change7d: 0.01, change30d: 0.05 },
+        'ESTR': { value: 3.88, change24h: 0, change7d: -0.01, change30d: -0.15 },
         
-        // SECURITISATION
-        'IG SPREAD': { value: 0.84, change24h: -0.02, change7d: 0.05, change30d: -0.12 },
-        'HY SPREAD': { value: 3.45, change24h: 0.08, change7d: -0.25, change30d: 0.45 },
-        'CMBS AAA': { value: 1.35, change24h: 0.02, change7d: -0.08, change30d: 0.15 },
-        'RMBS AAA': { value: 1.12, change24h: -0.01, change7d: 0.04, change30d: -0.08 },
-        'CLO AAA': { value: 1.56, change24h: 0.03, change7d: -0.06, change30d: 0.18 },
+        // Credit Spreads
+        'IG SPREAD': { value: 1.45, change24h: -0.02, change7d: 0.05, change30d: -0.08 },
+        'HY SPREAD': { value: 4.25, change24h: 0.08, change7d: -0.15, change30d: 0.25 },
+        'CMBS AAA': { value: 1.45, change24h: -0.02, change7d: 0.03, change30d: -0.05 },
+        'RMBS AAA': { value: 1.25, change24h: -0.01, change7d: 0.02, change30d: -0.03 },
+        'CLO AAA': { value: 1.75, change24h: -0.03, change7d: 0.06, change30d: -0.10 },
         
-        // FX RATES
-        'GBP/USD': { value: 1.2892, change24h: 0.32, change7d: -0.45, change30d: 1.23 },
-        'EUR/USD': { value: 1.0945, change24h: -0.21, change7d: 0.56, change30d: -0.89 },
-        'USD/JPY': { value: 149.23, change24h: 0.45, change7d: -1.23, change30d: 2.67 },
-        'EUR/GBP': { value: 0.8489, change24h: -0.53, change7d: 1.01, change30d: -2.10 },
+        // FX Rates
+        'GBP/USD': { value: 1.2745, change24h: -0.0023, change7d: 0.0156, change30d: -0.0234 },
+        'EUR/USD': { value: 1.0842, change24h: 0.0012, change7d: -0.0089, change30d: 0.0145 },
+        'USD/JPY': { value: 149.75, change24h: 0.45, change7d: -1.23, change30d: 5.67 },
+        'EUR/GBP': { value: 0.8508, change24h: 0.0034, change7d: -0.0201, change30d: 0.0089 },
         
-        // INDICES
-        'S&P 500': { value: 4567.89, change24h: 0.51, change7d: -1.47, change30d: 2.73 },
-        'FTSE 100': { value: 7543.21, change24h: -0.21, change7d: 0.61, change30d: -0.31 },
-        'DAX': { value: 16245.67, change24h: 0.35, change7d: -0.89, change30d: 1.95 },
-        'NIKKEI': { value: 33156.89, change24h: -0.45, change7d: 1.23, change30d: 3.45 },
-        'VIX': { value: 18.45, change24h: -2.35, change7d: 8.45, change30d: -12.65 },
+        // Equity Indices
+        'S&P 500': { value: 4567.89, change24h: 23.45, change7d: -67.23, change30d: 124.56 },
+        'FTSE 100': { value: 7543.21, change24h: -15.67, change7d: 45.89, change30d: -23.45 },
+        'DAX': { value: 16345.67, change24h: 34.56, change7d: -89.12, change30d: 234.56 },
         
-        // COMMODITIES
-        'GOLD': { value: 2034.50, change24h: -0.28, change7d: 1.15, change30d: -0.61 },
-        'SILVER': { value: 23.45, change24h: -0.85, change7d: 2.35, change30d: -1.95 },
-        'OIL': { value: 78.65, change24h: 1.25, change7d: -2.85, change30d: 4.65 }
+        // Commodities
+        'GOLD': { value: 2034.50, change24h: -5.75, change7d: 23.40, change30d: -12.34 },
+        'OIL WTI': { value: 72.34, change24h: 0.89, change7d: -1.56, change30d: 3.45 },
+        'SILVER': { value: 24.56, change24h: -0.34, change7d: 0.78, change30d: -1.23 }
     };
 
+
+    // Define drag functions first (before createTicker)
+    function startAutoScroll() {
+        if (isDragging) return;
+        
+        const ticker = document.getElementById('marketTicker');
+        if (!ticker) return;
+        
+        // Cancel any existing animation
+        if (tickerAnimationId) {
+            cancelAnimationFrame(tickerAnimationId);
+        }
+        
+        // Smooth continuous animation
+        function animate() {
+            if (!isDragging) {
+                tickerPosition -= 0.3; // Slower smooth scroll speed
+                
+                // Get actual width of one set of content
+                const tickerWidth = ticker.scrollWidth / 3;
+                
+                // Reset position for endless loop
+                if (Math.abs(tickerPosition) >= tickerWidth) {
+                    tickerPosition = tickerPosition % tickerWidth;
+                }
+                
+                ticker.style.transform = `translateX(${tickerPosition}px)`;
+                tickerAnimationId = requestAnimationFrame(animate);
+            }
+        }
+        
+        animate();
+    }
+    
+    function startDrag(e) {
+        isDragging = true;
+        const container = document.getElementById('tickerContainer');
+        const ticker = document.getElementById('marketTicker');
+        container.classList.add('dragging');
+        
+        // Clear any pending resume timeout
+        if (window.tickerResumeTimeout) {
+            clearTimeout(window.tickerResumeTimeout);
+            window.tickerResumeTimeout = null;
+        }
+        
+        // Cancel auto-scroll
+        if (tickerAnimationId) {
+            cancelAnimationFrame(tickerAnimationId);
+            tickerAnimationId = null;
+        }
+        
+        // Always get current position from the actual transform
+        const currentTransform = window.getComputedStyle(ticker).transform;
+        if (currentTransform !== 'none') {
+            const matrix = new DOMMatrix(currentTransform);
+            tickerPosition = matrix.m41; // Update global position
+            scrollLeft = tickerPosition;
+        } else {
+            scrollLeft = tickerPosition;
+        }
+        
+        startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+        e.preventDefault();
+    }
+    
+    function drag(e) {
+        if (!isDragging) return;
+        
+        e.preventDefault();
+        const ticker = document.getElementById('marketTicker');
+        const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+        const walk = x - startX; // Direct 1:1 movement
+        
+        tickerPosition = scrollLeft + walk;
+        
+        // Handle endless scrolling boundaries
+        const tickerWidth = ticker.scrollWidth / 3;
+        if (tickerPosition > 0) {
+            tickerPosition = -tickerWidth + (tickerPosition % tickerWidth);
+        } else if (Math.abs(tickerPosition) >= tickerWidth * 2) {
+            tickerPosition = tickerPosition % tickerWidth;
+        }
+        
+        ticker.style.transition = 'none'; // Remove transition for immediate response
+        ticker.style.transform = `translateX(${tickerPosition}px)`;
+    }
+    
+    function stopDrag() {
+        if (!isDragging) return;
+        
+        isDragging = false;
+        const container = document.getElementById('tickerContainer');
+        const ticker = document.getElementById('marketTicker');
+        container.classList.remove('dragging');
+        
+        // Save the final position
+        const currentTransform = window.getComputedStyle(ticker).transform;
+        if (currentTransform !== 'none') {
+            const matrix = new DOMMatrix(currentTransform);
+            tickerPosition = matrix.m41;
+        }
+        
+        // Re-enable smooth transitions
+        ticker.style.transition = 'transform 0.5s linear';
+        
+        // Clear any existing resume timeout
+        if (window.tickerResumeTimeout) {
+            clearTimeout(window.tickerResumeTimeout);
+        }
+        
+        // Resume auto-scroll after a delay
+        window.tickerResumeTimeout = setTimeout(() => {
+            if (!isDragging) {
+                startAutoScroll();
+            }
+        }, 2000);
+    }
 
     // Enhanced Data Integration with multiple sources
     async function fetchLiveMarketData() {
@@ -2505,128 +2654,115 @@
         }
     }
     
-    // Fetch live data on load and every 30 seconds
-    fetchLiveMarketData();
-    setInterval(fetchLiveMarketData, 30000);
+    // Fetch live data will be called after DOM is ready
     
-    // Ticker Drag Functionality - using same logic as Gate2
-    // Variables already defined at top of script
-    
-    function initTickerDrag() {
+    // Create ticker content
+    function createTicker() {
         const ticker = document.getElementById('marketTicker');
         const container = document.getElementById('tickerContainer');
         
-        if (!ticker || !container) return;
+        console.log('CreateTicker called - ticker element:', ticker);
+        console.log('CreateTicker called - container element:', container);
+        console.log('Market data:', marketData);
         
-        let isDragging = false;
-        let startX = 0;
-        let scrollLeft = 0;
-        
-        function startAutoScroll() {
-            if (isDragging) return;
-            
-            if (dashboardTickerAnimationId) {
-                cancelAnimationFrame(dashboardTickerAnimationId);
-            }
-            
-            function animate() {
-                if (!isDragging) {
-                    dashboardTickerPosition -= 0.5; // Faster smooth scroll speed
-                    
-                    const tickerWidth = ticker.scrollWidth / 2;
-                    
-                    // Seamless endless scrolling without jumping
-                    if (Math.abs(dashboardTickerPosition) >= tickerWidth) {
-                        dashboardTickerPosition = 0;
-                    }
-                    
-                    ticker.style.transform = `translateX(${dashboardTickerPosition}px)`;
-                    dashboardTickerAnimationId = requestAnimationFrame(animate);
-                }
-            }
-            
-            animate();
+        if (!ticker || !container) {
+            console.error('Ticker or container not found!');
+            // Try again in 100ms if elements not ready
+            setTimeout(createTicker, 100);
+            return;
         }
         
-        function startDrag(e) {
-            isDragging = true;
-            container.classList.add('dragging');
-            
-            // Clear any pending resume timeout
-            if (window.dashboardTickerResumeTimeout) {
-                clearTimeout(window.dashboardTickerResumeTimeout);
-                window.dashboardTickerResumeTimeout = null;
-            }
-            
-            // Cancel auto-scroll
-            if (dashboardTickerAnimationId) {
-                cancelAnimationFrame(dashboardTickerAnimationId);
-                dashboardTickerAnimationId = null;
-            }
-            
-            // Always get current position from the actual transform
-            const currentTransform = window.getComputedStyle(ticker).transform;
-            if (currentTransform !== 'none') {
-                const matrix = new DOMMatrix(currentTransform);
-                dashboardTickerPosition = matrix.m41;
-                scrollLeft = dashboardTickerPosition;
-            } else {
-                scrollLeft = dashboardTickerPosition;
-            }
-            
-            startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-            e.preventDefault();
+        // Ensure ticker is visible
+        container.style.display = 'block';
+        container.style.visibility = 'visible';
+        container.style.opacity = '1';
+        
+        // Prevent multiple initializations
+        if (tickerInitialized) {
+            // Just update content without re-adding event listeners
+            updateTickerContent();
+            return;
         }
         
-        function drag(e) {
-            if (!isDragging) return;
-            
-            e.preventDefault();
-            const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-            const walk = x - startX; // Direct 1:1 movement
-            
-            dashboardTickerPosition = scrollLeft + walk;
-            
-            const tickerWidth = ticker.scrollWidth / 2;
-            if (dashboardTickerPosition > 0) {
-                dashboardTickerPosition = -tickerWidth + (dashboardTickerPosition % tickerWidth);
-            } else if (Math.abs(dashboardTickerPosition) >= tickerWidth * 2) {
-                dashboardTickerPosition = dashboardTickerPosition % tickerWidth;
-            }
-            
-            ticker.style.transition = 'none';
-            ticker.style.transform = `translateX(${dashboardTickerPosition}px)`;
+        // Stop any existing animation
+        if (tickerAnimationId) {
+            cancelAnimationFrame(tickerAnimationId);
+            tickerAnimationId = null;
         }
         
-        function stopDrag() {
-            if (!isDragging) return;
+        let content = '';
+        
+        // Build one complete set of ticker content
+        function buildTickerContent() {
+            let singleSet = '';
             
-            isDragging = false;
-            container.classList.remove('dragging');
+            // Bonds Section
+            singleSet += '<span class="ticker-section-header">BONDS</span>';
+            singleSet += '<span class="ticker-separator">●</span>';
+            ['US 10Y', 'UK 10Y', 'DE 10Y', 'US 5Y', 'US 2Y'].forEach(key => {
+                const data = marketData[key];
+                if (data) singleSet += createTickerItem(key, data);
+            });
             
-            // Save the final position
-            const currentTransform = window.getComputedStyle(ticker).transform;
-            if (currentTransform !== 'none') {
-                const matrix = new DOMMatrix(currentTransform);
-                dashboardTickerPosition = matrix.m41;
-            }
+            // Central Banks
+            singleSet += '<span class="ticker-section-header">CENTRAL BANKS</span>';
+            singleSet += '<span class="ticker-separator">●</span>';
+            ['FED RATE', 'BOE RATE', 'ECB RATE'].forEach(key => {
+                const data = marketData[key];
+                if (data) singleSet += createTickerItem(key, data);
+            });
             
-            ticker.style.transition = 'transform 0.5s linear';
+            // Reference Rates
+            singleSet += '<span class="ticker-section-header">REFERENCE RATES</span>';
+            singleSet += '<span class="ticker-separator">●</span>';
+            ['SOFR', 'SONIA', 'ESTR'].forEach(key => {
+                const data = marketData[key];
+                if (data) singleSet += createTickerItem(key, data);
+            });
             
-            // Clear any existing resume timeout
-            if (window.dashboardTickerResumeTimeout) {
-                clearTimeout(window.dashboardTickerResumeTimeout);
-            }
+            // Credit Spreads
+            singleSet += '<span class="ticker-section-header">SECURITISATION</span>';
+            singleSet += '<span class="ticker-separator">●</span>';
+            ['IG SPREAD', 'HY SPREAD', 'CMBS AAA', 'RMBS AAA', 'CLO AAA'].forEach(key => {
+                const data = marketData[key];
+                if (data) singleSet += createTickerItem(key, data);
+            });
             
-            // Resume auto-scroll after a delay
-            window.dashboardTickerResumeTimeout = setTimeout(() => {
-                if (!isDragging) {
-                    startAutoScroll();
-                }
-            }, 2000);
+            // FX
+            singleSet += '<span class="ticker-section-header">FX</span>';
+            singleSet += '<span class="ticker-separator">●</span>';
+            ['GBP/USD', 'EUR/USD', 'USD/JPY', 'EUR/GBP'].forEach(key => {
+                const data = marketData[key];
+                if (data) singleSet += createTickerItem(key, data);
+            });
+            
+            // Equities
+            singleSet += '<span class="ticker-section-header">EQUITIES</span>';
+            singleSet += '<span class="ticker-separator">●</span>';
+            ['S&P 500', 'FTSE 100', 'DAX'].forEach(key => {
+                const data = marketData[key];
+                if (data) singleSet += createTickerItem(key, data);
+            });
+            
+            // Commodities  
+            singleSet += '<span class="ticker-section-header">COMMODITIES</span>';
+            singleSet += '<span class="ticker-separator">●</span>';
+            ['GOLD', 'OIL WTI', 'SILVER'].forEach(key => {
+                const data = marketData[key];
+                if (data) singleSet += createTickerItem(key, data);
+            });
+            
+            singleSet += '<span class="ticker-separator" style="margin: 0 2rem;">||</span>';
+            return singleSet;
         }
         
-        // Event listeners
+        // Create three copies for seamless endless scrolling
+        const singleContent = buildTickerContent();
+        console.log('Built ticker content length:', singleContent.length);
+        ticker.innerHTML = singleContent + singleContent + singleContent;
+        console.log('Ticker innerHTML set, scrollWidth:', ticker.scrollWidth);
+        
+        // Setup drag functionality (only once)
         container.addEventListener('mousedown', startDrag);
         document.addEventListener('mousemove', drag);
         document.addEventListener('mouseup', stopDrag);
@@ -2636,102 +2772,11 @@
         document.addEventListener('touchmove', drag);
         document.addEventListener('touchend', stopDrag);
         
-        // Prevent text selection while dragging
-        container.addEventListener('selectstart', e => {
-            if (isDragging) e.preventDefault();
-        });
+        // Mark as initialized
+        tickerInitialized = true;
         
         // Start auto-scroll
         startAutoScroll();
-    }
-    
-    // Initialize drag functionality is called from createTicker
-    // Removed duplicate DOMContentLoaded listener
-    // Variables already defined at top of script
-    
-    
-
-    // Create ticker content
-    function createTicker() {
-        const ticker = document.getElementById('marketTicker');
-        const container = document.getElementById('tickerContainer');
-        if (!ticker || !container) return;
-        
-        // Prevent multiple initializations
-        if (tickerInitialized) {
-            // Just update content without re-adding event listeners
-            updateTickerContent();
-            return;
-        }
-        
-        let content = '';
-        
-        // Create two identical sets for seamless looping
-        for (let i = 0; i < 2; i++) {
-            // BONDS
-            content += '<span class="ticker-section-header">BONDS</span>';
-            content += '<span class="ticker-separator">●</span>';
-            ['US 10Y', 'UK 10Y', 'DE 10Y', 'US 5Y', 'US 2Y', 'JP 10Y'].forEach(key => {
-                const data = marketData[key];
-                content += createTickerItem(key, data);
-            });
-            
-            // CENTRAL BANKS
-            content += '<span class="ticker-section-header">CENTRAL BANKS</span>';
-            content += '<span class="ticker-separator">●</span>';
-            ['FED RATE', 'BOE RATE', 'ECB RATE', 'BOJ RATE', 'SNB RATE'].forEach(key => {
-                const data = marketData[key];
-                content += createTickerItem(key, data);
-            });
-            
-            // REFERENCE RATES
-            content += '<span class="ticker-section-header">REFERENCE RATES</span>';
-            content += '<span class="ticker-separator">●</span>';
-            ['SOFR', 'SONIA', 'ESTR', 'TONAR'].forEach(key => {
-                const data = marketData[key];
-                content += createTickerItem(key, data);
-            });
-            
-            // SECURITISATION
-            content += '<span class="ticker-section-header">SECURITISATION</span>';
-            content += '<span class="ticker-separator">●</span>';
-            ['RMBS AAA', 'CMBS AAA', 'CLO AAA', 'ABS AAA', 'IG SPREAD', 'HY SPREAD'].forEach(key => {
-                const data = marketData[key];
-                content += createTickerItem(key, data);
-            });
-            
-            // FX
-            content += '<span class="ticker-section-header">FX</span>';
-            content += '<span class="ticker-separator">●</span>';
-            ['GBP/USD', 'EUR/USD', 'USD/JPY', 'EUR/GBP', 'AUD/USD', 'USD/CHF'].forEach(key => {
-                const data = marketData[key];
-                content += createTickerItem(key, data);
-            });
-            
-            // EQUITIES
-            content += '<span class="ticker-section-header">EQUITIES</span>';
-            content += '<span class="ticker-separator">●</span>';
-            ['S&P 500', 'FTSE 100', 'DAX', 'NIKKEI', 'VIX'].forEach(key => {
-                const data = marketData[key];
-                content += createTickerItem(key, data);
-            });
-            
-            // COMMODITIES
-            content += '<span class="ticker-section-header">COMMODITIES</span>';
-            content += '<span class="ticker-separator">●</span>';
-            ['GOLD', 'SILVER', 'OIL WTI', 'OIL BRENT'].forEach(key => {
-                const data = marketData[key];
-                content += createTickerItem(key, data);
-            });
-        }
-        
-        ticker.innerHTML = content;
-        
-        // Initialize drag functionality only once
-        if (!tickerInitialized) {
-            initTickerDrag();
-            tickerInitialized = true;
-        }
     }
 
     function createTickerItem(symbol, data) {
@@ -2794,72 +2839,76 @@
         
         let content = '';
         
-        // Create two identical sets for seamless looping
-        for (let i = 0; i < 2; i++) {
-            // BONDS
-            content += '<span class="ticker-section-header">BONDS</span>';
-            content += '<span class="ticker-separator">●</span>';
-            ['US 10Y', 'UK 10Y', 'DE 10Y', 'US 5Y', 'US 2Y', 'JP 10Y'].forEach(key => {
+        // Build one complete set of ticker content
+        function buildTickerContent() {
+            let singleSet = '';
+            
+            // Bonds Section
+            singleSet += '<span class="ticker-section-header">BONDS</span>';
+            singleSet += '<span class="ticker-separator">●</span>';
+            ['US 10Y', 'UK 10Y', 'DE 10Y', 'US 5Y', 'US 2Y'].forEach(key => {
                 const data = marketData[key];
-                content += createTickerItem(key, data);
+                if (data) singleSet += createTickerItem(key, data);
             });
             
-            // CENTRAL BANKS
-            content += '<span class="ticker-section-header">CENTRAL BANKS</span>';
-            content += '<span class="ticker-separator">●</span>';
-            ['FED RATE', 'BOE RATE', 'ECB RATE', 'BOJ RATE', 'SNB RATE'].forEach(key => {
+            // Central Banks
+            singleSet += '<span class="ticker-section-header">CENTRAL BANKS</span>';
+            singleSet += '<span class="ticker-separator">●</span>';
+            ['FED RATE', 'BOE RATE', 'ECB RATE'].forEach(key => {
                 const data = marketData[key];
-                content += createTickerItem(key, data);
+                if (data) singleSet += createTickerItem(key, data);
             });
             
-            // REFERENCE RATES
-            content += '<span class="ticker-section-header">REFERENCE RATES</span>';
-            content += '<span class="ticker-separator">●</span>';
-            ['SOFR', 'SONIA', 'ESTR', 'TONAR'].forEach(key => {
+            // Reference Rates
+            singleSet += '<span class="ticker-section-header">REFERENCE RATES</span>';
+            singleSet += '<span class="ticker-separator">●</span>';
+            ['SOFR', 'SONIA', 'ESTR'].forEach(key => {
                 const data = marketData[key];
-                content += createTickerItem(key, data);
+                if (data) singleSet += createTickerItem(key, data);
             });
             
-            // SECURITISATION
-            content += '<span class="ticker-section-header">SECURITISATION</span>';
-            content += '<span class="ticker-separator">●</span>';
+            // Credit Spreads
+            singleSet += '<span class="ticker-section-header">SECURITISATION</span>';
+            singleSet += '<span class="ticker-separator">●</span>';
             ['IG SPREAD', 'HY SPREAD', 'CMBS AAA', 'RMBS AAA', 'CLO AAA'].forEach(key => {
                 const data = marketData[key];
-                content += createTickerItem(key, data);
+                if (data) singleSet += createTickerItem(key, data);
             });
             
             // FX
-            content += '<span class="ticker-section-header">FX</span>';
-            content += '<span class="ticker-separator">●</span>';
+            singleSet += '<span class="ticker-section-header">FX</span>';
+            singleSet += '<span class="ticker-separator">●</span>';
             ['GBP/USD', 'EUR/USD', 'USD/JPY', 'EUR/GBP'].forEach(key => {
                 const data = marketData[key];
-                content += createTickerItem(key, data);
+                if (data) singleSet += createTickerItem(key, data);
             });
             
-            // COMMODITIES
-            content += '<span class="ticker-section-header">COMMODITIES</span>';
-            content += '<span class="ticker-separator">●</span>';
-            ['GOLD', 'SILVER', 'OIL'].forEach(key => {
+            // Commodities
+            singleSet += '<span class="ticker-section-header">COMMODITIES</span>';
+            singleSet += '<span class="ticker-separator">●</span>';
+            ['GOLD', 'OIL WTI', 'SILVER'].forEach(key => {
                 const data = marketData[key];
-                content += createTickerItem(key, data);
+                if (data) singleSet += createTickerItem(key, data);
             });
             
-            // INDICES
-            content += '<span class="ticker-section-header">INDICES</span>';
-            content += '<span class="ticker-separator">●</span>';
-            ['S&P 500', 'FTSE 100', 'DAX', 'NIKKEI', 'VIX'].forEach(key => {
-                const data = marketData[key];
-                content += createTickerItem(key, data);
-            });
+            return singleSet;
         }
         
-        ticker.innerHTML = content;
+        // Create three copies for seamless loop
+        const singleContent = buildTickerContent();
+        ticker.innerHTML = singleContent + singleContent + singleContent;
     }
     
     // Initialize everything on page load
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing ticker...');
+        
         // Create and initialize ticker
         createTicker();
+        
+        // Fetch live data on load and every 30 seconds
+        fetchLiveMarketData();
+        setInterval(fetchLiveMarketData, 30000);
         
         // Set current date
         const currentDateElement = document.getElementById('currentDate');
@@ -2940,19 +2989,48 @@
     }
     
     // Toggle Navigation Toolbar
+    let toolbarOpen = true; // Track toolbar state
+    
     function toggleNavToolbar() {
         const toolbar = document.getElementById('navToolbar');
         const toggleIcon = document.getElementById('toggleIcon');
-        const mainContainer = document.querySelector('.main-container');
+        const toggleBtn = document.getElementById('toggleToolbar');
+        const mainContainers = document.querySelectorAll('.main-container, #main-dashboard, #market-section, #data-section, #analytics-section, #risk-section, #portfolio-section, #compliance-section, #permutation-section');
         
-        if (toolbar.style.height === '0px' || !toolbar.style.height) {
-            toolbar.style.height = '50px';
-            toggleIcon.className = 'fas fa-chevron-up';
-            mainContainer.style.marginTop = '165px'; // Adjust for toolbar
-        } else {
-            toolbar.style.height = '0';
+        if (toolbarOpen) {
+            // Close toolbar
+            toolbar.style.height = '0px';
+            toolbar.style.overflow = 'hidden';
+            toolbar.style.borderBottom = 'none';
             toggleIcon.className = 'fas fa-chevron-down';
-            mainContainer.style.marginTop = '115px'; // Normal margin
+            toggleBtn.style.borderRadius = '0 0 6px 6px';
+            
+            // Adjust all main containers
+            mainContainers.forEach(container => {
+                if (container) {
+                    container.style.marginTop = '115px';
+                    container.style.paddingTop = '2rem';
+                }
+            });
+            
+            toolbarOpen = false;
+        } else {
+            // Open toolbar
+            toolbar.style.height = '50px';
+            toolbar.style.overflow = 'visible';
+            toolbar.style.borderBottom = '1px solid rgba(96, 165, 250, 0.3)';
+            toggleIcon.className = 'fas fa-chevron-up';
+            toggleBtn.style.borderRadius = '0';
+            
+            // Adjust all main containers
+            mainContainers.forEach(container => {
+                if (container) {
+                    container.style.marginTop = '165px';
+                    container.style.paddingTop = '2rem';
+                }
+            });
+            
+            toolbarOpen = true;
         }
     }
     

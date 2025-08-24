@@ -1332,19 +1332,143 @@
             if (!confirm(`Delete user: ${email}?`)) return;
             
             try {
-                const response = await fetch('/admin/delete-data', {
+                const response = await fetch('/admin/user/delete', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({type: 'user', identifier: email})
+                    body: JSON.stringify({email})
                 });
                 
                 const data = await response.json();
                 if (data.status === 'success') {
                     showAlert('User deleted', 'success');
                     loadUsersData();
+                    loadRegistrationsData();
                 }
             } catch (error) {
                 showAlert('Error deleting user', 'danger');
+            }
+        }
+
+        async function editUser(email) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.8); display: flex;
+                align-items: center; justify-content: center; z-index: 9999;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: #1a1f3a; border: 1px solid rgba(255,215,0,0.3); 
+                            border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%;">
+                    <h3 style="color: #ffd700; margin-bottom: 1.5rem;">Edit User: ${email}</h3>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: #888; display: block; margin-bottom: 0.5rem;">Account Type:</label>
+                        <select id="editAccountType" style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); color: #ffd700; border: 1px solid rgba(255,215,0,0.3); border-radius: 4px;">
+                            <option value="external">External</option>
+                            <option value="internal">Internal</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                        <button onclick="this.closest('[style*=\"position: fixed\"]').remove()" 
+                                style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); 
+                                       color: #888; border: 1px solid #888; border-radius: 4px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="saveUserEdit('${email}')" 
+                                style="padding: 0.5rem 1rem; background: #ffd700; 
+                                       color: #1a1f3a; border: none; border-radius: 4px; cursor: pointer;">
+                            Save Changes
+                        </button>
+                        <button onclick="toggleFreeze('${email}')" 
+                                style="padding: 0.5rem 1rem; background: #e74c3c; 
+                                       color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Freeze Account
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        async function saveUserEdit(email) {
+            const accountType = document.getElementById('editAccountType').value;
+            
+            try {
+                const response = await fetch('/admin/user/edit', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, account_type: accountType})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('User updated successfully', 'success');
+                    document.querySelector('[style*="position: fixed"]').remove();
+                    loadUsersData();
+                }
+            } catch (error) {
+                showAlert('Error updating user', 'danger');
+            }
+        }
+        
+        async function toggleFreeze(email) {
+            const reason = prompt('Enter reason for freezing account:');
+            if (!reason) return;
+            
+            try {
+                const response = await fetch('/admin/user/freeze', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, reason})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('Account frozen successfully', 'success');
+                    document.querySelector('[style*="position: fixed"]').remove();
+                    loadUsersData();
+                }
+            } catch (error) {
+                showAlert('Error freezing account', 'danger');
+            }
+        }
+        
+        async function saveCustomPassword(email) {
+            const inputId = 'customPassword_' + email.replace(/[@.]/g, '_');
+            const newPassword = document.getElementById(inputId).value;
+            
+            if (!newPassword) {
+                showAlert('Please enter a password', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/admin/update-password', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password: newPassword})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('Password saved successfully', 'success');
+                    // Update the displayed password
+                    const displayId = 'userPassword_' + email.replace(/[@.]/g, '_');
+                    const displayElement = document.getElementById(displayId);
+                    if (displayElement) {
+                        displayElement.value = newPassword;
+                    }
+                    // Update in allRegistrations
+                    if (allRegistrations[email]) {
+                        allRegistrations[email].generated_password = newPassword;
+                    }
+                }
+            } catch (error) {
+                showAlert('Error saving password', 'danger');
             }
         }
 

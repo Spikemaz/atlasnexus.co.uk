@@ -162,8 +162,12 @@ def apply_ip_lockout(ip_address, lockout_type='24h', reason='', failed_passwords
         }
     else:
         # Timed lockout (30min, 24h, or custom)
-        # Add 59 seconds to ensure full time display (e.g., 23:59:59 shows as 24 hours)
-        locked_until = datetime.now() + timedelta(hours=duration_hours, seconds=59)
+        # Don't add extra seconds for 30-minute lockout to display correctly
+        if lockout_type == 'blocked_30min':
+            locked_until = datetime.now() + timedelta(minutes=30)
+        else:
+            # Add 59 seconds for 24h display
+            locked_until = datetime.now() + timedelta(hours=duration_hours, seconds=59)
         ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
         
         # Preserve existing data if updating
@@ -669,7 +673,7 @@ def site_auth():
     if password == 'TIMEOUT_TRIGGER_BLOCK_NOW':
         # Force block due to timeout
         session[f'attempt_count_{ip_address}'] = MAX_ATTEMPTS_BEFORE_BLOCK
-        blocked_until = datetime.now() + timedelta(minutes=BLOCK_DURATION_MINUTES, seconds=59)
+        blocked_until = datetime.now() + timedelta(minutes=BLOCK_DURATION_MINUTES)
         session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
         # Generate reference code
         import random
@@ -740,7 +744,7 @@ def site_auth():
             lockouts[ip_address]['additional_info'] = additional_info
             save_lockouts(lockouts)
         
-        blocked_until = datetime.now() + timedelta(minutes=BLOCK_DURATION_MINUTES, seconds=59)
+        blocked_until = datetime.now() + timedelta(minutes=BLOCK_DURATION_MINUTES)
         session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
         
         # Generate reference code
@@ -1627,6 +1631,14 @@ def auth():
     users = load_json_db(USERS_FILE)
     if email in users:
         user = users[email]
+        
+        # Check if account is frozen
+        if user.get('is_frozen', False):
+            return jsonify({
+                'status': 'error', 
+                'message': f'Account frozen: {user.get("freeze_reason", "Contact administrator")}'
+            }), 403
+        
         # Check if password is valid and not expired
         if user.get('password') == password:
             expiry = datetime.fromisoformat(user.get('password_expiry', '2000-01-01'))
@@ -1705,10 +1717,22 @@ def dashboard():
     
     username = session.get(f'username_{ip_address}', 'User')
     is_admin = session.get(f'is_admin_{ip_address}', False)
+    access_level = session.get(f'access_level_{ip_address}', 'external')
+    
+    # Get account type for display
+    if is_admin:
+        account_type_display = 'Admin'
+    elif access_level == 'internal':
+        account_type_display = 'Internal'
+    else:
+        account_type_display = 'External'
     
     # Show dashboard for ALL users including admin
     # Admin can access admin panel through the header button
-    return render_template('dashboard.html', username=username, is_admin=is_admin)
+    return render_template('dashboard.html', 
+                         username=username, 
+                         is_admin=is_admin, 
+                         account_type=account_type_display)
 
 @app.route('/admin/approve-user', methods=['POST'])
 def admin_approve_user():
@@ -2573,6 +2597,338 @@ def admin_update_password():
     })
     
     return jsonify({'status': 'success', 'message': 'Password updated successfully'})
+
+@app.route('/admin/user/delete', methods=['POST'])
+def admin_delete_user():
+    """Delete a user from the system"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    email = request.json.get('email')
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email required'}), 400
+    
+    # Delete from users
+    users = load_json_db(USERS_FILE)
+    if email in users:
+        del users[email]
+        save_json_db(USERS_FILE, users)
+    
+    # Delete from registrations
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    if email in registrations:
+        del registrations[email]
+        save_json_db(REGISTRATIONS_FILE, registrations)
+    
+    # Log the action
+    log_admin_action(ip_address, 'user_delete', {
+        'deleted_user': email,
+        'admin_email': session.get(f'user_email_{ip_address}')
+    })
+    
+    return jsonify({'status': 'success', 'message': f'User {email} deleted successfully'})
+
+@app.route('/admin/user/freeze', methods=['POST'])
+def admin_freeze_user():
+    """Freeze a user account"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    email = request.json.get('email')
+    reason = request.json.get('reason', 'Account frozen by administrator')
+    
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email required'}), 400
+    
+    # Update user status
+    users = load_json_db(USERS_FILE)
+    if email not in users:
+        return jsonify({'status': 'error', 'message': 'User not found'}), 404
+    
+    users[email]['is_frozen'] = True
+    users[email]['frozen_at'] = datetime.now().isoformat()
+    users[email]['freeze_reason'] = reason
+    users[email]['frozen_by'] = session.get(f'user_email_{ip_address}')
+    save_json_db(USERS_FILE, users)
+    
+    # Log the action
+    log_admin_action(ip_address, 'user_freeze', {
+        'frozen_user': email,
+        'reason': reason,
+        'admin_email': session.get(f'user_email_{ip_address}')
+    })
+    
+    return jsonify({'status': 'success', 'message': f'User {email} frozen successfully'})
+
+@app.route('/admin/user/unfreeze', methods=['POST'])
+def admin_unfreeze_user():
+    """Unfreeze a user account"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    email = request.json.get('email')
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email required'}), 400
+    
+    # Update user status
+    users = load_json_db(USERS_FILE)
+    if email not in users:
+        return jsonify({'status': 'error', 'message': 'User not found'}), 404
+    
+    users[email]['is_frozen'] = False
+    users[email]['unfrozen_at'] = datetime.now().isoformat()
+    users[email]['unfrozen_by'] = session.get(f'user_email_{ip_address}')
+    # Keep freeze history
+    if 'freeze_history' not in users[email]:
+        users[email]['freeze_history'] = []
+    users[email]['freeze_history'].append({
+        'frozen_at': users[email].get('frozen_at'),
+        'unfrozen_at': datetime.now().isoformat(),
+        'reason': users[email].get('freeze_reason'),
+        'frozen_by': users[email].get('frozen_by'),
+        'unfrozen_by': session.get(f'user_email_{ip_address}')
+    })
+    save_json_db(USERS_FILE, users)
+    
+    # Log the action
+    log_admin_action(ip_address, 'user_unfreeze', {
+        'unfrozen_user': email,
+        'admin_email': session.get(f'user_email_{ip_address}')
+    })
+    
+    return jsonify({'status': 'success', 'message': f'User {email} unfrozen successfully'})
+
+@app.route('/admin/user/edit', methods=['POST'])
+def admin_edit_user():
+    """Edit user account type and details"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    data = request.json
+    email = data.get('email')
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email required'}), 400
+    
+    # Update user
+    users = load_json_db(USERS_FILE)
+    if email not in users:
+        return jsonify({'status': 'error', 'message': 'User not found'}), 404
+    
+    # Update account type if provided
+    if 'account_type' in data:
+        old_type = users[email].get('account_type', 'external')
+        new_type = data['account_type']
+        if new_type in ['admin', 'internal', 'external']:
+            users[email]['account_type'] = new_type
+            users[email]['is_admin'] = (new_type == 'admin')
+            
+            # Log type change
+            if 'account_type_history' not in users[email]:
+                users[email]['account_type_history'] = []
+            users[email]['account_type_history'].append({
+                'from': old_type,
+                'to': new_type,
+                'changed_at': datetime.now().isoformat(),
+                'changed_by': session.get(f'user_email_{ip_address}')
+            })
+    
+    # Update other fields if provided
+    if 'full_name' in data:
+        users[email]['full_name'] = data['full_name']
+    if 'company' in data:
+        users[email]['company'] = data['company']
+    if 'phone' in data:
+        users[email]['phone'] = data['phone']
+    
+    users[email]['last_modified'] = datetime.now().isoformat()
+    users[email]['modified_by'] = session.get(f'user_email_{ip_address}')
+    save_json_db(USERS_FILE, users)
+    
+    # Log the action
+    log_admin_action(ip_address, 'user_edit', {
+        'edited_user': email,
+        'changes': data,
+        'admin_email': session.get(f'user_email_{ip_address}')
+    })
+    
+    return jsonify({'status': 'success', 'message': 'User updated successfully'})
+
+@app.route('/admin/users/all')
+def admin_get_all_users():
+    """Get all users with online/offline status"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    users = load_json_db(USERS_FILE)
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    
+    # Combine users and registrations
+    all_users = []
+    
+    # Add approved users
+    for email, user_data in users.items():
+        # Check if user is online (has active session)
+        is_online = False
+        last_activity = None
+        
+        # Check if user has logged in recently (within last 30 minutes)
+        if 'last_login' in user_data:
+            last_login = datetime.fromisoformat(user_data['last_login'])
+            if (datetime.now() - last_login).total_seconds() < 1800:  # 30 minutes
+                is_online = True
+                last_activity = last_login
+        
+        all_users.append({
+            'email': email,
+            'full_name': user_data.get('full_name', 'N/A'),
+            'company': user_data.get('company', 'N/A'),
+            'account_type': user_data.get('account_type', 'external'),
+            'is_admin': user_data.get('is_admin', False),
+            'is_frozen': user_data.get('is_frozen', False),
+            'is_online': is_online,
+            'last_activity': last_activity.isoformat() if last_activity else None,
+            'created_at': user_data.get('created_at'),
+            'status': 'approved'
+        })
+    
+    # Add pending registrations
+    for email, reg_data in registrations.items():
+        if email not in users:  # Don't duplicate approved users
+            all_users.append({
+                'email': email,
+                'full_name': reg_data.get('full_name', 'N/A'),
+                'company': reg_data.get('company', 'N/A'),
+                'account_type': reg_data.get('account_type', 'external'),
+                'is_admin': False,
+                'is_frozen': False,
+                'is_online': False,
+                'last_activity': None,
+                'created_at': reg_data.get('created_at'),
+                'status': 'pending'
+            })
+    
+    return jsonify({'status': 'success', 'users': all_users})
+
+@app.route('/admin/ban-ip', methods=['POST'])
+def admin_ban_ip():
+    """Ban an IP address"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    target_ip = request.json.get('ip')
+    duration = request.json.get('duration', 'permanent')  # permanent, 24h, 7d, 30d
+    reason = request.json.get('reason', 'Banned by administrator')
+    
+    if not target_ip:
+        return jsonify({'status': 'error', 'message': 'IP address required'}), 400
+    
+    # Apply the ban
+    if duration == 'permanent':
+        apply_ip_lockout(target_ip, 'permanent', reason=reason)
+    elif duration == '24h':
+        apply_ip_lockout(target_ip, 'blocked_24h', reason=reason, duration_hours=24)
+    elif duration == '7d':
+        apply_ip_lockout(target_ip, 'blocked_7d', reason=reason, duration_hours=168)
+    elif duration == '30d':
+        apply_ip_lockout(target_ip, 'blocked_30d', reason=reason, duration_hours=720)
+    else:
+        return jsonify({'status': 'error', 'message': 'Invalid duration'}), 400
+    
+    # Log the action
+    log_admin_action(ip_address, 'ip_ban', {
+        'banned_ip': target_ip,
+        'duration': duration,
+        'reason': reason,
+        'admin_email': session.get(f'user_email_{ip_address}')
+    })
+    
+    return jsonify({'status': 'success', 'message': f'IP {target_ip} banned successfully'})
+
+@app.route('/admin/ip-tracking')
+def admin_get_ip_tracking():
+    """Get comprehensive IP tracking data"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    # Load all tracking data
+    lockouts = load_lockouts()
+    login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE)
+    
+    # Build comprehensive IP data
+    ip_data = {}
+    
+    # Add lockout data
+    for ip, lockout_info in lockouts.items():
+        if ip not in ip_data:
+            ip_data[ip] = {
+                'ip_address': ip,
+                'status': 'blocked' if lockout_info.get('permanent') or lockout_info.get('locked_until') else 'normal',
+                'lockout_info': lockout_info,
+                'login_attempts': [],
+                'pages_accessed': [],
+                'first_seen': None,
+                'last_seen': None,
+                'total_attempts': 0
+            }
+    
+    # Add login attempt data
+    for ip, attempts in login_attempts.items():
+        if ip not in ip_data:
+            ip_data[ip] = {
+                'ip_address': ip,
+                'status': 'normal',
+                'lockout_info': None,
+                'login_attempts': [],
+                'pages_accessed': [],
+                'first_seen': None,
+                'last_seen': None,
+                'total_attempts': 0
+            }
+        
+        ip_data[ip]['login_attempts'] = attempts
+        ip_data[ip]['total_attempts'] = len(attempts)
+        
+        # Calculate first and last seen
+        if attempts:
+            timestamps = [datetime.fromisoformat(a['timestamp']) for a in attempts if 'timestamp' in a]
+            if timestamps:
+                ip_data[ip]['first_seen'] = min(timestamps).isoformat()
+                ip_data[ip]['last_seen'] = max(timestamps).isoformat()
+        
+        # Determine pages accessed
+        pages = set()
+        for attempt in attempts:
+            if attempt.get('success'):
+                pages.add('dashboard')
+            pages.add('gate2')
+        ip_data[ip]['pages_accessed'] = list(pages)
+        
+        # Add Gate1 if they got past it
+        if pages:
+            ip_data[ip]['pages_accessed'].insert(0, 'gate1')
+    
+    return jsonify({'status': 'success', 'ip_data': list(ip_data.values())})
 
 @app.route('/admin-panel')
 def admin_panel():

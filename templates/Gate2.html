@@ -1851,20 +1851,19 @@
                 tickerPosition = matrix.m41;
             }
             
-            // Re-enable smooth transitions
-            ticker.style.transition = 'transform 0.5s linear';
-            
             // Clear any existing resume timeout
             if (window.tickerResumeTimeout) {
                 clearTimeout(window.tickerResumeTimeout);
             }
             
-            // Resume auto-scroll after a delay
+            // Smoothly resume auto-scroll immediately from current position
             window.tickerResumeTimeout = setTimeout(() => {
                 if (!isDragging) {
+                    // Resume with smooth transition from current position
+                    ticker.style.transition = 'transform 0.5s ease-out';
                     startAutoScroll();
                 }
-            }, 2000);
+            }, 1000);
         }
         
         // Create ticker content
