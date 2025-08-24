@@ -126,6 +126,12 @@
         }
         .countdown { color: var(--platinum-gold); font-weight: 600; }
         
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(34, 197, 94, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+        
         @keyframes slideIn {
             from { opacity: 0; transform: translateX(20px); }
             to { opacity: 1; transform: translateX(0); }
@@ -178,17 +184,21 @@
         }
         
         function updateUIForVerified() {
-            // Replace resend button with Complete button
+            // Replace resend button with Verified button
             const buttons = document.querySelector('.buttons');
             if (buttons) {
                 const resendBtn = buttons.querySelector('.btn-secondary');
                 if (resendBtn) {
-                    resendBtn.textContent = 'Complete';
+                    resendBtn.textContent = '✓ Verified';
                     resendBtn.style.background = 'linear-gradient(135deg, #059669 0%, #22C55E 100%)';
                     resendBtn.style.color = 'white';
                     resendBtn.style.border = 'none';
+                    resendBtn.style.cursor = 'default';
                     resendBtn.onclick = null;
                     resendBtn.disabled = true;
+                    
+                    // Add a pulse animation to draw attention
+                    resendBtn.style.animation = 'pulse 2s ease-in-out';
                 }
             }
         }
@@ -267,8 +277,8 @@
             
             // Only start interval if not already verified
             if (!emailVerified) {
-                // Start checking verification status every 5 seconds
-                verificationCheckInterval = setInterval(checkVerificationStatus, 5000);
+                // Start checking verification status every 3 seconds for faster updates
+                verificationCheckInterval = setInterval(checkVerificationStatus, 3000);
                 
                 // Stop checking after 1 hour
                 setTimeout(() => {
