@@ -109,6 +109,16 @@
             0%, 100% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.05); opacity: 0.8; }
         }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
 
         .status-icon svg {
             width: 50px;
@@ -269,9 +279,9 @@
 <body>
     <!-- Header -->
     <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <div class="header-content" style="justify-content: center;">
+            <div class="logo" style="animation: float 6s ease-in-out infinite;">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="animation: rotate 20s linear infinite;">
                     <path d="M16 3L26.5 9.5V22.5L16 29L5.5 22.5V9.5L16 3Z" stroke="#93c5fd" stroke-width="2" fill="rgba(147, 197, 253, 0.08)"/>
                     <path d="M16 8L22 11.5V20.5L16 24L10 20.5V11.5L16 8Z" stroke="rgba(147, 197, 253, 0.4)" stroke-width="1"/>
                     <circle cx="16" cy="16" r="3" fill="#dbeafe"/>
@@ -281,9 +291,6 @@
                     <span style="font-size: 1.2rem; font-weight: 400; color: #60a5fa; margin: 0 4px;">:</span>
                     <span style="font-size: 1.35rem; font-weight: 700; background: linear-gradient(90deg, #93c5fd, #dbeafe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">NEXUS</span>
                 </div>
-            </div>
-            <div style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">
-                Registration Pending
             </div>
         </div>
     </header>
@@ -318,7 +325,7 @@
                     <div style="color: #22C55E; font-size: 1.2rem; margin-bottom: 1rem;">
                         <strong>Your email has been verified!</strong>
                     </div>
-                    Your registration is now awaiting admin approval. You will receive an email with your login details once approved (typically within 1-2 business days).
+                    Your registration is now awaiting admin approval. You will receive an email with your login details once approved.
                 {% elif message %}
                     {{ message }}
                 {% else %}
@@ -326,42 +333,6 @@
                 {% endif %}
             </div>
 
-            {% if email %}
-            <div class="email-display">
-                <div class="label">Registered Email</div>
-                <div class="email">{{ email }}</div>
-            </div>
-            {% endif %}
-
-            <div class="steps-container">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <div class="step-title">Verify Your Email</div>
-                        <div class="step-description">Click the verification link in the email we sent you</div>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <div class="step-title">Admin Review</div>
-                        <div class="step-description">Your application will be reviewed within 24 hours</div>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <div class="step-title">Receive Credentials</div>
-                        <div class="step-description">Once approved, you'll receive your login credentials via email</div>
-                    </div>
-                </div>
-            </div>
-
-            <div style="margin: 2rem 0; padding: 1rem; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 10px;">
-                <p style="color: var(--success-green); font-size: 0.9rem;">
-                    <strong>Note:</strong> Please check your spam folder if you don't see the email within a few minutes.
-                </p>
-            </div>
 
             <div class="loading-dots">
                 <span></span>
@@ -373,7 +344,6 @@
                 Processing your application...
             </div>
 
-            <a href="/secure-login" class="back-button">Back to Login</a>
         </div>
     </main>
 
@@ -382,7 +352,7 @@
         <div class="footer-content">
             <p>© 2024 AtlasNexus. All rights reserved. | Registration System</p>
             <p style="margin-top: 0.5rem; color: #92969C;">
-                Support: Support@AtlasNexus.co.uk | +44 20 7123 4567
+                Support: Support@AtlasNexus.co.uk
             </p>
         </div>
     </footer>
