@@ -1764,16 +1764,19 @@
             // Smooth continuous animation
             function animate() {
                 if (!isDragging) {
-                    tickerPosition -= 0.3; // Slower smooth scroll speed
+                    tickerPosition -= 0.5; // Consistent scroll speed
                     
                     // Get actual width of one set of content
                     const tickerWidth = ticker.scrollWidth / 3;
                     
-                    // Reset position for endless loop
+                    // Seamless reset - adjust position without visual jump
                     if (Math.abs(tickerPosition) >= tickerWidth) {
-                        tickerPosition = tickerPosition % tickerWidth;
+                        // Smoothly wrap to equivalent position
+                        tickerPosition = tickerPosition + tickerWidth;
                     }
                     
+                    // Apply transform without any transition for smooth animation
+                    ticker.style.transition = 'none';
                     ticker.style.transform = `translateX(${tickerPosition}px)`;
                     tickerAnimationId = requestAnimationFrame(animate);
                 }
@@ -1824,12 +1827,16 @@
             
             tickerPosition = scrollLeft + walk;
             
-            // Handle endless scrolling boundaries
+            // Seamless endless scrolling - adjust position smoothly
             const tickerWidth = ticker.scrollWidth / 3;
-            if (tickerPosition > 0) {
-                tickerPosition = -tickerWidth + (tickerPosition % tickerWidth);
-            } else if (Math.abs(tickerPosition) >= tickerWidth * 2) {
+            
+            // Only adjust if we're way out of bounds to prevent jumping
+            if (Math.abs(tickerPosition) > tickerWidth * 2.5) {
+                // Smoothly wrap to equivalent position
                 tickerPosition = tickerPosition % tickerWidth;
+            } else if (tickerPosition > tickerWidth * 0.5) {
+                // Smoothly wrap when dragging too far right
+                tickerPosition = tickerPosition - tickerWidth;
             }
             
             ticker.style.transition = 'none'; // Remove transition for immediate response
@@ -1851,19 +1858,28 @@
                 tickerPosition = matrix.m41;
             }
             
+            // Normalize position to prevent jumps
+            const tickerWidth = ticker.scrollWidth / 3;
+            while (tickerPosition < -tickerWidth) {
+                tickerPosition += tickerWidth;
+            }
+            while (tickerPosition > 0) {
+                tickerPosition -= tickerWidth;
+            }
+            
             // Clear any existing resume timeout
             if (window.tickerResumeTimeout) {
                 clearTimeout(window.tickerResumeTimeout);
             }
             
-            // Smoothly resume auto-scroll immediately from current position
+            // Resume auto-scroll smoothly after a short delay
             window.tickerResumeTimeout = setTimeout(() => {
                 if (!isDragging) {
-                    // Resume with smooth transition from current position
-                    ticker.style.transition = 'transform 0.5s ease-out';
+                    // Remove any transition to ensure smooth animation
+                    ticker.style.transition = 'none';
                     startAutoScroll();
                 }
-            }, 1000);
+            }, 500);
         }
         
         // Create ticker content
