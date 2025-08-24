@@ -1565,9 +1565,9 @@ def verify_email():
             session['email_verified'] = True
             return redirect(url_for('secure_login'))
         else:
-            # User is verified but NOT approved - show waiting page
+            # User is verified but NOT approved - show confirmation page
             return render_template('awaiting_verification.html', 
-                                 message="Email verified! Your account is awaiting admin approval.",
+                                 email=email,
                                  status="pending_approval")
     
     # Invalid token
