@@ -79,47 +79,6 @@
             margin: 1rem 0;
             word-break: break-all;
         }
-        .steps {
-            list-style: none;
-            counter-reset: step;
-            margin: 2rem auto;
-            max-width: 450px;
-        }
-        .step {
-            position: relative;
-            padding-left: 3rem;
-            margin-bottom: 1.5rem;
-            counter-increment: step;
-        }
-        .step::before {
-            content: counter(step);
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 2rem;
-            height: 2rem;
-            background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: #1A1D23;
-        }
-        .step.completed::before {
-            background: linear-gradient(135deg, #059669 0%, #22C55E 100%);
-            content: '✓';
-            color: white;
-        }
-        .step-title {
-            color: var(--pearl-grey);
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-        .step-desc {
-            color: #92969C;
-            font-size: 0.95rem;
-        }
         .warning {
             background: rgba(239, 68, 68, 0.05);
             border: 1px solid rgba(239, 68, 68, 0.2);
@@ -131,12 +90,11 @@
         }
         .buttons {
             display: flex;
-            gap: 1rem;
+            justify-content: center;
             margin-top: 2rem;
         }
         .btn {
-            flex: 1;
-            padding: 0.875rem 1.5rem;
+            padding: 0.875rem 2rem;
             border: none;
             border-radius: 10px;
             font-size: 1rem;
@@ -188,91 +146,14 @@
             </p>
         </div>
 
-        <ol class="steps">
-            <li class="step completed">
-                <div class="step-title">Registration Submitted</div>
-                <div class="step-desc">Your details have been received</div>
-            </li>
-            <li class="step" id="step2">
-                <div class="step-title">Verify Email Address</div>
-                <div class="step-desc">Click the link in your email (1 hour expiry)</div>
-            </li>
-            <li class="step">
-                <div class="step-title">Admin Review</div>
-                <div class="step-desc">Our team will review (1-2 business days)</div>
-            </li>
-            <li class="step">
-                <div class="step-title">Account Activation</div>
-                <div class="step-desc">Receive login credentials once approved</div>
-            </li>
-        </ol>
-
         <div class="warning">
             ⚠️ <strong>Important:</strong> Verify your email within 1 hour or registration expires
         </div>
 
         <div class="buttons">
             <button class="btn btn-secondary" onclick="resendEmail()">Resend Email</button>
-            <a href="/secure-login" class="btn btn-primary">Return to Login</a>
-        </div>
-
-        <div class="login-section">
-            <div class="section-divider"></div>
-            <h3>Already Verified & Approved?</h3>
-            <p style="color: #92969C; margin-bottom: 1.5rem;">Login below once your account is activated</p>
-            
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <input type="email" id="loginEmail" name="email" placeholder="Email Address" required>
-                </div>
-                <div class="form-group">
-                    <input type="password" id="loginPassword" name="password" placeholder="Password" required>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Login to Dashboard</button>
-            </form>
-            
-            <div id="loginMessage" style="margin-top: 1rem; text-align: center; display: none;"></div>
         </div>
     </div>
-
-    <style>
-        .login-section {
-            margin-top: 2.5rem;
-            padding-top: 2rem;
-        }
-        .section-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(146, 150, 156, 0.3), transparent);
-            margin-bottom: 2rem;
-        }
-        .login-section h3 {
-            color: var(--pearl-grey);
-            font-size: 1.3rem;
-            margin-bottom: 0.5rem;
-            text-align: center;
-        }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(146, 150, 156, 0.3);
-            border-radius: 8px;
-            color: var(--pearl-grey);
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--platinum-gold);
-            background: rgba(255, 255, 255, 0.08);
-        }
-        .form-group input::placeholder {
-            color: #92969C;
-        }
-    </style>
 
     <script>
         // Check verification status periodically
@@ -297,12 +178,6 @@
         }
         
         function updateUIForVerified() {
-            // Update step 2 to completed
-            const step2 = document.getElementById('step2');
-            if (step2) {
-                step2.classList.add('completed');
-            }
-            
             // Replace resend button with Complete button
             const buttons = document.querySelector('.buttons');
             if (buttons) {
@@ -357,11 +232,6 @@
                 // Also check if approved (for future status updates)
                 if (data.approved) {
                     localStorage.setItem(storageKey, 'approved');
-                    // Update step 3 if needed
-                    const step3 = document.querySelector('.step:nth-child(3)');
-                    if (step3 && !step3.classList.contains('completed')) {
-                        step3.classList.add('completed');
-                    }
                 }
             })
             .catch(error => console.log('Verification check failed:', error));
@@ -408,44 +278,6 @@
                 }, 3600000); // 1 hour
             }
         });
-        
-        function handleLogin(event) {
-            event.preventDefault();
-            const form = event.target;
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const messageDiv = document.getElementById('loginMessage');
-            
-            // Show loading
-            messageDiv.style.display = 'block';
-            messageDiv.style.color = '#60a5fa';
-            messageDiv.innerHTML = 'Logging in...';
-            
-            fetch('/auth', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    messageDiv.style.color = '#22C55E';
-                    messageDiv.innerHTML = '✓ Login successful! Redirecting...';
-                    setTimeout(() => {
-                        window.location.href = data.redirect || '/dashboard';
-                    }, 1500);
-                } else {
-                    messageDiv.style.color = '#ef4444';
-                    messageDiv.innerHTML = data.message || 'Login failed. Account may not be activated yet.';
-                }
-            })
-            .catch(error => {
-                messageDiv.style.color = '#ef4444';
-                messageDiv.innerHTML = 'Connection error. Please try again.';
-            });
-            
-            return false;
-        }
 
         let lastResendTime = 0;
         
