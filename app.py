@@ -1859,6 +1859,31 @@ def dashboard():
                          is_admin=is_admin, 
                          account_type=account_type_display)
 
+@app.route('/market-view')
+def market_view():
+    """Market view with registration prompt for unauthenticated users"""
+    ip_address = get_real_ip()
+    
+    # If not authenticated, show registration screen
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return render_template('registration-submitted.html',
+                             message="Please complete registration to access market data",
+                             show_registration=True)
+    
+    # If authenticated, redirect to dashboard market section
+    return redirect(url_for('dashboard') + '#market')
+
+@app.route('/data-sources')
+def data_sources():
+    """Data sources page showing all data feeds"""
+    ip_address = get_real_ip()
+    
+    # Require authentication to view data sources
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return redirect(url_for('secure_login'))
+    
+    return render_template('data_sources.html')
+
 @app.route('/admin/approve-user', methods=['POST'])
 def admin_approve_user():
     """Admin approve user"""

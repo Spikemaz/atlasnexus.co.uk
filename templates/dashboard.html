@@ -351,6 +351,217 @@
             border-color: var(--platinum-gold);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            /* Fix header for mobile */
+            .header {
+                flex-direction: column;
+                padding: 15px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+            }
+            
+            .header-left {
+                margin-bottom: 10px;
+                text-align: center;
+            }
+            
+            .header-right {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            
+            .header-btn {
+                width: 100%;
+                padding: 10px !important;
+                font-size: 0.9rem !important;
+            }
+            
+            /* Fix ticker for mobile */
+            .market-ticker-container {
+                top: 100px !important;
+                height: 40px;
+                min-height: 40px;
+                padding: 8px 0;
+            }
+            
+            .market-ticker {
+                font-size: 0.75rem;
+            }
+            
+            .ticker-item {
+                margin: 0 8px !important;
+            }
+            
+            /* Fix toolbar for mobile */
+            .toolbar {
+                top: 140px !important;
+                padding: 10px;
+                overflow-x: auto;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .nav-btn {
+                padding: 8px 12px !important;
+                font-size: 0.8rem !important;
+                min-width: auto;
+            }
+            
+            /* Fix main container for mobile */
+            .main-container {
+                margin-top: 200px !important;
+                padding: 1rem;
+            }
+            
+            /* Fix cards for mobile */
+            .card {
+                margin-bottom: 15px;
+            }
+            
+            .card-body {
+                padding: 15px !important;
+            }
+            
+            /* Fix stats cards for mobile */
+            .stats-card {
+                padding: 15px !important;
+            }
+            
+            .stats-card h3 {
+                font-size: 1.5rem !important;
+            }
+            
+            .stats-card p {
+                font-size: 0.8rem !important;
+            }
+            
+            /* Fix footer for mobile */
+            footer {
+                padding: 20px 10px !important;
+            }
+            
+            footer .container {
+                padding: 0 !important;
+            }
+            
+            footer h4 {
+                font-size: 1rem !important;
+            }
+            
+            footer a {
+                font-size: 0.85rem !important;
+            }
+            
+            /* Hide some elements on mobile for cleaner view */
+            .desktop-only {
+                display: none !important;
+            }
+            
+            /* Fix sections for mobile */
+            #market-section, #data-section, #analytics-section, 
+            #risk-section, #portfolio-section, #compliance-section {
+                padding: 200px 1rem 2rem !important;
+            }
+            
+            /* Fix dropdown for mobile */
+            .dropdown-content {
+                width: 100%;
+                right: 0;
+                left: 0;
+            }
+            
+            /* Fix chart container for mobile */
+            canvas {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+            
+            /* Fix table responsiveness */
+            table {
+                font-size: 0.8rem;
+            }
+            
+            th, td {
+                padding: 8px !important;
+            }
+            
+            /* Fix modals for mobile */
+            .modal-content {
+                width: 95% !important;
+                margin: 10px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* Extra small devices */
+            .header {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.2rem !important;
+            }
+            
+            .market-ticker-container {
+                font-size: 0.65rem;
+            }
+            
+            .toolbar {
+                padding: 8px 5px;
+            }
+            
+            .nav-btn {
+                padding: 6px 10px !important;
+                font-size: 0.75rem !important;
+            }
+            
+            .main-container {
+                padding: 0.5rem;
+            }
+            
+            .card-title {
+                font-size: 1rem !important;
+            }
+            
+            footer {
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* Ensure horizontal scrolling is prevented */
+        body {
+            overflow-x: hidden;
+        }
+        
+        /* Mobile-specific utility classes */
+        @media (max-width: 768px) {
+            .mobile-center {
+                text-align: center !important;
+            }
+            
+            .mobile-full-width {
+                width: 100% !important;
+            }
+            
+            .mobile-padding {
+                padding: 10px !important;
+            }
+            
+            .hide-mobile {
+                display: none !important;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .show-mobile {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
