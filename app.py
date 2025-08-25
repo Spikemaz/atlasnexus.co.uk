@@ -2789,21 +2789,45 @@ def admin_resend_credentials():
     
     email = request.json.get('email')
     
-    # Load users
+    # Try to find user in both users and registrations
     users = load_json_db(USERS_FILE)
+    registrations = load_json_db(REGISTRATIONS_FILE)
     
-    if email not in users:
+    user_data = None
+    password = None
+    account_type = 'external'
+    
+    # Check users first
+    if email in users:
+        user_data = users[email]
+        password = user_data.get('password')
+        account_type = user_data.get('account_type', 'external')
+    # Then check registrations
+    elif email in registrations:
+        user_data = registrations[email]
+        password = user_data.get('generated_password')
+        account_type = user_data.get('account_type', 'external')
+    
+    if not user_data:
         return jsonify({'status': 'error', 'message': 'User not found'}), 404
     
-    user = users[email]
-    
-    if not user.get('admin_approved'):
+    if not user_data.get('admin_approved'):
         return jsonify({'status': 'error', 'message': 'User not approved'}), 400
+    
+    if not password:
+        return jsonify({'status': 'error', 'message': 'No password found for user'}), 400
     
     # Send credentials email
     base_url = get_base_url()
-    password = user.get('password', 'Please contact admin for password')
-    account_type = user.get('account_type', 'external')
+    password_expiry = user_data.get('password_expiry')
+    expiry_message = ""
+    if password_expiry:
+        expiry_date = datetime.fromisoformat(password_expiry)
+        days_left = (expiry_date - datetime.now()).days
+        if days_left > 0:
+            expiry_message = f"<p style='color: #e67e22;'><strong>⚠️ Password expires in {days_left} days</strong></p>"
+        else:
+            expiry_message = f"<p style='color: #e74c3c;'><strong>⚠️ Password has expired - please request a new one</strong></p>"
     
     email_html = f"""
     <html>
@@ -2815,6 +2839,7 @@ def admin_resend_credentials():
                     <p><strong>Email:</strong> {email}</p>
                     <p><strong>Password:</strong> <code style="background: #fffae6; padding: 4px 8px; border-radius: 4px; font-size: 14px;">{password}</code></p>
                     <p><strong>Account Type:</strong> {account_type.upper()}</p>
+                    {expiry_message}
                 </div>
                 <a href="{base_url}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
             </div>
@@ -2823,6 +2848,11 @@ def admin_resend_credentials():
     """
     
     if send_email(email, 'AtlasNexus - Your Login Credentials', email_html):
+        # Log the action
+        log_admin_action(ip_address, 'credentials_resent', {
+            'user_email': email,
+            'admin_email': session.get(f'user_email_{ip_address}')
+        })
         return jsonify({'status': 'success', 'message': 'Credentials resent successfully'})
     else:
         return jsonify({'status': 'error', 'message': 'Failed to send email'}), 500
@@ -2868,8 +2898,9 @@ def debug_ip_status():
     return jsonify(status)
 
 @app.route('/admin/update-password', methods=['POST'])
+@app.route('/admin/user/update-password', methods=['POST'])
 def admin_update_password():
-    """Update user password"""
+    """Update user password with 30-day expiry and optional email"""
     ip_address = get_real_ip()
     
     # Verify admin access
@@ -2879,6 +2910,7 @@ def admin_update_password():
     data = request.get_json()
     email = data.get('email')
     new_password = data.get('password')
+    send_email_flag = data.get('send_email', False)
     
     if not email or not new_password:
         return jsonify({'status': 'error', 'message': 'Email and password required'}), 400
@@ -2893,14 +2925,42 @@ def admin_update_password():
     users = load_json_db(USERS_FILE)
     if email in users:
         users[email]['password'] = new_password
-        # Reset password expiry to 90 days from now
-        users[email]['password_expiry'] = (datetime.now() + timedelta(days=90)).isoformat()
+        # Reset password expiry to 30 days from now
+        users[email]['password_expiry'] = (datetime.now() + timedelta(days=30)).isoformat()
         save_json_db(USERS_FILE, users)
+        
+        # Send email if requested
+        if send_email_flag:
+            base_url = get_base_url()
+            account_type = users[email].get('account_type', 'external')
+            
+            email_html = f"""
+            <html>
+                <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+                    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                        <h2 style="color: #e67e22;">Password Updated</h2>
+                        <p>Your password has been updated by an administrator.</p>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <p><strong>Email:</strong> {email}</p>
+                            <p><strong>New Password:</strong> <code style="background: #fffae6; padding: 4px 8px; border-radius: 4px; font-size: 14px;">{new_password}</code></p>
+                            <p><strong>Account Type:</strong> {account_type.upper()}</p>
+                            <p style="color: #e67e22; margin-top: 1rem;"><strong>⚠️ This password expires in 30 days</strong></p>
+                        </div>
+                        <a href="{base_url}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
+                        <p style="color: #666; font-size: 14px; margin-top: 20px;">For security, please change your password after first login.</p>
+                    </div>
+                </body>
+            </html>
+            """
+            
+            if not send_email(email, 'AtlasNexus - Password Updated', email_html):
+                return jsonify({'status': 'warning', 'message': 'Password updated but email failed to send'})
     
     # Log the action
     log_admin_action(ip_address, 'password_update', {
         'user_email': email,
-        'admin_email': session.get(f'user_email_{ip_address}')
+        'admin_email': session.get(f'user_email_{ip_address}'),
+        'email_sent': send_email_flag
     })
     
     return jsonify({'status': 'success', 'message': 'Password updated successfully'})
