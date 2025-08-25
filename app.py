@@ -1656,13 +1656,30 @@ def verify_email():
         save_json_db(REGISTRATIONS_FILE, registrations)
         
         # Check if user was already approved (approved before verification)
-        users = load_json_db(USERS_FILE)
-        if email in users and users[email].get('admin_approved') and not users[email].get('password_sent'):
-            # Send password email since they were approved before verification
-            password = users[email].get('password')
-            account_type = users[email].get('account_type', 'external')
+        if registrations[email].get('admin_approved'):
+            # User was approved before verification - now create account and send credentials
+            password = registrations[email].get('generated_password')
+            account_type = registrations[email].get('account_type', 'external')
             
             if password:
+                # Create user account now that they're verified
+                password_expiry = datetime.now() + timedelta(days=30)
+                users = load_json_db(USERS_FILE)
+                users[email] = {
+                    **registrations[email],
+                    'password': password,
+                    'password_expiry': password_expiry.isoformat(),
+                    'admin_approved': True,
+                    'account_type': account_type,
+                    'login_count': 0,
+                    'total_login_time': 0,
+                    'last_login': None,
+                    'login_history': [],
+                    'password_sent': True  # Sending now
+                }
+                save_json_db(USERS_FILE, users)
+                
+                # Send credentials email
                 base_url = get_base_url()
                 email_html = f"""
                 <html>
@@ -1684,10 +1701,6 @@ def verify_email():
                 """
                 
                 send_email(email, 'AtlasNexus - Your Account is Ready', email_html)
-                
-                # Mark password as sent
-                users[email]['password_sent'] = True
-                save_json_db(USERS_FILE, users)
         
         # Check if user is approved
         if registrations[email].get('admin_approved'):
@@ -1956,27 +1969,33 @@ def admin_approve_user():
     
     # Use the pre-generated password or create a new one if missing
     password = registrations[email].get('generated_password', generate_secure_password())
-    password_expiry = datetime.now() + timedelta(days=30)
     
-    # Create user account
-    users = load_json_db(USERS_FILE)
-    users[email] = {
-        **registrations[email],
-        'password': password,
-        'password_expiry': password_expiry.isoformat(),
-        'admin_approved': True,
-        'approved_at': datetime.now().isoformat(),
-        'login_count': 0,
-        'total_login_time': 0,
-        'last_login': None,
-        'login_history': [],
-        'approved_by': 'spikemaz8@aol.com'
-    }
-    save_json_db(USERS_FILE, users)
-    
-    # Update registration status
+    # Update registration with approval info
+    registrations[email]['generated_password'] = password
     registrations[email]['admin_approved'] = True
+    registrations[email]['approved_at'] = datetime.now().isoformat()
+    registrations[email]['approved_by'] = session.get(f'user_email_{ip_address}', 'spikemaz8@aol.com')
     save_json_db(REGISTRATIONS_FILE, registrations)
+    
+    # Check if email is verified
+    email_verified = registrations[email].get('email_verified', False)
+    
+    # Only create user account if email is verified
+    if email_verified:
+        password_expiry = datetime.now() + timedelta(days=30)
+        users = load_json_db(USERS_FILE)
+        users[email] = {
+            **registrations[email],
+            'password': password,
+            'password_expiry': password_expiry.isoformat(),
+            'admin_approved': True,
+            'login_count': 0,
+            'total_login_time': 0,
+            'last_login': None,
+            'login_history': [],
+            'approved_by': session.get(f'user_email_{ip_address}', 'spikemaz8@aol.com')
+        }
+        save_json_db(USERS_FILE, users)
     
     # Log admin action
     admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
@@ -1990,33 +2009,41 @@ def admin_approve_user():
     })
     save_json_db(ADMIN_ACTIONS_FILE, admin_actions)
     
-    # Send approval email with password
-    email_html = f"""
-    <html>
-        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
-            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
-                <h2 style="color: #333;">Account Approved - AtlasNexus</h2>
-                <p>Your account has been approved. You can now login with the following credentials:</p>
-                <div style="background: #f0f0f0; padding: 20px; border-radius: 5px; margin: 20px 0;">
-                    <p><strong>Email:</strong> {email}</p>
-                    <p><strong>Password:</strong> {password}</p>
-                    <p style="color: #666; font-size: 14px;">This password expires in 30 days</p>
+    # Only send email if user has verified their email
+    if email_verified:
+        email_html = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+                <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                    <h2 style="color: #333;">Account Approved - AtlasNexus</h2>
+                    <p>Your account has been approved. You can now login with the following credentials:</p>
+                    <div style="background: #f0f0f0; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                        <p><strong>Email:</strong> {email}</p>
+                        <p><strong>Password:</strong> {password}</p>
+                        <p style="color: #666; font-size: 14px;">This password expires in 30 days</p>
+                    </div>
+                    <a href="{get_base_url()}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                    <p style="color: #999; font-size: 12px;">For security, please change your password after first login.</p>
                 </div>
-                <a href="{get_base_url()}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
-                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-                <p style="color: #999; font-size: 12px;">For security, please change your password after first login.</p>
-            </div>
-        </body>
-    </html>
-    """
-    
-    send_email(email, 'Account Approved - AtlasNexus', email_html)
-    
-    return jsonify({
-        'status': 'success',
-        'message': f'User approved. Password sent to {email}',
-        'password': password  # Show to admin for reference
-    })
+            </body>
+        </html>
+        """
+        
+        send_email(email, 'Account Approved - AtlasNexus', email_html)
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'User approved. Password sent to {email}',
+            'password': password  # Show to admin for reference
+        })
+    else:
+        # User not yet verified - credentials will be sent after verification
+        return jsonify({
+            'status': 'success',
+            'message': f'User approved. Credentials will be sent after email verification.',
+            'password': password  # Show to admin for reference
+        })
 
 @app.route('/admin/quick-approve')
 def admin_quick_approve():
@@ -2592,34 +2619,37 @@ def admin_approve_user_advanced():
     else:
         password = generate_secure_password()
     
-    # Store password in registration for later use
+    # Update registration with approval info but keep it in registrations
     registrations[email]['generated_password'] = password
     registrations[email]['account_type'] = account_type
     registrations[email]['admin_approved'] = True
     registrations[email]['approved_at'] = datetime.now().isoformat()
+    registrations[email]['approved_by'] = session.get(f'user_email_{ip_address}', 'spikemaz8@aol.com')
     save_json_db(REGISTRATIONS_FILE, registrations)
     
     # Check if email is verified
     email_verified = registrations[email].get('email_verified', False)
     
-    # Create user account
-    password_expiry = datetime.now() + timedelta(days=30)
-    users = load_json_db(USERS_FILE)
-    users[email] = {
-        **registrations[email],
-        'password': password,
-        'password_expiry': password_expiry.isoformat(),
-        'admin_approved': True,
-        'approved_at': datetime.now().isoformat(),
-        'account_type': account_type,
-        'login_count': 0,
-        'total_login_time': 0,
-        'last_login': None,
-        'login_history': [],
-        'approved_by': 'spikemaz8@aol.com',
-        'password_sent': email_verified  # Track if password was sent
-    }
-    save_json_db(USERS_FILE, users)
+    # Only create user account and send credentials if BOTH verified AND approved
+    if email_verified:
+        # Create user account
+        password_expiry = datetime.now() + timedelta(days=30)
+        users = load_json_db(USERS_FILE)
+        users[email] = {
+            **registrations[email],
+            'password': password,
+            'password_expiry': password_expiry.isoformat(),
+            'admin_approved': True,
+            'approved_at': datetime.now().isoformat(),
+            'account_type': account_type,
+            'login_count': 0,
+            'total_login_time': 0,
+            'last_login': None,
+            'login_history': [],
+            'approved_by': session.get(f'user_email_{ip_address}', 'spikemaz8@aol.com'),
+            'password_sent': False  # Will be sent now
+        }
+        save_json_db(USERS_FILE, users)
     
     # Update registration status
     registrations[email]['admin_approved'] = True
