@@ -956,6 +956,12 @@
                 
                 if (data.status === 'success') {
                     adminData = data.data;
+                    console.log('Dashboard data loaded:', {
+                        login_attempts: Object.keys(adminData.login_attempts || {}).length,
+                        admin_actions: adminData.admin_actions ? adminData.admin_actions.length : 0,
+                        registrations: Object.keys(adminData.registrations || {}).length,
+                        users: Object.keys(adminData.users || {}).length
+                    });
                     updateDashboardStats();
                     updateActivityTable();
                 }
@@ -1047,32 +1053,96 @@
             const tbody = document.getElementById('activityTableBody');
             const activities = [];
             
-            // Combine different activity sources
+            // Add login attempts
             Object.entries(adminData.login_attempts || {}).forEach(([ip, attempts]) => {
-                attempts.forEach(attempt => {
-                    activities.push({
-                        time: new Date(attempt.timestamp),
-                        user: attempt.email || 'Unknown',
-                        action: attempt.success ? 'Login Success' : 'Login Failed',
-                        ip: ip,
-                        status: attempt.success ? 'success' : 'failed'
+                if (Array.isArray(attempts)) {
+                    attempts.forEach(attempt => {
+                        activities.push({
+                            time: new Date(attempt.timestamp),
+                            user: attempt.email || 'Unknown',
+                            action: attempt.success ? 'Login Success' : 'Login Failed',
+                            ip: ip,
+                            status: attempt.success ? 'success' : 'failed'
+                        });
                     });
-                });
+                }
             });
             
-            // Sort by time
+            // Add admin actions
+            if (Array.isArray(adminData.admin_actions)) {
+                adminData.admin_actions.forEach(action => {
+                    activities.push({
+                        time: new Date(action.timestamp),
+                        user: action.admin || action.admin_email || 'Admin',
+                        action: formatActionType(action.action),
+                        ip: action.ip || 'System',
+                        status: 'success'
+                    });
+                });
+            }
+            
+            // Add recent registrations
+            Object.entries(adminData.registrations || {}).forEach(([email, reg]) => {
+                if (reg.created_at) {
+                    activities.push({
+                        time: new Date(reg.created_at),
+                        user: email,
+                        action: 'New Registration',
+                        ip: reg.ip_address || 'Unknown',
+                        status: 'pending'
+                    });
+                }
+                if (reg.approved_at) {
+                    activities.push({
+                        time: new Date(reg.approved_at),
+                        user: email,
+                        action: 'User Approved',
+                        ip: 'Admin Action',
+                        status: 'success'
+                    });
+                }
+            });
+            
+            // Sort by time (most recent first)
             activities.sort((a, b) => b.time - a.time);
             
+            console.log(`Found ${activities.length} total activities`);
+            
             // Display top 10
-            tbody.innerHTML = activities.slice(0, 10).map(activity => `
-                <tr>
-                    <td>${activity.time.toLocaleString()}</td>
-                    <td>${activity.user}</td>
-                    <td>${activity.action}</td>
-                    <td>${activity.ip}</td>
-                    <td><span class="status-badge ${activity.status === 'success' ? 'status-active' : 'status-banned'}">${activity.status}</span></td>
-                </tr>
-            `).join('') || '<tr><td colspan="5" style="text-align: center;">No recent activity</td></tr>';
+            if (activities.length > 0) {
+                tbody.innerHTML = activities.slice(0, 10).map(activity => {
+                    const statusClass = activity.status === 'success' ? 'status-active' : 
+                                       activity.status === 'failed' ? 'status-banned' : 
+                                       'status-pending';
+                    return `
+                        <tr>
+                            <td>${activity.time.toLocaleString()}</td>
+                            <td>${activity.user}</td>
+                            <td>${activity.action}</td>
+                            <td><code>${activity.ip}</code></td>
+                            <td><span class="status-badge ${statusClass}">${activity.status}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No recent activity</td></tr>';
+            }
+        }
+        
+        function formatActionType(action) {
+            const actionMap = {
+                'user_approved': 'Approved User',
+                'user_approved_advanced': 'Advanced Approval',
+                'password_update': 'Password Updated',
+                'credentials_resent': 'Resent Credentials',
+                'user_frozen': 'Froze Account',
+                'user_unfrozen': 'Unfroze Account',
+                'user_deleted': 'Deleted User',
+                'ip_ban': 'Banned IP',
+                'ip_unban': 'Unbanned IP',
+                'login_attempts_deleted': 'Cleared Login Attempts'
+            };
+            return actionMap[action] || action;
         }
 
         function updateUsersTable(users) {
