@@ -146,12 +146,71 @@ def check_ip_lockout(ip_address):
     
     return None
 
+def send_lockout_notification(ip_address, failed_attempts, lockout_type='30min'):
+    """Send email notification to admin when IP gets locked out"""
+    admin_email = 'spikemaz8@aol.com'
+    
+    # Format the failed attempts
+    attempts_html = ""
+    for attempt in failed_attempts:
+        attempts_html += f"<li><code style='color: #e74c3c;'>{attempt}</code></li>"
+    
+    # Get IP location info if available
+    tracking_file = os.path.join(DATA_DIR, 'ip_tracking.json')
+    tracking = load_json_db(tracking_file)
+    ip_info = tracking.get(ip_address, {})
+    
+    email_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                <h2 style="color: #e74c3c;">🚨 Security Alert: IP Lockout</h2>
+                <p>An IP address has been locked out after multiple failed password attempts.</p>
+                
+                <div style="background: #fee; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #fcc;">
+                    <h3 style="color: #c00; margin-top: 0;">Lockout Details</h3>
+                    <p><strong>IP Address:</strong> <code>{ip_address}</code></p>
+                    <p><strong>Lockout Type:</strong> {lockout_type}</p>
+                    <p><strong>Time:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                    <p><strong>First Seen:</strong> {ip_info.get('first_seen', 'Unknown')}</p>
+                    <p><strong>Total Visits:</strong> {ip_info.get('total_visits', 0)}</p>
+                </div>
+                
+                <div style="background: #fff5f5; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #fdd;">
+                    <h3 style="color: #a00; margin-top: 0;">Failed Password Attempts</h3>
+                    <ol style="color: #666;">
+                        {attempts_html}
+                    </ol>
+                </div>
+                
+                <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #bae6fd;">
+                    <p style="color: #0369a1; margin: 0;">
+                        <strong>Action Required:</strong> Review the failed attempts. If suspicious, consider a permanent ban.
+                    </p>
+                </div>
+                
+                <a href="https://atlasnexus.co.uk/admin-panel" 
+                   style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; 
+                          text-decoration: none; border-radius: 5px;">
+                    View Admin Panel
+                </a>
+            </div>
+        </body>
+    </html>
+    """
+    
+    send_email(admin_email, f'Security Alert: IP {ip_address} Locked Out', email_html)
+
 def apply_ip_lockout(ip_address, lockout_type='24h', reason='', failed_passwords=None, duration_hours=24):
     """Apply a lockout to an IP address with detailed logging"""
     lockouts = load_lockouts()
     
     # Debug logging
     print(f"[LOCKOUT] Applying {lockout_type} to IP {ip_address} for {duration_hours} hours. Reason: {reason}")
+    
+    # Send email notification for 30-minute lockouts
+    if lockout_type == 'blocked_30min' and failed_passwords:
+        send_lockout_notification(ip_address, failed_passwords, '30-minute lockout')
     
     if lockout_type == 'permanent':
         lockouts[ip_address] = {
@@ -1868,10 +1927,20 @@ def auth():
                     user['login_history'] = []
                 user['login_history'].append({
                     'timestamp': current_time.isoformat(),
-                    'ip_address': ip_address
+                    'ip_address': ip_address,
+                    'success': True
                 })
                 # Keep only last 50 logins
                 user['login_history'] = user['login_history'][-50:]
+                
+                # Track IP history (all IPs ever used by this user)
+                if 'ip_history' not in user:
+                    user['ip_history'] = []
+                if ip_address not in user['ip_history']:
+                    user['ip_history'].append(ip_address)
+                
+                # Update IP tracking for this user
+                track_ip_access(ip_address, 'user_login', email)
                 
                 # Store login session start time
                 session[f'login_start_time_{ip_address}'] = current_time.isoformat()
@@ -2365,59 +2434,34 @@ def test_email():
 
 @app.route('/admin/ip-management')
 def admin_ip_management():
-    """Get all IP lockout data for admin panel"""
+    """Get comprehensive IP data for admin panel"""
     ip_address = get_real_ip()
     
     # Verify admin access
     if not session.get(f'is_admin_{ip_address}'):
         return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
     
-    # Load all lockout data
+    # Load all data sources
     lockouts = load_lockouts()
     attempt_logs = load_attempt_logs()
+    login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE)
+    tracking_file = os.path.join(DATA_DIR, 'ip_tracking.json')
+    ip_tracking = load_json_db(tracking_file)
     
     # Debug logging
     print(f"[ADMIN] IP Management accessed by {ip_address}")
     print(f"[ADMIN] Found {len(lockouts)} locked IPs")
     print(f"[ADMIN] Found {len(attempt_logs)} IPs with attempts")
+    print(f"[ADMIN] Found {len(ip_tracking)} tracked IPs")
     
-    # Format data for frontend
-    ip_data = []
-    for ip, info in lockouts.items():
-        # Calculate remaining time if applicable
-        remaining_time = None
-        if 'locked_until' in info and not info.get('permanent'):
-            locked_until = datetime.fromisoformat(info['locked_until'])
-            if datetime.now() < locked_until:
-                remaining_time = str(locked_until - datetime.now()).split('.')[0]
-        
-        # Get attempt history
-        attempts = []
-        if ip in attempt_logs:
-            attempts = attempt_logs[ip].get('attempts', [])[-10:]  # Last 10 attempts
-        
-        # Get additional info if available
-        additional_info = info.get('additional_info', {})
-        
-        ip_data.append({
-            'ip': ip,
-            'status': 'permanent' if info.get('permanent') else 'temporary',
-            'locked_at': info.get('locked_at'),
-            'locked_until': info.get('locked_until'),
-            'remaining_time': remaining_time,
-            'reason': info.get('reason', 'Unknown'),
-            'failed_passwords': info.get('failed_passwords', []),
-            'reference_code': info.get('reference_code'),
-            'attempt_history': attempts,
-            'total_attempts': attempt_logs.get(ip, {}).get('total_attempts', 0),
-            'first_seen': additional_info.get('first_seen') or attempt_logs.get(ip, {}).get('first_seen'),
-            'user_agent': additional_info.get('user_agent', 'Unknown'),
-            'browser_info': additional_info.get('browser_info', 'Unknown'),
-            'accept_language': additional_info.get('accept_language', 'Unknown'),
-            'lockout_type': info.get('lockout_type', 'unknown')
-        })
+    # Compile comprehensive data
+    data = {
+        'lockouts': lockouts,
+        'login_attempts': login_attempts,
+        'tracking': ip_tracking
+    }
     
-    return jsonify({'status': 'success', 'data': ip_data})
+    return jsonify({'status': 'success', 'data': data})
 
 @app.route('/admin/manage-ip', methods=['POST'])
 def admin_manage_ip():
@@ -3210,6 +3254,8 @@ def admin_ban_ip():
     # Apply the ban
     if duration == 'permanent':
         apply_ip_lockout(target_ip, 'permanent', reason=reason)
+    elif duration == '30min':
+        apply_ip_lockout(target_ip, 'blocked_30min', reason=reason, duration_hours=0.5)
     elif duration == '24h':
         apply_ip_lockout(target_ip, 'blocked_24h', reason=reason, duration_hours=24)
     elif duration == '7d':
@@ -3228,6 +3274,38 @@ def admin_ban_ip():
     })
     
     return jsonify({'status': 'success', 'message': f'IP {target_ip} banned successfully'})
+
+@app.route('/admin/delete-login-attempts', methods=['POST'])
+def admin_delete_login_attempts():
+    """Delete login attempt records for an IP (admin only)"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    target_ip = request.json.get('ip')
+    if not target_ip:
+        return jsonify({'status': 'error', 'message': 'IP address required'}), 400
+    
+    # Remove from lockouts file (failed password records)
+    lockouts = load_lockouts()
+    if target_ip in lockouts:
+        # Keep the ban status but remove password history
+        if 'failed_passwords' in lockouts[target_ip]:
+            del lockouts[target_ip]['failed_passwords']
+        # If no other data, remove the entry entirely
+        if not lockouts[target_ip].get('permanent') and not lockouts[target_ip].get('locked_until'):
+            del lockouts[target_ip]
+        save_lockouts(lockouts)
+    
+    # Log the action
+    log_admin_action(ip_address, 'login_attempts_deleted', {
+        'target_ip': target_ip,
+        'admin_email': session.get(f'user_email_{ip_address}')
+    })
+    
+    return jsonify({'status': 'success', 'message': 'Login attempt records deleted'})
 
 @app.route('/admin/unban-ip', methods=['POST'])
 def admin_unban_ip():

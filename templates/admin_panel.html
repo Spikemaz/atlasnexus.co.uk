@@ -797,13 +797,17 @@
         <div id="ipManagementContent" class="tab-content" style="display: none;">
             <div class="content-section">
                 <div class="section-header">
-                    <h2 class="section-title">IP Address Management</h2>
+                    <h2 class="section-title">IP Address Management & History</h2>
+                    <p style="color: #888; margin-top: 0.5rem;">Track all IP addresses used by users and manage access</p>
                 </div>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>IP Address</th>
+                                <th>Associated Users</th>
+                                <th>First Seen</th>
+                                <th>Last Activity</th>
                                 <th>Failed Attempts</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -811,7 +815,34 @@
                         </thead>
                         <tbody id="ipTableBody">
                             <tr>
-                                <td colspan="4" style="text-align: center; padding: 2rem;">Loading IP data...</td>
+                                <td colspan="7" style="text-align: center; padding: 2rem;">Loading IP data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Login Attempts Section -->
+            <div class="content-section" style="margin-top: 2rem;">
+                <div class="section-header">
+                    <h2 class="section-title">Failed Login Attempts</h2>
+                    <p style="color: #888; margin-top: 0.5rem;">30-minute lockouts and password attempts (never auto-deleted)</p>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>IP Address</th>
+                                <th>Failed Passwords</th>
+                                <th>Lockout Type</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="loginAttemptsTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 2rem;">Loading login attempts...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1268,25 +1299,144 @@
         function updateIPTable(ipData) {
             const tbody = document.getElementById('ipTableBody');
             
-            if (Object.keys(ipData).length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem;">No IP data found</td></tr>';
+            // Combine IP data from multiple sources
+            const allIPs = {};
+            
+            // Add lockout data
+            Object.entries(ipData.lockouts || {}).forEach(([ip, data]) => {
+                allIPs[ip] = {
+                    ...allIPs[ip],
+                    lockout_data: data,
+                    is_banned: data.permanent || data.is_banned,
+                    locked_until: data.locked_until
+                };
+            });
+            
+            // Add tracking data
+            Object.entries(ipData.tracking || {}).forEach(([ip, data]) => {
+                allIPs[ip] = {
+                    ...allIPs[ip],
+                    tracking_data: data,
+                    first_seen: data.first_seen,
+                    last_seen: data.last_seen,
+                    user_emails: data.user_emails || []
+                };
+            });
+            
+            // Add login attempts
+            Object.entries(ipData.login_attempts || {}).forEach(([ip, attempts]) => {
+                allIPs[ip] = {
+                    ...allIPs[ip],
+                    failed_attempts: attempts.filter(a => !a.success).length,
+                    total_attempts: attempts.length
+                };
+            });
+            
+            // Add user IP history
+            Object.values(adminData.users || {}).forEach(user => {
+                if (user.ip_history) {
+                    user.ip_history.forEach(ip => {
+                        if (!allIPs[ip]) allIPs[ip] = {};
+                        if (!allIPs[ip].associated_users) allIPs[ip].associated_users = [];
+                        if (!allIPs[ip].associated_users.includes(user.email)) {
+                            allIPs[ip].associated_users.push(user.email);
+                        }
+                    });
+                }
+            });
+            
+            if (Object.keys(allIPs).length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No IP data found</td></tr>';
                 return;
             }
             
-            tbody.innerHTML = Object.entries(ipData).map(([ip, data]) => {
-                const status = data.is_banned ? 'banned' : 'active';
+            tbody.innerHTML = Object.entries(allIPs).map(([ip, data]) => {
+                const isBanned = data.is_banned || false;
+                const isLocked = data.locked_until && new Date(data.locked_until) > new Date();
+                const status = isBanned ? 'banned' : (isLocked ? 'locked' : 'active');
+                const statusBadge = isBanned ? 
+                    '<span class="status-badge" style="background: #ef4444;">Banned</span>' :
+                    (isLocked ? 
+                        '<span class="status-badge" style="background: #f59e0b;">Locked</span>' :
+                        '<span class="status-badge status-active">Active</span>');
+                
+                const users = data.associated_users || data.user_emails || [];
+                const usersList = users.length > 0 ? 
+                    users.slice(0, 2).join('<br>') + (users.length > 2 ? `<br>+${users.length - 2} more` : '') :
+                    '<span style="color: #666;">None tracked</span>';
+                
+                const firstSeen = data.first_seen ? new Date(data.first_seen).toLocaleDateString() : 'Unknown';
+                const lastSeen = data.last_seen ? new Date(data.last_seen).toLocaleDateString() : 'Unknown';
+                
                 return `
                     <tr>
-                        <td>${ip}</td>
-                        <td>${data.failed_attempts || 0}</td>
-                        <td><span class="status-badge status-${status}">${status}</span></td>
+                        <td style="font-family: monospace;"><strong>${ip}</strong></td>
+                        <td style="font-size: 0.9rem;">${usersList}</td>
+                        <td>${firstSeen}</td>
+                        <td>${lastSeen}</td>
+                        <td><span style="color: ${data.failed_attempts > 0 ? '#ef4444' : '#666'};">${data.failed_attempts || 0}</span></td>
+                        <td>${statusBadge}</td>
                         <td>
-                            <div class="action-buttons">
-                                ${status === 'banned' ? 
-                                    `<button class="action-btn action-edit" onclick="unbanIP('${ip}')">Unban</button>` :
-                                    `<button class="action-btn action-delete" onclick="banIP('${ip}')">Ban</button>`
+                            <div class="action-buttons" style="display: flex; gap: 0.5rem;">
+                                ${isBanned ? 
+                                    `<button class="action-btn" style="background: #22c55e;" onclick="unbanIP('${ip}')" title="Unban IP">
+                                        <i class="fas fa-unlock"></i> Unban
+                                    </button>` :
+                                    `<button class="action-btn action-delete" onclick="showBanModal('${ip}')" title="Ban IP">
+                                        <i class="fas fa-ban"></i> Ban
+                                    </button>`
                                 }
+                                <button class="action-btn" style="background: #3498db;" onclick="showIPDetails('${ip}')" title="View details">
+                                    <i class="fas fa-eye"></i> Details
+                                </button>
                             </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Update login attempts table
+            updateLoginAttemptsTable(ipData.lockouts || {});
+        }
+        
+        function updateLoginAttemptsTable(lockouts) {
+            const tbody = document.getElementById('loginAttemptsTableBody');
+            if (!tbody) return;
+            
+            const lockedIPs = Object.entries(lockouts).filter(([ip, data]) => 
+                data.failed_passwords && data.failed_passwords.length > 0
+            );
+            
+            if (lockedIPs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No failed login attempts recorded</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = lockedIPs.map(([ip, data]) => {
+                const lockedAt = data.locked_at ? new Date(data.locked_at).toLocaleString() : 'Unknown';
+                const passwords = data.failed_passwords || [];
+                const passwordList = passwords.map(p => 
+                    `<code style="background: #fee; color: #c00; padding: 2px 6px; border-radius: 3px; margin: 2px;">${p}</code>`
+                ).join(' ');
+                
+                const isActive = data.locked_until && new Date(data.locked_until) > new Date();
+                const statusBadge = data.permanent ? 
+                    '<span class="status-badge" style="background: #ef4444;">Permanent Ban</span>' :
+                    (isActive ? 
+                        '<span class="status-badge" style="background: #f59e0b;">Active Lockout</span>' :
+                        '<span class="status-badge" style="background: #666;">Expired</span>');
+                
+                return `
+                    <tr>
+                        <td>${lockedAt}</td>
+                        <td style="font-family: monospace;"><strong>${ip}</strong></td>
+                        <td>${passwordList || 'None recorded'}</td>
+                        <td>${data.lockout_type || data.reason || '30-minute'}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <button class="action-btn action-delete" onclick="deleteLoginAttempt('${ip}')" title="Delete record">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
                         </td>
                     </tr>
                 `;
@@ -2023,6 +2173,139 @@
                 }
             } catch (error) {
                 showAlert('Error updating password', 'danger');
+            }
+        }
+        
+        function showBanModal(ip) {
+            const modal = document.createElement('div');
+            modal.id = 'banModal';
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0, 0, 0, 0.8); display: flex;
+                align-items: center; justify-content: center; z-index: 10000;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1a1f3a 0%, #0f1428 100%); 
+                            border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; 
+                            padding: 2rem; max-width: 500px; width: 90%;">
+                    <h2 style="color: #ef4444; margin-bottom: 1.5rem;">
+                        <i class="fas fa-ban"></i> Ban IP Address
+                    </h2>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <p style="color: #888; margin: 0;">IP Address</p>
+                        <p style="color: #ffd700; font-family: monospace; font-size: 1.2rem; margin: 0.5rem 0 0 0;">${ip}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: #888; display: block; margin-bottom: 0.5rem;">Ban Duration</label>
+                        <select id="banDuration" style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.1); 
+                                                       color: #e0e0e0; border: 1px solid rgba(255,215,0,0.3); 
+                                                       border-radius: 4px;">
+                            <option value="30min">30 Minutes</option>
+                            <option value="24h">24 Hours</option>
+                            <option value="7d">7 Days</option>
+                            <option value="30d">30 Days</option>
+                            <option value="permanent">Permanent</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="color: #888; display: block; margin-bottom: 0.5rem;">Reason (optional)</label>
+                        <input type="text" id="banReason" placeholder="Enter reason for ban" 
+                               style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.1); 
+                                      color: #e0e0e0; border: 1px solid rgba(255,215,0,0.3); 
+                                      border-radius: 4px;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button onclick="document.getElementById('banModal').remove()" 
+                                style="padding: 0.5rem 1.5rem; background: rgba(255,255,255,0.1); 
+                                       color: #888; border: 1px solid #888; border-radius: 4px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="executeBan('${ip}')" 
+                                style="padding: 0.5rem 1.5rem; background: #ef4444; 
+                                       color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            <i class="fas fa-ban"></i> Ban IP
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        async function executeBan(ip) {
+            const duration = document.getElementById('banDuration').value;
+            const reason = document.getElementById('banReason').value || 'Manual ban by admin';
+            
+            try {
+                const response = await fetch('/admin/ban-ip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ip: ip,
+                        duration: duration,
+                        reason: reason
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert(`IP ${ip} has been banned`, 'success');
+                    document.getElementById('banModal').remove();
+                    loadIPData(); // Refresh the IP table
+                } else {
+                    showAlert(data.message || 'Error banning IP', 'danger');
+                }
+            } catch (error) {
+                showAlert('Error banning IP', 'danger');
+            }
+        }
+        
+        async function unbanIP(ip) {
+            if (!confirm(`Are you sure you want to unban IP: ${ip}?`)) return;
+            
+            try {
+                const response = await fetch('/admin/unban-ip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip: ip })
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert(`IP ${ip} has been unbanned`, 'success');
+                    loadIPData(); // Refresh the IP table
+                } else {
+                    showAlert(data.message || 'Error unbanning IP', 'danger');
+                }
+            } catch (error) {
+                showAlert('Error unbanning IP', 'danger');
+            }
+        }
+        
+        async function deleteLoginAttempt(ip) {
+            if (!confirm(`Delete all login attempt records for IP: ${ip}?\n\nThis will remove the failed password history.`)) return;
+            
+            try {
+                const response = await fetch('/admin/delete-login-attempts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip: ip })
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('Login attempt records deleted', 'success');
+                    loadIPData(); // Refresh the tables
+                } else {
+                    showAlert(data.message || 'Error deleting records', 'danger');
+                }
+            } catch (error) {
+                showAlert('Error deleting records', 'danger');
             }
         }
         
