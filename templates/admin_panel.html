@@ -10,6 +10,21 @@
             padding: 0;
             box-sizing: border-box;
         }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .spinning {
+            animation: spin 1s linear infinite;
+        }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
@@ -656,11 +671,21 @@
             <div class="header-top">
                 <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
                 <div class="header-actions">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-right: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="autoRefreshToggle" checked style="cursor: pointer;">
+                            <span style="color: #22c55e; font-size: 0.9rem;">Live</span>
+                        </label>
+                        <span id="liveIndicator" style="display: flex; align-items: center; gap: 0.3rem;">
+                            <i class="fas fa-circle" style="color: #22c55e; font-size: 0.5rem; animation: pulse 2s infinite;"></i>
+                            <span id="lastUpdateTime" style="color: #888; font-size: 0.85rem;">Now</span>
+                        </span>
+                    </div>
                     <a href="/dashboard" class="btn btn-primary">
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
-                    <button class="btn btn-secondary" onclick="refreshData()">
-                        <i class="fas fa-sync-alt"></i> Refresh
+                    <button class="btn btn-secondary" onclick="manualRefresh()">
+                        <i class="fas fa-sync-alt" id="refreshIcon"></i> Refresh
                     </button>
                 </div>
             </div>
@@ -2428,29 +2453,173 @@
             setTimeout(() => alert.remove(), 5000);
         }
 
-        async function refreshData() {
+        // Auto-refresh variables
+        let autoRefreshInterval = null;
+        let sessionHeartbeatInterval = null;
+        let lastUpdateTime = new Date();
+        const REFRESH_INTERVAL = 5000; // 5 seconds
+        const HEARTBEAT_INTERVAL = 60000; // 1 minute
+        
+        function startAutoRefresh() {
+            if (autoRefreshInterval) return; // Already running
+            
+            autoRefreshInterval = setInterval(async () => {
+                if (document.getElementById('autoRefreshToggle').checked) {
+                    await silentRefresh();
+                }
+            }, REFRESH_INTERVAL);
+            
+            // Start session heartbeat
+            sessionHeartbeatInterval = setInterval(async () => {
+                await keepSessionAlive();
+            }, HEARTBEAT_INTERVAL);
+            
+            updateLiveIndicator(true);
+        }
+        
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+            updateLiveIndicator(false);
+        }
+        
+        async function silentRefresh() {
+            try {
+                const response = await fetch('/admin/comprehensive-data');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const oldData = JSON.stringify(adminData);
+                    adminData = data.data;
+                    const newData = JSON.stringify(adminData);
+                    
+                    // Only update UI if data changed
+                    if (oldData !== newData) {
+                        updateDashboardStats();
+                        updatePageContent();
+                        
+                        // Flash the live indicator
+                        const indicator = document.getElementById('liveIndicator');
+                        indicator.style.color = '#ffd700';
+                        setTimeout(() => {
+                            indicator.querySelector('i').style.color = '#22c55e';
+                        }, 500);
+                    }
+                    
+                    lastUpdateTime = new Date();
+                    updateLastUpdateTime();
+                }
+            } catch (error) {
+                console.error('Silent refresh error:', error);
+            }
+        }
+        
+        function updatePageContent() {
+            switch(currentPage) {
+                case 'dashboard':
+                    updateActivityTable();
+                    break;
+                case 'users':
+                    updateUsersTable(adminData.users || {});
+                    break;
+                case 'registrations':
+                    updateRegistrationsTable(adminData.registrations || {});
+                    break;
+                case 'ip-management':
+                    updateIPTable(adminData);
+                    break;
+            }
+        }
+        
+        async function keepSessionAlive() {
+            try {
+                // Simple endpoint to keep session active
+                await fetch('/admin/heartbeat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            } catch (error) {
+                console.error('Heartbeat error:', error);
+            }
+        }
+        
+        function updateLiveIndicator(isLive) {
+            const indicator = document.getElementById('liveIndicator');
+            const icon = indicator.querySelector('i');
+            
+            if (isLive) {
+                icon.style.color = '#22c55e';
+                icon.style.animation = 'pulse 2s infinite';
+            } else {
+                icon.style.color = '#666';
+                icon.style.animation = 'none';
+            }
+        }
+        
+        function updateLastUpdateTime() {
+            const element = document.getElementById('lastUpdateTime');
+            const seconds = Math.floor((new Date() - lastUpdateTime) / 1000);
+            
+            if (seconds < 5) {
+                element.textContent = 'Now';
+            } else if (seconds < 60) {
+                element.textContent = `${seconds}s ago`;
+            } else {
+                const minutes = Math.floor(seconds / 60);
+                element.textContent = `${minutes}m ago`;
+            }
+        }
+        
+        async function manualRefresh() {
+            const icon = document.getElementById('refreshIcon');
+            icon.classList.add('spinning');
+            
             showAlert('Refreshing data...', 'info');
             
-            // First load the comprehensive data to update adminData and counts
             try {
                 const response = await fetch('/admin/comprehensive-data');
                 const data = await response.json();
                 
                 if (data.status === 'success') {
                     adminData = data.data;
-                    updateDashboardStats(); // Update all counts in sidebar
+                    updateDashboardStats();
+                    updatePageContent();
+                    lastUpdateTime = new Date();
+                    updateLastUpdateTime();
                 }
+                
+                setTimeout(() => {
+                    showAlert('Data refreshed successfully', 'success');
+                    icon.classList.remove('spinning');
+                }, 500);
             } catch (error) {
                 console.error('Error refreshing data:', error);
+                showAlert('Error refreshing data', 'danger');
+                icon.classList.remove('spinning');
             }
-            
-            // Then reload the current page's specific data
-            loadPageData(currentPage);
-            
-            setTimeout(() => {
-                showAlert('Data refreshed successfully', 'success');
-            }, 500);
         }
+        
+        // Setup auto-refresh toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('autoRefreshToggle');
+            toggle.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    startAutoRefresh();
+                    showAlert('Live updates enabled', 'success');
+                } else {
+                    stopAutoRefresh();
+                    showAlert('Live updates disabled', 'info');
+                }
+            });
+            
+            // Start auto-refresh by default
+            startAutoRefresh();
+            
+            // Update time display every second
+            setInterval(updateLastUpdateTime, 1000);
+        });
 
         // Initialize on load
         document.addEventListener('DOMContentLoaded', async () => {

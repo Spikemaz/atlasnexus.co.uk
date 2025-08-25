@@ -3465,6 +3465,29 @@ def admin_panel():
     
     return render_template('admin_panel.html')
 
+@app.route('/admin/heartbeat', methods=['POST'])
+def admin_heartbeat():
+    """Keep admin session alive"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    # Update session to keep it alive
+    session.permanent = True
+    session.modified = True
+    
+    # Update last activity in users file
+    user_email = session.get(f'user_email_{ip_address}')
+    if user_email:
+        users = load_json_db(USERS_FILE)
+        if user_email in users:
+            users[user_email]['last_activity'] = datetime.now().isoformat()
+            save_json_db(USERS_FILE, users)
+    
+    return jsonify({'status': 'success', 'timestamp': datetime.now().isoformat()})
+
 @app.route('/admin/system-stats')
 def admin_system_stats():
     """Get system statistics for admin panel"""
