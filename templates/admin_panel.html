@@ -946,6 +946,7 @@
                     const users = data.data.users || {};
                     console.log('Users object:', users); // Debug log
                     console.log('Number of users:', Object.keys(users).length); // Debug log
+                    console.log('Current user email:', adminData.current_user_email); // Debug log
                     updateUsersTable(users);
                     updateDashboardStats();  // Update the counts in sidebar
                 } else {
@@ -1064,9 +1065,14 @@
             const offlineUsers = [];
             
             Object.entries(users).forEach(([email, user]) => {
-                // Check if user is online (last activity within 30 minutes)
+                // Check if user is online
                 let isOnline = false;
-                if (user.last_login) {
+                
+                // Current logged-in user is always online
+                if (email === adminData.current_user_email) {
+                    isOnline = true;
+                } else if (user.last_login) {
+                    // For other users, check last activity within 30 minutes
                     const lastLogin = new Date(user.last_login);
                     const minutesAgo = (Date.now() - lastLogin.getTime()) / (1000 * 60);
                     isOnline = minutesAgo < 30;

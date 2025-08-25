@@ -2427,6 +2427,9 @@ def admin_comprehensive_data():
         if isinstance(admin_actions, dict):
             admin_actions = list(admin_actions.values())
         
+        # Get current logged-in user's email
+        current_user_email = session.get(f'user_email_{ip_address}')
+        
         # Compile comprehensive data - matching what frontend expects
         data = {
             'lockouts': lockouts,
@@ -2434,6 +2437,7 @@ def admin_comprehensive_data():
             'registrations': registrations,
             'users': users,
             'admin_actions': admin_actions,
+            'current_user_email': current_user_email,  # Add current user email
             'statistics': {
                 'total_users': len(users) if isinstance(users, dict) else 0,
                 'total_registrations': len(registrations) if isinstance(registrations, dict) else 0,
