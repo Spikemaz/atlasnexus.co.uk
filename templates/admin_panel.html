@@ -932,9 +932,15 @@
                 const response = await fetch('/admin/comprehensive-data');
                 const data = await response.json();
                 
+                console.log('Users data received:', data); // Debug log
+                
                 if (data.status === 'success') {
                     const users = data.data.users || {};
+                    console.log('Users object:', users); // Debug log
+                    console.log('Number of users:', Object.keys(users).length); // Debug log
                     updateUsersTable(users);
+                } else {
+                    console.error('Failed to load users:', data.message);
                 }
             } catch (error) {
                 console.error('Error loading users data:', error);
@@ -1022,6 +1028,14 @@
         function updateUsersTable(users) {
             const tbody = document.getElementById('usersTableBody');
             
+            console.log('updateUsersTable called with:', users); // Debug log
+            console.log('tbody element:', tbody); // Debug log
+            
+            if (!tbody) {
+                console.error('usersTableBody element not found!');
+                return;
+            }
+            
             if (Object.keys(users).length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No users found</td></tr>';
                 return;
@@ -1055,6 +1069,9 @@
             // Build table HTML
             let html = '';
             
+            console.log('Online users:', onlineUsers.length, onlineUsers); // Debug log
+            console.log('Offline users:', offlineUsers.length, offlineUsers); // Debug log
+            
             // Online users section
             if (onlineUsers.length > 0) {
                 html += `<tr><td colspan="7" style="background: rgba(34, 197, 94, 0.1); padding: 0.5rem; font-weight: bold; color: #22c55e;">ONLINE USERS (${onlineUsers.length})</td></tr>`;
@@ -1067,7 +1084,8 @@
                 html += offlineUsers.map(user => createUserRow(user)).join('');
             }
             
-            tbody.innerHTML = html;
+            console.log('Final HTML:', html); // Debug log
+            tbody.innerHTML = html || '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No users to display</td></tr>';
         }
         
         function createUserRow(user) {
