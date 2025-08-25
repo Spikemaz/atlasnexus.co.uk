@@ -648,6 +648,23 @@ def check_ip_ban(ip_address):
         return tracking[ip_address].get('is_banned', False)
     return False
 
+@app.route('/version')
+def version():
+    """Version check endpoint"""
+    return jsonify({
+        'version': '2.1.0',
+        'features': {
+            'gate1_timer_fix': True,
+            'gate1_override_reset': True,
+            'gate2_ticker': True,
+            'admin_panel_enhanced': True,
+            'ip_tracking': True,
+            'online_offline_users': True,
+            'freeze_unfreeze': True
+        },
+        'deployed': datetime.now().isoformat()
+    })
+
 @app.route('/')
 def index():
     """Gate 1 - Site Authentication"""
