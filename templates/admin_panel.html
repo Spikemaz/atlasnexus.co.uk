@@ -1348,7 +1348,11 @@
                 if (data.status === 'success') {
                     showAlert(`User approved successfully! ${data.message || ''}`, 'success');
                     document.querySelector('[style*="position: fixed"]').remove();
+                    // Reload both registrations and users data to reflect the approval
                     loadRegistrationsData();
+                    loadUsersData();
+                    // Update counts
+                    loadDashboardData();
                 } else {
                     showAlert(data.message || 'Error approving user', 'danger');
                 }
@@ -1443,7 +1447,7 @@
                             Close
                         </button>
                         ${!reg.admin_approved ? `
-                            <button onclick="this.closest('[style*=\"position: fixed\"]').remove(); approveUserAdvanced('${email}')" 
+                            <button onclick="document.getElementById('userDetailsModal').remove(); approveUserAdvanced('${email}')" 
                                     style="padding: 0.5rem 1rem; background: #2ecc71; 
                                            color: white; border: none; border-radius: 4px; cursor: pointer;">
                                 Approve User
@@ -1828,6 +1832,9 @@
         // Initialize on load
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboardData();
+            // Also load initial data for other tabs
+            loadUsersData();
+            loadRegistrationsData();
         });
     </script>
 </body>
