@@ -2673,6 +2673,9 @@
         container.style.display = 'block';
         container.style.visibility = 'visible';
         container.style.opacity = '1';
+        container.style.background = 'linear-gradient(90deg, #1a1d23 0%, #0f1419 100%)';
+        container.style.minHeight = '45px';
+        ticker.style.color = '#ffffff';
         
         // Prevent multiple initializations
         if (tickerInitialized) {
@@ -2694,56 +2697,56 @@
             let singleSet = '';
             
             // Bonds Section
-            singleSet += '<span class="ticker-section-header">BONDS</span>';
-            singleSet += '<span class="ticker-separator">●</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">BONDS</span>';
+            singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['US 10Y', 'UK 10Y', 'DE 10Y', 'US 5Y', 'US 2Y'].forEach(key => {
                 const data = marketData[key];
                 if (data) singleSet += createTickerItem(key, data);
             });
             
             // Central Banks
-            singleSet += '<span class="ticker-section-header">CENTRAL BANKS</span>';
-            singleSet += '<span class="ticker-separator">●</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">CENTRAL BANKS</span>';
+            singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['FED RATE', 'BOE RATE', 'ECB RATE'].forEach(key => {
                 const data = marketData[key];
                 if (data) singleSet += createTickerItem(key, data);
             });
             
             // Reference Rates
-            singleSet += '<span class="ticker-section-header">REFERENCE RATES</span>';
-            singleSet += '<span class="ticker-separator">●</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">REFERENCE RATES</span>';
+            singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['SOFR', 'SONIA', 'ESTR'].forEach(key => {
                 const data = marketData[key];
                 if (data) singleSet += createTickerItem(key, data);
             });
             
             // Credit Spreads
-            singleSet += '<span class="ticker-section-header">SECURITISATION</span>';
-            singleSet += '<span class="ticker-separator">●</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">SECURITISATION</span>';
+            singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['IG SPREAD', 'HY SPREAD', 'CMBS AAA', 'RMBS AAA', 'CLO AAA'].forEach(key => {
                 const data = marketData[key];
                 if (data) singleSet += createTickerItem(key, data);
             });
             
             // FX
-            singleSet += '<span class="ticker-section-header">FX</span>';
-            singleSet += '<span class="ticker-separator">●</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">FX</span>';
+            singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['GBP/USD', 'EUR/USD', 'USD/JPY', 'EUR/GBP'].forEach(key => {
                 const data = marketData[key];
                 if (data) singleSet += createTickerItem(key, data);
             });
             
             // Equities
-            singleSet += '<span class="ticker-section-header">EQUITIES</span>';
-            singleSet += '<span class="ticker-separator">●</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">EQUITIES</span>';
+            singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['S&P 500', 'FTSE 100', 'DAX'].forEach(key => {
                 const data = marketData[key];
                 if (data) singleSet += createTickerItem(key, data);
             });
             
             // Commodities  
-            singleSet += '<span class="ticker-section-header">COMMODITIES</span>';
-            singleSet += '<span class="ticker-separator">●</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">COMMODITIES</span>';
+            singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['GOLD', 'OIL WTI', 'SILVER'].forEach(key => {
                 const data = marketData[key];
                 if (data) singleSet += createTickerItem(key, data);
@@ -2841,40 +2844,40 @@
             let singleSet = '';
             
             // Bonds Section
-            singleSet += '<span class="ticker-section-header">BONDS</span>';
-            singleSet += '<span class="ticker-separator">●</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">BONDS</span>';
+            singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['US 10Y', 'UK 10Y', 'DE 10Y', 'US 5Y', 'US 2Y'].forEach(key => {
                 const data = marketData[key];
                 if (data) singleSet += createTickerItem(key, data);
             });
             
             // Central Banks
-            singleSet += '<span class="ticker-section-header">CENTRAL BANKS</span>';
-            singleSet += '<span class="ticker-separator">●</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">CENTRAL BANKS</span>';
+            singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['FED RATE', 'BOE RATE', 'ECB RATE'].forEach(key => {
                 const data = marketData[key];
                 if (data) singleSet += createTickerItem(key, data);
             });
             
             // Reference Rates
-            singleSet += '<span class="ticker-section-header">REFERENCE RATES</span>';
-            singleSet += '<span class="ticker-separator">●</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">REFERENCE RATES</span>';
+            singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['SOFR', 'SONIA', 'ESTR'].forEach(key => {
                 const data = marketData[key];
                 if (data) singleSet += createTickerItem(key, data);
             });
             
             // Credit Spreads
-            singleSet += '<span class="ticker-section-header">SECURITISATION</span>';
-            singleSet += '<span class="ticker-separator">●</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">SECURITISATION</span>';
+            singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['IG SPREAD', 'HY SPREAD', 'CMBS AAA', 'RMBS AAA', 'CLO AAA'].forEach(key => {
                 const data = marketData[key];
                 if (data) singleSet += createTickerItem(key, data);
             });
             
             // FX
-            singleSet += '<span class="ticker-section-header">FX</span>';
-            singleSet += '<span class="ticker-separator">●</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">FX</span>';
+            singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['GBP/USD', 'EUR/USD', 'USD/JPY', 'EUR/GBP'].forEach(key => {
                 const data = marketData[key];
                 if (data) singleSet += createTickerItem(key, data);
