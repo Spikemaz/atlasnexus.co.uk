@@ -2832,6 +2832,7 @@
         });
         
         // Auto-search as user types
+        let searchTimeout; // Declare searchTimeout variable
         document.getElementById('companyName').addEventListener('input', function(e) {
             clearTimeout(searchTimeout);
             const value = e.target.value;
