@@ -942,10 +942,12 @@
                 console.log('Users data received:', data); // Debug log
                 
                 if (data.status === 'success') {
+                    adminData = data.data;  // Update the global adminData
                     const users = data.data.users || {};
                     console.log('Users object:', users); // Debug log
                     console.log('Number of users:', Object.keys(users).length); // Debug log
                     updateUsersTable(users);
+                    updateDashboardStats();  // Update the counts in sidebar
                 } else {
                     console.error('Failed to load users:', data.message);
                 }
@@ -960,8 +962,10 @@
                 const data = await response.json();
                 
                 if (data.status === 'success') {
+                    adminData = data.data;  // Update the global adminData
                     const registrations = data.data.registrations || {};
                     updateRegistrationsTable(registrations);
+                    updateDashboardStats();  // Update the counts in sidebar
                 }
             } catch (error) {
                 console.error('Error loading registrations:', error);
