@@ -2540,11 +2540,6 @@ def privacy():
     """Privacy Policy page"""
     return render_template('privacy.html')
 
-@app.route('/compliance')
-def compliance():
-    """Compliance page"""
-    return render_template('compliance.html')
-
 @app.route('/data-protection')
 def data_protection():
     """Data Protection page"""
