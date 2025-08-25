@@ -997,6 +997,13 @@
                 return !reg.admin_approved;
             }).length;
             
+            console.log('Dashboard Stats Update:', {
+                users: users,
+                registrations: Object.keys(adminData.registrations || {}).length,
+                pending: pending,
+                blocked: blocked
+            });
+            
             document.getElementById('totalUsers').textContent = users;
             document.getElementById('blockedIPs').textContent = blocked;
             document.getElementById('activeNow').textContent = pending;
@@ -1855,18 +1862,51 @@
 
         async function refreshData() {
             showAlert('Refreshing data...', 'info');
+            
+            // First load the comprehensive data to update adminData and counts
+            try {
+                const response = await fetch('/admin/comprehensive-data');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    adminData = data.data;
+                    updateDashboardStats(); // Update all counts in sidebar
+                }
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+            }
+            
+            // Then reload the current page's specific data
             loadPageData(currentPage);
+            
+            setTimeout(() => {
+                showAlert('Data refreshed successfully', 'success');
+            }, 500);
         }
 
         // Initialize on load
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             console.log('Page loaded, initializing data...'); // Debug log
+            
+            // Load comprehensive data first to ensure counts are accurate
+            try {
+                const response = await fetch('/admin/comprehensive-data');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    adminData = data.data;
+                    console.log('Initial data loaded:', {
+                        users: Object.keys(adminData.users || {}).length,
+                        registrations: Object.keys(adminData.registrations || {}).length
+                    });
+                    updateDashboardStats(); // Update counts immediately
+                }
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+            }
+            
+            // Then load the dashboard specific view
             loadDashboardData();
-            // Also load initial data for other tabs to have it ready
-            setTimeout(() => {
-                loadUsersData();
-                loadRegistrationsData();
-            }, 500); // Small delay to ensure DOM is ready
         });
     </script>
 </body>
