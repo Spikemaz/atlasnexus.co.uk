@@ -856,11 +856,16 @@
         });
 
         function switchPage(page) {
+            console.log('Switching to page:', page); // Debug log
+            
             // Update active nav item
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
-            document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
+            const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+            if (navItem) {
+                navItem.classList.add('active');
+            }
 
             // Hide all content
             document.querySelectorAll('.tab-content').forEach(content => {
@@ -870,6 +875,7 @@
             // Show selected content
             const contentId = page + 'Content';
             const content = document.getElementById(contentId);
+            console.log('Looking for content ID:', contentId, 'Found:', content); // Debug log
             if (content) {
                 content.style.display = 'block';
             }
@@ -878,7 +884,8 @@
             updatePageTitle(page);
             currentPage = page;
 
-            // Load page-specific data
+            // Load page-specific data - ALWAYS load fresh data when switching pages
+            console.log('Loading data for page:', page); // Debug log
             loadPageData(page);
         }
 
@@ -1849,10 +1856,13 @@
 
         // Initialize on load
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, initializing data...'); // Debug log
             loadDashboardData();
-            // Also load initial data for other tabs
-            loadUsersData();
-            loadRegistrationsData();
+            // Also load initial data for other tabs to have it ready
+            setTimeout(() => {
+                loadUsersData();
+                loadRegistrationsData();
+            }, 500); // Small delay to ensure DOM is ready
         });
     </script>
 </body>

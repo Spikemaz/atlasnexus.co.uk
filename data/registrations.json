@@ -1,1 +1,20 @@
-{}
+{
+  "testuser@example.com": {
+    "email": "testuser@example.com",
+    "full_name": "Test User",
+    "company_name": "Test Company Ltd",
+    "company_website": "https://testcompany.com",
+    "job_title": "Test Manager",
+    "phone": "+44 20 1234 5678",
+    "country": "United Kingdom",
+    "verification_token": "W13TJ2EQ7t2JzrKXLxOSq3ByUwTfPSYCeg0pMi_jvPM",
+    "created_at": "2025-08-25T19:03:08.281678",
+    "ip_address": "127.0.0.1",
+    "email_verified": true,
+    "admin_approved": true,
+    "account_type": "external",
+    "verified_at": "2025-08-25T19:03:08.283009",
+    "approved_at": "2025-08-25T19:03:08.284170",
+    "generated_password": "sL&A8pXE!E%v"
+  }
+}
