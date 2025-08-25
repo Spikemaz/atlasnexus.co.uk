@@ -1564,12 +1564,13 @@ def check_verification_status():
 
 @app.route('/verify-email')
 def verify_email():
-    """Handle email verification"""
+    """Handle email verification - bypasses site authentication"""
     token = request.args.get('token')
     email = request.args.get('email')
     
     if not token or not email:
-        return redirect(url_for('secure_login'))
+        # If no token/email, redirect to Gate 1 to authenticate first
+        return redirect(url_for('index'))
     
     # Load registrations
     registrations = load_json_db(REGISTRATIONS_FILE)
@@ -1702,11 +1703,82 @@ def verify_email():
                 
                 send_email(email, 'AtlasNexus - Your Account is Ready', email_html)
         
+        # Set site authentication for this IP since they verified their email
+        ip_address = get_real_ip()
+        session[f'site_authenticated_{ip_address}'] = True
+        
         # Check if user is approved
         if registrations[email].get('admin_approved'):
-            # User is both verified and approved - can go to login
+            # User is both verified and approved - show success and redirect to login
             session['email_verified'] = True
-            return redirect(url_for('secure_login'))
+            
+            # Show a success page with auto-redirect
+            return f"""
+            <html>
+            <head>
+                <title>Email Verified Successfully</title>
+                <meta http-equiv="refresh" content="5;url={url_for('secure_login')}">
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%);
+                        color: white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 100vh;
+                        margin: 0;
+                    }}
+                    .container {{
+                        background: rgba(44, 49, 55, 0.95);
+                        border: 1px solid rgba(34, 197, 94, 0.3);
+                        border-radius: 16px;
+                        padding: 3rem;
+                        max-width: 500px;
+                        text-align: center;
+                    }}
+                    h1 {{
+                        color: #22c55e;
+                        margin-bottom: 1rem;
+                    }}
+                    p {{
+                        color: #b0b0b0;
+                        margin-bottom: 1.5rem;
+                    }}
+                    .btn {{
+                        display: inline-block;
+                        padding: 0.75rem 2rem;
+                        background: #3b82f6;
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 8px;
+                        transition: background 0.3s;
+                    }}
+                    .btn:hover {{
+                        background: #2563eb;
+                    }}
+                    .info {{
+                        background: rgba(34, 197, 94, 0.1);
+                        border: 1px solid rgba(34, 197, 94, 0.3);
+                        padding: 1rem;
+                        border-radius: 8px;
+                        margin: 1.5rem 0;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>✅ Email Verified Successfully!</h1>
+                    <p>Your email has been verified and your account is approved.</p>
+                    <div class="info">
+                        <p style="margin: 0;">Check your email for your login credentials.</p>
+                    </div>
+                    <p>You will be redirected to the login page in 5 seconds...</p>
+                    <a href="{url_for('secure_login')}" class="btn">Go to Login Now</a>
+                </div>
+            </body>
+            </html>
+            """
         else:
             # User is verified but NOT approved - show confirmation page
             return render_template('awaiting_verification.html', 
