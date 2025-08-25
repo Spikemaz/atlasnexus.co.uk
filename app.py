@@ -1884,6 +1884,53 @@ def data_sources():
     
     return render_template('data_sources.html')
 
+@app.route('/compliance')
+def compliance():
+    """Compliance tool page"""
+    ip_address = get_real_ip()
+    
+    # Require authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return redirect(url_for('secure_login'))
+    
+    return render_template('compliance.html')
+
+@app.route('/portfolio')
+def portfolio():
+    """Portfolio management page"""
+    ip_address = get_real_ip()
+    
+    # Require authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return redirect(url_for('secure_login'))
+    
+    # For now, redirect to dashboard with portfolio section
+    return redirect(url_for('dashboard') + '#portfolio')
+
+@app.route('/analytics')
+def analytics():
+    """Analytics dashboard page"""
+    ip_address = get_real_ip()
+    
+    # Require authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return redirect(url_for('secure_login'))
+    
+    # For now, redirect to dashboard with analytics section
+    return redirect(url_for('dashboard') + '#analytics')
+
+@app.route('/risk-management')
+def risk_management():
+    """Risk management page"""
+    ip_address = get_real_ip()
+    
+    # Require authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return redirect(url_for('secure_login'))
+    
+    # For now, redirect to dashboard with risk section
+    return redirect(url_for('dashboard') + '#risk')
+
 @app.route('/admin/approve-user', methods=['POST'])
 def admin_approve_user():
     """Admin approve user"""
