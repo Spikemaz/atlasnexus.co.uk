@@ -1069,9 +1069,21 @@
                 }
             });
             
-            // Update counters
-            document.getElementById('onlineCount').textContent = onlineUsers.length;
-            document.getElementById('totalUsersCount').textContent = Object.keys(users).length;
+            // Update counters if elements exist
+            const onlineCountEl = document.getElementById('onlineCount');
+            if (onlineCountEl) {
+                onlineCountEl.textContent = onlineUsers.length;
+            }
+            const totalUsersCountEl = document.getElementById('totalUsersCount');
+            if (totalUsersCountEl) {
+                totalUsersCountEl.textContent = Object.keys(users).length;
+            }
+            
+            // Update the user count in navigation if it exists
+            const userCountBadge = document.getElementById('userCount');
+            if (userCountBadge) {
+                userCountBadge.textContent = Object.keys(users).length;
+            }
             
             // Build table HTML
             let html = '';
