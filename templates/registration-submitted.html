@@ -157,7 +157,7 @@
         </div>
 
         <div class="buttons">
-            <button class="btn btn-secondary" onclick="resendEmail()">Resend Email</button>
+            <button class="btn btn-secondary" id="resendBtn" onclick="resendEmail(this)">Resend Email</button>
         </div>
     </div>
 
@@ -331,14 +331,16 @@
 
         let lastResendTime = 0;
         
-        function resendEmail() {
+        function resendEmail(btn) {
             // Don't allow resend if already verified
             if (emailVerified) {
                 showNotification('Email already verified!', 'success');
                 return;
             }
             
-            const btn = event.target;
+            if (!btn) {
+                btn = document.getElementById('resendBtn');
+            }
             const now = Date.now();
             const timeSinceLastSend = now - lastResendTime;
             const oneMinute = 60000; // 60 seconds in milliseconds
@@ -346,18 +348,25 @@
             // Check if 1 minute has passed since last send
             if (timeSinceLastSend < oneMinute) {
                 const secondsRemaining = Math.ceil((oneMinute - timeSinceLastSend) / 1000);
-                btn.textContent = `Wait ${secondsRemaining}s`;
                 btn.disabled = true;
+                btn.style.background = 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)';
+                btn.style.color = 'white';
+                btn.innerHTML = `⏱️ Wait ${secondsRemaining}s`;
                 
-                // Update button every second
+                // Update button every second with visual countdown
                 const interval = setInterval(() => {
                     const timeLeft = Math.ceil((oneMinute - (Date.now() - lastResendTime)) / 1000);
                     if (timeLeft > 0) {
-                        btn.textContent = `Wait ${timeLeft}s`;
+                        btn.innerHTML = `⏱️ Wait ${timeLeft}s`;
+                        // Visual progress indicator
+                        const progress = ((60 - timeLeft) / 60) * 100;
+                        btn.style.background = `linear-gradient(90deg, #22c55e ${progress}%, #dc2626 ${progress}%)`;
                     } else {
                         clearInterval(interval);
-                        btn.textContent = 'Resend Email';
+                        btn.innerHTML = 'Resend Email';
                         btn.disabled = false;
+                        btn.style.background = '';
+                        btn.style.color = '';
                     }
                 }, 1000);
                 return;
@@ -366,7 +375,9 @@
             // Proceed with sending
             lastResendTime = now;
             btn.disabled = true;
-            btn.textContent = 'Sending...';
+            btn.innerHTML = '📧 Sending...';
+            btn.style.background = 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)';
+            btn.style.color = 'white';
             
             fetch('/resend-verification', {
                 method: 'POST',
@@ -382,12 +393,9 @@
                     
                     showNotification('Verification email sent! Check your inbox.', 'success');
                     
-                    // Reset button after 3 seconds but keep the rate limit
+                    // Start the 60-second cooldown timer immediately
                     setTimeout(() => {
-                        btn.style.background = '';
-                        btn.style.color = '';
-                        btn.textContent = 'Resend Email';
-                        btn.disabled = false;
+                        startCooldownTimer(btn);
                     }, 3000);
                 } else if (data.message) {
                     if (data.message.includes('already verified')) {
@@ -422,6 +430,28 @@
                 lastResendTime = 0; // Reset on error
                 showNotification('Network error. Please try again.', 'error');
             });
+        }
+        
+        // Helper function for cooldown timer
+        function startCooldownTimer(btn) {
+            const endTime = Date.now() + 60000;
+            btn.disabled = true;
+            
+            const interval = setInterval(() => {
+                const timeLeft = Math.ceil((endTime - Date.now()) / 1000);
+                if (timeLeft > 0) {
+                    btn.innerHTML = `⏱️ Wait ${timeLeft}s`;
+                    const progress = ((60 - timeLeft) / 60) * 100;
+                    btn.style.background = `linear-gradient(90deg, #22c55e ${progress}%, #dc2626 ${progress}%)`;
+                    btn.style.color = 'white';
+                } else {
+                    clearInterval(interval);
+                    btn.innerHTML = 'Resend Email';
+                    btn.disabled = false;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                }
+            }, 1000);
         }
     </script>
 </body>

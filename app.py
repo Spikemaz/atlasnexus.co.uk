@@ -1504,12 +1504,15 @@ def resend_verification():
     base_url = get_base_url()
     verification_link = f"{base_url}verify-email?token={new_token}&email={email}"
     
+    print(f"[RESEND] Attempting to resend verification email to {email}")
+    print(f"[RESEND] Verification link: {verification_link}")
+    
     email_html = f"""
     <html>
         <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
             <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
                 <h2 style="color: #333;">Verification Email (Resent)</h2>
-                <p>Please click the link below to verify your email address:</p>
+                <p>You requested a new verification email. Please click the link below to verify your email address:</p>
                 <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin: 15px 0;">
                     <p style="color: #856404; margin: 0; font-weight: bold;">⚠️ Important: This link expires in 1 hour!</p>
                 </div>
@@ -1518,6 +1521,7 @@ def resend_verification():
                         Verify Email Address
                     </a>
                 </div>
+                <p style="color: #666; font-size: 14px;">This is a resent verification email requested at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}.</p>
                 <p style="color: #666; font-size: 14px;">This link expires in 1 hour from now.</p>
                 <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>
             </div>
@@ -1526,6 +1530,7 @@ def resend_verification():
     """
     
     email_sent = send_email(email, 'Email Verification - AtlasNexus (Resent)', email_html)
+    print(f"[RESEND] Email send result: {email_sent}")
     
     if email_sent:
         return jsonify({'status': 'success', 'message': 'Verification email resent'})
