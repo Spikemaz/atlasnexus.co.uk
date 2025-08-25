@@ -1,0 +1,16 @@
+{
+  "spikemaz8@aol.com": {
+    "email": "spikemaz8@aol.com",
+    "username": "Admin",
+    "full_name": "Administrator",
+    "account_type": "admin",
+    "created_at": "2025-08-20T01:39:46.674704",
+    "is_admin": true,
+    "admin_approved": true,
+    "last_login": "2025-08-20T02:58:59.012918",
+    "login_count": 15,
+    "password": "SpikeMaz",
+    "password_expiry": "2026-08-25T17:20:55.604780",
+    "email_verified": true
+  }
+}
