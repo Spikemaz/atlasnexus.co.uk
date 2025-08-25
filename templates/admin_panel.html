@@ -2010,15 +2010,21 @@
         }
 
         async function managePassword(email) {
-            // Get user data from either registrations or users
-            let userData = allRegistrations[email];
-            let isFromUsers = false;
+            // Always use adminData which has the most current information
+            let userData = null;
+            let currentPassword = null;
             
-            if (!userData) {
-                // Try to get from users data
-                const users = adminData.users || {};
-                userData = users[email];
-                isFromUsers = true;
+            // Check in users first (active accounts)
+            if (adminData.users && adminData.users[email]) {
+                userData = adminData.users[email];
+                currentPassword = userData.password || userData.generated_password;
+                console.log('Found user in users:', email, 'Password:', currentPassword);
+            }
+            // Then check in registrations (pending accounts)
+            else if (adminData.registrations && adminData.registrations[email]) {
+                userData = adminData.registrations[email];
+                currentPassword = userData.generated_password || userData.password;
+                console.log('Found user in registrations:', email, 'Password:', currentPassword);
             }
             
             if (!userData) {
@@ -2026,7 +2032,11 @@
                 return;
             }
             
-            const currentPassword = userData.generated_password || userData.password || 'No password set';
+            if (!currentPassword) {
+                currentPassword = 'No password set';
+                console.log('No password found for:', email);
+            }
+            
             const passwordExpiry = userData.password_expiry ? new Date(userData.password_expiry).toLocaleDateString() : 'Not set';
             
             // Create password management modal
@@ -2059,7 +2069,7 @@
                                    style="flex: 1; padding: 0.5rem; background: rgba(255,255,255,0.1); 
                                           color: #22c55e; border: 1px solid rgba(46,204,113,0.3); 
                                           border-radius: 4px; font-family: monospace;">
-                            <button onclick="copyToClipboard('${currentPassword}')" 
+                            <button onclick="copyToClipboard('${currentPassword.replace(/'/g, "\\'")}')" 
                                     style="padding: 0.5rem 1rem; background: #3498db; color: white; 
                                            border: none; border-radius: 4px; cursor: pointer;">
                                 <i class="fas fa-copy"></i> Copy
@@ -2118,8 +2128,14 @@
         }
         
         function copyToClipboard(text) {
+            if (text === 'No password set') {
+                showAlert('No password to copy', 'warning');
+                return;
+            }
             navigator.clipboard.writeText(text).then(() => {
                 showAlert('Password copied to clipboard', 'success');
+            }).catch(() => {
+                showAlert('Failed to copy password', 'danger');
             });
         }
         
@@ -2370,7 +2386,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('Page loaded, initializing data...'); // Debug log
             
-            // Load comprehensive data first to ensure counts are accurate
+            // Load comprehensive data first to ensure all data including passwords are available
             try {
                 const response = await fetch('/admin/comprehensive-data');
                 const data = await response.json();
@@ -2381,6 +2397,14 @@
                         users: Object.keys(adminData.users || {}).length,
                         registrations: Object.keys(adminData.registrations || {}).length
                     });
+                    
+                    // Debug: Check if passwords are present
+                    Object.entries(adminData.users || {}).forEach(([email, user]) => {
+                        if (user.password) {
+                            console.log(`User ${email} has password: ${user.password.substring(0, 3)}...`);
+                        }
+                    });
+                    
                     updateDashboardStats(); // Update counts immediately
                 }
             } catch (error) {
