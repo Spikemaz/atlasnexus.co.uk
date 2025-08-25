@@ -2990,6 +2990,36 @@ def admin_ban_ip():
     
     return jsonify({'status': 'success', 'message': f'IP {target_ip} banned successfully'})
 
+@app.route('/admin/unban-ip', methods=['POST'])
+def admin_unban_ip():
+    """Unban an IP address"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    target_ip = request.json.get('ip')
+    
+    if not target_ip:
+        return jsonify({'status': 'error', 'message': 'IP address required'}), 400
+    
+    # Remove the ban
+    lockouts = load_lockouts()
+    if target_ip in lockouts:
+        del lockouts[target_ip]
+        save_lockouts(lockouts)
+        
+        # Log the action
+        log_admin_action(ip_address, 'ip_unban', {
+            'unbanned_ip': target_ip,
+            'admin_email': session.get(f'user_email_{ip_address}')
+        })
+        
+        return jsonify({'status': 'success', 'message': f'IP {target_ip} unbanned successfully'})
+    else:
+        return jsonify({'status': 'error', 'message': 'IP not found in ban list'}), 404
+
 @app.route('/admin/ip-tracking')
 def admin_get_ip_tracking():
     """Get comprehensive IP tracking data"""
