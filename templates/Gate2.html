@@ -2770,6 +2770,29 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // Search Companies House (for auto-search functionality)
+        function searchCompaniesHouse(isAutoSearch = false) {
+            const companyName = document.getElementById('companyName').value.trim();
+            const resultsDiv = document.getElementById('companyResults');
+            
+            if (!companyName || companyName.length < 3) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+            
+            // For auto-search, show a helpful message
+            if (isAutoSearch) {
+                resultsDiv.innerHTML = `
+                    <div style="padding: 10px; background: rgba(52, 152, 219, 0.1); border: 1px solid #3498db; border-radius: 5px; margin-top: 10px;">
+                        <p style="color: #3498db; margin: 0; font-size: 0.9rem;">
+                            Click the "Search" button to look up "${companyName}" on Companies House
+                        </p>
+                    </div>
+                `;
+                resultsDiv.style.display = 'block';
+            }
+        }
+        
         // Open Companies House in popup window
         function openCompaniesHouseSearch() {
             const companyName = document.getElementById('companyName').value.trim();
@@ -2778,6 +2801,9 @@
                 alert('Please enter at least 2 characters to search');
                 return;
             }
+            
+            // Hide any auto-search results
+            document.getElementById('companyResults').style.display = 'none';
             
             // Open Companies House in a small popup window
             const searchUrl = `https://find-and-update.company-information.service.gov.uk/search/companies?q=${encodeURIComponent(companyName)}`;
