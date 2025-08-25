@@ -616,14 +616,17 @@
                         <thead>
                             <tr>
                                 <th>Email</th>
-                                <th>Username</th>
+                                <th>Name</th>
+                                <th>Company</th>
                                 <th>Status</th>
+                                <th>Account Type</th>
+                                <th>Last Login</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="usersTableBody">
                             <tr>
-                                <td colspan="4" style="text-align: center; padding: 2rem;">Loading users...</td>
+                                <td colspan="7" style="text-align: center; padding: 2rem;">Loading users...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -877,23 +880,97 @@
             const tbody = document.getElementById('usersTableBody');
             
             if (Object.keys(users).length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem;">No users found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No users found</td></tr>';
                 return;
             }
             
-            tbody.innerHTML = Object.entries(users).map(([email, user]) => `
+            // Separate online and offline users
+            const onlineUsers = [];
+            const offlineUsers = [];
+            
+            Object.entries(users).forEach(([email, user]) => {
+                // Check if user is online (last activity within 30 minutes)
+                let isOnline = false;
+                if (user.last_login) {
+                    const lastLogin = new Date(user.last_login);
+                    const minutesAgo = (Date.now() - lastLogin.getTime()) / (1000 * 60);
+                    isOnline = minutesAgo < 30;
+                }
+                
+                const userObj = { email, ...user, isOnline };
+                if (isOnline) {
+                    onlineUsers.push(userObj);
+                } else {
+                    offlineUsers.push(userObj);
+                }
+            });
+            
+            // Update counters
+            document.getElementById('onlineCount').textContent = onlineUsers.length;
+            document.getElementById('totalUsersCount').textContent = Object.keys(users).length;
+            
+            // Build table HTML
+            let html = '';
+            
+            // Online users section
+            if (onlineUsers.length > 0) {
+                html += `<tr><td colspan="7" style="background: rgba(34, 197, 94, 0.1); padding: 0.5rem; font-weight: bold; color: #22c55e;">ONLINE USERS (${onlineUsers.length})</td></tr>`;
+                html += onlineUsers.map(user => createUserRow(user)).join('');
+            }
+            
+            // Offline users section
+            if (offlineUsers.length > 0) {
+                html += `<tr><td colspan="7" style="background: rgba(148, 163, 184, 0.1); padding: 0.5rem; font-weight: bold; color: #94a3b8;">OFFLINE USERS (${offlineUsers.length})</td></tr>`;
+                html += offlineUsers.map(user => createUserRow(user)).join('');
+            }
+            
+            tbody.innerHTML = html;
+        }
+        
+        function createUserRow(user) {
+            const accountType = user.account_type || 'external';
+            const isFrozen = user.is_frozen || false;
+            const statusBadge = user.isOnline ? 
+                '<span class="status-badge status-active">● Online</span>' : 
+                '<span class="status-badge" style="background: #64748b;">● Offline</span>';
+            
+            const accountBadge = accountType === 'admin' ? 
+                '<span class="status-badge" style="background: #ffd700; color: #000;">Admin</span>' :
+                accountType === 'internal' ?
+                '<span class="status-badge" style="background: #3b82f6;">Internal</span>' :
+                '<span class="status-badge" style="background: #64748b;">External</span>';
+            
+            const frozenBadge = isFrozen ? 
+                '<span class="status-badge" style="background: #ef4444;">❄ Frozen</span>' : '';
+            
+            return `
                 <tr>
-                    <td>${email}</td>
-                    <td>${user.username || 'N/A'}</td>
-                    <td><span class="status-badge status-active">Active</span></td>
+                    <td style="font-weight: 600;">${user.email}</td>
+                    <td>${user.full_name || user.username || 'N/A'}</td>
+                    <td>${user.company || user.company_name || 'N/A'}</td>
+                    <td>${statusBadge}</td>
+                    <td>${accountBadge} ${frozenBadge}</td>
+                    <td>${user.last_login ? new Date(user.last_login).toLocaleString() : 'Never'}</td>
                     <td>
-                        <div class="action-buttons">
-                            <button class="action-btn action-edit" onclick="editUser('${email}')">Edit</button>
-                            <button class="action-btn action-delete" onclick="deleteUser('${email}')">Delete</button>
+                        <div class="action-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="action-btn action-edit" onclick="editUserAccount('${user.email}')" title="Edit account type">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            ${isFrozen ? 
+                                `<button class="action-btn" style="background: #22c55e;" onclick="unfreezeUser('${user.email}')" title="Unfreeze account">
+                                    <i class="fas fa-unlock"></i>
+                                </button>` :
+                                `<button class="action-btn" style="background: #3b82f6;" onclick="freezeUser('${user.email}')" title="Freeze account">
+                                    <i class="fas fa-snowflake"></i>
+                                </button>`
+                            }
+                            <button class="action-btn action-delete" onclick="deleteUser('${user.email}')" title="Delete user">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
-            `).join('');
+            `;
         }
 
         let allRegistrations = {};
@@ -1329,7 +1406,7 @@
         }
 
         async function deleteUser(email) {
-            if (!confirm(`Delete user: ${email}?`)) return;
+            if (!confirm(`Are you sure you want to delete user: ${email}?\n\nThis action cannot be undone.`)) return;
             
             try {
                 const response = await fetch('/admin/user/delete', {
@@ -1340,12 +1417,127 @@
                 
                 const data = await response.json();
                 if (data.status === 'success') {
-                    showAlert('User deleted', 'success');
+                    showAlert('User deleted successfully', 'success');
                     loadUsersData();
                     loadRegistrationsData();
+                } else {
+                    showAlert(data.message || 'Error deleting user', 'danger');
                 }
             } catch (error) {
                 showAlert('Error deleting user', 'danger');
+            }
+        }
+        
+        async function freezeUser(email) {
+            if (!confirm(`Freeze user account: ${email}?\n\nThey will not be able to log in until unfrozen.`)) return;
+            
+            try {
+                const response = await fetch('/admin/user/freeze', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('User account frozen', 'success');
+                    loadUsersData();
+                } else {
+                    showAlert(data.message || 'Error freezing user', 'danger');
+                }
+            } catch (error) {
+                showAlert('Error freezing user', 'danger');
+            }
+        }
+        
+        async function unfreezeUser(email) {
+            try {
+                const response = await fetch('/admin/user/unfreeze', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('User account unfrozen', 'success');
+                    loadUsersData();
+                } else {
+                    showAlert(data.message || 'Error unfreezing user', 'danger');
+                }
+            } catch (error) {
+                showAlert('Error unfreezing user', 'danger');
+            }
+        }
+        
+        async function editUserAccount(email) {
+            // Get current user data
+            const response = await fetch('/admin/comprehensive-data');
+            const data = await response.json();
+            const user = data.data.users[email] || {};
+            const currentType = user.account_type || 'external';
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.8); display: flex;
+                align-items: center; justify-content: center; z-index: 9999;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: #1a1f3a; border: 1px solid rgba(255,215,0,0.3); 
+                            border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%;">
+                    <h3 style="color: #ffd700; margin-bottom: 1.5rem;">Edit User Account Type</h3>
+                    <p style="color: #888; margin-bottom: 1rem;">User: ${email}</p>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="color: #888; display: block; margin-bottom: 0.5rem;">Account Type:</label>
+                        <select id="newAccountType" style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); 
+                                color: #ffd700; border: 1px solid rgba(255,215,0,0.3); border-radius: 4px;">
+                            <option value="external" ${currentType === 'external' ? 'selected' : ''}>External</option>
+                            <option value="internal" ${currentType === 'internal' ? 'selected' : ''}>Internal</option>
+                            <option value="admin" ${currentType === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button onclick="this.closest('[style*=\"position: fixed\"]').remove()" 
+                                style="padding: 0.5rem 1rem; background: #888; color: white; 
+                                       border: none; border-radius: 4px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="saveAccountType('${email}')" 
+                                style="padding: 0.5rem 1rem; background: #3b82f6; 
+                                       color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        async function saveAccountType(email) {
+            const newType = document.getElementById('newAccountType').value;
+            
+            try {
+                const response = await fetch('/admin/user/edit', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, account_type: newType})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('Account type updated successfully', 'success');
+                    document.querySelector('[style*="position: fixed"]').remove();
+                    loadUsersData();
+                } else {
+                    showAlert(data.message || 'Error updating account type', 'danger');
+                }
+            } catch (error) {
+                showAlert('Error updating account type', 'danger');
             }
         }
 

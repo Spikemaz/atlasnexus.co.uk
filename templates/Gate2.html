@@ -1830,16 +1830,17 @@
             
             tickerPosition = scrollLeft + walk;
             
-            // Seamless endless scrolling - adjust position smoothly
+            // Get ticker width (one segment)
             const tickerWidth = ticker.scrollWidth / 3;
             
-            // Only adjust if we're way out of bounds to prevent jumping
-            if (Math.abs(tickerPosition) > tickerWidth * 2.5) {
-                // Smoothly wrap to equivalent position
-                tickerPosition = tickerPosition % tickerWidth;
-            } else if (tickerPosition > tickerWidth * 0.5) {
-                // Smoothly wrap when dragging too far right
-                tickerPosition = tickerPosition - tickerWidth;
+            // Normalize position for seamless looping without jumping
+            // Keep position within a reasonable range to prevent visual artifacts
+            if (tickerPosition > 0) {
+                // If dragged too far right, keep it bounded
+                tickerPosition = Math.max(-tickerWidth * 2, tickerPosition - tickerWidth);
+            } else if (tickerPosition < -tickerWidth * 2) {
+                // If dragged too far left, keep it bounded
+                tickerPosition = Math.min(0, tickerPosition + tickerWidth);
             }
             
             ticker.style.transition = 'none'; // Remove transition for immediate response
@@ -2112,10 +2113,19 @@
         }
         
         // Initialize ticker with live data
-        createTicker();
+        // Ensure ticker is created after DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                createTicker();
+                fetchLiveMarketData();
+            });
+        } else {
+            // DOM is already loaded
+            createTicker();
+            fetchLiveMarketData();
+        }
         
-        // Fetch live data on load and every 30 seconds
-        fetchLiveMarketData();
+        // Update market data every 30 seconds
         setInterval(fetchLiveMarketData, 30000);
         
         // Fix checkbox clicking functionality

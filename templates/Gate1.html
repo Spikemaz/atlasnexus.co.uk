@@ -144,6 +144,10 @@
         let timeLeft = Math.max(0, Math.floor((lockoutEnd - new Date()) / 1000));
         {% else %}
         let timeLeft = {{ remaining_seconds|default(1800) }};
+        // Cap at 30 minutes (1800 seconds) for 30-minute blocks
+        {% if state == 'blocked_30min' %}
+        timeLeft = Math.min(timeLeft, 1800);
+        {% endif %}
         {% endif %}
         
         function updateCountdown() {

@@ -184,12 +184,24 @@
         }
         
         function updateUIForVerified() {
+            // Update email box
+            const emailBox = document.querySelector('.email-box');
+            if (emailBox) {
+                emailBox.innerHTML = `
+                    <strong style="color: #22C55E;">✅ Email Verified!</strong>
+                    <div class="email-display">${userEmail}</div>
+                    <p style="color: var(--silver-light); font-size: 0.95rem;">
+                        Awaiting admin approval...
+                    </p>
+                `;
+            }
+            
             // Replace resend button with Verified button
             const buttons = document.querySelector('.buttons');
             if (buttons) {
                 const resendBtn = buttons.querySelector('.btn-secondary');
                 if (resendBtn) {
-                    resendBtn.textContent = '✓ Verified';
+                    resendBtn.textContent = '✓ Email Verified';
                     resendBtn.style.background = 'linear-gradient(135deg, #059669 0%, #22C55E 100%)';
                     resendBtn.style.color = 'white';
                     resendBtn.style.border = 'none';
@@ -201,15 +213,17 @@
                     resendBtn.style.animation = 'pulse 2s ease-in-out';
                 }
             }
+            
+            // Update warning message
+            const warning = document.querySelector('.warning');
+            if (warning) {
+                warning.style.display = 'none';
+            }
         }
         
         // If already verified (from localStorage), update UI immediately
         if (savedStatus === 'verified') {
             emailVerified = true;
-            // Wait for DOM to load then update UI
-            document.addEventListener('DOMContentLoaded', function() {
-                updateUIForVerified();
-            });
         }
         
         function checkVerificationStatus() {
@@ -233,6 +247,7 @@
                     // Clear the interval
                     if (verificationCheckInterval) {
                         clearInterval(verificationCheckInterval);
+                        verificationCheckInterval = null;
                     }
                     
                     // Show success notification
@@ -242,6 +257,24 @@
                 // Also check if approved (for future status updates)
                 if (data.approved) {
                     localStorage.setItem(storageKey, 'approved');
+                    
+                    // Update UI for approval
+                    const emailBox = document.querySelector('.email-box');
+                    if (emailBox) {
+                        emailBox.innerHTML = `
+                            <strong style="color: #22C55E;">🎉 Account Approved!</strong>
+                            <div class="email-display">${userEmail}</div>
+                            <p style="color: var(--silver-light); font-size: 0.95rem;">
+                                You can now log in to your account
+                            </p>
+                        `;
+                    }
+                    
+                    // Stop checking once approved
+                    if (verificationCheckInterval) {
+                        clearInterval(verificationCheckInterval);
+                        verificationCheckInterval = null;
+                    }
                 }
             })
             .catch(error => console.log('Verification check failed:', error));
@@ -273,6 +306,12 @@
         
         // Check status immediately on page load
         window.addEventListener('DOMContentLoaded', function() {
+            // If already verified from localStorage, update UI immediately
+            if (emailVerified) {
+                updateUIForVerified();
+            }
+            
+            // Always check current status from server
             checkVerificationStatus();
             
             // Only start interval if not already verified
@@ -284,6 +323,7 @@
                 setTimeout(() => {
                     if (verificationCheckInterval) {
                         clearInterval(verificationCheckInterval);
+                        verificationCheckInterval = null;
                     }
                 }, 3600000); // 1 hour
             }
@@ -292,6 +332,12 @@
         let lastResendTime = 0;
         
         function resendEmail() {
+            // Don't allow resend if already verified
+            if (emailVerified) {
+                showNotification('Email already verified!', 'success');
+                return;
+            }
+            
             const btn = event.target;
             const now = Date.now();
             const timeSinceLastSend = now - lastResendTime;
@@ -325,27 +371,45 @@
             fetch('/resend-verification', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email: '{{ email }}'})
+                body: JSON.stringify({email: userEmail})
             })
             .then(r => r.json())
             .then(data => {
                 if (data.status === 'success') {
                     btn.textContent = '✓ Email Sent';
-                    btn.style.background = '#22C55E';
+                    btn.style.background = 'linear-gradient(135deg, #059669 0%, #22C55E 100%)';
+                    btn.style.color = 'white';
+                    
+                    showNotification('Verification email sent! Check your inbox.', 'success');
                     
                     // Reset button after 3 seconds but keep the rate limit
                     setTimeout(() => {
                         btn.style.background = '';
+                        btn.style.color = '';
                         btn.textContent = 'Resend Email';
                         btn.disabled = false;
                     }, 3000);
-                } else if (data.message && data.message.includes('wait')) {
-                    // Server-side rate limiting message
-                    btn.textContent = data.message;
-                    setTimeout(() => {
-                        btn.textContent = 'Resend Email';
+                } else if (data.message) {
+                    if (data.message.includes('already verified')) {
+                        // Email was verified, update UI
+                        emailVerified = true;
+                        localStorage.setItem(storageKey, 'verified');
+                        localStorage.setItem(storageTimeKey, Date.now().toString());
+                        updateUIForVerified();
+                        showNotification('Email already verified!', 'success');
+                    } else if (data.message.includes('wait')) {
+                        // Server-side rate limiting message
+                        btn.textContent = data.message;
+                        setTimeout(() => {
+                            btn.textContent = 'Resend Email';
+                            btn.disabled = false;
+                        }, 5000);
+                    } else {
+                        btn.textContent = 'Failed - Try Again';
                         btn.disabled = false;
-                    }, 5000);
+                        lastResendTime = 0; // Reset on failure
+                        showNotification(data.message || 'Failed to send email', 'error');
+                    }
                 } else {
                     btn.textContent = 'Failed - Try Again';
                     btn.disabled = false;
@@ -356,50 +420,9 @@
                 btn.textContent = 'Error - Try Again';
                 btn.disabled = false;
                 lastResendTime = 0; // Reset on error
+                showNotification('Network error. Please try again.', 'error');
             });
         }
-
-        // Check verification status every 5 seconds
-        let verificationCheckInterval = setInterval(() => {
-            fetch('/check-verification-status', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email: '{{ email }}'})
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.verified) {
-                    document.getElementById('step2').classList.add('completed');
-                    // Update message instead of redirecting
-                    const emailBox = document.querySelector('.email-box');
-                    emailBox.innerHTML = `
-                        <strong style="color: #22C55E;">✅ Email Verified!</strong>
-                        <div class="email-display">{{ email }}</div>
-                        <p style="color: var(--silver-light); font-size: 0.95rem;">
-                            Awaiting admin approval...
-                        </p>
-                    `;
-                }
-                
-                // Check if also approved
-                if (data.approved) {
-                    document.getElementById('step2').classList.add('completed');
-                    document.querySelector('.step:nth-child(3)').classList.add('completed');
-                    document.querySelector('.step:nth-child(4)').classList.add('completed');
-                    
-                    // Update login section
-                    const loginSection = document.querySelector('.login-section h3');
-                    if (loginSection) {
-                        loginSection.innerHTML = '🎉 Your Account is Active!';
-                        loginSection.style.color = '#22C55E';
-                    }
-                    
-                    // Stop checking once approved
-                    clearInterval(verificationCheckInterval);
-                }
-            })
-            .catch(err => console.log('Status check failed:', err));
-        }, 5000);
     </script>
 </body>
 </html>

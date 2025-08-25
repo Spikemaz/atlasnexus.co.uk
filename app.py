@@ -553,11 +553,113 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = SESSION_COOKIE_SECURE
 app.config['DEBUG'] = DEBUG
 
+def track_ip_access(ip_address, page, user_email=None):
+    """Track IP access to different pages"""
+    tracking_file = os.path.join(DATA_DIR, 'ip_tracking.json')
+    tracking = load_json_db(tracking_file)
+    
+    if ip_address not in tracking:
+        tracking[ip_address] = {
+            'first_seen': datetime.now().isoformat(),
+            'last_seen': datetime.now().isoformat(),
+            'pages_visited': [],
+            'total_visits': 0,
+            'user_emails': [],
+            'is_banned': False,
+            'reached_pages': {
+                'gate1': False,
+                'gate2': False,
+                'dashboard': False,
+                'admin_panel': False
+            }
+        }
+    
+    tracking[ip_address]['last_seen'] = datetime.now().isoformat()
+    tracking[ip_address]['total_visits'] += 1
+    
+    # Update reached pages
+    if page == 'gate1':
+        tracking[ip_address]['reached_pages']['gate1'] = True
+    elif page == 'gate2':
+        tracking[ip_address]['reached_pages']['gate2'] = True
+    elif page == 'dashboard':
+        tracking[ip_address]['reached_pages']['dashboard'] = True
+    elif page == 'admin_panel':
+        tracking[ip_address]['reached_pages']['admin_panel'] = True
+    
+    # Add page visit with timestamp
+    tracking[ip_address]['pages_visited'].append({
+        'page': page,
+        'timestamp': datetime.now().isoformat()
+    })
+    
+    # Keep only last 100 page visits
+    if len(tracking[ip_address]['pages_visited']) > 100:
+        tracking[ip_address]['pages_visited'] = tracking[ip_address]['pages_visited'][-100:]
+    
+    # Track associated user emails
+    if user_email and user_email not in tracking[ip_address]['user_emails']:
+        tracking[ip_address]['user_emails'].append(user_email)
+    
+    save_json_db(tracking_file, tracking)
+    return tracking[ip_address]
+
+def ban_ip_address(ip_address, reason='Manual ban', banned_by='admin'):
+    """Ban an IP address from accessing the site"""
+    tracking_file = os.path.join(DATA_DIR, 'ip_tracking.json')
+    tracking = load_json_db(tracking_file)
+    
+    if ip_address not in tracking:
+        tracking[ip_address] = {
+            'first_seen': datetime.now().isoformat(),
+            'last_seen': datetime.now().isoformat(),
+            'pages_visited': [],
+            'total_visits': 0,
+            'user_emails': [],
+            'is_banned': False
+        }
+    
+    tracking[ip_address]['is_banned'] = True
+    tracking[ip_address]['ban_reason'] = reason
+    tracking[ip_address]['banned_at'] = datetime.now().isoformat()
+    tracking[ip_address]['banned_by'] = banned_by
+    
+    save_json_db(tracking_file, tracking)
+    return True
+
+def unban_ip_address(ip_address):
+    """Unban an IP address"""
+    tracking_file = os.path.join(DATA_DIR, 'ip_tracking.json')
+    tracking = load_json_db(tracking_file)
+    
+    if ip_address in tracking:
+        tracking[ip_address]['is_banned'] = False
+        tracking[ip_address]['unbanned_at'] = datetime.now().isoformat()
+        save_json_db(tracking_file, tracking)
+        return True
+    return False
+
+def check_ip_ban(ip_address):
+    """Check if an IP is banned"""
+    tracking_file = os.path.join(DATA_DIR, 'ip_tracking.json')
+    tracking = load_json_db(tracking_file)
+    
+    if ip_address in tracking:
+        return tracking[ip_address].get('is_banned', False)
+    return False
+
 @app.route('/')
 def index():
     """Gate 1 - Site Authentication"""
     ip_address = get_real_ip()
     session.permanent = True
+    
+    # Track IP access
+    track_ip_access(ip_address, 'gate1')
+    
+    # Check if IP is banned
+    if check_ip_ban(ip_address):
+        return "Access Denied - Your IP has been banned", 403
     
     # Debug log the detected IP
     print(f"[DEBUG] Detected IP: {ip_address}, Headers: X-Forwarded-For={request.headers.get('X-Forwarded-For')}, X-Real-IP={request.headers.get('X-Real-IP')}")
@@ -817,15 +919,21 @@ def unlock():
             del lockouts[ip_address]
             save_lockouts(lockouts)
         
-        # Clear password attempts
+        # Clear password attempts from logs
         clear_ip_attempts(ip_address)
         
-        # Reset all counters and timers in session
+        # Explicitly reset all counters and timers in session
         session[f'attempt_count_{ip_address}'] = 0
+        session[f'site_attempts_{ip_address}'] = 0  # Reset site password attempts
         session.pop(f'blocked_until_{ip_address}', None)
         session.pop(f'lockout_24h_{ip_address}', None)
         session.pop(f'permanent_block_{ip_address}', None)
         session.pop(f'reference_code_{ip_address}', None)
+        session.pop(f'site_authenticated_{ip_address}', None)  # Clear site auth
+        session.pop(f'first_access_{ip_address}', None)  # Clear first access time
+        
+        # Clear any rate limiting
+        session.pop(f'last_attempt_{ip_address}', None)
         
         print(f"[OVERRIDE] Successfully cleared all blocks for IP {ip_address}")
         
@@ -2393,6 +2501,9 @@ def admin_approve_user_advanced():
     # Store password in registration for later use
     registrations[email]['generated_password'] = password
     registrations[email]['account_type'] = account_type
+    registrations[email]['admin_approved'] = True
+    registrations[email]['approved_at'] = datetime.now().isoformat()
+    save_json_db(REGISTRATIONS_FILE, registrations)
     
     # Check if email is verified
     email_verified = registrations[email].get('email_verified', False)
