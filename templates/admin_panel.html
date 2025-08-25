@@ -1462,42 +1462,14 @@
                             <label style="color: #888; font-size: 0.85rem;">Business Address:</label>
                             <p style="color: #e0e0e0; margin-bottom: 1rem;">${reg.business_address || 'N/A'}</p>
                         </div>
-                        <div style="grid-column: 1 / -1; padding: 1rem; background: rgba(46,204,113,0.1); 
-                                    border: 1px solid rgba(46,204,113,0.3); border-radius: 8px;">
-                            <label style="color: #2ecc71; font-size: 0.85rem;">Password:</label>
-                            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
-                                <input type="text" id="userPassword_${email.replace(/[@.]/g, '_')}" 
-                                       value="${reg.generated_password || 'No password set'}" 
-                                       style="flex: 1; padding: 0.5rem; background: rgba(255,255,255,0.1); 
-                                              color: #2ecc71; border: 1px solid rgba(46,204,113,0.3); 
-                                              border-radius: 4px; font-family: monospace;">
-                                <button onclick="generateNewPassword('${email}')" 
-                                        style="padding: 0.5rem 1rem; background: #3498db; color: white; 
-                                               border: none; border-radius: 4px; cursor: pointer;">
-                                    Generate New
-                                </button>
-                                <button onclick="updateUserPassword('${email}')" 
-                                        style="padding: 0.5rem 1rem; background: #2ecc71; color: white; 
-                                               border: none; border-radius: 4px; cursor: pointer;">
-                                    Save
-                                </button>
-                            </div>
-                        </div>
                     </div>
                     
-                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
                         <button onclick="document.getElementById('userDetailsModal').remove()" 
-                                style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); 
-                                       color: #888; border: 1px solid #888; border-radius: 4px; cursor: pointer;">
+                                style="padding: 0.75rem 2rem; background: #3498db; 
+                                       color: white; border: none; border-radius: 4px; cursor: pointer;">
                             Close
                         </button>
-                        ${!reg.admin_approved ? `
-                            <button onclick="document.getElementById('userDetailsModal').remove(); approveUserAdvanced('${email}')" 
-                                    style="padding: 0.5rem 1rem; background: #2ecc71; 
-                                           color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                Approve User
-                            </button>
-                        ` : ''}
                     </div>
                 </div>
             `;
