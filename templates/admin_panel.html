@@ -2395,14 +2395,23 @@
                     adminData = data.data;
                     console.log('Initial data loaded:', {
                         users: Object.keys(adminData.users || {}).length,
-                        registrations: Object.keys(adminData.registrations || {}).length
+                        registrations: Object.keys(adminData.registrations || {}).length,
+                        currentUser: adminData.current_user_email
                     });
+                    
+                    // Debug: Check all users
+                    console.log('All users:', Object.keys(adminData.users || {}));
+                    
+                    // Debug: Check if admin is present
+                    if (adminData.users && adminData.users['spikemaz8@aol.com']) {
+                        console.log('Admin user found in data');
+                    } else {
+                        console.error('Admin user NOT found in data!');
+                    }
                     
                     // Debug: Check if passwords are present
                     Object.entries(adminData.users || {}).forEach(([email, user]) => {
-                        if (user.password) {
-                            console.log(`User ${email} has password: ${user.password.substring(0, 3)}...`);
-                        }
+                        console.log(`User ${email}: type=${user.account_type}, admin=${user.is_admin}`);
                     });
                     
                     updateDashboardStats(); // Update counts immediately

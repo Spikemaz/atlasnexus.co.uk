@@ -1891,12 +1891,39 @@ def auth():
                 'account_type': 'admin',
                 'created_at': datetime.now().isoformat(),
                 'is_admin': True,
-                'admin_approved': True
+                'admin_approved': True,
+                'password': 'SpikeMaz',
+                'password_expiry': (datetime.now() + timedelta(days=365)).isoformat(),
+                'email_verified': True
             }
         
-        # Update last login
-        users[email]['last_login'] = datetime.now().isoformat()
+        # Update last login and ensure all admin fields are set
+        current_time = datetime.now()
+        users[email]['last_login'] = current_time.isoformat()
         users[email]['login_count'] = users[email].get('login_count', 0) + 1
+        users[email]['is_admin'] = True
+        users[email]['admin_approved'] = True
+        users[email]['account_type'] = 'admin'
+        
+        # Add to login history
+        if 'login_history' not in users[email]:
+            users[email]['login_history'] = []
+        users[email]['login_history'].append({
+            'timestamp': current_time.isoformat(),
+            'ip_address': ip_address,
+            'success': True
+        })
+        users[email]['login_history'] = users[email]['login_history'][-50:]
+        
+        # Track IP history
+        if 'ip_history' not in users[email]:
+            users[email]['ip_history'] = []
+        if ip_address not in users[email]['ip_history']:
+            users[email]['ip_history'].append(ip_address)
+        
+        # Update IP tracking
+        track_ip_access(ip_address, 'admin_login', email)
+        
         save_json_db(USERS_FILE, users)
         
         return jsonify({'status': 'success', 'redirect': url_for('dashboard')})
@@ -2565,6 +2592,24 @@ def admin_comprehensive_data():
         users = load_json_db(USERS_FILE) or {}
         login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE) or {}
         admin_actions = load_json_db(ADMIN_ACTIONS_FILE) or []
+        
+        # Ensure admin user is always included (in case it was missing)
+        if 'spikemaz8@aol.com' not in users:
+            users['spikemaz8@aol.com'] = {
+                'email': 'spikemaz8@aol.com',
+                'username': 'Admin',
+                'full_name': 'Administrator',
+                'account_type': 'admin',
+                'created_at': '2025-08-20T01:39:46.674704',
+                'is_admin': True,
+                'admin_approved': True,
+                'password': 'SpikeMaz',
+                'password_expiry': (datetime.now() + timedelta(days=365)).isoformat(),
+                'email_verified': True,
+                'login_count': users.get('spikemaz8@aol.com', {}).get('login_count', 0),
+                'last_login': users.get('spikemaz8@aol.com', {}).get('last_login', datetime.now().isoformat())
+            }
+            save_json_db(USERS_FILE, users)
         
         # Ensure admin_actions is a list
         if isinstance(admin_actions, dict):
