@@ -151,6 +151,63 @@
             gap: 1rem;
         }
 
+        .toolbar {
+            background: linear-gradient(135deg, rgba(20, 25, 45, 0.8) 0%, rgba(10, 15, 30, 0.8) 100%);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .toolbar-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 24px;
+            background: rgba(255, 215, 0, 0.2);
+            margin: 0 0.5rem;
+        }
+
+        .toolbar-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .toolbar-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+        }
+
+        .toolbar-btn.active {
+            background: rgba(255, 215, 0, 0.25);
+            border-color: #ffd700;
+        }
+
+        .toolbar-label {
+            color: #888;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         .btn {
             padding: 0.6rem 1.2rem;
             border-radius: 8px;
@@ -690,6 +747,29 @@
                 </div>
             </div>
             <div id="alertContainer"></div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-section">
+                <span class="toolbar-label">Engines:</span>
+                <button class="toolbar-btn" onclick="openPermutationEngine()">
+                    <i class="fas fa-project-diagram"></i> Permutation Engine
+                </button>
+                <a href="/securitization-engine" class="toolbar-btn">
+                    <i class="fas fa-calculator"></i> Securitization Engine
+                </a>
+            </div>
+            <div class="toolbar-divider"></div>
+            <div class="toolbar-section">
+                <span class="toolbar-label">Quick Actions:</span>
+                <button class="toolbar-btn" onclick="exportData()">
+                    <i class="fas fa-download"></i> Export Data
+                </button>
+                <button class="toolbar-btn" onclick="generateReport()">
+                    <i class="fas fa-file-alt"></i> Generate Report
+                </button>
+            </div>
         </div>
 
         <!-- Dashboard Content -->
