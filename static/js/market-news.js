@@ -11,6 +11,9 @@ function initializeMarketNews() {
     loadMarketEvents();
     loadMarketCommentary();
     
+    // Load saved articles count
+    updateSavedArticleCount();
+    
     // Set up auto-refresh
     startAutoRefresh();
     
@@ -870,17 +873,264 @@ function shareArticle(articleId) {
     }
 }
 
-// Save article function
-function saveArticle(articleId) {
-    // Placeholder for save functionality
-    const savedArticles = JSON.parse(localStorage.getItem('savedArticles') || '[]');
-    if (!savedArticles.includes(articleId)) {
-        savedArticles.push(articleId);
-        localStorage.setItem('savedArticles', JSON.stringify(savedArticles));
-        showToast('Article saved successfully!', 'success');
-    } else {
-        showToast('Article already saved', 'info');
+// Save article function - now saves to user account
+async function saveArticle(articleId) {
+    // Find the article in current news data
+    const article = currentNewsData.find(item => item.id === articleId);
+    if (!article) {
+        showToast('Article not found', 'error');
+        return;
     }
+    
+    try {
+        const response = await fetch('/api/saved-articles', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(article)
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showToast('Article saved successfully!', 'success');
+            updateSavedArticleCount();
+        } else if (data.status === 'info') {
+            showToast(data.message, 'info');
+        } else {
+            showToast('Error saving article', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving article:', error);
+        showToast('Error saving article', 'error');
+    }
+}
+
+// Load saved articles count
+async function updateSavedArticleCount() {
+    try {
+        const response = await fetch('/api/saved-articles');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            const countElement = document.getElementById('savedArticleCount');
+            if (countElement) {
+                countElement.textContent = data.count;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading saved articles count:', error);
+    }
+}
+
+// Show saved articles modal
+async function showSavedArticles() {
+    try {
+        const response = await fetch('/api/saved-articles');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showSavedArticlesModal(data.articles);
+        }
+    } catch (error) {
+        console.error('Error loading saved articles:', error);
+        showToast('Error loading saved articles', 'error');
+    }
+}
+
+// Display saved articles modal
+function showSavedArticlesModal(articles) {
+    // Remove any existing modal and backdrop
+    const existingModal = document.getElementById('savedArticlesModal');
+    if (existingModal) {
+        const modalInstance = bootstrap.Modal.getInstance(existingModal);
+        if (modalInstance) {
+            modalInstance.dispose();
+        }
+        existingModal.remove();
+    }
+    
+    // Remove any lingering modal backdrops
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('padding-right');
+    
+    // Create modal HTML
+    const modalHTML = `
+        <div class="modal fade" id="savedArticlesModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content" style="background: rgba(31, 41, 55, 0.98); border: 1px solid #60a5fa;">
+                    <div class="modal-header border-bottom border-secondary">
+                        <h5 class="modal-title text-white">
+                            <i class="fas fa-bookmark me-2"></i>Saved Articles (${articles.length})
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${articles.length === 0 ? 
+                            '<p class="text-muted text-center py-4">No saved articles yet. Click "Save for Later" on any article to save it here.</p>' :
+                            `<div class="saved-articles-list">
+                                ${articles.map(article => `
+                                    <div class="saved-article-item border-bottom border-secondary pb-3 mb-3" data-article-id="${article.id}">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <span class="badge bg-${getBadgeColor(article.type)}">${article.type}</span>
+                                            <div>
+                                                <small class="text-muted me-2">Saved ${getTimeAgo(article.saved_at)}</small>
+                                                <button class="btn btn-sm btn-outline-danger" onclick="removeSavedArticle('${article.id}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <h6 class="text-white mb-2" style="cursor: pointer;" onclick='openSavedNewsDetail(${JSON.stringify(article).replace(/'/g, "&apos;")})'>${article.title}</h6>
+                                        <p class="text-muted small mb-2">${article.content ? article.content.substring(0, 150) + '...' : ''}</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-info">
+                                                <i class="fas fa-tag me-1"></i>${article.tags ? article.tags.slice(0, 3).join(' • ') : ''}
+                                            </small>
+                                            <small class="text-warning">
+                                                <i class="fas fa-newspaper me-1"></i>${article.source}
+                                            </small>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>`
+                        }
+                    </div>
+                    <div class="modal-footer border-top border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        ${articles.length > 0 ? 
+                            '<button type="button" class="btn btn-danger" onclick="clearAllSavedArticles()"><i class="fas fa-trash-alt me-1"></i>Clear All</button>' : ''
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Initialize and show modal
+    const modalElement = document.getElementById('savedArticlesModal');
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+    
+    // Clean up modal after it's hidden
+    modalElement.addEventListener('hidden.bs.modal', function() {
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+            modalInstance.dispose();
+        }
+        modalElement.remove();
+        // Extra cleanup for any lingering backdrops
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('padding-right');
+    });
+}
+
+// Remove saved article
+async function removeSavedArticle(articleId) {
+    try {
+        const response = await fetch(`/api/saved-articles?article_id=${articleId}`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            // Remove from modal
+            const articleElement = document.querySelector(`[data-article-id="${articleId}"]`);
+            if (articleElement) {
+                articleElement.remove();
+            }
+            
+            // Update count
+            updateSavedArticleCount();
+            showToast('Article removed', 'success');
+            
+            // Update modal title count
+            const modalTitle = document.querySelector('#savedArticlesModal .modal-title');
+            if (modalTitle) {
+                modalTitle.innerHTML = `<i class="fas fa-bookmark me-2"></i>Saved Articles (${data.count})`;
+            }
+        }
+    } catch (error) {
+        console.error('Error removing saved article:', error);
+        showToast('Error removing article', 'error');
+    }
+}
+
+// Clear all saved articles
+async function clearAllSavedArticles() {
+    if (!confirm('Are you sure you want to clear all saved articles?')) {
+        return;
+    }
+    
+    try {
+        // Get all saved articles first
+        const response = await fetch('/api/saved-articles');
+        const data = await response.json();
+        
+        if (data.status === 'success' && data.articles.length > 0) {
+            // Remove each article
+            for (const article of data.articles) {
+                await fetch(`/api/saved-articles?article_id=${article.id}`, {
+                    method: 'DELETE'
+                });
+            }
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('savedArticlesModal'));
+            if (modal) {
+                modal.hide();
+            }
+            
+            updateSavedArticleCount();
+            showToast('All saved articles cleared', 'success');
+        }
+    } catch (error) {
+        console.error('Error clearing saved articles:', error);
+        showToast('Error clearing articles', 'error');
+    }
+}
+
+// Open saved news detail (reuse existing modal)
+function openSavedNewsDetail(article) {
+    openNewsDetail(article);
+}
+
+// Get badge color helper
+function getBadgeColor(type) {
+    const colors = {
+        'BREAKING': 'danger',
+        'MARKET MOVE': 'primary',
+        'ANALYSIS': 'warning',
+        'DEAL NEWS': 'success',
+        'REGULATORY': 'info'
+    };
+    return colors[type] || 'secondary';
+}
+
+// Get time ago helper
+function getTimeAgo(timestamp) {
+    if (!timestamp) return 'recently';
+    
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (minutes < 1) return 'just now';
+    if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+    if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+    if (days < 30) return `${days} day${days !== 1 ? 's' : ''} ago`;
+    
+    return date.toLocaleDateString();
 }
 
 // Show toast notification

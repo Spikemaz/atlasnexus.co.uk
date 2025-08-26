@@ -4035,6 +4035,88 @@ def get_expert_history(expert_id):
     expert_data = market_news_service.get_expert_history(expert_id)
     return jsonify(expert_data)
 
+@app.route('/api/saved-articles', methods=['GET', 'POST', 'DELETE'])
+def manage_saved_articles():
+    """Manage user's saved articles"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    # Get user email from session
+    user_email = session.get(f'user_email_{ip_address}')
+    if not user_email:
+        return jsonify({'status': 'error', 'message': 'User email not found'}), 400
+    
+    # Load user data
+    users_file = os.path.join(DATA_DIR, 'users.json')
+    users = load_json_db(users_file)
+    
+    # Initialize saved articles if not exists
+    if user_email not in users:
+        users[user_email] = {}
+    if 'saved_articles' not in users[user_email]:
+        users[user_email]['saved_articles'] = []
+    
+    if request.method == 'GET':
+        # Return user's saved articles
+        saved_articles = users[user_email]['saved_articles']
+        return jsonify({
+            'status': 'success',
+            'articles': saved_articles,
+            'count': len(saved_articles)
+        })
+    
+    elif request.method == 'POST':
+        # Save a new article
+        article_data = request.json
+        if not article_data or 'id' not in article_data:
+            return jsonify({'status': 'error', 'message': 'Invalid article data'}), 400
+        
+        # Check if article already saved
+        saved_articles = users[user_email]['saved_articles']
+        article_ids = [a.get('id') for a in saved_articles]
+        
+        if article_data['id'] in article_ids:
+            return jsonify({'status': 'info', 'message': 'Article already saved'}), 200
+        
+        # Add timestamp
+        article_data['saved_at'] = datetime.now().isoformat()
+        
+        # Add to saved articles (keep last 100)
+        saved_articles.insert(0, article_data)
+        users[user_email]['saved_articles'] = saved_articles[:100]
+        
+        # Save to file
+        save_json_db(users_file, users)
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Article saved successfully',
+            'count': len(saved_articles)
+        })
+    
+    elif request.method == 'DELETE':
+        # Remove a saved article
+        article_id = request.args.get('article_id')
+        if not article_id:
+            return jsonify({'status': 'error', 'message': 'Article ID required'}), 400
+        
+        saved_articles = users[user_email]['saved_articles']
+        users[user_email]['saved_articles'] = [
+            a for a in saved_articles if a.get('id') != article_id
+        ]
+        
+        # Save to file
+        save_json_db(users_file, users)
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Article removed',
+            'count': len(users[user_email]['saved_articles'])
+        })
+
 @app.route('/admin/audit-log')
 def admin_audit_log():
     """Get complete audit log"""
