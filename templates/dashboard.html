@@ -1,8 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- DEBUG LINE 1 -->
-<!-- DEBUG LINE 2 -->
-<!-- DEBUG LINE 3 -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2713,73 +2710,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- DEBUG: Script block starts here. Counting lines from here -->
     <script>
-    // IMMEDIATE DEBUG - This runs before parsing error
-    console.log('Dashboard script starting to load...');
-    
-    // Get the HTML source and show what's at line 3688
-    window.addEventListener('DOMContentLoaded', function() {
-        fetch(window.location.href)
-            .then(response => response.text())
-            .then(html => {
-                const lines = html.split('\n');
-                console.log('DEBUGGING LINE 3688:');
-                console.log('Total lines in page:', lines.length);
-                if (lines.length > 3687) {
-                    console.log('Line 3686:', lines[3685]);
-                    console.log('Line 3687:', lines[3686]);
-                    console.log('Line 3688:', lines[3687]);
-                    console.log('Line 3689:', lines[3688]);
-                    console.log('Line 3690:', lines[3689]);
-                    
-                    // Show character at position 13
-                    const line3688 = lines[3687];
-                    console.log('Character at column 13:', line3688[12], '(char code:', line3688.charCodeAt(12), ')');
-                    
-                    // Look for = signs in the line
-                    let equalPos = line3688.indexOf('=');
-                    while (equalPos !== -1) {
-                        console.log('Found = at position', equalPos + 1, '- Left side:', line3688.substring(Math.max(0, equalPos - 20), equalPos));
-                        equalPos = line3688.indexOf('=', equalPos + 1);
-                    }
-                }
-            })
-            .catch(err => console.error('Could not fetch page source:', err));
-    });
-    </script>
-    <script>
-    // ERROR DEBUGGING - Add this at the very beginning
-    window.addEventListener('error', function(event) {
-        console.error('Global error caught:', event);
-        console.error('Error message:', event.message);
-        console.error('Error filename:', event.filename);
-        console.error('Error line:', event.lineno);
-        console.error('Error column:', event.colno);
-        console.error('Error object:', event.error);
-        if (event.lineno === 3688) {
-            console.error('ERROR AT LINE 3688 DETECTED!');
-            console.error('Attempting to identify the actual code at this line...');
-            // Try to get the actual script content
-            try {
-                var scripts = document.getElementsByTagName('script');
-                var allScriptContent = '';
-                for (var i = 0; i < scripts.length; i++) {
-                    if (scripts[i].innerHTML) {
-                        allScriptContent += scripts[i].innerHTML + '\n';
-                    }
-                }
-                var lines = allScriptContent.split('\n');
-                if (lines[3687]) {
-                    console.error('Line 3688 content:', lines[3687]);
-                    console.error('Line 3687 content:', lines[3686]);
-                    console.error('Line 3689 content:', lines[3688]);
-                }
-            } catch (e) {
-                console.error('Could not retrieve line content:', e);
-            }
-        }
-    });
     
     // Global variables - must be defined before any functions that use them
     let tickerInitialized = false;
@@ -2982,7 +2913,7 @@
             
             // Fetch SOFR rate (replaces LIBOR)
             try {
-                const sofrResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&api_key=' + fredApiKey + '&file_type=json&limit=1&sort_order=desc');
+                const sofrResponse = await fetch('/api/market-data/fred/SOFR');
                 const sofrData = await sofrResponse.json();
                 if (sofrData.observations && sofrData.observations[0]) {
                     marketData['SOFR'].value = parseFloat(sofrData.observations[0].value);
@@ -3525,8 +3456,8 @@
                     await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
                 }
                 
-                const url = baseUrl + '?series_id=' + seriesId + '&api_key=' + fredApiKey + '&file_type=json&limit=1&sort_order=desc';
-                const response = await fetch(url);
+                // Use proxy to avoid CORS issues
+                const response = await fetch('/api/market-data/fred/' + seriesId);
                 const data = await response.json();
                 
                 if (data.observations && data.observations[0]) {

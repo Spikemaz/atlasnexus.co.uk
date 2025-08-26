@@ -2174,7 +2174,13 @@ def favicon():
 def proxy_fred_api(series_id):
     """Proxy FRED API requests to avoid CORS issues"""
     # Whitelist of allowed series to prevent abuse
-    allowed_series = ['SOFR', 'DGS10', 'DGS2', 'DGS5', 'DGS30', 'DFEDTARU', 'DEXUSEU']
+    allowed_series = [
+        'SOFR', 'DGS10', 'DGS2', 'DGS5', 'DGS30', 'DFEDTARU', 'DEXUSEU',
+        'DFF', 'UNRATE', 'CPIAUCSL', 'PPIACO', 'HOUST',
+        'T1YIE', 'T5YIFR', 'TEDRATE', 'DEXUSUK', 'DEXJPUS',
+        'GDP', 'PAYEMS', 'INDPRO', 'M1SL', 'M2SL', 'BOGMBASE',
+        'TB3MS', 'TB6MS', 'CSUSHPISA', 'PERMIT'
+    ]
     
     if series_id not in allowed_series:
         return jsonify({'error': 'Invalid series ID'}), 400
