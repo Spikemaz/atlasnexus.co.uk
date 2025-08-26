@@ -30,7 +30,7 @@ except ImportError:
     SECURITIZATION_AVAILABLE = False
     run_securitization_calculation = None
 
-# Import market news service
+# Import market news service (AI-generated analysis)
 try:
     from market_news_service import MarketNewsService
     MARKET_NEWS_AVAILABLE = True
@@ -38,6 +38,15 @@ try:
 except ImportError:
     MARKET_NEWS_AVAILABLE = False
     market_news_service = None
+
+# Import real news service
+try:
+    from real_news_service import RealNewsService
+    REAL_NEWS_AVAILABLE = True
+    real_news_service = RealNewsService()
+except ImportError:
+    REAL_NEWS_AVAILABLE = False
+    real_news_service = None
 
 # ==================== IP LOCKOUT TRACKING ====================
 # On Vercel/production, use /tmp directory (writable)
@@ -4168,6 +4177,81 @@ def get_active_deals():
             'by_region': by_region,
             'by_status': by_status
         },
+        'timestamp': datetime.now().isoformat()
+    })
+
+@app.route('/api/real-news')
+def get_real_news():
+    """Get real news from external sources"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    if not REAL_NEWS_AVAILABLE or not real_news_service:
+        # Fall back to AI-generated news if real news not available
+        if MARKET_NEWS_AVAILABLE and market_news_service:
+            return jsonify({
+                'status': 'fallback',
+                'message': 'Using AI-generated content',
+                'news': market_news_service.generate_sample_news(20),
+                'timestamp': datetime.now().isoformat()
+            })
+        return jsonify({'status': 'error', 'message': 'News service not available'}), 503
+    
+    # Get query parameters
+    region = request.args.get('region', 'all')
+    asset_class = request.args.get('asset', 'all')
+    limit = int(request.args.get('limit', 20))
+    
+    # Fetch real news
+    news_items = real_news_service.fetch_real_news(region, asset_class, limit)
+    
+    return jsonify({
+        'status': 'success',
+        'news': news_items,
+        'count': len(news_items),
+        'is_real': True,
+        'timestamp': datetime.now().isoformat()
+    })
+
+@app.route('/api/ai-analysis')
+def get_ai_analysis():
+    """Get AI-generated market analysis"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    if not MARKET_NEWS_AVAILABLE or not market_news_service:
+        return jsonify({'status': 'error', 'message': 'AI analysis service not available'}), 503
+    
+    # Get query parameters
+    region = request.args.get('region', 'all')
+    asset_class = request.args.get('asset', 'all')
+    limit = int(request.args.get('limit', 20))
+    
+    # Generate AI analysis
+    analysis_items = market_news_service.generate_sample_news(limit)
+    
+    # Mark as AI-generated
+    for item in analysis_items:
+        item['is_ai_generated'] = True
+        item['type'] = 'AI ANALYSIS'
+    
+    # Apply filters
+    if region != 'all':
+        analysis_items = [n for n in analysis_items if n.get('region', '').lower() == region.lower()]
+    if asset_class != 'all':
+        analysis_items = [n for n in analysis_items if n.get('asset_class', '').lower() == asset_class.lower()]
+    
+    return jsonify({
+        'status': 'success',
+        'analysis': analysis_items,
+        'count': len(analysis_items),
+        'is_ai_generated': True,
         'timestamp': datetime.now().isoformat()
     })
 

@@ -1,11 +1,12 @@
 // Market News JavaScript Module
 let currentNewsData = [];
+let currentNewsType = 'live'; // 'live' or 'ai'
 let updateInterval = null;
 
 // Initialize market news when page loads
 function initializeMarketNews() {
     loadMarketIndicators();
-    loadMarketNews();
+    loadMarketNews(); // This will now load based on currentNewsType
     loadRegionalData();
     loadTrendingTopics();
     loadMarketEvents();
@@ -40,7 +41,7 @@ async function loadMarketIndicators() {
     }
 }
 
-// Load market news
+// Load market news (live or AI based on current selection)
 async function loadMarketNews(filters = {}) {
     try {
         const params = new URLSearchParams({
@@ -51,21 +52,50 @@ async function loadMarketNews(filters = {}) {
             limit: 20
         });
         
-        const response = await fetch(`/api/market-news?${params}`);
+        // Choose endpoint based on news type
+        const endpoint = currentNewsType === 'live' ? '/api/real-news' : '/api/ai-analysis';
+        const response = await fetch(`${endpoint}?${params}`);
         const data = await response.json();
         
-        if (data.status === 'success') {
-            currentNewsData = data.news;
-            renderNewsItems(data.news);
+        if (data.status === 'success' || data.status === 'fallback') {
+            currentNewsData = data.news || data.analysis || [];
+            const containerId = currentNewsType === 'live' ? 'liveNewsContainer' : 'aiNewsContainer';
+            renderNewsItems(currentNewsData, containerId);
         }
     } catch (error) {
         console.error('Error loading market news:', error);
     }
 }
 
+// Switch between live news and AI analysis
+function switchNewsType(type) {
+    currentNewsType = type;
+    
+    // Update button states
+    const liveBtn = document.getElementById('btnLiveNews');
+    const aiBtn = document.getElementById('btnAIAnalysis');
+    const liveSection = document.getElementById('liveNewsSection');
+    const aiSection = document.getElementById('aiAnalysisSection');
+    
+    if (type === 'live') {
+        liveBtn.classList.add('active');
+        aiBtn.classList.remove('active');
+        liveSection.classList.remove('d-none');
+        aiSection.classList.add('d-none');
+    } else {
+        aiBtn.classList.add('active');
+        liveBtn.classList.remove('active');
+        aiSection.classList.remove('d-none');
+        liveSection.classList.add('d-none');
+    }
+    
+    // Load news for the selected type
+    loadMarketNews();
+}
+
 // Render news items
-function renderNewsItems(newsItems) {
-    const container = document.getElementById('newsContainer');
+function renderNewsItems(newsItems, containerId = null) {
+    const container = document.getElementById(containerId || 'newsContainer');
     if (!container) return;
     
     container.innerHTML = '';
@@ -99,10 +129,17 @@ function createNewsElement(item) {
         'MARKET MOVE': 'primary',
         'ANALYSIS': 'warning',
         'DEAL NEWS': 'success',
-        'REGULATORY': 'info'
+        'REGULATORY': 'info',
+        'LIVE NEWS': 'success',
+        'AI ANALYSIS': 'purple'
     };
     
     const badgeColor = badgeColors[item.type] || 'secondary';
+    
+    // Add indicator for real vs AI
+    const sourceIndicator = item.is_real ? 
+        '<i class="fas fa-check-circle text-success me-1" title="Verified Source"></i>' : 
+        (item.is_ai_generated ? '<i class="fas fa-robot text-info me-1" title="AI Generated"></i>' : '');
     
     div.innerHTML = `
         <div class="d-flex justify-content-between align-items-start mb-2">
@@ -116,6 +153,7 @@ function createNewsElement(item) {
                 <i class="fas fa-tag me-1"></i>${item.tags.slice(0, 3).join(' • ')}
             </small>
             <small class="text-warning">
+                ${sourceIndicator}
                 <i class="fas fa-newspaper me-1"></i>${item.source}
             </small>
         </div>
