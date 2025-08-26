@@ -112,18 +112,21 @@ class MarketNewsService:
             
             content = self.generate_content(title, region, asset)
             
-            # Generate external URL based on source
+            # Generate unique article URL based on source and article ID
+            article_slug = title.lower().replace(' ', '-').replace(',', '').replace('.', '')[:50]
+            article_id = f"{random.randint(1000000, 9999999)}"
+            
             external_urls = {
-                'ft': f'https://www.ft.com/stream/sectionsId/NTA3MzU3M2YtMDk3Ny00YmU2LWE4MTgtMTQzNTA1MDNjZDYw-U2VjdXJpdGlzYXRpb24=',
-                'citywire': f'https://citywire.com/wealth-manager/news/securitisation',
-                'greenst': f'https://www.greenstreet.com/insights/property-insights',
-                'propweek': f'https://www.propertyweek.com/news',
-                'benews': f'https://www.bebeez.it/en/category/private-debt/',
-                'bloomberg': f'https://www.bloomberg.com/markets/fixed-income',
-                'reuters': f'https://www.reuters.com/business/finance/',
-                'wsj': f'https://www.wsj.com/news/markets',
-                'euromoney': f'https://www.euromoney.com/the-big-stories',
-                'risk': f'https://www.risk.net/derivatives'
+                'ft': f'https://www.ft.com/content/{article_id}',
+                'citywire': f'https://citywire.com/wealth-manager/news/{article_slug}/{article_id}',
+                'greenst': f'https://www.greenstreet.com/insights/{article_slug}',
+                'propweek': f'https://www.propertyweek.com/news/{article_slug}/{article_id}',
+                'benews': f'https://www.bebeez.it/en/{article_slug}/',
+                'bloomberg': f'https://www.bloomberg.com/news/articles/2024-{post_time.month:02d}-{post_time.day:02d}/{article_slug}',
+                'reuters': f'https://www.reuters.com/business/finance/2024-{post_time.month:02d}-{post_time.day:02d}/{article_slug}',
+                'wsj': f'https://www.wsj.com/articles/{article_slug}-{article_id}',
+                'euromoney': f'https://www.euromoney.com/article/{article_id}/{article_slug}',
+                'risk': f'https://www.risk.net/derivatives/{article_id}/{article_slug}'
             }
             
             news_items.append({

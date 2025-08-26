@@ -1502,7 +1502,7 @@ function showToast(message, type = 'info') {
                 <strong class="me-auto">Atlas Nexus</strong>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-            <div class="toast-body">
+            <div class="toast-body bg-dark text-white">
                 ${message}
             </div>
         </div>
@@ -1512,6 +1512,11 @@ function showToast(message, type = 'info') {
     const toastElement = document.querySelector('.toast:last-child');
     const toast = new bootstrap.Toast(toastElement);
     toast.show();
+    
+    // Auto-close after 3 seconds
+    setTimeout(() => {
+        toast.hide();
+    }, 3000);
     
     // Remove toast after it's hidden
     toastElement.addEventListener('hidden.bs.toast', function() {
