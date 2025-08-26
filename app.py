@@ -30,6 +30,15 @@ except ImportError:
     SECURITIZATION_AVAILABLE = False
     run_securitization_calculation = None
 
+# Import market news service
+try:
+    from market_news_service import MarketNewsService
+    MARKET_NEWS_AVAILABLE = True
+    market_news_service = MarketNewsService()
+except ImportError:
+    MARKET_NEWS_AVAILABLE = False
+    market_news_service = None
+
 # ==================== IP LOCKOUT TRACKING ====================
 # On Vercel/production, use /tmp directory (writable)
 # On local, use current directory
@@ -366,6 +375,8 @@ def audit_project():
         'data-protection.html',
         'security.html',
         'contact.html',
+        'market_news.html',
+        'market_news_content.html',
         'awaiting_verification.html',  # Added for registration system
         'registration-submitted.html',  # Added for new registration flow
         'admin_panel.html',  # Admin control panel
@@ -3863,6 +3874,141 @@ def check_securitization_access():
         'status': 'success',
         'role': role,
         'username': session.get(f'username_{ip_address}')
+    })
+
+@app.route('/api/market-news')
+def get_market_news():
+    """Get market news feed"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    if not MARKET_NEWS_AVAILABLE or not market_news_service:
+        return jsonify({'status': 'error', 'message': 'Market news service not available'}), 503
+    
+    # Get query parameters for filtering
+    region = request.args.get('region', 'all')
+    asset_class = request.args.get('asset', 'all')
+    source = request.args.get('source', 'all')
+    search = request.args.get('search', '')
+    limit = int(request.args.get('limit', 20))
+    
+    # Generate news items
+    news_items = market_news_service.generate_sample_news(limit)
+    
+    # Apply filters
+    if region != 'all':
+        news_items = [n for n in news_items if n['region'].lower() == region.lower()]
+    if asset_class != 'all':
+        news_items = [n for n in news_items if n['asset_class'].lower() == asset_class.lower()]
+    if source != 'all':
+        news_items = [n for n in news_items if n['source_key'] == source]
+    if search:
+        search_lower = search.lower()
+        news_items = [n for n in news_items if search_lower in n['title'].lower() or search_lower in n['content'].lower()]
+    
+    return jsonify({
+        'status': 'success',
+        'news': news_items,
+        'count': len(news_items),
+        'timestamp': datetime.now().isoformat()
+    })
+
+@app.route('/api/market-indicators')
+def get_market_indicators():
+    """Get market indicators and sentiment"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    if not MARKET_NEWS_AVAILABLE or not market_news_service:
+        return jsonify({'status': 'error', 'message': 'Market news service not available'}), 503
+    
+    indicators = market_news_service.get_market_indicators()
+    return jsonify({
+        'status': 'success',
+        'data': indicators,
+        'timestamp': datetime.now().isoformat()
+    })
+
+@app.route('/api/market-regional')
+def get_regional_data():
+    """Get regional market data"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    if not MARKET_NEWS_AVAILABLE or not market_news_service:
+        return jsonify({'status': 'error', 'message': 'Market news service not available'}), 503
+    
+    regional_data = market_news_service.get_regional_data()
+    return jsonify({
+        'status': 'success',
+        'regions': regional_data,
+        'timestamp': datetime.now().isoformat()
+    })
+
+@app.route('/api/market-trending')
+def get_trending_topics():
+    """Get trending topics in securitisation"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    if not MARKET_NEWS_AVAILABLE or not market_news_service:
+        return jsonify({'status': 'error', 'message': 'Market news service not available'}), 503
+    
+    topics = market_news_service.get_trending_topics()
+    return jsonify({
+        'status': 'success',
+        'topics': topics,
+        'timestamp': datetime.now().isoformat()
+    })
+
+@app.route('/api/market-events')
+def get_market_events():
+    """Get upcoming market events"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    if not MARKET_NEWS_AVAILABLE or not market_news_service:
+        return jsonify({'status': 'error', 'message': 'Market news service not available'}), 503
+    
+    events = market_news_service.get_upcoming_events()
+    return jsonify({
+        'status': 'success',
+        'events': events,
+        'timestamp': datetime.now().isoformat()
+    })
+
+@app.route('/api/market-commentary')
+def get_market_commentary():
+    """Get expert market commentary"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    if not MARKET_NEWS_AVAILABLE or not market_news_service:
+        return jsonify({'status': 'error', 'message': 'Market news service not available'}), 503
+    
+    commentary = market_news_service.get_market_commentary()
+    return jsonify({
+        'status': 'success',
+        'commentary': commentary,
+        'timestamp': datetime.now().isoformat()
     })
 
 @app.route('/admin/audit-log')

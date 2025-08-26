@@ -1226,59 +1226,9 @@
         </div>
     </div>
 
-    <!-- Market Updates Section -->
+    <!-- Market News Section - Dynamic Content -->
     <div id="market-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
-        <div class="container">
-            <h2 class="text-white mb-4"><i class="fas fa-chart-line me-2"></i>Market Updates</h2>
-            <div class="row g-4">
-                <div class="col-lg-6">
-                    <div class="card shadow-lg" style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa;">
-                        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);">
-                            <h5 class="mb-0">Bond Markets</h5>
-                        </div>
-                        <div class="card-body text-white">
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>US 10Y Treasury</span>
-                                    <span class="text-success">4.25% <i class="fas fa-arrow-up"></i></span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>German 10Y Bund</span>
-                                    <span class="text-danger">2.45% <i class="fas fa-arrow-down"></i></span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>UK 10Y Gilt</span>
-                                    <span class="text-success">4.10% <i class="fas fa-arrow-up"></i></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="card shadow-lg" style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa;">
-                        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);">
-                            <h5 class="mb-0">Credit Spreads</h5>
-                        </div>
-                        <div class="card-body text-white">
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>IG Corporate</span>
-                                    <span class="text-warning">+95 bps</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>HY Corporate</span>
-                                    <span class="text-warning">+385 bps</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>EM Sovereign</span>
-                                    <span class="text-danger">+425 bps</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Content will be loaded from market_news.html -->
     </div>
 
     <!-- Data Section -->
@@ -3327,6 +3277,12 @@
             const sectionElement = document.getElementById(section + '-section');
             if (sectionElement) {
                 sectionElement.style.display = 'block';
+                
+                // Initialize market news when market section is shown
+                if (section === 'market' && !window.marketNewsLoaded) {
+                    loadMarketNewsData();
+                    window.marketNewsLoaded = true;
+                }
             }
         }
         
@@ -4246,6 +4202,68 @@
             this.remove();
         });
     }
+    
+    // Load market news content dynamically
+    function loadMarketNewsContent() {
+        fetch('/static/market_news_content.html')
+            .then(response => response.text())
+            .then(html => {
+                const marketSection = document.getElementById('market-section');
+                if (marketSection) {
+                    // Extract just the inner content from market_news.html
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const content = doc.querySelector('#market-section-content');
+                    if (content) {
+                        marketSection.innerHTML = content.innerHTML;
+                    } else {
+                        // Fallback: use the entire content
+                        marketSection.innerHTML = html;
+                    }
+                    // Initialize market news functionality
+                    if (window.marketNews) {
+                        window.marketNews.initialize();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading market news content:', error);
+                // Fallback to loading data directly
+                loadMarketNewsData();
+            });
+    }
+    
+    // Alternative: Load market news data directly via API
+    function loadMarketNewsData() {
+        const marketSection = document.getElementById('market-section');
+        if (!marketSection) return;
+        
+        // Insert the market news HTML structure
+        marketSection.innerHTML = `{% include 'market_news_content.html' %}`;
+        
+        // Wait a moment for DOM to update, then initialize
+        setTimeout(() => {
+            if (window.marketNews) {
+                window.marketNews.initialize();
+            }
+        }, 100);
+    }
+    
+    // Initialize market news when market tab is clicked
+    document.addEventListener('DOMContentLoaded', function() {
+        const marketBtn = document.querySelector('[onclick*="showSection(\'market\')"]');
+        if (marketBtn) {
+            marketBtn.addEventListener('click', function() {
+                if (!window.marketNewsLoaded) {
+                    loadMarketNewsData();
+                    window.marketNewsLoaded = true;
+                }
+            });
+        }
+    });
     </script>
+    
+    <!-- Market News Script -->
+    <script src="/static/js/market-news.js"></script>
 </body>
 </html>
