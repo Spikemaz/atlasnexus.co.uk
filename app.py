@@ -2179,7 +2179,8 @@ def proxy_fred_api(series_id):
         'DFF', 'UNRATE', 'CPIAUCSL', 'PPIACO', 'HOUST',
         'T1YIE', 'T5YIFR', 'TEDRATE', 'DEXUSUK', 'DEXJPUS',
         'GDP', 'PAYEMS', 'INDPRO', 'M1SL', 'M2SL', 'BOGMBASE',
-        'TB3MS', 'TB6MS', 'CSUSHPISA', 'PERMIT'
+        'TB3MS', 'TB6MS', 'CSUSHPISA', 'PERMIT',
+        'DPRIME', 'BAMLH0A0HYM2', 'BAMLC0A0CM', 'MORTGAGE30US', 'MORTGAGE15US'
     ]
     
     if series_id not in allowed_series:
