@@ -1297,11 +1297,12 @@ def register():
             'ip_address': ip_address
         }
         
-        # Load existing registrations
+        # Load existing registrations and users
         registrations = load_json_db(REGISTRATIONS_FILE)
+        users = load_json_db(USERS_FILE)
         
-        # Check if email already exists
-        if data['email'] in registrations:
+        # Check if email already exists in either database
+        if data['email'] in registrations or data['email'] in users:
             return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
         
         # Save registration
@@ -1499,16 +1500,16 @@ def registration_expired():
     registrations = load_json_db(REGISTRATIONS_FILE)
     
     if email in registrations:
-        # Move to expired registrations
+        # Mark as expired instead of deleting
+        registrations[email]['expired'] = True
+        registrations[email]['expired_at'] = datetime.now().isoformat()
+        registrations[email]['expired_reason'] = 'Email not verified within 10 minutes'
+        save_json_db(REGISTRATIONS_FILE, registrations)
+        
+        # Also save to expired file for tracking
         expired = load_json_db('data/expired_registrations.json')
         expired[email] = registrations[email]
-        expired[email]['expired_at'] = datetime.now().isoformat()
-        expired[email]['reason'] = 'Email not verified within 10 minutes'
         save_json_db('data/expired_registrations.json', expired)
-        
-        # Remove from active registrations
-        del registrations[email]
-        save_json_db(REGISTRATIONS_FILE, registrations)
         
         print(f"[REGISTRATION] Expired registration for {email} - not verified within 10 minutes")
         return jsonify({'status': 'success'})
@@ -1735,9 +1736,15 @@ def verify_email():
                     'total_login_time': 0,
                     'last_login': None,
                     'login_history': [],
-                    'password_sent': True  # Sending now
+                    'credentials_sent': True,  # Mark that credentials were sent
+                    'credentials_sent_at': datetime.now().isoformat()
                 }
                 save_json_db(USERS_FILE, users)
+                
+                # Also update registration to mark credentials sent
+                registrations[email]['credentials_sent'] = True
+                registrations[email]['credentials_sent_at'] = datetime.now().isoformat()
+                save_json_db(REGISTRATIONS_FILE, registrations)
                 
                 # Send credentials email
                 base_url = get_base_url()
@@ -2328,8 +2335,10 @@ def admin_quick_reject():
         </html>
         """, 400
     
-    # Remove from registrations
-    del registrations[email]
+    # Mark as rejected instead of deleting
+    registrations[email]['rejected'] = True
+    registrations[email]['rejected_at'] = datetime.now().isoformat()
+    registrations[email]['rejected_reason'] = 'Admin rejected via link'
     save_json_db(REGISTRATIONS_FILE, registrations)
     
     # Send rejection email
@@ -2375,10 +2384,12 @@ def admin_reject_user():
     email = request.json.get('email')
     reason = request.json.get('reason', 'Application not approved')
     
-    # Remove from registrations
+    # Mark as rejected instead of deleting
     registrations = load_json_db(REGISTRATIONS_FILE)
     if email in registrations:
-        del registrations[email]
+        registrations[email]['rejected'] = True
+        registrations[email]['rejected_at'] = datetime.now().isoformat()
+        registrations[email]['rejected_by'] = session.get(f'user_email_{ip_address}', 'spikemaz8@aol.com')
         save_json_db(REGISTRATIONS_FILE, registrations)
     
     # Send rejection email
@@ -2791,9 +2802,16 @@ def admin_approve_user_advanced():
     # Check if email is verified
     email_verified = registrations[email].get('email_verified', False)
     
-    # Only create user account and send credentials if BOTH verified AND approved
+    # Store approval info in registrations but DON'T create user yet if not verified
+    # Keep user in registrations with approved status until they verify
+    registrations[email]['admin_approved'] = True
+    registrations[email]['approved_at'] = datetime.now().isoformat()
+    registrations[email]['approved_by'] = session.get(f'user_email_{ip_address}', 'spikemaz8@aol.com')
+    registrations[email]['generated_password'] = password  # Store the password for when they verify
+    registrations[email]['account_type'] = account_type
+    
+    # Only create user account if email is already verified
     if email_verified:
-        # Create user account
         password_expiry = datetime.now() + timedelta(days=30)
         users = load_json_db(USERS_FILE)
         users[email] = {
@@ -2803,14 +2821,18 @@ def admin_approve_user_advanced():
             'admin_approved': True,
             'approved_at': datetime.now().isoformat(),
             'account_type': account_type,
+            'email_verified': True,
             'login_count': 0,
             'total_login_time': 0,
             'last_login': None,
             'login_history': [],
             'approved_by': session.get(f'user_email_{ip_address}', 'spikemaz8@aol.com'),
-            'password_sent': False  # Will be sent now
+            'credentials_sent': False,  # Will be updated when email is sent
+            'credentials_sent_at': None
         }
         save_json_db(USERS_FILE, users)
+    
+    save_json_db(REGISTRATIONS_FILE, registrations)
     
     # Update registration status
     registrations[email]['admin_approved'] = True
@@ -2831,16 +2853,15 @@ def admin_approve_user_advanced():
     })
     save_json_db(ADMIN_ACTIONS_FILE, admin_actions)
     
-    # Send approval email ONLY if email is verified
+    # Only send credentials if email is verified
     if email_verified:
-        # Send approval email with password
         base_url = get_base_url()
         email_html = f"""
         <html>
             <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
                 <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
                     <h2 style="color: #22c55e;">Application Approved!</h2>
-                    <p>Welcome to AtlasNexus! Your account has been approved.</p>
+                    <p>Welcome to AtlasNexus! Your account has been approved by an administrator.</p>
                     <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
                         <h3 style="color: #333;">Your Login Credentials:</h3>
                         <p><strong>Email:</strong> {email}</p>
@@ -2854,17 +2875,33 @@ def admin_approve_user_advanced():
         </html>
         """
         
-        send_email(email, 'AtlasNexus - Account Approved', email_html)
+        # Try to send email
+        email_sent = send_email(email, 'AtlasNexus - Account Approved', email_html)
         
-        return jsonify({
-            'status': 'success', 
-            'message': 'User approved and credentials sent via email'
-        })
+        # Update credentials_sent status
+        if email_sent:
+            users[email]['credentials_sent'] = True
+            users[email]['credentials_sent_at'] = datetime.now().isoformat()
+            save_json_db(USERS_FILE, users)
+            
+            registrations[email]['credentials_sent'] = True
+            registrations[email]['credentials_sent_at'] = datetime.now().isoformat()
+            save_json_db(REGISTRATIONS_FILE, registrations)
+            
+            return jsonify({
+                'status': 'success', 
+                'message': 'User approved and credentials sent via email'
+            })
+        else:
+            return jsonify({
+                'status': 'success',
+                'message': f'User approved. Password: {password} (email delivery failed - please share credentials manually)'
+            })
     else:
-        # Email not verified - credentials will be sent after verification
+        # User approved but email not verified yet
         return jsonify({
             'status': 'success',
-            'message': 'User approved. Credentials will be sent after email verification.'
+            'message': 'User approved. They will receive credentials after verifying their email address.'
         })
 
 @app.route('/admin/resend-credentials', methods=['POST'])

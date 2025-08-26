@@ -802,9 +802,9 @@
                                 <th>Company</th>
                                 <th>IP Address</th>
                                 <th>Registered</th>
-                                <th>Email Verified</th>
-                                <th>Account Type</th>
                                 <th>Status</th>
+                                <th>Account Type</th>
+                                <th>Approval</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -1321,12 +1321,21 @@
             
             let filtered = Object.entries(allRegistrations);
             
+            // Always filter out expired and rejected unless specifically viewing them
+            if (filter !== 'expired' && filter !== 'rejected') {
+                filtered = filtered.filter(([_, reg]) => !reg.expired && !reg.rejected);
+            }
+            
             if (filter === 'pending') {
                 filtered = filtered.filter(([_, reg]) => !reg.admin_approved);
             } else if (filter === 'verified') {
                 filtered = filtered.filter(([_, reg]) => reg.email_verified);
             } else if (filter === 'approved') {
                 filtered = filtered.filter(([_, reg]) => reg.admin_approved);
+            } else if (filter === 'expired') {
+                filtered = Object.entries(allRegistrations).filter(([_, reg]) => reg.expired);
+            } else if (filter === 'rejected') {
+                filtered = Object.entries(allRegistrations).filter(([_, reg]) => reg.rejected);
             }
             
             if (filtered.length === 0) {
@@ -1335,6 +1344,22 @@
             }
             
             tbody.innerHTML = filtered.map(([email, reg]) => {
+                // Determine credential status with color coding
+                let statusBadge = '';
+                if (reg.expired) {
+                    statusBadge = '<span class="status-badge" style="background: #dc3545;">Expired</span>';
+                } else if (reg.rejected) {
+                    statusBadge = '<span class="status-badge" style="background: #dc3545;">Rejected</span>';
+                } else if (!reg.email_verified) {
+                    statusBadge = '<span class="status-badge" style="background: #6c757d;">Not Verified</span>';
+                } else if (!reg.admin_approved) {
+                    statusBadge = '<span class="status-badge" style="background: #ffc107; color: #000;">Verified</span>';
+                } else if (!reg.credentials_sent) {
+                    statusBadge = '<span class="status-badge" style="background: #17a2b8;">Approved</span>';
+                } else {
+                    statusBadge = '<span class="status-badge" style="background: #28a745;">✓ Credentials Sent</span>';
+                }
+                
                 const verifiedBadge = reg.email_verified ? 
                     '<span class="status-badge status-active">✓ Verified</span>' : 
                     '<span class="status-badge status-pending">Pending</span>';
@@ -1353,7 +1378,7 @@
                         <td>${reg.company_name || 'N/A'}</td>
                         <td><code style="color: #3498db;">${reg.ip_address || 'Unknown'}</code></td>
                         <td>${new Date(reg.created_at || reg.timestamp).toLocaleString()}</td>
-                        <td>${verifiedBadge}</td>
+                        <td>${statusBadge}</td>
                         <td>
                             <select class="form-select-sm" id="accountType_${email}" style="padding: 0.25rem; border-radius: 4px; background: rgba(255,255,255,0.05); color: #ffd700; border: 1px solid rgba(255,215,0,0.3);">
                                 <option value="external" ${accountType === 'external' ? 'selected' : ''}>External</option>

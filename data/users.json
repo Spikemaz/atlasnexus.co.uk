@@ -12,36 +12,5 @@
     "password": "SpikeMaz",
     "password_expiry": "2026-08-25T17:20:55.604780",
     "email_verified": true
-  },
-  "testuser@example.com": {
-    "email": "testuser@example.com",
-    "full_name": "Test User",
-    "company_name": "Test Company Ltd",
-    "company_website": "https://testcompany.com",
-    "job_title": "Test Manager",
-    "phone": "+44 20 1234 5678",
-    "country": "United Kingdom",
-    "verification_token": "W13TJ2EQ7t2JzrKXLxOSq3ByUwTfPSYCeg0pMi_jvPM",
-    "created_at": "2025-08-25T19:03:08.281678",
-    "ip_address": "127.0.0.1",
-    "email_verified": true,
-    "admin_approved": true,
-    "account_type": "external",
-    "verified_at": "2025-08-25T19:03:08.283009",
-    "approved_at": "2025-08-25T19:03:08.284170",
-    "generated_password": "sL&A8pXE!E%v",
-    "password": "sL&A8pXE!E%v",
-    "password_expiry": "2025-09-24T19:03:08.284175",
-    "approved_by": "spikemaz8@aol.com",
-    "login_count": 1,
-    "total_login_time": 0,
-    "last_login": "2025-08-25T19:03:08.285172",
-    "login_history": [
-      {
-        "timestamp": "2025-08-25T19:03:08.285178",
-        "ip_address": "127.0.0.1",
-        "success": true
-      }
-    ]
   }
 }

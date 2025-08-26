@@ -1,1 +1,21 @@
-{}
+{
+  "127.0.0.1": {
+    "first_seen": "2025-08-25T21:54:36.243846",
+    "last_seen": "2025-08-25T21:54:36.244099",
+    "pages_visited": [
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-25T21:54:36.244104"
+      }
+    ],
+    "total_visits": 1,
+    "user_emails": [],
+    "is_banned": false,
+    "reached_pages": {
+      "gate1": true,
+      "gate2": false,
+      "dashboard": false,
+      "admin_panel": false
+    }
+  }
+}

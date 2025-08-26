@@ -276,7 +276,7 @@
 
         /* Main Container */
         .main-container {
-            margin-top: 165px; /* Account for header + ticker + toolbar */
+            margin-top: 165px; /* Account for header + ticker + nav bar */
             padding: 2rem;
             max-width: 1400px;
             margin-left: auto;
@@ -625,40 +625,50 @@
             <!-- Content populated by JavaScript -->
         </div>
     </div>
-    
-    <!-- Collapsible Navigation Toolbar -->
-    <div id="navToolbar" style="position: fixed; top: 115px; left: 0; right: 0; background: linear-gradient(90deg, #1e293b 0%, #334155 100%); border-bottom: 1px solid rgba(96, 165, 250, 0.3); z-index: 998; transition: all 0.3s ease; overflow: hidden; height: 50px;">
-        <div style="display: flex; justify-content: center; align-items: center; gap: 2rem; padding: 10px 0;">
-            <button class="nav-btn dashboard-btn" onclick="showSection('dashboard')" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                <i class="fas fa-home me-2"></i>Dashboard
+
+    <!-- Navigation Bar -->
+    <div id="navBar" style="position: fixed; top: 115px; left: 0; right: 0; background: linear-gradient(90deg, #1e293b 0%, #334155 100%); border-bottom: 1px solid rgba(96, 165, 250, 0.3); z-index: 998; padding: 10px 0; transition: all 0.3s ease;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <button onclick="showSection('dashboard')" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-home"></i> Dashboard
             </button>
-            <button class="nav-btn" onclick="showSection('market')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                <i class="fas fa-chart-line me-2"></i>Market Updates
+            <button onclick="showSection('market')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-chart-line"></i> Market
             </button>
-            <button class="nav-btn" onclick="showSection('data')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                <i class="fas fa-database me-2"></i>Data
+            <button onclick="showSection('analytics')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-chart-bar"></i> Analytics
             </button>
-            <button class="nav-btn" onclick="showSection('analytics')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                <i class="fas fa-chart-bar me-2"></i>Analytics
+            <button onclick="showSection('risk')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-shield-alt"></i> Risk
             </button>
-            <button class="nav-btn" onclick="showSection('risk')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                <i class="fas fa-shield-alt me-2"></i>Risk Management
+            <button onclick="showSection('portfolio')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-briefcase"></i> Portfolio
             </button>
-            <button class="nav-btn" onclick="showSection('portfolio')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                <i class="fas fa-briefcase me-2"></i>Portfolio
+            <button onclick="showSection('compliance')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-gavel"></i> Compliance
             </button>
-            <button class="nav-btn" onclick="showSection('compliance')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                <i class="fas fa-gavel me-2"></i>Compliance
-            </button>
-            <button class="nav-btn" onclick="showSection('permutation')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                <i class="fas fa-cogs me-2"></i>Permutation Engine
+            <button onclick="showSection('permutation')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-cogs"></i> Engine
             </button>
         </div>
     </div>
     
-    <!-- Toggle Button for Toolbar -->
-    <button id="toggleToolbar" onclick="toggleNavToolbar()" style="position: fixed; top: 115px; right: 20px; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 8px 12px; border-radius: 0 0 6px 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; z-index: 999; transition: all 0.3s;">
-        <i class="fas fa-chevron-up" id="toggleIcon"></i> Tools
+    <!-- Toggle Button -->
+    <button onclick="(function(){
+        var nav = document.getElementById('navBar');
+        var icon = document.getElementById('navToggleIcon');
+        var containers = document.querySelectorAll('.main-container, #main-dashboard, #market-section, #data-section, #analytics-section, #risk-section, #portfolio-section, #compliance-section, #permutation-section');
+        if (nav.style.display === 'none') {
+            nav.style.display = 'block';
+            icon.className = 'fas fa-chevron-up';
+            containers.forEach(function(c) { if(c) c.style.marginTop = '165px'; });
+        } else {
+            nav.style.display = 'none';
+            icon.className = 'fas fa-chevron-down';
+            containers.forEach(function(c) { if(c) c.style.marginTop = '125px'; });
+        }
+    })()" style="position: fixed; top: 115px; right: 20px; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; z-index: 999;">
+        <i class="fas fa-chevron-up" id="navToggleIcon"></i> Tools
     </button>
 
     <!-- Main Dashboard Content -->
@@ -2043,15 +2053,15 @@
                 
                 for (const [email, data] of Object.entries(regs)) {
                     html += '<tr style="border-bottom: 1px solid #364049;">';
-                    html += `<td style="padding: 10px;">${email}</td>`;
-                    html += `<td style="padding: 10px;">${data.full_name || '-'}</td>`;
-                    html += `<td style="padding: 10px;">${data.company_name || '-'}</td>`;
-                    html += `<td style="padding: 10px;">${data.email_verified ? '✅' : '❌'}</td>`;
-                    html += `<td style="padding: 10px;">${data.admin_approved ? '✅' : '❌'}</td>`;
-                    html += `<td style="padding: 10px;">
-                        <button onclick="deleteData('registration', '${email}')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-right: 5px;">Delete</button>
-                        ${!data.admin_approved ? `<button onclick="approveUser('${email}')" style="background: #22c55e; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Approve</button>` : ''}
-                    </td>`;
+                    html += '<td style="padding: 10px;">' + email + '</td>';
+                    html += '<td style="padding: 10px;">' + (data.full_name || '-') + '</td>';
+                    html += '<td style="padding: 10px;">' + (data.company_name || '-') + '</td>';
+                    html += '<td style="padding: 10px;">' + (data.email_verified ? '✅' : '❌') + '</td>';
+                    html += '<td style="padding: 10px;">' + (data.admin_approved ? '✅' : '❌') + '</td>';
+                    html += '<td style="padding: 10px;">' +
+                        '<button onclick="deleteData(\'registration\', \'' + email + '\')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-right: 5px;">Delete</button>' +
+                        (!data.admin_approved ? '<button onclick="approveUser(\'' + email + '\')" style="background: #22c55e; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Approve</button>' : '') +
+                    '</td>';
                     html += '</tr>';
                 }
                 html += '</tbody></table></div>';
@@ -2083,13 +2093,13 @@
                 
                 for (const [ip, data] of Object.entries(lockouts)) {
                     html += '<tr style="border-bottom: 1px solid #364049;">';
-                    html += `<td style="padding: 10px; font-family: monospace;">${ip}</td>`;
-                    html += `<td style="padding: 10px;">${data.permanent ? 'Permanent' : 'Temporary'}</td>`;
-                    html += `<td style="padding: 10px;">${data.reason || '-'}</td>`;
-                    html += `<td style="padding: 10px;">${data.locked_until || 'Permanent'}</td>`;
-                    html += `<td style="padding: 10px;">
-                        <button onclick="deleteData('ip_lockout', '${ip}')" style="background: #22c55e; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Unblock</button>
-                    </td>`;
+                    html += '<td style="padding: 10px; font-family: monospace;">' + ip + '</td>';
+                    html += '<td style="padding: 10px;">' + (data.permanent ? 'Permanent' : 'Temporary') + '</td>';
+                    html += '<td style="padding: 10px;">' + (data.reason || '-') + '</td>';
+                    html += '<td style="padding: 10px;">' + (data.locked_until || 'Permanent') + '</td>';
+                    html += '<td style="padding: 10px;">' +
+                        '<button onclick="deleteData(\'ip_lockout\', \'' + ip + '\')" style="background: #22c55e; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Unblock</button>' +
+                    '</td>';
                     html += '</tr>';
                 }
                 html += '</tbody></table></div>';
@@ -2120,12 +2130,12 @@
                 
                 for (const [ip, data] of Object.entries(attempts)) {
                     html += '<tr style="border-bottom: 1px solid #364049;">';
-                    html += `<td style="padding: 10px; font-family: monospace;">${ip}</td>`;
-                    html += `<td style="padding: 10px;">${data.total_attempts || 0}</td>`;
-                    html += `<td style="padding: 10px;">${data.last_attempt || '-'}</td>`;
-                    html += `<td style="padding: 10px;">
-                        <button onclick="deleteData('login_attempt', '${ip}')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Delete</button>
-                    </td>`;
+                    html += '<td style="padding: 10px; font-family: monospace;">' + ip + '</td>';
+                    html += '<td style="padding: 10px;">' + (data.total_attempts || 0) + '</td>';
+                    html += '<td style="padding: 10px;">' + (data.last_attempt || '-') + '</td>';
+                    html += '<td style="padding: 10px;">' +
+                        '<button onclick="deleteData(\'login_attempt\', \'' + ip + '\')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Delete</button>' +
+                    '</td>';
                     html += '</tr>';
                 }
                 html += '</tbody></table></div>';
@@ -3022,35 +3032,35 @@
         
         // Special handling for central bank rates with history
         if ((symbol === 'FED RATE' || symbol === 'BOE RATE' || symbol === 'ECB RATE') && data.history) {
-            return `
-                <div class="ticker-item" style="display: inline-flex; align-items: center; gap: 8px; margin: 0 12px;">
-                    <span class="ticker-symbol" style="color: #dbeafe; font-weight: 600;">${symbol}:</span>
-                    <span class="ticker-value" style="color: #fff; font-weight: 500;">${formatValue(data.value)}</span>
-                    <span style="color: #64748b; font-size: 0.65rem; margin-left: 8px;">History:</span>
-                    ${data.history.map((rate, i) => `
-                        <span style="color: ${i === data.history.length - 1 ? '#fbbf24' : '#94a3b8'}; font-size: 0.75rem; font-weight: ${i === data.history.length - 1 ? '600' : '400'};">
-                            ${rate.toFixed(2)}%
-                        </span>
-                    `).join('')}
-                </div>
-                <span class="ticker-separator" style="color: #475569; margin: 0 8px;">●</span>
-            `;
+            var historyHTML = '';
+            for (var i = 0; i < data.history.length; i++) {
+                var rate = data.history[i];
+                var color = (i === data.history.length - 1) ? '#fbbf24' : '#94a3b8';
+                var weight = (i === data.history.length - 1) ? '600' : '400';
+                historyHTML += '<span style="color: ' + color + '; font-size: 0.75rem; font-weight: ' + weight + ';">' + rate.toFixed(2) + '%</span>';
+            }
+            
+            return '<div class="ticker-item" style="display: inline-flex; align-items: center; gap: 8px; margin: 0 12px;">' +
+                '<span class="ticker-symbol" style="color: #dbeafe; font-weight: 600;">' + symbol + ':</span>' +
+                '<span class="ticker-value" style="color: #fff; font-weight: 500;">' + formatValue(data.value) + '</span>' +
+                '<span style="color: #64748b; font-size: 0.65rem; margin-left: 8px;">History:</span>' +
+                historyHTML +
+                '</div>' +
+                '<span class="ticker-separator" style="color: #475569; margin: 0 8px;">●</span>';
         }
         
         // Regular ticker item
-        return `
-            <div class="ticker-item" style="display: inline-flex; align-items: center; gap: 8px; margin: 0 12px;">
-                <span class="ticker-symbol" style="color: #dbeafe; font-weight: 600;">${symbol}:</span>
-                <span class="ticker-value" style="color: #fff; font-weight: 500;">${formatValue(data.value)}</span>
-                <span style="color: #64748b; font-size: 0.7rem; margin-left: 4px;">24h</span>
-                <span style="color: ${getChangeColor(data.change24h)}; font-size: 0.8rem; font-weight: 500;">${formatChange(data.change24h)}</span>
-                <span style="color: #64748b; font-size: 0.7rem;">7d</span>
-                <span style="color: ${getChangeColor(data.change7d)}; font-size: 0.8rem; font-weight: 500;">${formatChange(data.change7d)}</span>
-                <span style="color: #64748b; font-size: 0.7rem;">30d</span>
-                <span style="color: ${getChangeColor(data.change30d)}; font-size: 0.8rem; font-weight: 500;">${formatChange(data.change30d)}</span>
-            </div>
-            <span class="ticker-separator" style="color: #475569; margin: 0 8px;">●</span>
-        `;
+        return '<div class="ticker-item" style="display: inline-flex; align-items: center; gap: 8px; margin: 0 12px;">' +
+            '<span class="ticker-symbol" style="color: #dbeafe; font-weight: 600;">' + symbol + ':</span>' +
+            '<span class="ticker-value" style="color: #fff; font-weight: 500;">' + formatValue(data.value) + '</span>' +
+            '<span style="color: #64748b; font-size: 0.7rem; margin-left: 4px;">24h</span>' +
+            '<span style="color: ' + getChangeColor(data.change24h) + '; font-size: 0.8rem; font-weight: 500;">' + formatChange(data.change24h) + '</span>' +
+            '<span style="color: #64748b; font-size: 0.7rem;">7d</span>' +
+            '<span style="color: ' + getChangeColor(data.change7d) + '; font-size: 0.8rem; font-weight: 500;">' + formatChange(data.change7d) + '</span>' +
+            '<span style="color: #64748b; font-size: 0.7rem;">30d</span>' +
+            '<span style="color: ' + getChangeColor(data.change30d) + '; font-size: 0.8rem; font-weight: 500;">' + formatChange(data.change30d) + '</span>' +
+            '</div>' +
+            '<span class="ticker-separator" style="color: #475569; margin: 0 8px;">●</span>';
     }
 
     // Function to update ticker content without reinitializing
@@ -3122,7 +3132,7 @@
     
     // Initialize everything on page load
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM loaded, initializing ticker...');
+        console.log('DOM loaded, initializing...');
         
         // Create and initialize ticker
         createTicker();
@@ -3209,51 +3219,6 @@
         return 1 - (--t) * t * t * t;
     }
     
-    // Toggle Navigation Toolbar
-    let toolbarOpen = true; // Track toolbar state
-    
-    function toggleNavToolbar() {
-        const toolbar = document.getElementById('navToolbar');
-        const toggleIcon = document.getElementById('toggleIcon');
-        const toggleBtn = document.getElementById('toggleToolbar');
-        const mainContainers = document.querySelectorAll('.main-container, #main-dashboard, #market-section, #data-section, #analytics-section, #risk-section, #portfolio-section, #compliance-section, #permutation-section');
-        
-        if (toolbarOpen) {
-            // Close toolbar
-            toolbar.style.height = '0px';
-            toolbar.style.overflow = 'hidden';
-            toolbar.style.borderBottom = 'none';
-            toggleIcon.className = 'fas fa-chevron-down';
-            toggleBtn.style.borderRadius = '0 0 6px 6px';
-            
-            // Adjust all main containers
-            mainContainers.forEach(container => {
-                if (container) {
-                    container.style.marginTop = '115px';
-                    container.style.paddingTop = '2rem';
-                }
-            });
-            
-            toolbarOpen = false;
-        } else {
-            // Open toolbar
-            toolbar.style.height = '50px';
-            toolbar.style.overflow = 'visible';
-            toolbar.style.borderBottom = '1px solid rgba(96, 165, 250, 0.3)';
-            toggleIcon.className = 'fas fa-chevron-up';
-            toggleBtn.style.borderRadius = '0';
-            
-            // Adjust all main containers
-            mainContainers.forEach(container => {
-                if (container) {
-                    container.style.marginTop = '165px';
-                    container.style.paddingTop = '2rem';
-                }
-            });
-            
-            toolbarOpen = true;
-        }
-    }
     
     // Show section based on navigation
     function showSection(section) {
@@ -3606,13 +3571,13 @@
         document.getElementById('perm-progress-bar').style.width = permutationEngine.progress + '%';
         document.getElementById('perm-progress-percent').textContent = Math.round(permutationEngine.progress) + '%';
         document.getElementById('perm-current-iterations').textContent = 
-            `${permutationEngine.currentIteration} / ${permutationEngine.totalIterations}`;
+            permutationEngine.currentIteration + ' / ' + permutationEngine.totalIterations;
         
         // Simulate live results
         const liveResults = document.getElementById('perm-live-results');
         if (liveResults) {
             const result = Math.random() * 1000;
-            liveResults.innerHTML += `<br>Iteration ${permutationEngine.currentIteration}: Result = ${result.toFixed(4)}`;
+            liveResults.innerHTML += '<br>Iteration ' + permutationEngine.currentIteration + ': Result = ' + result.toFixed(4);
             
             // Keep only last 10 results visible
             const lines = liveResults.innerHTML.split('<br>');
