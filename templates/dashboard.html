@@ -3112,6 +3112,9 @@
 
     function createTickerItem(symbol, data) {
         const formatValue = (val) => {
+            if (val === undefined || val === null || isNaN(val)) {
+                return 'N/A';
+            }
             if (symbol.includes('/')) return val.toFixed(4);
             else if (symbol.includes('JPY')) return val.toFixed(2);
             else if (symbol.includes('RATE') || symbol.includes('SPREAD') || symbol.includes('AAA') || symbol.includes('SOFR') || symbol.includes('SONIA') || symbol.includes('ESTR') || symbol.includes('TONAR')) return val.toFixed(2) + '%';
@@ -3121,12 +3124,18 @@
         };
         
         const getChangeColor = (change) => {
+            if (change === undefined || change === null || isNaN(change)) {
+                return '#94a3b8';
+            }
             if (change > 0) return '#22c55e';
             if (change < 0) return '#ef4444';
             return '#94a3b8';
         };
         
         const formatChange = (change) => {
+            if (change === undefined || change === null || isNaN(change)) {
+                return 'N/A';
+            }
             return (change > 0 ? '+' : '') + change.toFixed(2) + '%';
         };
         
