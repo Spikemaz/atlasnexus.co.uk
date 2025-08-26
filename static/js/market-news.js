@@ -456,26 +456,193 @@ function loadMoreNews() {
 
 // Open news detail
 function openNewsDetail(item) {
-    // In a real implementation, this could open a modal or navigate to a detail page
-    console.log('Opening news detail:', item);
+    // Remove any existing modal
+    const existingModal = document.getElementById('newsDetailModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
     
-    // For now, we'll show a simple alert with more information
-    const detail = `
-${item.title}
-
-${item.content}
-
-Source: ${item.source}
-Time: ${item.time}
-Region: ${item.region}
-Asset Class: ${item.asset_class}
-Tags: ${item.tags.join(', ')}
-Impact: ${item.impact}
-Sentiment: ${item.sentiment}
+    // Determine badge color and icons
+    const badgeColors = {
+        'BREAKING': 'danger',
+        'MARKET MOVE': 'primary',
+        'ANALYSIS': 'warning',
+        'DEAL NEWS': 'success',
+        'REGULATORY': 'info'
+    };
+    
+    const sentimentColors = {
+        'positive': 'success',
+        'neutral': 'warning',
+        'negative': 'danger'
+    };
+    
+    const impactColors = {
+        'high': 'danger',
+        'medium': 'warning',
+        'low': 'info'
+    };
+    
+    const badgeColor = badgeColors[item.type] || 'secondary';
+    const sentimentColor = sentimentColors[item.sentiment] || 'secondary';
+    const impactColor = impactColors[item.impact] || 'secondary';
+    
+    // Create modal HTML
+    const modalHTML = `
+        <div class="modal fade" id="newsDetailModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content" style="background: rgba(31, 41, 55, 0.98); border: 1px solid #60a5fa;">
+                    <div class="modal-header border-bottom border-secondary">
+                        <div class="d-flex align-items-center w-100">
+                            <span class="badge bg-${badgeColor} me-2">${item.type}</span>
+                            <h5 class="modal-title text-white flex-grow-1">${item.title}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Article Meta Info -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <small class="text-muted">Source</small>
+                                <p class="text-white mb-2">
+                                    <i class="fas fa-newspaper me-1"></i>${item.source}
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Published</small>
+                                <p class="text-white mb-2">
+                                    <i class="fas fa-clock me-1"></i>${item.time}
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Region</small>
+                                <p class="text-white mb-2">
+                                    <i class="fas fa-globe me-1"></i>${item.region}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Article Content -->
+                        <div class="article-content border-top border-bottom border-secondary py-3 mb-3">
+                            <p class="text-white" style="line-height: 1.8; font-size: 1.05rem;">
+                                ${item.content}
+                            </p>
+                            
+                            <!-- Extended content placeholder -->
+                            <p class="text-muted mt-3">
+                                <em>This article continues with detailed analysis of the ${item.asset_class} market in ${item.region}, 
+                                examining recent trends, regulatory impacts, and forward-looking projections. 
+                                Market participants should monitor these developments closely as they may impact pricing 
+                                and issuance strategies in the coming quarters.</em>
+                            </p>
+                        </div>
+                        
+                        <!-- Article Metadata -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-2">Asset Class</small>
+                                <span class="badge bg-primary me-2">${item.asset_class}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block mb-2">Market Impact</small>
+                                <span class="badge bg-${impactColor}">${item.impact.toUpperCase()}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block mb-2">Sentiment</small>
+                                <span class="badge bg-${sentimentColor}">${item.sentiment.toUpperCase()}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Tags -->
+                        <div class="mt-3">
+                            <small class="text-muted d-block mb-2">Related Topics</small>
+                            <div>
+                                ${item.tags.map(tag => `<span class="badge bg-secondary me-1">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="shareArticle('${item.id}')">
+                            <i class="fas fa-share-alt me-1"></i>Share
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="saveArticle('${item.id}')">
+                            <i class="fas fa-bookmark me-1"></i>Save for Later
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     `;
     
-    // You could replace this with a modal popup
-    alert(detail);
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Initialize and show modal
+    const modalElement = document.getElementById('newsDetailModal');
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+    
+    // Clean up modal after it's hidden
+    modalElement.addEventListener('hidden.bs.modal', function() {
+        modalElement.remove();
+    });
+}
+
+// Share article function
+function shareArticle(articleId) {
+    // Placeholder for share functionality
+    const shareUrl = `${window.location.origin}/market/article/${articleId}`;
+    if (navigator.share) {
+        navigator.share({
+            title: 'Securitisation Market Update',
+            text: 'Check out this market update from Atlas Nexus',
+            url: shareUrl
+        }).catch(err => console.log('Error sharing:', err));
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            showToast('Link copied to clipboard!', 'success');
+        });
+    }
+}
+
+// Save article function
+function saveArticle(articleId) {
+    // Placeholder for save functionality
+    const savedArticles = JSON.parse(localStorage.getItem('savedArticles') || '[]');
+    if (!savedArticles.includes(articleId)) {
+        savedArticles.push(articleId);
+        localStorage.setItem('savedArticles', JSON.stringify(savedArticles));
+        showToast('Article saved successfully!', 'success');
+    } else {
+        showToast('Article already saved', 'info');
+    }
+}
+
+// Show toast notification
+function showToast(message, type = 'info') {
+    const toastHTML = `
+        <div class="toast position-fixed bottom-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} text-white">
+                <strong class="me-auto">Atlas Nexus</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', toastHTML);
+    const toastElement = document.querySelector('.toast:last-child');
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+    
+    // Remove toast after it's hidden
+    toastElement.addEventListener('hidden.bs.toast', function() {
+        toastElement.remove();
+    });
 }
 
 // Start auto refresh
