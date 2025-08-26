@@ -630,7 +630,7 @@
     </div>
 
     <!-- Navigation Bar -->
-    <div id="navBar" style="position: fixed; top: 115px; left: 0; right: 0; background: linear-gradient(90deg, #1e293b 0%, #334155 100%); border-bottom: 1px solid rgba(96, 165, 250, 0.3); z-index: 998; padding: 10px 0; transition: all 0.3s ease;">
+    <div id="navBar" style="position: fixed; top: 115px; left: 0; right: 0; background: linear-gradient(90deg, #1e293b 0%, #334155 100%); border-bottom: 1px solid rgba(96, 165, 250, 0.3); z-index: 998; padding: 10px 0; transition: top 0.3s ease, opacity 0.3s ease; opacity: 1;">
         <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap;">
             <button class="nav-btn" data-section="dashboard" onclick="showSection('dashboard')" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-home"></i> Dashboard
@@ -663,26 +663,32 @@
         var mainDashboard = document.getElementById('main-dashboard');
         var sections = document.querySelectorAll('#market-section, #data-section, #analytics-section, #risk-section, #portfolio-section, #compliance-section, #permutation-section');
         
-        if (nav.style.display === 'none') {
-            // Show toolbar
-            nav.style.display = 'block';
+        if (nav.getAttribute('data-hidden') === 'true') {
+            // Show toolbar - slide down smoothly
+            nav.style.top = '115px';
+            nav.style.opacity = '1';
+            nav.setAttribute('data-hidden', 'false');
             icon.className = 'fas fa-chevron-up';
-            // Adjust padding for sections when toolbar is visible (185px to see section outlines)
-            sections.forEach(function(s) { 
-                if(s) s.style.paddingTop = '185px'; 
-            });
-            // Dashboard maintains its spacing
-            if(mainDashboard) mainDashboard.style.marginTop = '165px';
+            // Adjust padding for sections when toolbar is visible
+            setTimeout(function() {
+                sections.forEach(function(s) { 
+                    if(s) s.style.paddingTop = '185px'; 
+                });
+                if(mainDashboard) mainDashboard.style.marginTop = '165px';
+            }, 50);
         } else {
-            // Hide toolbar
-            nav.style.display = 'none';
+            // Hide toolbar - slide up smoothly
+            nav.style.top = '70px'; // Hide behind header
+            nav.style.opacity = '0';
+            nav.setAttribute('data-hidden', 'true');
             icon.className = 'fas fa-chevron-down';
-            // Reduce padding for sections when toolbar is hidden (135px for better visibility)
-            sections.forEach(function(s) { 
-                if(s) s.style.paddingTop = '135px'; 
-            });
-            // Dashboard adjusts too (125px works well)
-            if(mainDashboard) mainDashboard.style.marginTop = '125px';
+            // Reduce padding for sections when toolbar is hidden - make dashboard consistent with others
+            setTimeout(function() {
+                sections.forEach(function(s) { 
+                    if(s) s.style.paddingTop = '135px'; 
+                });
+                if(mainDashboard) mainDashboard.style.marginTop = '135px'; // Same as other sections now
+            }, 50);
         }
     })()" style="position: fixed; top: 115px; right: 20px; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; z-index: 999;">
         <i class="fas fa-chevron-up" id="navToggleIcon"></i> Tools
@@ -3196,7 +3202,8 @@
         var sections = document.querySelectorAll('#market-section, #data-section, #analytics-section, #risk-section, #portfolio-section, #compliance-section, #permutation-section');
         
         // Check if toolbar is visible and set appropriate padding
-        if (nav && nav.style.display !== 'none') {
+        if (nav && nav.getAttribute('data-hidden') !== 'true') {
+            nav.setAttribute('data-hidden', 'false');
             sections.forEach(function(s) { 
                 if(s) s.style.paddingTop = '185px'; 
             });
@@ -3205,7 +3212,7 @@
             sections.forEach(function(s) { 
                 if(s) s.style.paddingTop = '135px'; 
             });
-            if(mainDashboard) mainDashboard.style.marginTop = '125px';
+            if(mainDashboard) mainDashboard.style.marginTop = '135px'; // Consistent with other sections
         }
         
         // Create and initialize ticker
