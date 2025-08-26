@@ -1,9 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- DEBUG LINE 1 -->
+<!-- DEBUG LINE 2 -->
+<!-- DEBUG LINE 3 -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>AtlasNexus - Securitisation Command Centre</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="alternate icon" href="/favicon.ico">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&family=SF+Pro+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1850,10 +1859,10 @@
                             </select>
                         </div>
                         <div style="display: flex; gap: 1rem;">
-                            <button onclick="approveUser('{{ reg.email }}')" style="background: #22c55e; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                            <button onclick="approveUser({{ reg.email|tojson|safe }})" style="background: #22c55e; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
                                 <i class="fas fa-check"></i> Approve
                             </button>
-                            <button onclick="rejectUser('{{ reg.email }}')" style="background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                            <button onclick="rejectUser({{ reg.email|tojson|safe }})" style="background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
                                 <i class="fas fa-times"></i> Reject
                             </button>
                         </div>
@@ -1905,7 +1914,7 @@
                                     </td>
                                     <td style="padding: 10px; color: #fbbf24; font-family: monospace; font-size: 0.85rem;">{{ user.password }}</td>
                                     <td style="padding: 10px;">
-                                        <button onclick="resetPassword('{{ user.email }}')" style="background: #fbbf24; color: black; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                                        <button onclick="resetPassword({{ user.email|tojson|safe }})" style="background: #fbbf24; color: black; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
                                             Reset Password
                                         </button>
                                     </td>
@@ -2704,7 +2713,74 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- DEBUG: Script block starts here. Counting lines from here -->
     <script>
+    // IMMEDIATE DEBUG - This runs before parsing error
+    console.log('Dashboard script starting to load...');
+    
+    // Get the HTML source and show what's at line 3688
+    window.addEventListener('DOMContentLoaded', function() {
+        fetch(window.location.href)
+            .then(response => response.text())
+            .then(html => {
+                const lines = html.split('\n');
+                console.log('DEBUGGING LINE 3688:');
+                console.log('Total lines in page:', lines.length);
+                if (lines.length > 3687) {
+                    console.log('Line 3686:', lines[3685]);
+                    console.log('Line 3687:', lines[3686]);
+                    console.log('Line 3688:', lines[3687]);
+                    console.log('Line 3689:', lines[3688]);
+                    console.log('Line 3690:', lines[3689]);
+                    
+                    // Show character at position 13
+                    const line3688 = lines[3687];
+                    console.log('Character at column 13:', line3688[12], '(char code:', line3688.charCodeAt(12), ')');
+                    
+                    // Look for = signs in the line
+                    let equalPos = line3688.indexOf('=');
+                    while (equalPos !== -1) {
+                        console.log('Found = at position', equalPos + 1, '- Left side:', line3688.substring(Math.max(0, equalPos - 20), equalPos));
+                        equalPos = line3688.indexOf('=', equalPos + 1);
+                    }
+                }
+            })
+            .catch(err => console.error('Could not fetch page source:', err));
+    });
+    </script>
+    <script>
+    // ERROR DEBUGGING - Add this at the very beginning
+    window.addEventListener('error', function(event) {
+        console.error('Global error caught:', event);
+        console.error('Error message:', event.message);
+        console.error('Error filename:', event.filename);
+        console.error('Error line:', event.lineno);
+        console.error('Error column:', event.colno);
+        console.error('Error object:', event.error);
+        if (event.lineno === 3688) {
+            console.error('ERROR AT LINE 3688 DETECTED!');
+            console.error('Attempting to identify the actual code at this line...');
+            // Try to get the actual script content
+            try {
+                var scripts = document.getElementsByTagName('script');
+                var allScriptContent = '';
+                for (var i = 0; i < scripts.length; i++) {
+                    if (scripts[i].innerHTML) {
+                        allScriptContent += scripts[i].innerHTML + '\n';
+                    }
+                }
+                var lines = allScriptContent.split('\n');
+                if (lines[3687]) {
+                    console.error('Line 3688 content:', lines[3687]);
+                    console.error('Line 3687 content:', lines[3686]);
+                    console.error('Line 3689 content:', lines[3688]);
+                }
+            } catch (e) {
+                console.error('Could not retrieve line content:', e);
+            }
+        }
+    });
+    
     // Global variables - must be defined before any functions that use them
     let tickerInitialized = false;
     let tickerPosition = 0;
@@ -3651,46 +3727,89 @@
             const etaMinutes = Math.floor((remainingTime % 3600000) / 60000);
             const etaSeconds = Math.floor((remainingTime % 60000) / 1000);
             
-            document.getElementById('perm-eta').textContent = 
-                etaHours.toString().padStart(2, '0') + ':' + etaMinutes.toString().padStart(2, '0') + ':' + etaSeconds.toString().padStart(2, '0');
+            var etaString = etaHours.toString().padStart(2, '0') + ':' + 
+                            etaMinutes.toString().padStart(2, '0') + ':' + 
+                            etaSeconds.toString().padStart(2, '0');
+            document.getElementById('perm-eta').textContent = etaString;
         }
     }
     
     function simulatePermutationProcessing() {
-        if (permutationEngine.status !== 'running') return;
+        console.log('DEBUG: simulatePermutationProcessing called - Line 3659');
+        // Check if engine is running
+        if (permutationEngine.status !== 'running') {
+            return;
+        }
         
-        // Increment iteration
-        permutationEngine.currentIteration++;
+        // Increment the iteration counter
+        permutationEngine.currentIteration = permutationEngine.currentIteration + 1;
         
-        // Update progress
-        permutationEngine.progress = (permutationEngine.currentIteration / permutationEngine.totalIterations) * 100;
-        document.getElementById('perm-progress-bar').style.width = permutationEngine.progress + '%';
-        document.getElementById('perm-progress-percent').textContent = Math.round(permutationEngine.progress) + '%';
-        document.getElementById('perm-current-iterations').textContent = 
-            permutationEngine.currentIteration + ' / ' + permutationEngine.totalIterations;
+        // Calculate the progress percentage
+        var progressValue = (permutationEngine.currentIteration / permutationEngine.totalIterations) * 100;
+        permutationEngine.progress = progressValue;
         
-        // Simulate live results
-        const liveResults = document.getElementById('perm-live-results');
-        if (liveResults) {
-            const result = Math.random() * 1000;
-            liveResults.innerHTML += '<br>Iteration ' + permutationEngine.currentIteration + ': Result = ' + result.toFixed(4);
+        // Update the progress bar width
+        var progressBar = document.getElementById('perm-progress-bar');
+        if (progressBar) {
+            progressBar.style.width = progressValue + '%';
+        }
+        
+        // Update the progress percentage text
+        var progressPercent = document.getElementById('perm-progress-percent');
+        if (progressPercent) {
+            progressPercent.textContent = Math.round(progressValue) + '%';
+        }
+        
+        // Update the iteration counter display
+        try {
+            var iterationsDisplay = document.getElementById('perm-current-iterations');
+            if (iterationsDisplay) {
+                var iterationText = String(permutationEngine.currentIteration) + ' / ' + String(permutationEngine.totalIterations);
+                iterationsDisplay.textContent = iterationText;
+            }
+        } catch (e) {
+            console.error('Error updating iterations display:', e);
+        }
+        
+        // Update live results if element exists
+        var liveResultsElement = document.getElementById('perm-live-results');
+        if (liveResultsElement) {
+            var randomResult = Math.random() * 1000;
+            var newResultLine = 'Iteration ' + permutationEngine.currentIteration + ': Result = ' + randomResult.toFixed(4);
             
-            // Keep only last 10 results visible
-            const lines = liveResults.innerHTML.split('<br>');
-            if (lines.length > 11) {
-                liveResults.innerHTML = lines.slice(-11).join('<br>');
+            // Add new result line
+            var currentContent = liveResultsElement.innerHTML;
+            liveResultsElement.innerHTML = currentContent + '<br>' + newResultLine;
+            
+            // Keep only last 10 results
+            var allLines = liveResultsElement.innerHTML.split('<br>');
+            if (allLines.length > 11) {
+                var trimmedLines = allLines.slice(-11);
+                liveResultsElement.innerHTML = trimmedLines.join('<br>');
             }
         }
         
-        // Continue or complete
+        // Check if we should continue or complete
         if (permutationEngine.currentIteration < permutationEngine.totalIterations) {
-            setTimeout(function() { simulatePermutationProcessing(); }, 100); // Simulate processing delay
+            // Schedule next iteration
+            window.setTimeout(simulatePermutationProcessing, 100);
         } else {
-            // Processing complete
+            // Mark as completed
             permutationEngine.status = 'completed';
-            clearInterval(permutationEngine.timer);
-            document.getElementById('perm-status').textContent = 'Completed';
-            document.getElementById('perm-status').style.color = '#22c55e';
+            
+            // Clear the timer
+            if (permutationEngine.timer) {
+                clearInterval(permutationEngine.timer);
+            }
+            
+            // Update status display
+            var statusElement = document.getElementById('perm-status');
+            if (statusElement) {
+                statusElement.textContent = 'Completed';
+                statusElement.style.color = '#22c55e';
+            }
+            
+            // Show final results
             showPermutationResults();
         }
     }
@@ -3785,9 +3904,12 @@
         // Show/hide input containers
         const sections = ['project', 'senior', 'mezz', 'equity'];
         sections.forEach(section => {
-            document.getElementById('manual-' + section)?.style.display = 'none';
-            document.getElementById('range-' + section)?.style.display = 'none';
-            document.getElementById('lowhigh-' + section)?.style.display = 'none';
+            var manualEl = document.getElementById('manual-' + section);
+            if (manualEl) manualEl.style.display = 'none';
+            var rangeEl = document.getElementById('range-' + section);
+            if (rangeEl) rangeEl.style.display = 'none';
+            var lowhighEl = document.getElementById('lowhigh-' + section);
+            if (lowhighEl) lowhighEl.style.display = 'none';
             
             const activeContainer = document.getElementById(mode + '-' + section);
             if (activeContainer) {
@@ -3831,15 +3953,24 @@
         
         if (currentInputMode === 'manual') {
             // Collect manual input values
-            const capexValues = document.getElementById('sec-capex-manual')?.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
-            const opexValues = document.getElementById('sec-opex-manual')?.value.split(',').map(v => parseFloat(v.trim())/100).filter(v => !isNaN(v));
-            const rentValues = document.getElementById('sec-rent-manual')?.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
-            const seniorDSCR = document.getElementById('sec-senior-dscr-manual')?.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
-            const seniorCoupon = document.getElementById('sec-senior-coupon-manual')?.value.split(',').map(v => parseFloat(v.trim())/100).filter(v => !isNaN(v));
-            const seniorTenor = document.getElementById('sec-senior-tenor-manual')?.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
-            const mezzDSCR = document.getElementById('sec-mezz-dscr-manual')?.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
-            const mezzCoupon = document.getElementById('sec-mezz-coupon-manual')?.value.split(',').map(v => parseFloat(v.trim())/100).filter(v => !isNaN(v));
-            const equityIRR = document.getElementById('sec-equity-irr-manual')?.value.split(',').map(v => parseFloat(v.trim())/100).filter(v => !isNaN(v));
+            var capexEl = document.getElementById('sec-capex-manual');
+            const capexValues = capexEl ? capexEl.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v)) : [];
+            var opexEl = document.getElementById('sec-opex-manual');
+            const opexValues = opexEl ? opexEl.value.split(',').map(v => parseFloat(v.trim())/100).filter(v => !isNaN(v)) : [];
+            var rentEl = document.getElementById('sec-rent-manual');
+            const rentValues = rentEl ? rentEl.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v)) : [];
+            var seniorDSCREl = document.getElementById('sec-senior-dscr-manual');
+            const seniorDSCR = seniorDSCREl ? seniorDSCREl.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v)) : [];
+            var seniorCouponEl = document.getElementById('sec-senior-coupon-manual');
+            const seniorCoupon = seniorCouponEl ? seniorCouponEl.value.split(',').map(v => parseFloat(v.trim())/100).filter(v => !isNaN(v)) : [];
+            var seniorTenorEl = document.getElementById('sec-senior-tenor-manual');
+            const seniorTenor = seniorTenorEl ? seniorTenorEl.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v)) : [];
+            var mezzDSCREl = document.getElementById('sec-mezz-dscr-manual');
+            const mezzDSCR = mezzDSCREl ? mezzDSCREl.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v)) : [];
+            var mezzCouponEl = document.getElementById('sec-mezz-coupon-manual');
+            const mezzCoupon = mezzCouponEl ? mezzCouponEl.value.split(',').map(v => parseFloat(v.trim())/100).filter(v => !isNaN(v)) : [];
+            var equityIRREl = document.getElementById('sec-equity-irr-manual');
+            const equityIRR = equityIRREl ? equityIRREl.value.split(',').map(v => parseFloat(v.trim())/100).filter(v => !isNaN(v)) : [];
             
             inputs = {
                 capex: capexValues.length ? capexValues : [7500000, 10000000],
@@ -4067,7 +4198,8 @@
     
     function generateLowHighValues() {
         // Implementation for low/high mode value generation
-        const numScenarios = parseInt(document.getElementById('sec-num-scenarios')?.value) || 10;
+        var numScenariosEl = document.getElementById('sec-num-scenarios');
+        const numScenarios = numScenariosEl ? parseInt(numScenariosEl.value) : 10;
         return {
             capex: [],
             opex: [],
@@ -4146,7 +4278,7 @@
         const data = {
             timestamp: new Date().toISOString(),
             market_data: window.currentMarketData || {},
-            user: '{{ username }}'
+            user: {{ username|tojson|safe }}
         };
         const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
         const url = URL.createObjectURL(blob);

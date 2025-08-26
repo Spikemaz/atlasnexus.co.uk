@@ -1657,9 +1657,9 @@
                 // Rate limit: 120 requests per minute
                 const fredApiKey = '06d8ad927adcea880c39dc648df3d02f';
                 
-                // Fetch SOFR (replaced LIBOR)
+                // Fetch SOFR (replaced LIBOR) - Use proxy to avoid CORS
                 try {
-                    const sofrResponse = await fetch(`https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&api_key=${fredApiKey}&file_type=json&limit=1&sort_order=desc`);
+                    const sofrResponse = await fetch('/api/market-data/fred/SOFR');
                     const sofrData = await sofrResponse.json();
                     if (sofrData.observations && sofrData.observations[0]) {
                         marketData['SOFR'].value = parseFloat(sofrData.observations[0].value);

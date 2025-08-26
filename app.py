@@ -20,6 +20,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import threading
 import time
+import requests
 
 # Try to import securitization_engine if available
 try:
@@ -2045,12 +2046,47 @@ def dashboard():
     else:
         account_type_display = 'External'
     
+    # Get admin data if user is admin
+    pending_registrations = []
+    all_users = []
+    if is_admin:
+        registrations = load_json_db(REGISTRATIONS_FILE)
+        users = load_json_db(USERS_FILE)
+        
+        # Get pending registrations
+        for email, reg_data in registrations.items():
+            if email not in users:  # Only show pending ones
+                pending_registrations.append({
+                    'email': email,
+                    'full_name': reg_data.get('full_name', 'N/A'),
+                    'company_name': reg_data.get('company_name', 'N/A'),
+                    'job_title': reg_data.get('job_title', 'N/A'),
+                    'country_code': reg_data.get('country_code', ''),
+                    'phone': reg_data.get('phone', ''),
+                    'created_at': reg_data.get('created_at', ''),
+                    'generated_password': reg_data.get('generated_password', '')
+                })
+        
+        # Get all users
+        for email, user_data in users.items():
+            all_users.append({
+                'email': email,
+                'full_name': user_data.get('full_name', 'N/A'),
+                'company_name': user_data.get('company_name', 'N/A'),
+                'login_count': user_data.get('login_count', 0),
+                'total_login_time': user_data.get('total_login_time', 0),
+                'last_login': user_data.get('last_login', ''),
+                'password': user_data.get('password', '')
+            })
+    
     # Show dashboard for ALL users including admin
     # Admin can access admin panel through the header button
     return render_template('dashboard.html', 
                          username=username, 
                          is_admin=is_admin, 
-                         account_type=account_type_display)
+                         account_type=account_type_display,
+                         pending_registrations=pending_registrations,
+                         all_users=all_users)
 
 @app.route('/market-view')
 def market_view():
@@ -2125,6 +2161,51 @@ def risk_management():
     # For now, redirect to dashboard with risk section
     return redirect(url_for('dashboard') + '#risk')
 
+# ==================== MARKET DATA PROXY ====================
+@app.route('/favicon.ico')
+def favicon():
+    """Serve favicon - ICO for better compatibility"""
+    import os
+    if os.path.exists('static/favicon.ico'):
+        return send_file('static/favicon.ico', mimetype='image/x-icon')
+    else:
+        return send_file('static/favicon.svg', mimetype='image/svg+xml')
+
+@app.route('/api/market-data/fred/<series_id>')
+def proxy_fred_api(series_id):
+    """Proxy FRED API requests to avoid CORS issues"""
+    # Whitelist of allowed series to prevent abuse
+    allowed_series = ['SOFR', 'DGS10', 'DGS2', 'DGS5', 'DGS30', 'DFEDTARU', 'DEXUSEU']
+    
+    if series_id not in allowed_series:
+        return jsonify({'error': 'Invalid series ID'}), 400
+    
+    try:
+        # FRED API key
+        fred_api_key = '06d8ad927adcea880c39dc648df3d02f'
+        
+        # Make request to FRED API
+        url = f'https://api.stlouisfed.org/fred/series/observations'
+        params = {
+            'series_id': series_id,
+            'api_key': fred_api_key,
+            'file_type': 'json',
+            'limit': 1,
+            'sort_order': 'desc'
+        }
+        
+        response = requests.get(url, params=params, timeout=5)
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({'error': 'Failed to fetch data from FRED API'}), response.status_code
+            
+    except Exception as e:
+        print(f"[ERROR] FRED API proxy error: {str(e)}")
+        return jsonify({'error': 'Failed to fetch market data'}), 500
+
+# ==================== ADMIN ENDPOINTS ====================
 @app.route('/admin/approve-user', methods=['POST'])
 def admin_approve_user():
     """Admin approve user"""
