@@ -34,7 +34,8 @@
       "Bash(mkdir:*)",
       "Bash(start test_syntax.html)",
       "Bash(powershell:*)",
-      "Bash(start test_syntax2.html)"
+      "Bash(start test_syntax2.html)",
+      "Bash(timeout:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"

@@ -1998,37 +1998,35 @@
         
         function showOverview(container) {
             const stats = comprehensiveData.statistics || {};
-            container.innerHTML = `
-                <div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">
-                    <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">System Overview</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                        <div style="background: rgba(96, 165, 250, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(96, 165, 250, 0.3);">
-                            <div style="color: #94a3b8; font-size: 0.9rem;">Locked IPs</div>
-                            <div style="color: #ef4444; font-size: 2rem; font-weight: bold;">${stats.total_locked_ips || 0}</div>
-                        </div>
-                        <div style="background: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);">
-                            <div style="color: #94a3b8; font-size: 0.9rem;">Active Registrations</div>
-                            <div style="color: #22c55e; font-size: 2rem; font-weight: bold;">${stats.active_registrations || 0}</div>
-                        </div>
-                        <div style="background: rgba(251, 191, 36, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.3);">
-                            <div style="color: #94a3b8; font-size: 0.9rem;">Pending Verification</div>
-                            <div style="color: #fbbf24; font-size: 2rem; font-weight: bold;">${stats.pending_verification || 0}</div>
-                        </div>
-                        <div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
-                            <div style="color: #94a3b8; font-size: 0.9rem;">Expired Registrations</div>
-                            <div style="color: #ef4444; font-size: 2rem; font-weight: bold;">${stats.expired_registrations || 0}</div>
-                        </div>
-                        <div style="background: rgba(147, 51, 234, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(147, 51, 234, 0.3);">
-                            <div style="color: #94a3b8; font-size: 0.9rem;">Total Login Attempts</div>
-                            <div style="color: #9333ea; font-size: 2rem; font-weight: bold;">${stats.total_login_attempts || 0}</div>
-                        </div>
-                        <div style="background: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);">
-                            <div style="color: #94a3b8; font-size: 0.9rem;">Approved Users</div>
-                            <div style="color: #22c55e; font-size: 2rem; font-weight: bold;">${stats.approved_users || 0}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            container.innerHTML = '<div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">' +
+                '<h3 style="color: #60a5fa; margin-bottom: 1.5rem;">System Overview</h3>' +
+                '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">' +
+                    '<div style="background: rgba(96, 165, 250, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(96, 165, 250, 0.3);">' +
+                        '<div style="color: #94a3b8; font-size: 0.9rem;">Locked IPs</div>' +
+                        '<div style="color: #ef4444; font-size: 2rem; font-weight: bold;">' + (stats.total_locked_ips || 0) + '</div>' +
+                    '</div>' +
+                    '<div style="background: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);">' +
+                        '<div style="color: #94a3b8; font-size: 0.9rem;">Active Registrations</div>' +
+                        '<div style="color: #22c55e; font-size: 2rem; font-weight: bold;">' + (stats.active_registrations || 0) + '</div>' +
+                    '</div>' +
+                    '<div style="background: rgba(251, 191, 36, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.3);">' +
+                        '<div style="color: #94a3b8; font-size: 0.9rem;">Pending Verification</div>' +
+                        '<div style="color: #fbbf24; font-size: 2rem; font-weight: bold;">' + (stats.pending_verification || 0) + '</div>' +
+                    '</div>' +
+                    '<div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">' +
+                        '<div style="color: #94a3b8; font-size: 0.9rem;">Expired Registrations</div>' +
+                        '<div style="color: #ef4444; font-size: 2rem; font-weight: bold;">' + (stats.expired_registrations || 0) + '</div>' +
+                    '</div>' +
+                    '<div style="background: rgba(147, 51, 234, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(147, 51, 234, 0.3);">' +
+                        '<div style="color: #94a3b8; font-size: 0.9rem;">Total Login Attempts</div>' +
+                        '<div style="color: #9333ea; font-size: 2rem; font-weight: bold;">' + (stats.total_login_attempts || 0) + '</div>' +
+                    '</div>' +
+                    '<div style="background: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);">' +
+                        '<div style="color: #94a3b8; font-size: 0.9rem;">Approved Users</div>' +
+                        '<div style="color: #22c55e; font-size: 2rem; font-weight: bold;">' + (stats.approved_users || 0) + '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
         }
         
         function showRegistrations(container) {
