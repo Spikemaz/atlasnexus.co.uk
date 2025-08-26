@@ -602,3 +602,238 @@ class MarketNewsService:
             'status': 'error',
             'message': 'Expert not found'
         }
+    
+    def get_active_deals(self) -> List[Dict[str, Any]]:
+        """Get detailed information about active securitization deals"""
+        deals = []
+        
+        # Generate sample deals with comprehensive information
+        deal_templates = [
+            # European deals
+            {
+                'id': 'deal_001',
+                'name': 'Sunrise RMBS 2024-1',
+                'issuer': 'Sunrise Finance PLC',
+                'lead_manager': 'Deutsche Bank',
+                'co_managers': ['BNP Paribas', 'Commerzbank'],
+                'asset_class': 'RMBS',
+                'region': 'Germany',
+                'currency': 'EUR',
+                'total_size': 1250000000,
+                'tranches': [
+                    {'class': 'A', 'size': 1000000000, 'rating': 'AAA', 'coupon': 'E3M + 85bps', 'wal': '3.5 years'},
+                    {'class': 'B', 'size': 150000000, 'rating': 'AA', 'coupon': 'E3M + 125bps', 'wal': '5.2 years'},
+                    {'class': 'C', 'size': 100000000, 'rating': 'A', 'coupon': 'E3M + 200bps', 'wal': '7.1 years'}
+                ],
+                'pricing_date': '2024-01-15',
+                'closing_date': '2024-01-22',
+                'status': 'Priced',
+                'collateral': 'Prime German residential mortgages',
+                'originator': 'Sunrise Bank AG',
+                'servicer': 'Sunrise Servicing GmbH',
+                'pool_characteristics': {
+                    'number_of_loans': 8543,
+                    'average_loan_size': 146250,
+                    'wtd_avg_ltv': 65.3,
+                    'wtd_avg_seasoning': '24 months',
+                    'geographic_concentration': 'Bavaria (35%), NRW (25%), Baden-Württemberg (20%)'
+                },
+                'legal_structure': 'True Sale',
+                'listing': 'Luxembourg Stock Exchange',
+                'subscription_level': '3.2x oversubscribed'
+            },
+            {
+                'id': 'deal_002',
+                'name': 'Thames Auto ABS 2024-A',
+                'issuer': 'Thames Auto Finance Ltd',
+                'lead_manager': 'Barclays',
+                'co_managers': ['HSBC', 'Lloyds'],
+                'asset_class': 'Auto ABS',
+                'region': 'United Kingdom',
+                'currency': 'GBP',
+                'total_size': 850000000,
+                'tranches': [
+                    {'class': 'A1', 'size': 400000000, 'rating': 'AAA', 'coupon': 'SONIA + 75bps', 'wal': '1.8 years'},
+                    {'class': 'A2', 'size': 300000000, 'rating': 'AAA', 'coupon': 'SONIA + 95bps', 'wal': '2.9 years'},
+                    {'class': 'B', 'size': 150000000, 'rating': 'AA', 'coupon': 'SONIA + 145bps', 'wal': '3.5 years'}
+                ],
+                'pricing_date': '2024-01-18',
+                'closing_date': '2024-01-25',
+                'status': 'Marketing',
+                'collateral': 'UK prime auto loans',
+                'originator': 'Thames Motor Finance',
+                'servicer': 'Thames Servicing UK',
+                'pool_characteristics': {
+                    'number_of_loans': 45231,
+                    'average_loan_size': 18750,
+                    'wtd_avg_ltv': 85.2,
+                    'wtd_avg_seasoning': '12 months',
+                    'new_vs_used': '65% new / 35% used'
+                },
+                'legal_structure': 'True Sale with substitution',
+                'listing': 'London Stock Exchange',
+                'subscription_level': 'Building book'
+            },
+            {
+                'id': 'deal_003',
+                'name': 'Liberty Street CLO 2024-1',
+                'issuer': 'Liberty Street Capital LLC',
+                'lead_manager': 'JP Morgan',
+                'co_managers': ['Goldman Sachs', 'Morgan Stanley'],
+                'asset_class': 'CLO',
+                'region': 'United States',
+                'currency': 'USD',
+                'total_size': 500000000,
+                'tranches': [
+                    {'class': 'A', 'size': 350000000, 'rating': 'AAA', 'coupon': 'SOFR + 150bps', 'wal': '5.0 years'},
+                    {'class': 'B', 'size': 75000000, 'rating': 'AA', 'coupon': 'SOFR + 200bps', 'wal': '7.5 years'},
+                    {'class': 'C', 'size': 50000000, 'rating': 'A', 'coupon': 'SOFR + 275bps', 'wal': '8.5 years'},
+                    {'class': 'D', 'size': 25000000, 'rating': 'BBB', 'coupon': 'SOFR + 425bps', 'wal': '9.0 years'}
+                ],
+                'pricing_date': '2024-01-20',
+                'closing_date': '2024-01-27',
+                'status': 'Priced',
+                'collateral': 'Broadly syndicated leveraged loans',
+                'manager': 'Liberty Capital Management',
+                'pool_characteristics': {
+                    'number_of_obligors': 225,
+                    'average_spread': 'S+385bps',
+                    'wtd_avg_rating': 'B2/B',
+                    'largest_industry': 'Healthcare (12%)',
+                    'diversity_score': 78
+                },
+                'legal_structure': 'Cayman Islands SPV',
+                'reinvestment_period': '4 years',
+                'subscription_level': '2.5x oversubscribed'
+            },
+            {
+                'id': 'deal_004',
+                'name': 'Meridian CMBS 2024-1',
+                'issuer': 'Meridian Commercial Real Estate',
+                'lead_manager': 'Credit Suisse',
+                'co_managers': ['Wells Fargo', 'Citi'],
+                'asset_class': 'CMBS',
+                'region': 'United States',
+                'currency': 'USD',
+                'total_size': 1500000000,
+                'tranches': [
+                    {'class': 'A1', 'size': 800000000, 'rating': 'AAA', 'coupon': '4.85% fixed', 'wal': '5.2 years'},
+                    {'class': 'A2', 'size': 400000000, 'rating': 'AAA', 'coupon': '5.10% fixed', 'wal': '7.8 years'},
+                    {'class': 'B', 'size': 200000000, 'rating': 'AA', 'coupon': '5.45% fixed', 'wal': '9.1 years'},
+                    {'class': 'C', 'size': 100000000, 'rating': 'A', 'coupon': '5.95% fixed', 'wal': '9.5 years'}
+                ],
+                'pricing_date': '2024-01-12',
+                'closing_date': '2024-01-19',
+                'status': 'Closed',
+                'collateral': 'US commercial real estate loans',
+                'originator': 'Meridian Bank',
+                'special_servicer': 'Meridian Asset Management',
+                'pool_characteristics': {
+                    'number_of_loans': 48,
+                    'average_loan_size': 31250000,
+                    'property_types': 'Office (40%), Retail (25%), Industrial (20%), Multifamily (15%)',
+                    'geographic_distribution': 'NY (25%), CA (20%), TX (15%), FL (10%)',
+                    'wtd_avg_dscr': 1.45
+                },
+                'legal_structure': 'REMIC',
+                'listing': 'NYSE',
+                'subscription_level': '1.8x oversubscribed'
+            },
+            {
+                'id': 'deal_005',
+                'name': 'Emerald Card ABS 2024-1',
+                'issuer': 'Emerald Card Funding',
+                'lead_manager': 'Bank of America',
+                'co_managers': ['RBC Capital', 'TD Securities'],
+                'asset_class': 'Credit Card ABS',
+                'region': 'United States',
+                'currency': 'USD',
+                'total_size': 750000000,
+                'tranches': [
+                    {'class': 'A', 'size': 600000000, 'rating': 'AAA', 'coupon': 'SOFR + 45bps', 'wal': '2.1 years'},
+                    {'class': 'B', 'size': 100000000, 'rating': 'AA', 'coupon': 'SOFR + 85bps', 'wal': '2.8 years'},
+                    {'class': 'C', 'size': 50000000, 'rating': 'A', 'coupon': 'SOFR + 135bps', 'wal': '3.2 years'}
+                ],
+                'pricing_date': '2024-01-22',
+                'closing_date': '2024-01-29',
+                'status': 'Marketing',
+                'collateral': 'Prime credit card receivables',
+                'originator': 'Emerald Bank',
+                'servicer': 'Emerald Card Services',
+                'pool_characteristics': {
+                    'number_of_accounts': 850000,
+                    'average_balance': 882,
+                    'payment_rate': '28.5%',
+                    'charge_off_rate': '2.1%',
+                    'average_fico': 740
+                },
+                'legal_structure': 'Master Trust',
+                'early_amortization_triggers': 'Yes',
+                'subscription_level': 'Initial price talk'
+            },
+            {
+                'id': 'deal_006',
+                'name': 'Alpine SME CLO 2024-1',
+                'issuer': 'Alpine Capital S.A.',
+                'lead_manager': 'UniCredit',
+                'co_managers': ['Intesa Sanpaolo', 'BNP Paribas'],
+                'asset_class': 'SME CLO',
+                'region': 'Italy',
+                'currency': 'EUR',
+                'total_size': 400000000,
+                'tranches': [
+                    {'class': 'A', 'size': 320000000, 'rating': 'AAA', 'coupon': 'E3M + 95bps', 'wal': '4.5 years'},
+                    {'class': 'B', 'size': 50000000, 'rating': 'AA', 'coupon': 'E3M + 175bps', 'wal': '6.2 years'},
+                    {'class': 'C', 'size': 30000000, 'rating': 'A', 'coupon': 'E3M + 300bps', 'wal': '7.5 years'}
+                ],
+                'pricing_date': '2024-01-16',
+                'closing_date': '2024-01-23',
+                'status': 'Priced',
+                'collateral': 'Italian SME loans',
+                'originator': 'Alpine Bank SpA',
+                'servicer': 'Alpine Servicing',
+                'pool_characteristics': {
+                    'number_of_borrowers': 523,
+                    'average_loan_size': 765000,
+                    'wtd_avg_maturity': '5.5 years',
+                    'industry_concentration': 'Manufacturing (35%), Services (30%), Retail (20%)',
+                    'geographic_concentration': 'Northern Italy (65%), Central (25%), South (10%)'
+                },
+                'legal_structure': 'Italian SPV - Law 130/99',
+                'guarantee': 'EIF guarantee on senior tranche',
+                'subscription_level': '2.1x oversubscribed'
+            }
+        ]
+        
+        # Add more variety with different statuses and regions
+        for i, template in enumerate(deal_templates):
+            # Calculate days since pricing
+            pricing_date = datetime.strptime(template['pricing_date'], '%Y-%m-%d')
+            days_since = (datetime.now() - pricing_date).days
+            
+            # Update status based on timing
+            if days_since < 3:
+                template['status'] = 'Just Priced'
+                template['status_color'] = 'success'
+            elif days_since < 7:
+                template['status'] = 'Recently Closed'
+                template['status_color'] = 'info'
+            elif template['status'] == 'Marketing':
+                template['status_color'] = 'warning'
+            else:
+                template['status_color'] = 'primary'
+            
+            # Add performance metrics for closed deals
+            if template['status'] in ['Closed', 'Recently Closed']:
+                template['performance'] = {
+                    'spread_tightening': random.randint(-15, -5),
+                    'final_allocation': f"{random.randint(60, 95)}% institutional / {random.randint(5, 40)}% retail",
+                    'geographic_distribution': f"Europe {random.randint(40, 60)}%, Asia {random.randint(20, 35)}%, US {random.randint(15, 30)}%"
+                }
+            
+            deals.append(template)
+        
+        # Sort by pricing date (most recent first)
+        deals.sort(key=lambda x: x['pricing_date'], reverse=True)
+        
+        return deals[:20]  # Return top 20 deals

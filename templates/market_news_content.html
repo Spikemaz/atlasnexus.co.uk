@@ -42,7 +42,12 @@
                         <div class="col-md-3">
                             <div class="metric-box">
                                 <small class="text-muted">Active Deals</small>
-                                <div id="activeDeals"><h4 class="text-white">127</h4></div>
+                                <div id="activeDeals" style="cursor: pointer;" onclick="showActiveDeals()">
+                                    <h4 class="text-white">
+                                        <span id="activeDealsCount">127</span>
+                                        <i class="fas fa-external-link-alt ms-2" style="font-size: 0.7em;"></i>
+                                    </h4>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-3">

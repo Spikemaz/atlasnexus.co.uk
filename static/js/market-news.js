@@ -1133,6 +1133,367 @@ function getTimeAgo(timestamp) {
     return date.toLocaleDateString();
 }
 
+// Show active deals modal
+async function showActiveDeals() {
+    try {
+        const response = await fetch('/api/active-deals');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showActiveDealsModal(data.deals, data.summary);
+        }
+    } catch (error) {
+        console.error('Error loading active deals:', error);
+        showToast('Error loading active deals', 'error');
+    }
+}
+
+// Display active deals modal
+function showActiveDealsModal(deals, summary) {
+    // Remove any existing modal and backdrop
+    const existingModal = document.getElementById('activeDealsModal');
+    if (existingModal) {
+        const modalInstance = bootstrap.Modal.getInstance(existingModal);
+        if (modalInstance) {
+            modalInstance.dispose();
+        }
+        existingModal.remove();
+    }
+    
+    // Remove any lingering modal backdrops
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('padding-right');
+    
+    // Format currency
+    function formatCurrency(amount, currency = 'EUR') {
+        const symbols = { 'EUR': '€', 'USD': '$', 'GBP': '£' };
+        const symbol = symbols[currency] || currency;
+        if (amount >= 1000000000) {
+            return `${symbol}${(amount / 1000000000).toFixed(1)}B`;
+        } else if (amount >= 1000000) {
+            return `${symbol}${(amount / 1000000).toFixed(0)}M`;
+        }
+        return `${symbol}${amount.toLocaleString()}`;
+    }
+    
+    // Create modal HTML
+    const modalHTML = `
+        <div class="modal fade" id="activeDealsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content" style="background: rgba(31, 41, 55, 0.98); border: 1px solid #60a5fa; max-height: 90vh;">
+                    <div class="modal-header border-bottom border-secondary">
+                        <h5 class="modal-title text-white">
+                            <i class="fas fa-handshake me-2"></i>Active Securitization Deals (${deals.length})
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Summary Statistics -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="stat-box text-center p-2 border border-secondary rounded">
+                                    <small class="text-muted">Total Volume</small>
+                                    <h5 class="text-warning">${formatCurrency(summary.total_volume)}</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-box text-center p-2 border border-secondary rounded">
+                                    <small class="text-muted">Active Deals</small>
+                                    <h5 class="text-info">${summary.total_deals}</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-box text-center p-2 border border-secondary rounded">
+                                    <small class="text-muted">Avg Deal Size</small>
+                                    <h5 class="text-success">${formatCurrency(summary.total_volume / summary.total_deals)}</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-box text-center p-2 border border-secondary rounded">
+                                    <small class="text-muted">In Marketing</small>
+                                    <h5 class="text-primary">${summary.by_status['Marketing'] || 0}</h5>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Deals Table -->
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Deal Name</th>
+                                        <th>Asset Class</th>
+                                        <th>Region</th>
+                                        <th>Size</th>
+                                        <th>Status</th>
+                                        <th>Lead Manager</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${deals.map(deal => `
+                                        <tr>
+                                            <td class="text-white fw-bold">${deal.name}</td>
+                                            <td><span class="badge bg-primary">${deal.asset_class}</span></td>
+                                            <td>${deal.region}</td>
+                                            <td class="text-warning">${formatCurrency(deal.total_size, deal.currency)}</td>
+                                            <td><span class="badge bg-${deal.status_color || 'secondary'}">${deal.status}</span></td>
+                                            <td>${deal.lead_manager}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-info" onclick='viewDealDetails(${JSON.stringify(deal).replace(/'/g, "&apos;")})'>
+                                                    <i class="fas fa-eye"></i> Details
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Asset Class Distribution -->
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <h6 class="text-white mb-3">By Asset Class</h6>
+                                <div class="asset-distribution">
+                                    ${Object.entries(summary.by_asset_class).map(([asset, data]) => `
+                                        <div class="d-flex justify-content-between mb-2 pb-2 border-bottom border-secondary">
+                                            <span class="text-white">${asset}</span>
+                                            <span class="text-muted">${data.count} deals / ${formatCurrency(data.volume)}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-white mb-3">By Region</h6>
+                                <div class="region-distribution">
+                                    ${Object.entries(summary.by_region).map(([region, data]) => `
+                                        <div class="d-flex justify-content-between mb-2 pb-2 border-bottom border-secondary">
+                                            <span class="text-white">${region}</span>
+                                            <span class="text-muted">${data.count} deals / ${formatCurrency(data.volume)}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="exportDeals()">
+                            <i class="fas fa-download me-1"></i>Export to Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Initialize and show modal
+    const modalElement = document.getElementById('activeDealsModal');
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+    
+    // Clean up modal after it's hidden
+    modalElement.addEventListener('hidden.bs.modal', function() {
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+            modalInstance.dispose();
+        }
+        modalElement.remove();
+        // Extra cleanup for any lingering backdrops
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('padding-right');
+    });
+}
+
+// View individual deal details
+function viewDealDetails(deal) {
+    // Close the active deals modal first
+    const activeDealsModal = bootstrap.Modal.getInstance(document.getElementById('activeDealsModal'));
+    if (activeDealsModal) {
+        activeDealsModal.hide();
+    }
+    
+    // Format currency helper
+    function formatCurrency(amount, currency = 'EUR') {
+        const symbols = { 'EUR': '€', 'USD': '$', 'GBP': '£' };
+        const symbol = symbols[currency] || currency;
+        if (amount >= 1000000000) {
+            return `${symbol}${(amount / 1000000000).toFixed(2)}B`;
+        } else if (amount >= 1000000) {
+            return `${symbol}${(amount / 1000000).toFixed(0)}M`;
+        }
+        return `${symbol}${amount.toLocaleString()}`;
+    }
+    
+    // Create detailed view modal
+    const detailHTML = `
+        <div class="modal fade" id="dealDetailModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content" style="background: rgba(31, 41, 55, 0.98); border: 1px solid #60a5fa;">
+                    <div class="modal-header border-bottom border-secondary">
+                        <div class="w-100">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h4 class="modal-title text-white mb-1">${deal.name}</h4>
+                                    <small class="text-muted">${deal.issuer}</small>
+                                </div>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Deal Overview -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-info mb-3">Deal Structure</h6>
+                                <table class="table table-sm table-dark">
+                                    <tr><td class="text-muted">Asset Class:</td><td class="text-white">${deal.asset_class}</td></tr>
+                                    <tr><td class="text-muted">Total Size:</td><td class="text-warning">${formatCurrency(deal.total_size, deal.currency)}</td></tr>
+                                    <tr><td class="text-muted">Currency:</td><td class="text-white">${deal.currency}</td></tr>
+                                    <tr><td class="text-muted">Status:</td><td><span class="badge bg-${deal.status_color}">${deal.status}</span></td></tr>
+                                    <tr><td class="text-muted">Pricing Date:</td><td class="text-white">${new Date(deal.pricing_date).toLocaleDateString()}</td></tr>
+                                    <tr><td class="text-muted">Closing Date:</td><td class="text-white">${new Date(deal.closing_date).toLocaleDateString()}</td></tr>
+                                    <tr><td class="text-muted">Legal Structure:</td><td class="text-white">${deal.legal_structure}</td></tr>
+                                    <tr><td class="text-muted">Listing:</td><td class="text-white">${deal.listing || 'N/A'}</td></tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-info mb-3">Parties</h6>
+                                <table class="table table-sm table-dark">
+                                    <tr><td class="text-muted">Lead Manager:</td><td class="text-white">${deal.lead_manager}</td></tr>
+                                    <tr><td class="text-muted">Co-Managers:</td><td class="text-white">${deal.co_managers ? deal.co_managers.join(', ') : 'N/A'}</td></tr>
+                                    <tr><td class="text-muted">Originator:</td><td class="text-white">${deal.originator}</td></tr>
+                                    <tr><td class="text-muted">Servicer:</td><td class="text-white">${deal.servicer || deal.special_servicer || 'N/A'}</td></tr>
+                                    <tr><td class="text-muted">Region:</td><td class="text-white">${deal.region}</td></tr>
+                                    <tr><td class="text-muted">Subscription:</td><td class="text-success">${deal.subscription_level}</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Tranches -->
+                        <h6 class="text-info mb-3">Tranche Structure</h6>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-dark table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Class</th>
+                                        <th>Size</th>
+                                        <th>Rating</th>
+                                        <th>Coupon</th>
+                                        <th>WAL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${deal.tranches.map(tranche => `
+                                        <tr>
+                                            <td class="text-white">Class ${tranche.class}</td>
+                                            <td class="text-warning">${formatCurrency(tranche.size, deal.currency)}</td>
+                                            <td><span class="badge bg-${tranche.rating === 'AAA' ? 'success' : tranche.rating === 'AA' ? 'info' : 'warning'}">${tranche.rating}</span></td>
+                                            <td class="text-white">${tranche.coupon}</td>
+                                            <td class="text-muted">${tranche.wal}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Collateral Information -->
+                        <h6 class="text-info mb-3">Collateral & Pool Characteristics</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="p-3 border border-secondary rounded mb-3">
+                                    <p class="text-white mb-2"><strong>Collateral Type:</strong></p>
+                                    <p class="text-muted">${deal.collateral}</p>
+                                    ${deal.pool_characteristics ? `
+                                        <ul class="list-unstyled text-muted small">
+                                            ${Object.entries(deal.pool_characteristics).map(([key, value]) => `
+                                                <li><span class="text-white">${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</span> ${value}</li>
+                                            `).join('')}
+                                        </ul>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                ${deal.performance ? `
+                                    <div class="p-3 border border-success rounded mb-3">
+                                        <h6 class="text-success mb-2">Performance Metrics</h6>
+                                        <ul class="list-unstyled text-muted small mb-0">
+                                            <li>Spread Tightening: <span class="text-success">${deal.performance.spread_tightening}bps</span></li>
+                                            <li>Final Allocation: ${deal.performance.final_allocation}</li>
+                                            <li>Geographic Distribution: ${deal.performance.geographic_distribution}</li>
+                                        </ul>
+                                    </div>
+                                ` : ''}
+                                ${deal.guarantee ? `
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-shield-alt me-2"></i>${deal.guarantee}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-secondary">
+                        <button type="button" class="btn btn-secondary" onclick="backToDeals()">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Deals
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="shareDeal('${deal.id}')">
+                            <i class="fas fa-share me-1"></i>Share Deal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing detail modal if any
+    const existingDetail = document.getElementById('dealDetailModal');
+    if (existingDetail) {
+        existingDetail.remove();
+    }
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', detailHTML);
+    
+    // Show the detail modal
+    const detailModal = new bootstrap.Modal(document.getElementById('dealDetailModal'));
+    detailModal.show();
+    
+    // Clean up on close
+    document.getElementById('dealDetailModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('padding-right');
+    });
+}
+
+// Back to deals list
+function backToDeals() {
+    const detailModal = bootstrap.Modal.getInstance(document.getElementById('dealDetailModal'));
+    if (detailModal) {
+        detailModal.hide();
+    }
+    showActiveDeals();
+}
+
+// Export deals to Excel (placeholder)
+function exportDeals() {
+    showToast('Export functionality coming soon!', 'info');
+}
+
+// Share deal (placeholder)
+function shareDeal(dealId) {
+    const shareUrl = `${window.location.origin}/deal/${dealId}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+        showToast('Deal link copied to clipboard!', 'success');
+    });
+}
+
 // Show toast notification
 function showToast(message, type = 'info') {
     const toastHTML = `

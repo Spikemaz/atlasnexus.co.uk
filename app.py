@@ -4117,6 +4117,60 @@ def manage_saved_articles():
             'count': len(users[user_email]['saved_articles'])
         })
 
+@app.route('/api/active-deals')
+def get_active_deals():
+    """Get active securitization deals"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    if not MARKET_NEWS_AVAILABLE or not market_news_service:
+        return jsonify({'status': 'error', 'message': 'Market news service not available'}), 503
+    
+    deals = market_news_service.get_active_deals()
+    
+    # Calculate summary statistics
+    total_volume = sum(deal['total_size'] for deal in deals)
+    by_asset_class = {}
+    by_region = {}
+    by_status = {}
+    
+    for deal in deals:
+        # By asset class
+        asset = deal['asset_class']
+        if asset not in by_asset_class:
+            by_asset_class[asset] = {'count': 0, 'volume': 0}
+        by_asset_class[asset]['count'] += 1
+        by_asset_class[asset]['volume'] += deal['total_size']
+        
+        # By region
+        region = deal['region']
+        if region not in by_region:
+            by_region[region] = {'count': 0, 'volume': 0}
+        by_region[region]['count'] += 1
+        by_region[region]['volume'] += deal['total_size']
+        
+        # By status
+        status = deal['status']
+        if status not in by_status:
+            by_status[status] = 0
+        by_status[status] += 1
+    
+    return jsonify({
+        'status': 'success',
+        'deals': deals,
+        'summary': {
+            'total_deals': len(deals),
+            'total_volume': total_volume,
+            'by_asset_class': by_asset_class,
+            'by_region': by_region,
+            'by_status': by_status
+        },
+        'timestamp': datetime.now().isoformat()
+    })
+
 @app.route('/admin/audit-log')
 def admin_audit_log():
     """Get complete audit log"""
