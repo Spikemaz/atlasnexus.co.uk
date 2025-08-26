@@ -660,15 +660,25 @@
     <button onclick="(function(){
         var nav = document.getElementById('navBar');
         var icon = document.getElementById('navToggleIcon');
-        var containers = document.querySelectorAll('.main-container, #main-dashboard, #market-section, #data-section, #analytics-section, #risk-section, #portfolio-section, #compliance-section, #permutation-section');
+        var mainDashboard = document.getElementById('main-dashboard');
+        var sections = document.querySelectorAll('#market-section, #data-section, #analytics-section, #risk-section, #portfolio-section, #compliance-section, #permutation-section');
+        
         if (nav.style.display === 'none') {
+            // Show toolbar
             nav.style.display = 'block';
             icon.className = 'fas fa-chevron-up';
-            containers.forEach(function(c) { if(c) c.style.marginTop = '165px'; });
+            // Adjust padding for sections when toolbar is visible
+            sections.forEach(function(s) { 
+                if(s) s.style.paddingTop = '140px'; 
+            });
         } else {
+            // Hide toolbar
             nav.style.display = 'none';
             icon.className = 'fas fa-chevron-down';
-            containers.forEach(function(c) { if(c) c.style.marginTop = '125px'; });
+            // Reduce padding for sections when toolbar is hidden
+            sections.forEach(function(s) { 
+                if(s) s.style.paddingTop = '90px'; 
+            });
         }
     })()" style="position: fixed; top: 115px; right: 20px; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; z-index: 999;">
         <i class="fas fa-chevron-up" id="navToggleIcon"></i> Tools
@@ -1207,7 +1217,7 @@
     </div>
 
     <!-- Market Updates Section -->
-    <div id="market-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh;">
+    <div id="market-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div class="container">
             <h2 class="text-white mb-4"><i class="fas fa-chart-line me-2"></i>Market Updates</h2>
             <div class="row g-4">
@@ -1262,7 +1272,7 @@
     </div>
 
     <!-- Data Section -->
-    <div id="data-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh;">
+    <div id="data-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div class="container">
             <h2 class="text-white mb-4"><i class="fas fa-database me-2"></i>Data Center</h2>
             <div class="row g-4">
@@ -1317,7 +1327,7 @@
     </div>
 
     <!-- Analytics Section -->
-    <div id="analytics-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh;">
+    <div id="analytics-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div class="container">
             <h2 class="text-white mb-4"><i class="fas fa-chart-bar me-2"></i>Analytics & Insights</h2>
             <div class="row g-4">
@@ -1368,7 +1378,7 @@
     </div>
 
     <!-- Risk Management Section -->
-    <div id="risk-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh;">
+    <div id="risk-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div class="container">
             <h2 class="text-white mb-4"><i class="fas fa-shield-alt me-2"></i>Risk Management</h2>
             <div class="row g-4">
@@ -1449,7 +1459,7 @@
     </div>
 
     <!-- Portfolio Section -->
-    <div id="portfolio-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh;">
+    <div id="portfolio-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div class="container">
             <h2 class="text-white mb-4"><i class="fas fa-briefcase me-2"></i>Portfolio Management</h2>
             <div class="row g-4">
@@ -1516,7 +1526,7 @@
     </div>
 
     <!-- Compliance Section -->
-    <div id="compliance-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh;">
+    <div id="compliance-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div class="container">
             <h2 class="text-white mb-4"><i class="fas fa-gavel me-2"></i>Compliance & Regulatory</h2>
             <div class="row g-4">
@@ -1580,7 +1590,7 @@
     </div>
 
     <!-- Permutation Engine Command Centre Section -->
-    <div id="permutation-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh;">
+    <div id="permutation-section" style="display: none; padding: 140px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div style="max-width: 1800px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
                 <h2 style="color: #60a5fa; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">
@@ -3175,6 +3185,21 @@
     // Initialize everything on page load
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM loaded, initializing...');
+        
+        // Set initial padding for sections based on toolbar state
+        var nav = document.getElementById('navBar');
+        var sections = document.querySelectorAll('#market-section, #data-section, #analytics-section, #risk-section, #portfolio-section, #compliance-section, #permutation-section');
+        
+        // Check if toolbar is visible and set appropriate padding
+        if (nav && nav.style.display !== 'none') {
+            sections.forEach(function(s) { 
+                if(s) s.style.paddingTop = '140px'; 
+            });
+        } else {
+            sections.forEach(function(s) { 
+                if(s) s.style.paddingTop = '90px'; 
+            });
+        }
         
         // Create and initialize ticker
         createTicker();
