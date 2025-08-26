@@ -2165,7 +2165,6 @@ def risk_management():
 @app.route('/favicon.ico')
 def favicon():
     """Serve favicon - ICO for better compatibility"""
-    import os
     if os.path.exists('static/favicon.ico'):
         return send_file('static/favicon.ico', mimetype='image/x-icon')
     else:
