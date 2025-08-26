@@ -389,7 +389,8 @@ def audit_project():
         'awaiting_verification.html',  # Added for registration system
         'registration-submitted.html',  # Added for new registration flow
         'admin_panel.html',  # Admin control panel
-        'securitisation_engine.html'  # Securitization/Permutation engine
+        'securitisation_engine.html',  # Securitization/Permutation engine
+        'permutation_engine.html'  # Advanced permutation engine
     }
     
     # Files that should NEVER exist (delete immediately)
@@ -3741,6 +3742,38 @@ def securitization_engine():
     
     return render_template('securitisation_engine.html', 
                          is_admin=True,
+                         account_type=account_type,
+                         username=username)
+
+@app.route('/permutation-engine')
+def permutation_engine():
+    """Advanced Permutation Engine - Admin/Internal only"""
+    ip_address = get_real_ip()
+    
+    # Verify access
+    if not session.get(f'site_authenticated_{ip_address}'):
+        return redirect(url_for('index'))
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return redirect(url_for('secure_login'))
+    
+    # Get user's account type
+    username = session.get(f'username_{ip_address}')
+    users = load_json_db(USERS_FILE)
+    account_type = 'external'  # Default
+    
+    if username in users:
+        account_type = users[username].get('account_type', 'external')
+    
+    is_admin = session.get(f'is_admin_{ip_address}', False)
+    is_internal = account_type == 'internal' or is_admin
+    
+    # Only admin and internal users can access
+    if not is_internal:
+        return redirect(url_for('dashboard'))
+    
+    return render_template('permutation_engine.html', 
+                         is_admin=is_admin,
+                         is_internal=is_internal,
                          account_type=account_type,
                          username=username)
 
