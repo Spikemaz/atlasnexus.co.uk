@@ -374,7 +374,21 @@
                 <p>Securitization Engine (Table 6)</p>
             </div>
             <div class="user-info">
-                <span class="role-badge" id="userRole">{{ 'ADMIN' if is_admin else 'USER' }}</span>
+                <span style="color: #94a3b8; margin-right: 1rem;">
+                    <i class="fas fa-calendar"></i> 
+                    <span id="currentDate">Loading...</span>
+                </span>
+                <span class="role-badge" id="userRole">
+                    {% if account_type == 'admin' %}
+                        Admin Access
+                    {% elif account_type == 'internal' %}
+                        Internal Access
+                    {% elif account_type == 'external' %}
+                        External Access
+                    {% else %}
+                        {{ 'Admin Access' if is_admin else 'External Access' }}
+                    {% endif %}
+                </span>
                 <a href="/dashboard" style="color: #ffd700; text-decoration: none;">
                     <i class="fas fa-arrow-left"></i> Back to Dashboard
                 </a>
@@ -599,6 +613,28 @@
 
     <script>
         let currentOutput = null;
+        
+        // Function to update the current date
+        function updateCurrentDate() {
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                const now = new Date();
+                const options = { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                };
+                dateElement.textContent = now.toLocaleDateString('en-US', options);
+            }
+        }
+        
+        // Update date on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentDate();
+            // Update date every minute to ensure it's always current
+            setInterval(updateCurrentDate, 60000);
+        });
 
         async function runSecuritization() {
             const loader = document.getElementById('outputLoader');

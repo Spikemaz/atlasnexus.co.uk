@@ -1941,6 +1941,116 @@
     <script>
         let comprehensiveData = {}; // Store all admin data
         let currentTab = 'overview';
+        let currentSection = 'dashboard';
+        
+        // Function to show different sections
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = ['dashboard', 'compliance-section', 'permutation-section'];
+            sections.forEach(function(section) {
+                const element = document.getElementById(section === 'dashboard' ? 'main-content' : section);
+                if (element) {
+                    element.style.display = 'none';
+                }
+            });
+            
+            // Show placeholder content for sections that don't exist yet
+            let contentArea = document.getElementById('main-content');
+            if (!contentArea) {
+                contentArea = document.querySelector('.content-area');
+            }
+            
+            // Update button styles
+            const buttons = document.querySelectorAll('#navBar button');
+            buttons.forEach(function(btn) {
+                btn.style.background = 'transparent';
+            });
+            
+            // Highlight active button
+            event.target.style.background = 'linear-gradient(90deg, #60a5fa, #3b82f6)';
+            
+            switch(sectionName) {
+                case 'dashboard':
+                    if (contentArea) contentArea.style.display = 'block';
+                    currentSection = 'dashboard';
+                    break;
+                    
+                case 'market':
+                    showPlaceholderContent('Market Analysis', 'Real-time market data, trends, and analysis tools will be displayed here.');
+                    break;
+                    
+                case 'analytics':
+                    showPlaceholderContent('Analytics Dashboard', 'Advanced analytics, charts, and performance metrics will be displayed here.');
+                    break;
+                    
+                case 'risk':
+                    showPlaceholderContent('Risk Management', 'Risk assessment tools, exposure analysis, and mitigation strategies will be displayed here.');
+                    break;
+                    
+                case 'portfolio':
+                    showPlaceholderContent('Portfolio Manager', 'Portfolio overview, asset allocation, and performance tracking will be displayed here.');
+                    break;
+                    
+                case 'compliance':
+                    const complianceSection = document.getElementById('compliance-section');
+                    if (complianceSection) {
+                        complianceSection.style.display = 'block';
+                    } else {
+                        showPlaceholderContent('Compliance & Regulatory', 'Compliance tracking, regulatory reports, and audit trails will be displayed here.');
+                    }
+                    break;
+                    
+                case 'permutation':
+                    const permSection = document.getElementById('permutation-section');
+                    if (permSection) {
+                        permSection.style.display = 'block';
+                    } else {
+                        showPlaceholderContent('Permutation Engine', 'Advanced permutation analysis and securitization engine tools will be displayed here.');
+                    }
+                    break;
+                    
+                default:
+                    if (contentArea) contentArea.style.display = 'block';
+            }
+        }
+        
+        function showPlaceholderContent(title, description) {
+            let placeholderDiv = document.getElementById('placeholder-content');
+            if (!placeholderDiv) {
+                // Create placeholder div if it doesn't exist
+                placeholderDiv = document.createElement('div');
+                placeholderDiv.id = 'placeholder-content';
+                placeholderDiv.style.cssText = 'padding: 160px 2rem 2rem; min-height: 100vh;';
+                document.body.appendChild(placeholderDiv);
+            }
+            
+            // Hide main content
+            const mainContent = document.getElementById('main-content');
+            if (mainContent) mainContent.style.display = 'none';
+            
+            const complianceSection = document.getElementById('compliance-section');
+            if (complianceSection) complianceSection.style.display = 'none';
+            
+            const permSection = document.getElementById('permutation-section');
+            if (permSection) permSection.style.display = 'none';
+            
+            // Show placeholder
+            placeholderDiv.style.display = 'block';
+            placeholderDiv.innerHTML = '<div class="container">' +
+                '<div class="text-center" style="margin-top: 100px;">' +
+                    '<h1 style="color: #60a5fa; margin-bottom: 2rem;">' +
+                        '<i class="fas fa-cogs"></i> ' + title +
+                    '</h1>' +
+                    '<div style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa; border-radius: 12px; padding: 3rem; max-width: 600px; margin: 0 auto;">' +
+                        '<p style="color: #94a3b8; font-size: 1.1rem; margin-bottom: 2rem;">' + description + '</p>' +
+                        '<div style="color: #fbbf24;">' +
+                            '<i class="fas fa-clock fa-3x mb-3"></i>' +
+                            '<p>Coming Soon</p>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
         
         function toggleAdminPanel() {
             const panel = document.getElementById('adminPanel');

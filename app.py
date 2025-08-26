@@ -3614,15 +3614,28 @@ def securitization_engine():
         return redirect(url_for('index'))
     if not session.get(f'user_authenticated_{ip_address}'):
         return redirect(url_for('secure_login'))
-    if not session.get(f'is_admin_{ip_address}'):
+    
+    # Get user's account type
+    username = session.get(f'username_{ip_address}')
+    users = load_json_db(USERS_FILE)
+    account_type = 'external'  # Default
+    
+    if username in users:
+        account_type = users[username].get('account_type', 'external')
+    
+    is_admin = session.get(f'is_admin_{ip_address}', False)
+    
+    if not is_admin:
         # Non-admins get view-only access
         return render_template('securitisation_engine.html', 
-                             is_admin=False, 
-                             username=session.get(f'username_{ip_address}'))
+                             is_admin=False,
+                             account_type=account_type,
+                             username=username)
     
     return render_template('securitisation_engine.html', 
                          is_admin=True,
-                         username=session.get(f'username_{ip_address}'))
+                         account_type=account_type,
+                         username=username)
 
 @app.route('/api/securitization/run', methods=['POST'])
 def run_securitization():
