@@ -2183,10 +2183,10 @@
         }
         
         function deleteData(type, identifier) {
-            if (type.startsWith('all_') && !confirm(`Are you sure you want to clear ALL ${type.replace('all_', '')}?`)) {
+            if (type.startsWith('all_') && !confirm('Are you sure you want to clear ALL ' + type.replace('all_', '') + '?')) {
                 return;
             }
-            if (!type.startsWith('all_') && !confirm(`Are you sure you want to delete ${identifier}?`)) {
+            if (!type.startsWith('all_') && !confirm('Are you sure you want to delete ' + identifier + '?')) {
                 return;
             }
             
@@ -2406,7 +2406,7 @@
         }
         
         function unbanIP(ip) {
-            if (confirm(`Unban IP address ${ip}?`)) {
+            if (confirm('Unban IP address ' + ip + '?')) {
                 fetch('/admin/manage-ip', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -2425,7 +2425,7 @@
         }
         
         function extendBan(ip) {
-            const days = prompt(`Extend ban for ${ip} by how many days? (1-30)`);
+            const days = prompt('Extend ban for ' + ip + ' by how many days? (1-30)');
             if (days && !isNaN(days) && days >= 1 && days <= 30) {
                 fetch('/admin/manage-ip', {
                     method: 'POST',
@@ -2445,7 +2445,7 @@
         }
         
         function permanentBan(ip) {
-            if (confirm(`Permanently ban IP address ${ip}? This cannot be undone through the timeout.`)) {
+            if (confirm('Permanently ban IP address ' + ip + '? This cannot be undone through the timeout.')) {
                 fetch('/admin/manage-ip', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -2476,7 +2476,7 @@
                 'admin': 'Administrator'
             };
             
-            if (confirm(`Approve ${email} as ${accountTypeNames[accountType]}?`)) {
+            if (confirm('Approve ' + email + ' as ' + accountTypeNames[accountType] + '?')) {
                 fetch('/admin/approve-user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -2488,7 +2488,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        alert(`User approved as ${accountTypeNames[accountType]}!\n\nPassword: ${data.password}\n\nThis has been sent to ${email}`);
+                        alert('User approved as ' + accountTypeNames[accountType] + '!\n\nPassword: ' + data.password + '\n\nThis has been sent to ' + email);
                         window.location.reload();
                     } else {
                         alert('Error: ' + data.message);
@@ -2498,7 +2498,7 @@
         }
 
         function rejectUser(email) {
-            const reason = prompt(`Rejection reason for ${email}:`);
+            const reason = prompt('Rejection reason for ' + email + ':');
             if (reason) {
                 fetch('/admin/reject-user', {
                     method: 'POST',
@@ -2518,7 +2518,7 @@
         }
 
         function resetPassword(email) {
-            if (confirm(`Reset password for ${email}?`)) {
+            if (confirm('Reset password for ' + email + '?')) {
                 fetch('/admin/reset-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -2527,7 +2527,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        alert(`Password reset! New password: ${data.password}`);
+                        alert('Password reset! New password: ' + data.password);
                     } else {
                         alert('Error: ' + data.message);
                     }
@@ -2689,7 +2689,7 @@
                     tickerPosition = tickerPosition % tickerWidth;
                 }
                 
-                ticker.style.transform = `translateX(${tickerPosition}px)`;
+                ticker.style.transform = 'translateX(' + tickerPosition + 'px)';
                 tickerAnimationId = requestAnimationFrame(animate);
             }
         }
@@ -2748,7 +2748,7 @@
         }
         
         ticker.style.transition = 'none'; // Remove transition for immediate response
-        ticker.style.transform = `translateX(${tickerPosition}px)`;
+        ticker.style.transform = 'translateX(' + tickerPosition + 'px)';
     }
     
     function stopDrag() {
@@ -2813,7 +2813,7 @@
             
             // Fetch SOFR rate (replaces LIBOR)
             try {
-                const sofrResponse = await fetch(`https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&api_key=${fredApiKey}&file_type=json&limit=1&sort_order=desc`);
+                const sofrResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&api_key=' + fredApiKey + '&file_type=json&limit=1&sort_order=desc');
                 const sofrData = await sofrResponse.json();
                 if (sofrData.observations && sofrData.observations[0]) {
                     marketData['SOFR'].value = parseFloat(sofrData.observations[0].value);
@@ -3166,7 +3166,7 @@
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: Array.from({length: 30}, (_, i) => `Day ${i+1}`),
+                    labels: Array.from({length: 30}, (_, i) => 'Day ' + (i+1)),
                     datasets: [{
                         label: 'AAA Spread',
                         data: Array.from({length: 30}, () => Math.random() * 0.5 + 1.5),
@@ -3309,8 +3309,8 @@
         
         const now = new Date();
         const today = now.toDateString();
-        const thisWeek = `week-${Math.floor(now.getTime() / (7 * 24 * 60 * 60 * 1000))}`;
-        const thisMonth = `${now.getFullYear()}-${now.getMonth()}`;
+        const thisWeek = 'week-' + Math.floor(now.getTime() / (7 * 24 * 60 * 60 * 1000));
+        const thisMonth = now.getFullYear() + '-' + now.getMonth();
         
         // Check cache timestamps
         const dailyCache = localStorage.getItem('fredDailyCache');
@@ -3356,7 +3356,7 @@
                     await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
                 }
                 
-                const url = `${baseUrl}?series_id=${seriesId}&api_key=${fredApiKey}&file_type=json&limit=1&sort_order=desc`;
+                const url = baseUrl + '?series_id=' + seriesId + '&api_key=' + fredApiKey + '&file_type=json&limit=1&sort_order=desc';
                 const response = await fetch(url);
                 const data = await response.json();
                 
@@ -3461,7 +3461,7 @@
         // Update UI
         document.getElementById('perm-status').textContent = 'Running';
         document.getElementById('perm-status').style.color = '#f59e0b';
-        document.getElementById('perm-current-iterations').textContent = `0 / ${iterations}`;
+        document.getElementById('perm-current-iterations').textContent = '0 / ' + iterations;
         
         // Start timer
         permutationEngine.timer = setInterval(updatePermutationTimer, 1000);
@@ -3873,7 +3873,7 @@
         const percent = (current / total * 100).toFixed(1);
         document.getElementById('perm-progress-bar').style.width = percent + '%';
         document.getElementById('perm-progress-percent').textContent = percent + '%';
-        document.getElementById('perm-progress-text').textContent = `${current} / ${total}`;
+        document.getElementById('perm-progress-text').textContent = current + ' / ' + total;
         document.getElementById('perm-valid-count').textContent = securitisationEngine.validCount;
         document.getElementById('perm-invalid-count').textContent = securitisationEngine.invalidCount;
         
@@ -4071,7 +4071,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `atlas_nexus_export_${new Date().toISOString().split('T')[0]}.json`;
+        a.download = 'atlas_nexus_export_' + new Date().toISOString().split('T')[0] + '.json';
         a.click();
         URL.revokeObjectURL(url);
     }

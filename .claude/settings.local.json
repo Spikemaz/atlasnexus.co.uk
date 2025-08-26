@@ -31,7 +31,10 @@
       "Bash(/dev/null)",
       "Bash(git restore:*)",
       "Bash(dir:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(start test_syntax.html)",
+      "Bash(powershell:*)",
+      "Bash(start test_syntax2.html)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"
