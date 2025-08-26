@@ -267,50 +267,99 @@ function renderMarketEvents(events) {
     });
 }
 
-// Load market commentary
-async function loadMarketCommentary() {
+// Market commentary state
+let currentCommentaryPage = 0;
+let commentaryExperts = [];
+let frequentExperts = [];
+
+// Load market commentary with pagination
+async function loadMarketCommentary(page = 0) {
     try {
-        const response = await fetch('/api/market-commentary');
+        const response = await fetch(`/api/market-commentary?page=${page}&per_page=2`);
         const data = await response.json();
         
         if (data.status === 'success') {
-            renderMarketCommentary(data.commentary);
+            currentCommentaryPage = data.page;
+            commentaryExperts = data.experts;
+            frequentExperts = data.frequent_experts;
+            renderMarketCommentary(data.experts, data);
         }
     } catch (error) {
         console.error('Error loading market commentary:', error);
     }
 }
 
-// Render market commentary
-function renderMarketCommentary(commentary) {
+// Render market commentary with navigation
+function renderMarketCommentary(experts, metadata) {
     const container = document.querySelector('.commentary-container');
     if (!container) return;
     
     container.innerHTML = '';
     
+    // Create navigation header if there are multiple pages
+    if (metadata.total > metadata.per_page) {
+        const navHeader = document.createElement('div');
+        navHeader.className = 'd-flex justify-content-between align-items-center mb-3';
+        navHeader.innerHTML = `
+            <div>
+                <small class="text-muted">Showing ${metadata.page * metadata.per_page + 1}-${Math.min((metadata.page + 1) * metadata.per_page, metadata.total)} of ${metadata.total} experts</small>
+            </div>
+            <div>
+                <button class="btn btn-sm btn-outline-secondary me-2" onclick="navigateCommentary('prev')" ${metadata.page === 0 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="navigateCommentary('next')" ${!metadata.has_more ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(navHeader);
+    }
+    
+    // Create expert cards
     const row = document.createElement('div');
     row.className = 'row';
     
-    commentary.forEach(comment => {
+    experts.forEach(expert => {
         const col = document.createElement('div');
         col.className = 'col-md-6 mb-3';
         
-        const avatarColors = ['primary', 'success', 'warning', 'info'];
-        const avatarColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+        // Show "View All" link for experts with multiple comments
+        const viewAllLink = expert.comment_count > 1 ? 
+            `<a href="#" class="text-primary small" onclick="viewExpertHistory('${expert.id}'); return false;">
+                <i class="fas fa-history me-1"></i>View all ${expert.comment_count} comments
+            </a>` : '';
+        
+        // Display expertise badges
+        const expertiseBadges = expert.expertise ? 
+            expert.expertise.map(skill => `<span class="badge bg-secondary me-1" style="font-size: 0.7rem;">${skill}</span>`).join('') : '';
         
         col.innerHTML = `
-            <div class="commentary-card p-3 border border-secondary rounded">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="avatar bg-${avatarColor} rounded-circle p-2 me-2">
-                        <i class="fas fa-user text-white"></i>
+            <div class="commentary-card p-3 border border-secondary rounded" style="cursor: pointer;" onclick="viewExpertProfile('${expert.id}')">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar bg-${expert.avatar_color || 'primary'} rounded-circle p-2 me-2">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-white mb-0">${expert.name}</h6>
+                            <small class="text-muted">${expert.title}</small><br>
+                            <small class="text-info">${expert.organization}</small>
+                        </div>
                     </div>
-                    <div>
-                        <h6 class="text-white mb-0">${comment.name}</h6>
-                        <small class="text-muted">${comment.title}, ${comment.organization}</small>
-                    </div>
+                    ${expert.comment_count > 1 ? `<span class="badge bg-warning">${expert.comment_count} posts</span>` : ''}
                 </div>
-                <p class="text-muted small mb-0">"${comment.comment}"</p>
-                <small class="text-info">${comment.time}</small>
+                ${expertiseBadges ? `<div class="mb-2">${expertiseBadges}</div>` : ''}
+                <p class="text-white small mb-2" style="line-height: 1.6;">
+                    "${expert.latest_comment.text}"
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>${expert.latest_comment.time}
+                        ${expert.latest_comment.likes ? `<span class="ms-2"><i class="fas fa-thumbs-up me-1"></i>${expert.latest_comment.likes}</span>` : ''}
+                    </small>
+                    ${viewAllLink}
+                </div>
             </div>
         `;
         
@@ -318,6 +367,182 @@ function renderMarketCommentary(commentary) {
     });
     
     container.appendChild(row);
+    
+    // Add frequent contributors section if any
+    if (frequentExperts && frequentExperts.length > 0) {
+        const frequentSection = document.createElement('div');
+        frequentSection.className = 'mt-3 p-3 border border-info rounded';
+        frequentSection.innerHTML = `
+            <h6 class="text-info mb-2">
+                <i class="fas fa-star me-2"></i>Top Contributors
+            </h6>
+            <div class="d-flex flex-wrap gap-2">
+                ${frequentExperts.slice(0, 6).map(expert => `
+                    <button class="btn btn-sm btn-outline-info" onclick="viewExpertHistory('${expert.id}')">
+                        ${expert.name} (${expert.comment_count} posts)
+                    </button>
+                `).join('')}
+            </div>
+        `;
+        container.appendChild(frequentSection);
+    }
+}
+
+// Navigate commentary pages
+function navigateCommentary(direction) {
+    if (direction === 'prev' && currentCommentaryPage > 0) {
+        loadMarketCommentary(currentCommentaryPage - 1);
+    } else if (direction === 'next') {
+        loadMarketCommentary(currentCommentaryPage + 1);
+    }
+}
+
+// View expert history
+async function viewExpertHistory(expertId) {
+    try {
+        const response = await fetch(`/api/expert-history/${expertId}`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showExpertHistoryModal(data.expert);
+        }
+    } catch (error) {
+        console.error('Error loading expert history:', error);
+    }
+}
+
+// Show expert history modal
+function showExpertHistoryModal(expert) {
+    // Remove any existing modal
+    const existingModal = document.getElementById('expertHistoryModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create modal HTML
+    const modalHTML = `
+        <div class="modal fade" id="expertHistoryModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content" style="background: rgba(31, 41, 55, 0.98); border: 1px solid #60a5fa;">
+                    <div class="modal-header border-bottom border-secondary">
+                        <div class="d-flex align-items-center w-100">
+                            <div class="avatar bg-${expert.avatar_color || 'primary'} rounded-circle p-2 me-3">
+                                <i class="fas fa-user text-white fa-lg"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="modal-title text-white mb-0">${expert.name}</h5>
+                                <small class="text-muted">${expert.title} at ${expert.organization}</small>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Expert Info -->
+                        <div class="mb-3 p-3 bg-dark rounded">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted d-block mb-1">Areas of Expertise</small>
+                                    <div>
+                                        ${expert.expertise.map(skill => `<span class="badge bg-primary me-1">${skill}</span>`).join('')}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <small class="text-muted d-block mb-1">Activity</small>
+                                    <span class="text-white">${expert.comment_count} Total Comments</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Comments Timeline -->
+                        <h6 class="text-white mb-3">
+                            <i class="fas fa-comments me-2"></i>Recent Commentary
+                        </h6>
+                        <div class="comments-timeline">
+                            ${expert.comments.map((comment, index) => `
+                                <div class="comment-item mb-3 pb-3 ${index < expert.comments.length - 1 ? 'border-bottom border-secondary' : ''}">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="badge bg-info">${comment.topic}</span>
+                                        <small class="text-muted">${comment.time}</small>
+                                    </div>
+                                    <p class="text-white mb-2" style="line-height: 1.7;">
+                                        ${comment.text}
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-success me-2" onclick="likeComment('${expert.id}', ${index})">
+                                                <i class="fas fa-thumbs-up me-1"></i>${comment.likes || 0}
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="shareComment('${expert.id}', ${index})">
+                                                <i class="fas fa-share me-1"></i>Share
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="followExpert('${expert.id}')">
+                            <i class="fas fa-user-plus me-1"></i>Follow ${expert.name}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Initialize and show modal
+    const modalElement = document.getElementById('expertHistoryModal');
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+    
+    // Clean up modal after it's hidden
+    modalElement.addEventListener('hidden.bs.modal', function() {
+        modalElement.remove();
+    });
+}
+
+// View expert profile (simplified view)
+function viewExpertProfile(expertId) {
+    // Find expert in current data
+    const expert = commentaryExperts.find(e => e.id === expertId) || 
+                   frequentExperts.find(e => e.id === expertId);
+    
+    if (expert && expert.comment_count > 1) {
+        viewExpertHistory(expertId);
+    }
+}
+
+// Like a comment
+function likeComment(expertId, commentIndex) {
+    // Placeholder for like functionality
+    showToast('Comment liked!', 'success');
+}
+
+// Share a comment
+function shareComment(expertId, commentIndex) {
+    // Placeholder for share functionality
+    const shareUrl = `${window.location.origin}/expert/${expertId}/comment/${commentIndex}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+        showToast('Comment link copied to clipboard!', 'success');
+    });
+}
+
+// Follow an expert
+function followExpert(expertId) {
+    // Placeholder for follow functionality
+    const followedExperts = JSON.parse(localStorage.getItem('followedExperts') || '[]');
+    if (!followedExperts.includes(expertId)) {
+        followedExperts.push(expertId);
+        localStorage.setItem('followedExperts', JSON.stringify(followedExperts));
+        showToast('You are now following this expert!', 'success');
+    } else {
+        showToast('You are already following this expert', 'info');
+    }
 }
 
 // Update sentiment gauge

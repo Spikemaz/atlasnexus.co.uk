@@ -3994,7 +3994,7 @@ def get_market_events():
 
 @app.route('/api/market-commentary')
 def get_market_commentary():
-    """Get expert market commentary"""
+    """Get expert market commentary with pagination"""
     ip_address = get_real_ip()
     
     # Check authentication
@@ -4004,12 +4004,36 @@ def get_market_commentary():
     if not MARKET_NEWS_AVAILABLE or not market_news_service:
         return jsonify({'status': 'error', 'message': 'Market news service not available'}), 503
     
-    commentary = market_news_service.get_market_commentary()
+    # Get pagination parameters
+    page = int(request.args.get('page', 0))
+    per_page = int(request.args.get('per_page', 2))
+    
+    commentary_data = market_news_service.get_market_commentary(page=page, per_page=per_page)
     return jsonify({
         'status': 'success',
-        'commentary': commentary,
+        'experts': commentary_data['experts'],
+        'frequent_experts': commentary_data['frequent_experts'],
+        'page': commentary_data['page'],
+        'per_page': commentary_data['per_page'],
+        'total': commentary_data['total'],
+        'has_more': commentary_data['has_more'],
         'timestamp': datetime.now().isoformat()
     })
+
+@app.route('/api/expert-history/<expert_id>')
+def get_expert_history(expert_id):
+    """Get full comment history for a specific expert"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    if not MARKET_NEWS_AVAILABLE or not market_news_service:
+        return jsonify({'status': 'error', 'message': 'Market news service not available'}), 503
+    
+    expert_data = market_news_service.get_expert_history(expert_id)
+    return jsonify(expert_data)
 
 @app.route('/admin/audit-log')
 def admin_audit_log():

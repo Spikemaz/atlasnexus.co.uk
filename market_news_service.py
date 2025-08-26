@@ -290,36 +290,300 @@ class MarketNewsService:
         ]
         return events[:3]  # Return top 3 events
     
-    def get_market_commentary(self) -> List[Dict[str, Any]]:
-        """Get expert market commentary"""
+    def get_market_commentary(self, page: int = 0, per_page: int = 2) -> Dict[str, Any]:
+        """Get expert market commentary with pagination"""
+        # Expanded pool of market experts
         experts = [
             {
+                'id': 'john_smith',
                 'name': 'John Smith',
                 'title': 'Chief Market Strategist',
                 'organization': 'Financial Times',
-                'comment': 'The European securitisation market is showing remarkable resilience despite macroeconomic headwinds. We\'re seeing particularly strong demand for ESG-compliant structures, which could define the market direction for 2024.',
-                'time': '2 hours ago'
+                'avatar_color': 'primary',
+                'expertise': ['European Markets', 'ESG', 'RMBS'],
+                'comment_count': 15,
+                'comments': [
+                    {
+                        'text': 'The European securitisation market is showing remarkable resilience despite macroeconomic headwinds. We\'re seeing particularly strong demand for ESG-compliant structures, which could define the market direction for 2024.',
+                        'time': '2 hours ago',
+                        'likes': 234,
+                        'topic': 'ESG Securitisation'
+                    },
+                    {
+                        'text': 'Recent ECB guidance on green bond standards will accelerate the transformation of European ABS markets. Issuers need to prepare for stricter reporting requirements.',
+                        'time': '1 day ago',
+                        'likes': 189,
+                        'topic': 'Regulatory Updates'
+                    },
+                    {
+                        'text': 'German auto ABS showing signs of stress as EV transition impacts residual values. Traditional models need recalibration for the new automotive landscape.',
+                        'time': '3 days ago',
+                        'likes': 156,
+                        'topic': 'Auto ABS'
+                    }
+                ]
             },
             {
+                'id': 'sarah_johnson',
                 'name': 'Sarah Johnson',
                 'title': 'Head of Research',
                 'organization': 'City Wire',
-                'comment': 'UK RMBS continues to outperform expectations. The recent housing data suggests we might see tighter spreads heading into Q1 2024, particularly for prime mortgage pools.',
-                'time': '4 hours ago'
+                'avatar_color': 'success',
+                'expertise': ['UK Markets', 'RMBS', 'Housing'],
+                'comment_count': 23,
+                'comments': [
+                    {
+                        'text': 'UK RMBS continues to outperform expectations. The recent housing data suggests we might see tighter spreads heading into Q1 2024, particularly for prime mortgage pools.',
+                        'time': '4 hours ago',
+                        'likes': 312,
+                        'topic': 'UK RMBS'
+                    },
+                    {
+                        'text': 'Buy-to-let RMBS facing pressure from regulatory changes. Expect to see more conservative LTV ratios and stricter affordability assessments going forward.',
+                        'time': '2 days ago',
+                        'likes': 278,
+                        'topic': 'BTL Market'
+                    }
+                ]
             },
             {
+                'id': 'michael_chen',
                 'name': 'Michael Chen',
                 'title': 'Senior Analyst',
                 'organization': 'Bloomberg',
-                'comment': 'US CLO market dynamics are shifting with the rise in interest rates. We\'re observing more selective investor behavior, focusing on higher-rated tranches and established managers.',
-                'time': '6 hours ago'
+                'avatar_color': 'warning',
+                'expertise': ['US Markets', 'CLO', 'Leveraged Loans'],
+                'comment_count': 8,
+                'comments': [
+                    {
+                        'text': 'US CLO market dynamics are shifting with the rise in interest rates. We\'re observing more selective investor behavior, focusing on higher-rated tranches and established managers.',
+                        'time': '6 hours ago',
+                        'likes': 198,
+                        'topic': 'US CLO'
+                    }
+                ]
             },
             {
+                'id': 'emma_williams',
                 'name': 'Emma Williams',
                 'title': 'Portfolio Manager',
                 'organization': 'Green Street',
-                'comment': 'Commercial real estate securitisation faces headwinds, but selective opportunities remain in logistics and residential sectors. Geographic diversification is key.',
-                'time': '8 hours ago'
+                'avatar_color': 'info',
+                'expertise': ['CMBS', 'Real Estate', 'REITs'],
+                'comment_count': 5,
+                'comments': [
+                    {
+                        'text': 'Commercial real estate securitisation faces headwinds, but selective opportunities remain in logistics and residential sectors. Geographic diversification is key.',
+                        'time': '8 hours ago',
+                        'likes': 167,
+                        'topic': 'CMBS Outlook'
+                    }
+                ]
+            },
+            {
+                'id': 'david_mueller',
+                'name': 'David Müller',
+                'title': 'Head of Structured Finance',
+                'organization': 'Deutsche Bank',
+                'avatar_color': 'danger',
+                'expertise': ['European CLO', 'Corporate Credit', 'Basel IV'],
+                'comment_count': 19,
+                'comments': [
+                    {
+                        'text': 'European CLO issuance picking up despite volatility. Strong demand from Japanese investors providing crucial support to the primary market.',
+                        'time': '3 hours ago',
+                        'likes': 245,
+                        'topic': 'European CLO'
+                    },
+                    {
+                        'text': 'Basel IV implementation will fundamentally change the economics of securitisation. Banks need to reassess their originate-to-distribute strategies.',
+                        'time': '1 day ago',
+                        'likes': 298,
+                        'topic': 'Regulation'
+                    }
+                ]
+            },
+            {
+                'id': 'alexandra_petrov',
+                'name': 'Alexandra Petrov',
+                'title': 'Managing Director',
+                'organization': 'JP Morgan',
+                'avatar_color': 'purple',
+                'expertise': ['Emerging Markets', 'Cross-border', 'FX Risk'],
+                'comment_count': 11,
+                'comments': [
+                    {
+                        'text': 'Emerging market ABS showing resilience despite dollar strength. Local currency structures gaining traction as investors seek yield.',
+                        'time': '5 hours ago',
+                        'likes': 156,
+                        'topic': 'EM ABS'
+                    }
+                ]
+            },
+            {
+                'id': 'james_wong',
+                'name': 'James Wong',
+                'title': 'Chief Risk Officer',
+                'organization': 'HSBC',
+                'avatar_color': 'teal',
+                'expertise': ['Risk Management', 'Asia Pacific', 'Credit Analysis'],
+                'comment_count': 7,
+                'comments': [
+                    {
+                        'text': 'Asian securitisation markets entering new growth phase. Singapore and Hong Kong competing to become regional hubs for green securitisation.',
+                        'time': '7 hours ago',
+                        'likes': 189,
+                        'topic': 'APAC Markets'
+                    }
+                ]
+            },
+            {
+                'id': 'marie_dubois',
+                'name': 'Marie Dubois',
+                'title': 'Head of ESG Investing',
+                'organization': 'BNP Paribas',
+                'avatar_color': 'success',
+                'expertise': ['ESG', 'Green Bonds', 'Sustainability'],
+                'comment_count': 14,
+                'comments': [
+                    {
+                        'text': 'Green securitisation volume doubled in 2023. Expect continued growth as regulatory incentives and investor demand align.',
+                        'time': '9 hours ago',
+                        'likes': 267,
+                        'topic': 'Green Finance'
+                    },
+                    {
+                        'text': 'Social bonds backed by affordable housing loans showing strong performance. This could be the next frontier in sustainable securitisation.',
+                        'time': '2 days ago',
+                        'likes': 223,
+                        'topic': 'Social Bonds'
+                    }
+                ]
+            },
+            {
+                'id': 'robert_taylor',
+                'name': 'Robert Taylor',
+                'title': 'Global Head of ABS',
+                'organization': 'Goldman Sachs',
+                'avatar_color': 'warning',
+                'expertise': ['Technology', 'Fintech', 'Innovation'],
+                'comment_count': 9,
+                'comments': [
+                    {
+                        'text': 'Fintech lenders increasingly turning to securitisation for funding. Data-driven underwriting showing promising early results.',
+                        'time': '10 hours ago',
+                        'likes': 198,
+                        'topic': 'Fintech ABS'
+                    }
+                ]
+            },
+            {
+                'id': 'sophia_martinez',
+                'name': 'Sophia Martinez',
+                'title': 'Senior Credit Analyst',
+                'organization': 'Moody\'s',
+                'avatar_color': 'info',
+                'expertise': ['Credit Rating', 'Methodology', 'Surveillance'],
+                'comment_count': 6,
+                'comments': [
+                    {
+                        'text': 'Rating methodology updates for RMBS reflecting post-pandemic performance data. Expect more conservative assumptions on recovery rates.',
+                        'time': '11 hours ago',
+                        'likes': 145,
+                        'topic': 'Rating Updates'
+                    }
+                ]
+            },
+            {
+                'id': 'thomas_anderson',
+                'name': 'Thomas Anderson',
+                'title': 'Head of Trading',
+                'organization': 'Barclays Capital',
+                'avatar_color': 'primary',
+                'expertise': ['Secondary Markets', 'Trading', 'Liquidity'],
+                'comment_count': 12,
+                'comments': [
+                    {
+                        'text': 'Secondary market liquidity improving across most asset classes. Bid-ask spreads tightening as market confidence returns.',
+                        'time': '1 hour ago',
+                        'likes': 178,
+                        'topic': 'Market Liquidity'
+                    },
+                    {
+                        'text': 'Electronic trading platforms revolutionizing ABS secondary markets. Expect continued digitalization of trading infrastructure.',
+                        'time': '1 day ago',
+                        'likes': 156,
+                        'topic': 'Trading Technology'
+                    }
+                ]
+            },
+            {
+                'id': 'linda_chen',
+                'name': 'Linda Chen',
+                'title': 'Chief Investment Officer',
+                'organization': 'PIMCO',
+                'avatar_color': 'danger',
+                'expertise': ['Portfolio Management', 'Asset Allocation', 'Strategy'],
+                'comment_count': 16,
+                'comments': [
+                    {
+                        'text': 'Structured credit offering attractive risk-adjusted returns in current environment. Focusing on seasoned deals with proven performance.',
+                        'time': '12 hours ago',
+                        'likes': 234,
+                        'topic': 'Investment Strategy'
+                    }
+                ]
             }
         ]
-        return random.sample(experts, k=2)
+        
+        # Filter experts who have more than one comment for "View All" feature
+        frequent_experts = [e for e in experts if e['comment_count'] > 1]
+        
+        # Calculate pagination
+        total_experts = len(experts)
+        start_idx = page * per_page
+        end_idx = min(start_idx + per_page, total_experts)
+        
+        # Get current page of experts
+        current_experts = experts[start_idx:end_idx]
+        
+        # For each expert, select their most recent comment
+        for expert in current_experts:
+            if expert['comments']:
+                expert['latest_comment'] = expert['comments'][0]
+            else:
+                expert['latest_comment'] = {
+                    'text': 'No recent comments available.',
+                    'time': 'N/A',
+                    'likes': 0,
+                    'topic': 'General'
+                }
+        
+        return {
+            'experts': current_experts,
+            'frequent_experts': frequent_experts,
+            'page': page,
+            'per_page': per_page,
+            'total': total_experts,
+            'has_more': end_idx < total_experts
+        }
+    
+    def get_expert_history(self, expert_id: str) -> Dict[str, Any]:
+        """Get full comment history for a specific expert"""
+        # This would normally query a database
+        # For demo purposes, we'll return expanded data for known experts
+        expert_data = self.get_market_commentary(page=0, per_page=100)
+        
+        for expert in expert_data['experts']:
+            if expert['id'] == expert_id:
+                return {
+                    'status': 'success',
+                    'expert': expert,
+                    'total_comments': expert['comment_count'],
+                    'comments': expert.get('comments', [])
+                }
+        
+        return {
+            'status': 'error',
+            'message': 'Expert not found'
+        }
