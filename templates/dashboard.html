@@ -2031,10 +2031,8 @@
         
         function showRegistrations(container) {
             const regs = comprehensiveData.active_registrations || {};
-            let html = `
-                <div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">
-                    <h3 style="color: #22c55e; margin-bottom: 1.5rem;">Active Registrations</h3>
-            `;
+            let html = '<div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">' +
+                '<h3 style="color: #22c55e; margin-bottom: 1.5rem;">Active Registrations</h3>';
             
             if (Object.keys(regs).length === 0) {
                 html += '<p style="color: #94a3b8;">No active registrations</p>';
@@ -2071,11 +2069,9 @@
         
         function showLockouts(container) {
             const lockouts = comprehensiveData.ip_lockouts || {};
-            let html = `
-                <div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">
-                    <h3 style="color: #ef4444; margin-bottom: 1.5rem;">IP Lockouts</h3>
-                    <button onclick="deleteData('all_lockouts', null)" style="background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px;">Clear All Lockouts</button>
-            `;
+            let html = '<div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">' +
+                '<h3 style="color: #ef4444; margin-bottom: 1.5rem;">IP Lockouts</h3>' +
+                '<button onclick="deleteData(\'all_lockouts\', null)" style="background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px;">Clear All Lockouts</button>';
             
             if (Object.keys(lockouts).length === 0) {
                 html += '<p style="color: #94a3b8;">No IP lockouts</p>';
@@ -2109,11 +2105,9 @@
         
         function showAttempts(container) {
             const attempts = comprehensiveData.login_attempts || {};
-            let html = `
-                <div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">
-                    <h3 style="color: #9333ea; margin-bottom: 1.5rem;">Login Attempts</h3>
-                    <button onclick="deleteData('all_attempts', null)" style="background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px;">Clear All Attempts</button>
-            `;
+            let html = '<div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">' +
+                '<h3 style="color: #9333ea; margin-bottom: 1.5rem;">Login Attempts</h3>' +
+                '<button onclick="deleteData(\'all_attempts\', null)" style="background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px;">Clear All Attempts</button>';
             
             if (Object.keys(attempts).length === 0) {
                 html += '<p style="color: #94a3b8;">No login attempts logged</p>';
@@ -2145,10 +2139,8 @@
         
         function showExpired(container) {
             const expired = comprehensiveData.expired_registrations || {};
-            let html = `
-                <div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">
-                    <h3 style="color: #ef4444; margin-bottom: 1.5rem;">Expired Registrations</h3>
-            `;
+            let html = '<div style="background: rgba(54, 64, 73, 0.95); border-radius: 12px; padding: 2rem;">' +
+                '<h3 style="color: #ef4444; margin-bottom: 1.5rem;">Expired Registrations</h3>';
             
             if (Object.keys(expired).length === 0) {
                 html += '<p style="color: #94a3b8;">No expired registrations</p>';
@@ -2168,9 +2160,9 @@
                     html += '<td style="padding: 10px;">' + (data.full_name || '-') + '</td>';
                     html += '<td style="padding: 10px;">' + (data.expired_at || '-') + '</td>';
                     html += '<td style="padding: 10px;">' + (data.reason || '-') + '</td>';
-                    html += `<td style="padding: 10px;">
-                        <button onclick="deleteData('expired_registration', '${email}')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Delete</button>
-                    </td>`;
+                    html += '<td style="padding: 10px;">' +
+                        '<button onclick="deleteData(\'expired_registration\', \'' + email + '\')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Delete</button>' +
+                    '</td>';
                     html += '</tr>';
                 }
                 html += '</tbody></table></div>';
@@ -2209,89 +2201,88 @@
             const ipInfo = currentIPData.find(ip => ip.ip === ipAddress);
             if (!ipInfo) return;
             
-            let detailsHTML = `
-                <div style="padding: 20px;">
-                    <h3 style="color: #ef4444; margin-bottom: 20px;">Detailed Information for ${ipAddress}</h3>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                        <div>
-                            <strong style="color: #60a5fa;">Status:</strong> 
-                            <span style="color: #f59e0b;">${ipInfo.status}</span>
-                        </div>
-                        <div>
-                            <strong style="color: #60a5fa;">Lock Type:</strong> 
-                            <span style="color: #f59e0b;">${ipInfo.lockout_type || 'Unknown'}</span>
-                        </div>
-                        <div>
-                            <strong style="color: #60a5fa;">Reference Code:</strong> 
-                            <span style="color: white; font-family: monospace;">${ipInfo.reference_code || 'N/A'}</span>
-                        </div>
-                        <div>
-                            <strong style="color: #60a5fa;">Total Attempts:</strong> 
-                            <span style="color: #ef4444; font-weight: bold;">${ipInfo.total_attempts || 0}</span>
-                        </div>
-                        <div>
-                            <strong style="color: #60a5fa;">First Seen:</strong> 
-                            <span style="color: #94a3b8;">${ipInfo.first_seen || 'Unknown'}</span>
-                        </div>
-                        <div>
-                            <strong style="color: #60a5fa;">Locked At:</strong> 
-                            <span style="color: #94a3b8;">${ipInfo.locked_at || 'Unknown'}</span>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <strong style="color: #60a5fa;">User Agent:</strong>
-                        <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 5px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 5px;">
-                            ${ipInfo.user_agent || 'Unknown'}
-                        </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <strong style="color: #60a5fa;">Failed Passwords:</strong>
-                        <div style="margin-top: 10px;">
-                            ${ipInfo.failed_passwords && ipInfo.failed_passwords.length > 0 ? 
-                                ipInfo.failed_passwords.map(pwd => 
-                                    `<span style="display: inline-block; background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 5px 10px; margin: 5px; border-radius: 5px; font-family: monospace;">${pwd}</span>`
-                                ).join('') : 
-                                '<span style="color: #94a3b8;">No passwords logged</span>'
-                            }
-                        </div>
-                    </div>
-                    
-                    ${ipInfo.attempt_history && ipInfo.attempt_history.length > 0 ? `
-                        <div style="margin-bottom: 20px;">
-                            <strong style="color: #60a5fa;">Recent Attempt History:</strong>
-                            <div style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
-                                ${ipInfo.attempt_history.map(attempt => `
-                                    <div style="padding: 10px; margin: 5px 0; background: rgba(0,0,0,0.3); border-radius: 5px; border-left: 3px solid #ef4444;">
-                                        <div style="color: #ef4444; font-family: monospace;">${attempt.password}</div>
-                                        <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 5px;">
-                                            ${new Date(attempt.timestamp).toLocaleString('en-GB')} | Type: ${attempt.type}
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <div style="margin-top: 20px; text-align: right;">
-                        <button onclick="closeIPDetails()" style="background: #475569; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            `;
+            let detailsHTML = '<div style="padding: 20px;">' +
+                '<h3 style="color: #ef4444; margin-bottom: 20px;">Detailed Information for ' + ipAddress + '</h3>' +
+                '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">' +
+                    '<div>' +
+                        '<strong style="color: #60a5fa;">Status:</strong> ' +
+                        '<span style="color: #f59e0b;">' + ipInfo.status + '</span>' +
+                    '</div>' +
+                    '<div>' +
+                        '<strong style="color: #60a5fa;">Lock Type:</strong> ' +
+                        '<span style="color: #f59e0b;">' + (ipInfo.lockout_type || 'Unknown') + '</span>' +
+                    '</div>' +
+                    '<div>' +
+                        '<strong style="color: #60a5fa;">Reference Code:</strong> ' +
+                        '<span style="color: white; font-family: monospace;">' + (ipInfo.reference_code || 'N/A') + '</span>' +
+                    '</div>' +
+                    '<div>' +
+                        '<strong style="color: #60a5fa;">Total Attempts:</strong> ' +
+                        '<span style="color: #ef4444; font-weight: bold;">' + (ipInfo.total_attempts || 0) + '</span>' +
+                    '</div>' +
+                    '<div>' +
+                        '<strong style="color: #60a5fa;">First Seen:</strong> ' +
+                        '<span style="color: #94a3b8;">' + (ipInfo.first_seen || 'Unknown') + '</span>' +
+                    '</div>' +
+                    '<div>' +
+                        '<strong style="color: #60a5fa;">Locked At:</strong> ' +
+                        '<span style="color: #94a3b8;">' + (ipInfo.locked_at || 'Unknown') + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="margin-bottom: 20px;">' +
+                    '<strong style="color: #60a5fa;">User Agent:</strong>' +
+                    '<div style="color: #94a3b8; font-size: 0.9rem; margin-top: 5px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 5px;">' +
+                        (ipInfo.user_agent || 'Unknown') +
+                    '</div>' +
+                '</div>' +
+                '<div style="margin-bottom: 20px;">' +
+                    '<strong style="color: #60a5fa;">Failed Passwords:</strong>' +
+                    '<div style="margin-top: 10px;">';
+            
+            // Handle failed passwords
+            if (ipInfo.failed_passwords && ipInfo.failed_passwords.length > 0) {
+                for (let i = 0; i < ipInfo.failed_passwords.length; i++) {
+                    detailsHTML += '<span style="display: inline-block; background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 5px 10px; margin: 5px; border-radius: 5px; font-family: monospace;">' + 
+                        ipInfo.failed_passwords[i] + '</span>';
+                }
+            } else {
+                detailsHTML += '<span style="color: #94a3b8;">No passwords logged</span>';
+            }
+            
+            detailsHTML += '</div></div>';
+            
+            // Handle attempt history
+            if (ipInfo.attempt_history && ipInfo.attempt_history.length > 0) {
+                detailsHTML += '<div style="margin-bottom: 20px;">' +
+                    '<strong style="color: #60a5fa;">Recent Attempt History:</strong>' +
+                    '<div style="margin-top: 10px; max-height: 200px; overflow-y: auto;">';
+                
+                for (let i = 0; i < ipInfo.attempt_history.length; i++) {
+                    const attempt = ipInfo.attempt_history[i];
+                    detailsHTML += '<div style="padding: 10px; margin: 5px 0; background: rgba(0,0,0,0.3); border-radius: 5px; border-left: 3px solid #ef4444;">' +
+                        '<div style="color: #ef4444; font-family: monospace;">' + attempt.password + '</div>' +
+                        '<div style="color: #94a3b8; font-size: 0.85rem; margin-top: 5px;">' +
+                            new Date(attempt.timestamp).toLocaleString('en-GB') + ' | Type: ' + attempt.type +
+                        '</div>' +
+                    '</div>';
+                }
+                
+                detailsHTML += '</div></div>';
+            }
+            
+            detailsHTML += '<div style="margin-top: 20px; text-align: right;">' +
+                '<button onclick="closeIPDetails()" style="background: #475569; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">' +
+                    'Close' +
+                '</button>' +
+            '</div></div>';
             
             // Create modal
             const modal = document.createElement('div');
             modal.id = 'ipDetailsModal';
             modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 20000; display: flex; align-items: center; justify-content: center;';
-            modal.innerHTML = `
-                <div style="background: rgba(54, 64, 73, 0.98); border: 2px solid #ef4444; border-radius: 12px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
-                    ${detailsHTML}
-                </div>
-            `;
+            modal.innerHTML = '<div style="background: rgba(54, 64, 73, 0.98); border: 2px solid #ef4444; border-radius: 12px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">' +
+                detailsHTML +
+                '</div>';
             document.body.appendChild(modal);
         }
         
@@ -2308,24 +2299,22 @@
                 return;
             }
             
-            let html = `
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid rgba(239, 68, 68, 0.3);">
-                                <th style="padding: 10px; text-align: left; color: #94a3b8;">IP Address</th>
-                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Status</th>
-                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Reason</th>
-                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Failed Passwords</th>
-                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Browser/Device</th>
-                                <th style="padding: 10px; text-align: left; color: #94a3b8;">First Seen</th>
-                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Total Attempts</th>
-                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Time Remaining</th>
-                                <th style="padding: 10px; text-align: left; color: #94a3b8;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
+            let html = '<div style="overflow-x: auto;">' +
+                '<table style="width: 100%; border-collapse: collapse;">' +
+                    '<thead>' +
+                        '<tr style="border-bottom: 1px solid rgba(239, 68, 68, 0.3);">' +
+                            '<th style="padding: 10px; text-align: left; color: #94a3b8;">IP Address</th>' +
+                            '<th style="padding: 10px; text-align: left; color: #94a3b8;">Status</th>' +
+                            '<th style="padding: 10px; text-align: left; color: #94a3b8;">Reason</th>' +
+                            '<th style="padding: 10px; text-align: left; color: #94a3b8;">Failed Passwords</th>' +
+                            '<th style="padding: 10px; text-align: left; color: #94a3b8;">Browser/Device</th>' +
+                            '<th style="padding: 10px; text-align: left; color: #94a3b8;">First Seen</th>' +
+                            '<th style="padding: 10px; text-align: left; color: #94a3b8;">Total Attempts</th>' +
+                            '<th style="padding: 10px; text-align: left; color: #94a3b8;">Time Remaining</th>' +
+                            '<th style="padding: 10px; text-align: left; color: #94a3b8;">Actions</th>' +
+                        '</tr>' +
+                    '</thead>' +
+                    '<tbody>';
             
             ipData.forEach(ip => {
                 const statusColor = ip.status === 'permanent' ? '#ef4444' : '#f59e0b';
@@ -2355,50 +2344,46 @@
                     });
                 }
                 
-                html += `
-                    <tr style="border-bottom: 1px solid rgba(239, 68, 68, 0.1);">
-                        <td style="padding: 10px; color: white; font-family: monospace; cursor: pointer;" 
-                            onclick="showIPDetails('${ip.ip}')" 
-                            title="Click for details">
-                            ${ip.ip} 
-                            <i class="fas fa-info-circle" style="color: #60a5fa; margin-left: 5px;"></i>
-                        </td>
-                        <td style="padding: 10px;">
-                            <span style="color: ${statusColor}; font-weight: 600; font-size: 0.8rem;">${statusText}</span>
-                        </td>
-                        <td style="padding: 10px; color: #94a3b8; font-size: 0.85rem;">${ip.reason}</td>
-                        <td style="padding: 10px; color: #ef4444; font-size: 0.8rem; max-width: 150px; overflow: hidden; text-overflow: ellipsis;" 
-                            title="${ip.failed_passwords ? ip.failed_passwords.join(', ') : 'N/A'}">
-                            ${ip.failed_passwords ? ip.failed_passwords.join(', ') : 'N/A'}
-                        </td>
-                        <td style="padding: 10px; color: #60a5fa; font-size: 0.85rem;">${browserInfo}</td>
-                        <td style="padding: 10px; color: #94a3b8; font-size: 0.85rem;">${firstSeen}</td>
-                        <td style="padding: 10px; color: #f59e0b; font-weight: 600;">${ip.total_attempts || 0}</td>
-                        <td style="padding: 10px; color: #f59e0b; font-size: 0.85rem;">
-                            ${ip.remaining_time || (ip.status === 'permanent' ? 'PERMANENT' : 'Expired')}
-                        </td>
-                        <td style="padding: 10px;">
-                            <button onclick="unbanIP('${ip.ip}')" style="background: #22c55e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px; font-size: 0.8rem;">
-                                Unban
-                            </button>
-                            ${ip.status !== 'permanent' ? `
-                                <button onclick="extendBan('${ip.ip}')" style="background: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px; font-size: 0.8rem;">
-                                    Extend
-                                </button>
-                                <button onclick="permanentBan('${ip.ip}')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
-                                    Permanent
-                                </button>
-                            ` : ''}
-                        </td>
-                    </tr>
-                `;
+                html += '<tr style="border-bottom: 1px solid rgba(239, 68, 68, 0.1);">' +
+                    '<td style="padding: 10px; color: white; font-family: monospace; cursor: pointer;" ' +
+                        'onclick="showIPDetails(\'' + ip.ip + '\')" ' +
+                        'title="Click for details">' +
+                        ip.ip + ' ' +
+                        '<i class="fas fa-info-circle" style="color: #60a5fa; margin-left: 5px;"></i>' +
+                    '</td>' +
+                    '<td style="padding: 10px;">' +
+                        '<span style="color: ' + statusColor + '; font-weight: 600; font-size: 0.8rem;">' + statusText + '</span>' +
+                    '</td>' +
+                    '<td style="padding: 10px; color: #94a3b8; font-size: 0.85rem;">' + ip.reason + '</td>' +
+                    '<td style="padding: 10px; color: #ef4444; font-size: 0.8rem; max-width: 150px; overflow: hidden; text-overflow: ellipsis;" ' +
+                        'title="' + (ip.failed_passwords ? ip.failed_passwords.join(', ') : 'N/A') + '">' +
+                        (ip.failed_passwords ? ip.failed_passwords.join(', ') : 'N/A') +
+                    '</td>' +
+                    '<td style="padding: 10px; color: #60a5fa; font-size: 0.85rem;">' + browserInfo + '</td>' +
+                    '<td style="padding: 10px; color: #94a3b8; font-size: 0.85rem;">' + firstSeen + '</td>' +
+                    '<td style="padding: 10px; color: #f59e0b; font-weight: 600;">' + (ip.total_attempts || 0) + '</td>' +
+                    '<td style="padding: 10px; color: #f59e0b; font-size: 0.85rem;">' +
+                        (ip.remaining_time || (ip.status === 'permanent' ? 'PERMANENT' : 'Expired')) +
+                    '</td>' +
+                    '<td style="padding: 10px;">' +
+                        '<button onclick="unbanIP(\'' + ip.ip + '\')" style="background: #22c55e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px; font-size: 0.8rem;">' +
+                            'Unban' +
+                        '</button>' +
+                        (ip.status !== 'permanent' ? 
+                            '<button onclick="extendBan(\'' + ip.ip + '\')" style="background: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px; font-size: 0.8rem;">' +
+                                'Extend' +
+                            '</button>' +
+                            '<button onclick="permanentBan(\'' + ip.ip + '\')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">' +
+                                'Permanent' +
+                            '</button>'
+                        : '') +
+                    '</td>' +
+                '</tr>';
             });
             
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
+            html += '</tbody>' +
+                    '</table>' +
+                '</div>';
             
             container.innerHTML = html;
         }
@@ -3469,17 +3454,15 @@
         
         // Log to results
         const resultsDiv = document.getElementById('perm-results');
-        resultsDiv.innerHTML = `
-            <div style="color: #60a5fa; margin-bottom: 1rem;">
-                <strong>Engine Started</strong><br>
-                Configuration: ${permType} permutation using ${optimization}<br>
-                Dataset Size: ${datasetSize} | Iterations: ${iterations} | Sample Rate: ${sampleRate}%<br>
-                Processing Mode: ${mode} | Confidence Level: ${confidence}%
-            </div>
-            <div id="perm-live-results" style="color: #94a3b8; font-family: monospace; font-size: 0.9rem;">
-                Processing...
-            </div>
-        `;
+        resultsDiv.innerHTML = '<div style="color: #60a5fa; margin-bottom: 1rem;">' +
+            '<strong>Engine Started</strong><br>' +
+            'Configuration: ' + permType + ' permutation using ' + optimization + '<br>' +
+            'Dataset Size: ' + datasetSize + ' | Iterations: ' + iterations + ' | Sample Rate: ' + sampleRate + '%<br>' +
+            'Processing Mode: ' + mode + ' | Confidence Level: ' + confidence + '%' +
+            '</div>' +
+            '<div id="perm-live-results" style="color: #94a3b8; font-family: monospace; font-size: 0.9rem;">' +
+                'Processing...' +
+            '</div>';
     }
     
     function pausePermutationEngine() {
@@ -3546,7 +3529,7 @@
         const seconds = Math.floor((elapsed % 60000) / 1000);
         
         document.getElementById('perm-time').textContent = 
-            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
         
         // Calculate ETA
         if (permutationEngine.currentIteration > 0) {
@@ -3559,7 +3542,7 @@
             const etaSeconds = Math.floor((remainingTime % 60000) / 1000);
             
             document.getElementById('perm-eta').textContent = 
-                `${etaHours.toString().padStart(2, '0')}:${etaMinutes.toString().padStart(2, '0')}:${etaSeconds.toString().padStart(2, '0')}`;
+                etaHours.toString().padStart(2, '0') + ':' + etaMinutes.toString().padStart(2, '0') + ':' + etaSeconds.toString().padStart(2, '0');
         }
     }
     
@@ -3616,44 +3599,42 @@
             memoryUsed: (Math.random() * 500 + 100).toFixed(2)
         };
         
-        resultsDiv.innerHTML = `
-            <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid #22c55e; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-                <h4 style="color: #22c55e; margin-bottom: 0.5rem;">Processing Complete</h4>
-                <p style="color: #94a3b8;">Completed ${permutationEngine.currentIteration} iterations in ${elapsedSeconds} seconds</p>
-            </div>
+        resultsDiv.innerHTML = '<div style="background: rgba(34, 197, 94, 0.1); border: 1px solid #22c55e; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">' +
+                '<h4 style="color: #22c55e; margin-bottom: 0.5rem;">Processing Complete</h4>' +
+                '<p style="color: #94a3b8;">Completed ' + permutationEngine.currentIteration + ' iterations in ' + elapsedSeconds + ' seconds</p>' +
+            '</div>' +
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">
-                    <p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Total Permutations</p>
-                    <p style="color: white; font-size: 1.5rem; font-weight: 600;">${results.totalPermutations.toLocaleString()}</p>
-                </div>
-                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">
-                    <p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Optimal Solution</p>
-                    <p style="color: white; font-size: 1.5rem; font-weight: 600;">${results.optimalSolution}</p>
-                </div>
-                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">
-                    <p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Convergence Rate</p>
-                    <p style="color: white; font-size: 1.5rem; font-weight: 600;">${results.convergenceRate}%</p>
-                </div>
-                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">
-                    <p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Efficiency</p>
-                    <p style="color: white; font-size: 1.5rem; font-weight: 600;">${results.efficiency}%</p>
-                </div>
-                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">
-                    <p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Memory Used</p>
-                    <p style="color: white; font-size: 1.5rem; font-weight: 600;">${results.memoryUsed} MB</p>
-                </div>
-            </div>
+            '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">' +
+                '<div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">' +
+                    '<p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Total Permutations</p>' +
+                    '<p style="color: white; font-size: 1.5rem; font-weight: 600;">' + results.totalPermutations.toLocaleString() + '</p>' +
+                '</div>' +
+                '<div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">' +
+                    '<p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Optimal Solution</p>' +
+                    '<p style="color: white; font-size: 1.5rem; font-weight: 600;">' + results.optimalSolution + '</p>' +
+                '</div>' +
+                '<div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">' +
+                    '<p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Convergence Rate</p>' +
+                    '<p style="color: white; font-size: 1.5rem; font-weight: 600;">' + results.convergenceRate + '%</p>' +
+                '</div>' +
+                '<div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">' +
+                    '<p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Efficiency</p>' +
+                    '<p style="color: white; font-size: 1.5rem; font-weight: 600;">' + results.efficiency + '%</p>' +
+                '</div>' +
+                '<div style="background: rgba(96, 165, 250, 0.1); border: 1px solid #60a5fa; border-radius: 8px; padding: 1rem;">' +
+                    '<p style="color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.3rem;">Memory Used</p>' +
+                    '<p style="color: white; font-size: 1.5rem; font-weight: 600;">' + results.memoryUsed + ' MB</p>' +
+                '</div>' +
+            '</div>' +
             
-            <div style="margin-top: 1rem; padding: 1rem; background: rgba(30, 41, 59, 0.5); border-radius: 8px;">
-                <button onclick="exportPermutationResults()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-right: 10px;">
-                    <i class="fas fa-download"></i> Export Results
-                </button>
-                <button onclick="visualizePermutationResults()" style="background: linear-gradient(90deg, #8b5cf6, #7c3aed); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
-                    <i class="fas fa-chart-bar"></i> Visualize
-                </button>
-            </div>
-        `;
+            '<div style="margin-top: 1rem; padding: 1rem; background: rgba(30, 41, 59, 0.5); border-radius: 8px;">' +
+                '<button onclick="exportPermutationResults()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-right: 10px;">' +
+                    '<i class="fas fa-download"></i> Export Results' +
+                '</button>' +
+                '<button onclick="visualizePermutationResults()" style="background: linear-gradient(90deg, #8b5cf6, #7c3aed); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">' +
+                    '<i class="fas fa-chart-bar"></i> Visualize' +
+                '</button>' +
+            '</div>';
     }
     
     function exportPermutationResults() {
@@ -3839,22 +3820,20 @@
             // Add to table
             const row = tbody.insertRow();
             row.style.borderBottom = '1px solid #364049';
-            row.innerHTML = `
-                <td style="padding: 8px;">${index + 1}</td>
-                <td style="padding: 8px;">£${perm.capex.toLocaleString()}</td>
-                <td style="padding: 8px;">${(perm.opex * 100).toFixed(1)}%</td>
-                <td style="padding: 8px;">£${perm.rent.toLocaleString()}</td>
-                <td style="padding: 8px;">${perm.seniorDSCR.toFixed(2)}</td>
-                <td style="padding: 8px;">${(perm.seniorCoupon * 100).toFixed(2)}%</td>
-                <td style="padding: 8px;">£${seniorDebt.toLocaleString('en-GB', {maximumFractionDigits: 0})}</td>
-                <td style="padding: 8px;">${perm.mezzDSCR.toFixed(2)}</td>
-                <td style="padding: 8px;">${(perm.mezzCoupon * 100).toFixed(2)}%</td>
-                <td style="padding: 8px;">£${mezzDebt.toLocaleString('en-GB', {maximumFractionDigits: 0})}</td>
-                <td style="padding: 8px;">£${equity.toLocaleString('en-GB', {maximumFractionDigits: 0})}</td>
-                <td style="padding: 8px;">${(irr * 100).toFixed(2)}%</td>
-                <td style="padding: 8px;">${(wacd * 100).toFixed(2)}%</td>
-                <td style="padding: 8px; color: ${isViable ? '#22c55e' : '#ef4444'};">${isViable ? 'Viable' : 'Invalid'}</td>
-            `;
+            row.innerHTML = '<td style="padding: 8px;">' + (index + 1) + '</td>' +
+                '<td style="padding: 8px;">£' + perm.capex.toLocaleString() + '</td>' +
+                '<td style="padding: 8px;">' + (perm.opex * 100).toFixed(1) + '%</td>' +
+                '<td style="padding: 8px;">£' + perm.rent.toLocaleString() + '</td>' +
+                '<td style="padding: 8px;">' + perm.seniorDSCR.toFixed(2) + '</td>' +
+                '<td style="padding: 8px;">' + (perm.seniorCoupon * 100).toFixed(2) + '%</td>' +
+                '<td style="padding: 8px;">£' + seniorDebt.toLocaleString('en-GB', {maximumFractionDigits: 0}) + '</td>' +
+                '<td style="padding: 8px;">' + perm.mezzDSCR.toFixed(2) + '</td>' +
+                '<td style="padding: 8px;">' + (perm.mezzCoupon * 100).toFixed(2) + '%</td>' +
+                '<td style="padding: 8px;">£' + mezzDebt.toLocaleString('en-GB', {maximumFractionDigits: 0}) + '</td>' +
+                '<td style="padding: 8px;">£' + equity.toLocaleString('en-GB', {maximumFractionDigits: 0}) + '</td>' +
+                '<td style="padding: 8px;">' + (irr * 100).toFixed(2) + '%</td>' +
+                '<td style="padding: 8px;">' + (wacd * 100).toFixed(2) + '%</td>' +
+                '<td style="padding: 8px; color: ' + (isViable ? '#22c55e' : '#ef4444') + ';">' + (isViable ? 'Viable' : 'Invalid') + '</td>';
             
             // Update progress
             updateProgress(index + 1, permutations.length);
@@ -3942,13 +3921,11 @@
         document.getElementById('perm-valid-count').textContent = '0';
         document.getElementById('perm-invalid-count').textContent = '0';
         document.getElementById('perm-best-irr').textContent = '-';
-        document.getElementById('perm-results-body').innerHTML = `
-            <tr>
-                <td colspan="14" style="padding: 20px; text-align: center; color: #94a3b8;">
-                    No permutations generated yet. Configure parameters and click "Generate Permutations" to start.
-                </td>
-            </tr>
-        `;
+        document.getElementById('perm-results-body').innerHTML = '<tr>' +
+                '<td colspan="14" style="padding: 20px; text-align: center; color: #94a3b8;">' +
+                    'No permutations generated yet. Configure parameters and click "Generate Permutations" to start.' +
+                '</td>' +
+            '</tr>';
     }
     
     function exportToExcel() {
@@ -3996,26 +3973,24 @@
 
     // Modal functions for Quick Actions
     function showNewAnalysisModal() {
-        const modal = `
-            <div class="modal fade" id="newAnalysisModal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content bg-dark text-light">
-                        <div class="modal-header">
-                            <h5 class="modal-title">New Analysis</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>Select analysis type:</p>
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-outline-primary" onclick="location.href='/securitization-engine'">Securitization Analysis</button>
-                                <button class="btn btn-outline-primary" onclick="showPermutationEngine()">Permutation Analysis</button>
-                                <button class="btn btn-outline-primary" disabled>Market Analysis (Coming Soon)</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        const modal = '<div class="modal fade" id="newAnalysisModal" tabindex="-1">' +
+                '<div class="modal-dialog">' +
+                    '<div class="modal-content bg-dark text-light">' +
+                        '<div class="modal-header">' +
+                            '<h5 class="modal-title">New Analysis</h5>' +
+                            '<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>' +
+                        '</div>' +
+                        '<div class="modal-body">' +
+                            '<p>Select analysis type:</p>' +
+                            '<div class="d-grid gap-2">' +
+                                '<button class="btn btn-outline-primary" onclick="location.href=\'/securitization-engine\'">Securitization Analysis</button>' +
+                                '<button class="btn btn-outline-primary" onclick="showPermutationEngine()">Permutation Analysis</button>' +
+                                '<button class="btn btn-outline-primary" disabled>Market Analysis (Coming Soon)</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
         document.body.insertAdjacentHTML('beforeend', modal);
         const modalEl = new bootstrap.Modal(document.getElementById('newAnalysisModal'));
         modalEl.show();
@@ -4025,32 +4000,30 @@
     }
 
     function showUploadModal() {
-        const modal = `
-            <div class="modal fade" id="uploadModal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content bg-dark text-light">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Upload Data</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">Select file type:</label>
-                                <select class="form-select bg-dark text-light">
-                                    <option>CSV</option>
-                                    <option>Excel</option>
-                                    <option>JSON</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <input type="file" class="form-control bg-dark text-light" accept=".csv,.xlsx,.json">
-                            </div>
-                            <button class="btn btn-primary w-100">Upload File</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        const modal = '<div class="modal fade" id="uploadModal" tabindex="-1">' +
+                '<div class="modal-dialog">' +
+                    '<div class="modal-content bg-dark text-light">' +
+                        '<div class="modal-header">' +
+                            '<h5 class="modal-title">Upload Data</h5>' +
+                            '<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>' +
+                        '</div>' +
+                        '<div class="modal-body">' +
+                            '<div class="mb-3">' +
+                                '<label class="form-label">Select file type:</label>' +
+                                '<select class="form-select bg-dark text-light">' +
+                                    '<option>CSV</option>' +
+                                    '<option>Excel</option>' +
+                                    '<option>JSON</option>' +
+                                '</select>' +
+                            '</div>' +
+                            '<div class="mb-3">' +
+                                '<input type="file" class="form-control bg-dark text-light" accept=".csv,.xlsx,.json">' +
+                            '</div>' +
+                            '<button class="btn btn-primary w-100">Upload File</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
         document.body.insertAdjacentHTML('beforeend', modal);
         const modalEl = new bootstrap.Modal(document.getElementById('uploadModal'));
         modalEl.show();
@@ -4075,43 +4048,41 @@
     }
 
     function showSettingsModal() {
-        const modal = `
-            <div class="modal fade" id="settingsModal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content bg-dark text-light">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Settings</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">Theme</label>
-                                <select class="form-select bg-dark text-light">
-                                    <option>Dark (Default)</option>
-                                    <option disabled>Light (Coming Soon)</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Data Refresh Rate</label>
-                                <select class="form-select bg-dark text-light">
-                                    <option>5 minutes</option>
-                                    <option>10 minutes</option>
-                                    <option>30 minutes</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Notifications</label>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" checked>
-                                    <label class="form-check-label">Email notifications</label>
-                                </div>
-                            </div>
-                            <button class="btn btn-primary w-100">Save Settings</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        const modal = '<div class="modal fade" id="settingsModal" tabindex="-1">' +
+                '<div class="modal-dialog">' +
+                    '<div class="modal-content bg-dark text-light">' +
+                        '<div class="modal-header">' +
+                            '<h5 class="modal-title">Settings</h5>' +
+                            '<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>' +
+                        '</div>' +
+                        '<div class="modal-body">' +
+                            '<div class="mb-3">' +
+                                '<label class="form-label">Theme</label>' +
+                                '<select class="form-select bg-dark text-light">' +
+                                    '<option>Dark (Default)</option>' +
+                                    '<option disabled>Light (Coming Soon)</option>' +
+                                '</select>' +
+                            '</div>' +
+                            '<div class="mb-3">' +
+                                '<label class="form-label">Data Refresh Rate</label>' +
+                                '<select class="form-select bg-dark text-light">' +
+                                    '<option>5 minutes</option>' +
+                                    '<option>10 minutes</option>' +
+                                    '<option>30 minutes</option>' +
+                                '</select>' +
+                            '</div>' +
+                            '<div class="mb-3">' +
+                                '<label class="form-label">Notifications</label>' +
+                                '<div class="form-check">' +
+                                    '<input class="form-check-input" type="checkbox" checked>' +
+                                    '<label class="form-check-label">Email notifications</label>' +
+                                '</div>' +
+                            '</div>' +
+                            '<button class="btn btn-primary w-100">Save Settings</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
         document.body.insertAdjacentHTML('beforeend', modal);
         const modalEl = new bootstrap.Modal(document.getElementById('settingsModal'));
         modalEl.show();
