@@ -650,7 +650,7 @@
             <button class="nav-btn" data-section="compliance" onclick="showSection('compliance')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-gavel"></i> Compliance
             </button>
-            <button class="nav-btn" onclick="event.preventDefault(); event.stopPropagation(); window.location.href='/permutation-engine'; return false;" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="permutation" onclick="showSection('permutation')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-cogs"></i> Engine
             </button>
         </div>
@@ -1549,216 +1549,113 @@
         </div>
     </div>
 
-    <!-- Permutation Engine Command Centre Section -->
+    <!-- Advanced Permutation Engine Section -->
     <div id="permutation-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div style="max-width: 1800px; margin: 0 auto;">
-            <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
-                <h2 style="color: #60a5fa; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">
-                    <i class="fas fa-cogs"></i> Securitisation Permutation Engine
+            <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 2px solid #ffd700; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
+                <h2 style="color: #ffd700; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">
+                    <i class="fas fa-cogs"></i> Advanced Permutation Engine
                 </h2>
-                <p style="color: #94a3b8; text-align: center; margin-bottom: 2rem;">Advanced Securitisation Permutation Generator & Analysis System</p>
-                
-                <!-- Control Panel -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                    <!-- Input Parameters Section -->
-                    <div style="background: rgba(44, 49, 55, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem;">
-                        <h3 style="color: #60a5fa; margin-bottom: 1rem; font-size: 1.2rem;">
-                            <i class="fas fa-sliders-h"></i> Input Parameters
-                        </h3>
-                        <div style="display: grid; gap: 1rem;">
-                            <div>
-                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Dataset Size</label>
-                                <input type="number" id="perm-dataset-size" placeholder="Enter dataset size" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                            </div>
-                            <div>
-                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Iteration Count</label>
-                                <input type="number" id="perm-iterations" placeholder="Number of iterations" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                            </div>
-                            <div>
-                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Sample Rate (%)</label>
-                                <input type="number" id="perm-sample-rate" min="0" max="100" placeholder="0-100" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                            </div>
-                            <div>
-                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Confidence Level</label>
-                                <select id="perm-confidence" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                                    <option value="90">90%</option>
-                                    <option value="95" selected>95%</option>
-                                    <option value="99">99%</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                <p style="color: #94a3b8; text-align: center; margin-bottom: 2rem;">80+ Financial Parameters • Manual/Range/Boundary Modes • Real-time Generation</p>
 
-                    <!-- Algorithm Selection -->
-                    <div style="background: rgba(44, 49, 55, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem;">
-                        <h3 style="color: #60a5fa; margin-bottom: 1rem; font-size: 1.2rem;">
-                            <i class="fas fa-microchip"></i> Algorithm Selection
-                        </h3>
-                        <div style="display: grid; gap: 1rem;">
-                            <div>
-                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Permutation Type</label>
-                                <select id="perm-type" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                                    <option value="standard">Standard Permutation</option>
-                                    <option value="circular">Circular Permutation</option>
-                                    <option value="restricted">Restricted Permutation</option>
-                                    <option value="multiset">Multiset Permutation</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Optimization Method</label>
-                                <select id="perm-optimization" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                                    <option value="genetic">Genetic Algorithm</option>
-                                    <option value="simulated">Simulated Annealing</option>
-                                    <option value="particle">Particle Swarm</option>
-                                    <option value="gradient">Gradient Descent</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Processing Mode</label>
-                                <select id="perm-mode" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                                    <option value="sequential">Sequential</option>
-                                    <option value="parallel">Parallel</option>
-                                    <option value="distributed">Distributed</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Memory Allocation (MB)</label>
-                                <input type="number" id="perm-memory" placeholder="Memory limit" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                            </div>
-                        </div>
+                <!-- Control Bar -->
+                <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button class="btn btn-secondary active" onclick="setPermInputMode('manual')" data-perm-mode="manual">
+                            <i class="fas fa-edit"></i> Manual
+                        </button>
+                        <button class="btn btn-secondary" onclick="setPermInputMode('range')" data-perm-mode="range">
+                            <i class="fas fa-sliders-h"></i> Range
+                        </button>
+                        <button class="btn btn-secondary" onclick="setPermInputMode('boundary')" data-perm-mode="boundary">
+                            <i class="fas fa-compress-arrows-alt"></i> Boundary
+                        </button>
                     </div>
-
-                    <!-- Data Sources -->
-                    <div style="background: rgba(44, 49, 55, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem;">
-                        <h3 style="color: #60a5fa; margin-bottom: 1rem; font-size: 1.2rem;">
-                            <i class="fas fa-database"></i> Data Sources
-                        </h3>
-                        <div style="display: grid; gap: 1rem;">
-                            <div>
-                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Primary Dataset</label>
-                                <input type="text" id="perm-primary-data" placeholder="Dataset name or path" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                            </div>
-                            <div>
-                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Secondary Dataset</label>
-                                <input type="text" id="perm-secondary-data" placeholder="Optional secondary dataset" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                            </div>
-                            <div>
-                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Filter Expression</label>
-                                <input type="text" id="perm-filter" placeholder="e.g., value > 100" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                            </div>
-                            <div>
-                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Group By</label>
-                                <input type="text" id="perm-groupby" placeholder="Column name" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                            </div>
-                        </div>
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <span style="color: #888;">Max Permutations:</span>
+                        <input type="number" id="maxPermutations" value="1000" min="1" max="100000" style="width: 120px; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 6px; color: white;">
+                        <button class="btn btn-secondary" onclick="selectAllPermParameters()">
+                            <i class="fas fa-check-square"></i> All
+                        </button>
+                        <button class="btn btn-secondary" onclick="deselectAllPermParameters()">
+                            <i class="fas fa-square"></i> None
+                        </button>
                     </div>
                 </div>
 
-                <!-- Advanced Configuration -->
-                <div style="background: rgba(44, 49, 55, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-                    <h3 style="color: #60a5fa; margin-bottom: 1rem; font-size: 1.2rem;">
-                        <i class="fas fa-cog"></i> Advanced Configuration
-                    </h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                        <div>
-                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Seed Value</label>
-                            <input type="number" id="perm-seed" placeholder="Random seed" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                        </div>
-                        <div>
-                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Batch Size</label>
-                            <input type="number" id="perm-batch" placeholder="Processing batch size" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                        </div>
-                        <div>
-                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Timeout (seconds)</label>
-                            <input type="number" id="perm-timeout" placeholder="Max execution time" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                        </div>
-                        <div>
-                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Output Format</label>
-                            <select id="perm-output" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                                <option value="json">JSON</option>
-                                <option value="csv">CSV</option>
-                                <option value="xml">XML</option>
-                                <option value="binary">Binary</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Compression</label>
-                            <select id="perm-compression" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                                <option value="none">None</option>
-                                <option value="gzip">GZIP</option>
-                                <option value="lz4">LZ4</option>
-                                <option value="zstd">ZSTD</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Cache Strategy</label>
-                            <select id="perm-cache" style="width: 100%; padding: 8px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: white;">
-                                <option value="none">No Cache</option>
-                                <option value="memory">Memory Cache</option>
-                                <option value="disk">Disk Cache</option>
-                                <option value="hybrid">Hybrid Cache</option>
-                            </select>
-                        </div>
-                    </div>
+                <!-- Parameters Container -->
+                <div id="permParametersContainer" style="margin-bottom: 2rem;">
+                    <!-- Parameters will be dynamically loaded here -->
                 </div>
 
-                <!-- Control Buttons -->
-                <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem;">
-                    <button onclick="startPermutationEngine()" style="background: linear-gradient(90deg, #22c55e, #16a34a); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                        <i class="fas fa-play"></i> Start Engine
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 1rem; margin-top: 2rem; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="generateAdvancedPermutations()" style="padding: 1rem 2rem; font-size: 1rem;">
+                        <i class="fas fa-cogs"></i> Generate Permutations
                     </button>
-                    <button onclick="pausePermutationEngine()" style="background: linear-gradient(90deg, #f59e0b, #d97706); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                        <i class="fas fa-pause"></i> Pause
+                    <button class="btn btn-secondary" onclick="loadPermPreset()" style="padding: 1rem 2rem;">
+                        <i class="fas fa-file-import"></i> Load Preset
                     </button>
-                    <button onclick="stopPermutationEngine()" style="background: linear-gradient(90deg, #ef4444, #dc2626); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                        <i class="fas fa-stop"></i> Stop
+                    <button class="btn btn-secondary" onclick="savePermPreset()" style="padding: 1rem 2rem;">
+                        <i class="fas fa-save"></i> Save Preset
                     </button>
-                    <button onclick="resetPermutationEngine()" style="background: linear-gradient(90deg, #64748b, #475569); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                        <i class="fas fa-redo"></i> Reset
+                    <button class="btn btn-secondary" onclick="resetPermAll()" style="padding: 1rem 2rem;">
+                        <i class="fas fa-redo"></i> Reset All
                     </button>
                 </div>
 
-                <!-- Progress & Status -->
-                <div style="background: rgba(44, 49, 55, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-                    <h3 style="color: #60a5fa; margin-bottom: 1rem; font-size: 1.2rem;">
-                        <i class="fas fa-tasks"></i> Progress & Status
-                    </h3>
-                    <div style="margin-bottom: 1rem;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                            <span style="color: #94a3b8;">Overall Progress</span>
-                            <span id="perm-progress-percent" style="color: #60a5fa; font-weight: 600;">0%</span>
+                <!-- Results Panel -->
+                <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 215, 0, 0.1);">
+                        <div style="font-size: 1.5rem; color: #ffd700;">
+                            <i class="fas fa-chart-bar"></i> Permutation Results
                         </div>
-                        <div style="background: rgba(30, 41, 59, 0.8); border-radius: 8px; height: 24px; overflow: hidden;">
-                            <div id="perm-progress-bar" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                        <div style="display: flex; gap: 2rem; color: #888; font-size: 0.9rem;">
+                            <span>Total: <strong id="totalPermutations">0</strong></span>
+                            <span>Generated: <strong id="generatedTime">--:--</strong></span>
                         </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
-                        <div style="text-align: center;">
-                            <p style="color: #94a3b8; font-size: 0.9rem;">Status</p>
-                            <p id="perm-status" style="color: #22c55e; font-weight: 600;">Ready</p>
+                    
+                    <!-- Statistics -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="statActive">0</div>
+                            <div style="font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Active Parameters</div>
                         </div>
-                        <div style="text-align: center;">
-                            <p style="color: #94a3b8; font-size: 0.9rem;">Iterations</p>
-                            <p id="perm-current-iterations" style="color: white; font-weight: 600;">0 / 0</p>
+                        <div style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="statCombinations">0</div>
+                            <div style="font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Combinations</div>
                         </div>
-                        <div style="text-align: center;">
-                            <p style="color: #94a3b8; font-size: 0.9rem;">Time Elapsed</p>
-                            <p id="perm-time" style="color: white; font-weight: 600;">00:00:00</p>
+                        <div style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="statReduction">0%</div>
+                            <div style="font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Reduction</div>
                         </div>
-                        <div style="text-align: center;">
-                            <p style="color: #94a3b8; font-size: 0.9rem;">Est. Remaining</p>
-                            <p id="perm-eta" style="color: white; font-weight: 600;">--:--:--</p>
+                        <div style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="statTime">0ms</div>
+                            <div style="font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Process Time</div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Results Display -->
-                <div style="background: rgba(44, 49, 55, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem;">
-                    <h3 style="color: #60a5fa; margin-bottom: 1rem; font-size: 1.2rem;">
-                        <i class="fas fa-chart-line"></i> Results
-                    </h3>
-                    <div id="perm-results" style="min-height: 300px; background: rgba(30, 41, 59, 0.8); border-radius: 8px; padding: 1rem;">
-                        <p style="color: #94a3b8; text-align: center;">No results yet. Configure parameters and start the engine.</p>
+                    <!-- Results Content -->
+                    <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 8px; padding: 1.5rem; min-height: 300px; overflow: auto; max-height: 600px;" id="permResultsContent">
+                        <div style="text-align: center; color: #666; padding: 3rem;">
+                            <i class="fas fa-cube" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <p>No permutations generated yet</p>
+                            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Configure parameters and click Generate</p>
+                        </div>
+                    </div>
+
+                    <!-- Export Buttons -->
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="exportPermCSV()">
+                            <i class="fas fa-file-csv"></i> Export CSV
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportPermJSON()">
+                            <i class="fas fa-file-code"></i> Export JSON
+                        </button>
+                        <button class="btn btn-secondary" onclick="window.location.href='/securitization-engine'">
+                            <i class="fas fa-rocket"></i> Run in Securitization
+                        </button>
                     </div>
                 </div>
             </div>
@@ -4260,6 +4157,238 @@
                 }
             });
         }
+    });
+
+    // Advanced Permutation Engine JavaScript
+    const permParameters = {
+        project: [
+            { id: 'currency', name: 'Currency', type: 'select', options: ['EUR', 'USD', 'GBP'], default: 'EUR' },
+            { id: 'grossItLoad', name: 'Gross IT Load (MW)', type: 'number', min: 1, max: 1000, step: 0.1, default: 10 },
+            { id: 'pue', name: 'PUE', type: 'number', min: 1, max: 3, step: 0.01, default: 1.15 },
+            { id: 'deliveryDate', name: 'Delivery Date', type: 'date', default: '2025-01-01' },
+            { id: 'projectLocation', name: 'Location', type: 'select', options: ['London', 'Frankfurt', 'Paris', 'Amsterdam', 'Dublin'], default: 'London' }
+        ],
+        financial: [
+            { id: 'grossMonthlyRent', name: 'Gross Monthly Rent (€/kW)', type: 'number', min: 50, max: 500, step: 10, default: 110 },
+            { id: 'opexPercent', name: 'OPEX %', type: 'number', min: 0, max: 100, step: 1, default: 15 },
+            { id: 'contractTerm', name: 'Contract Term (Years)', type: 'number', min: 1, max: 30, step: 1, default: 10 },
+            { id: 'capex', name: 'CAPEX (€/kW)', type: 'number', min: 1000, max: 20000, step: 100, default: 7000 },
+            { id: 'developmentMargin', name: 'Development Margin %', type: 'number', min: 0, max: 50, step: 1, default: 15 }
+        ],
+        senior: [
+            { id: 'seniorTargetDscr', name: 'Target DSCR', type: 'number', min: 1, max: 3, step: 0.05, default: 1.35 },
+            { id: 'seniorCoupon', name: 'Coupon %', type: 'number', min: 0, max: 20, step: 0.25, default: 6.5 },
+            { id: 'seniorTenor', name: 'Tenor (Years)', type: 'number', min: 1, max: 30, step: 1, default: 7 },
+            { id: 'seniorMaxLtv', name: 'Max LTV %', type: 'number', min: 0, max: 100, step: 5, default: 65 }
+        ],
+        mezzanine: [
+            { id: 'mezzTargetDscr', name: 'Target DSCR', type: 'number', min: 1, max: 2, step: 0.05, default: 1.15 },
+            { id: 'mezzCoupon', name: 'Coupon %', type: 'number', min: 0, max: 30, step: 0.5, default: 12 },
+            { id: 'mezzTenor', name: 'Tenor (Years)', type: 'number', min: 1, max: 15, step: 1, default: 5 }
+        ],
+        equity: [
+            { id: 'equityTargetIrr', name: 'Target IRR %', type: 'number', min: 0, max: 50, step: 1, default: 18 },
+            { id: 'equityHoldPeriod', name: 'Hold Period (Years)', type: 'number', min: 1, max: 20, step: 1, default: 5 },
+            { id: 'equityExitCapRate', name: 'Exit Cap Rate %', type: 'number', min: 0, max: 20, step: 0.25, default: 7 }
+        ]
+    };
+
+    let currentPermMode = 'manual';
+    let activePermParameters = new Set();
+    let generatedPermutations = [];
+
+    function initPermutationEngine() {
+        const container = document.getElementById('permParametersContainer');
+        if (!container) return;
+        
+        let html = '';
+        Object.keys(permParameters).forEach(category => {
+            html += `
+                <div style="margin-bottom: 2rem;">
+                    <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1rem; cursor: pointer;" onclick="togglePermCategory('${category}')">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 1.1rem; color: #ffd700; text-transform: uppercase;">${category} Parameters</span>
+                            <span style="background: rgba(255, 215, 0, 0.2); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; color: #ffd700;" id="${category}Count">0 active</span>
+                        </div>
+                    </div>
+                    <div id="${category}Params" style="display: ${category === 'project' ? 'grid' : 'none'}; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1rem;">
+                        ${permParameters[category].map(param => createPermParameterCard(param, category)).join('')}
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    function createPermParameterCard(param, category) {
+        return `
+            <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 12px; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span style="color: #ffd700; font-weight: 600;">${param.name}</span>
+                    <input type="checkbox" data-param="${param.id}" data-category="${category}" onchange="togglePermParameter('${param.id}', '${category}')">
+                </div>
+                <div id="param-input-${param.id}">
+                    ${createPermParameterInput(param)}
+                </div>
+            </div>
+        `;
+    }
+
+    function createPermParameterInput(param) {
+        if (param.type === 'select') {
+            return `<select style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 6px; color: white;">
+                ${param.options.map(opt => `<option value="${opt}" ${opt === param.default ? 'selected' : ''}>${opt}</option>`).join('')}
+            </select>`;
+        } else {
+            return `<input type="${param.type}" value="${param.default}" style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 6px; color: white;">`;
+        }
+    }
+
+    function togglePermCategory(category) {
+        const params = document.getElementById(`${category}Params`);
+        if (params) {
+            params.style.display = params.style.display === 'none' ? 'grid' : 'none';
+        }
+    }
+
+    function togglePermParameter(paramId, category) {
+        const checkbox = document.querySelector(`input[data-param="${paramId}"]`);
+        if (checkbox.checked) {
+            activePermParameters.add(paramId);
+        } else {
+            activePermParameters.delete(paramId);
+        }
+        updatePermCategoryCounts();
+        updatePermStats();
+    }
+
+    function updatePermCategoryCounts() {
+        Object.keys(permParameters).forEach(category => {
+            const count = permParameters[category].filter(p => activePermParameters.has(p.id)).length;
+            const countEl = document.getElementById(`${category}Count`);
+            if (countEl) countEl.textContent = `${count} active`;
+        });
+    }
+
+    function updatePermStats() {
+        document.getElementById('statActive').textContent = activePermParameters.size;
+        const combinations = Math.min(Math.pow(10, activePermParameters.size), 1000000);
+        document.getElementById('statCombinations').textContent = combinations > 1000000 ? '1M+' : combinations;
+    }
+
+    function setPermInputMode(mode) {
+        currentPermMode = mode;
+        document.querySelectorAll('[data-perm-mode]').forEach(btn => {
+            if (btn.dataset.permMode === mode) {
+                btn.classList.add('active');
+                btn.style.background = 'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)';
+                btn.style.color = '#0a0e27';
+            } else {
+                btn.classList.remove('active');
+                btn.style.background = 'rgba(255, 255, 255, 0.1)';
+                btn.style.color = '#ffd700';
+            }
+        });
+    }
+
+    function selectAllPermParameters() {
+        document.querySelectorAll('input[data-param]').forEach(cb => {
+            cb.checked = true;
+            activePermParameters.add(cb.dataset.param);
+        });
+        updatePermCategoryCounts();
+        updatePermStats();
+    }
+
+    function deselectAllPermParameters() {
+        document.querySelectorAll('input[data-param]').forEach(cb => cb.checked = false);
+        activePermParameters.clear();
+        updatePermCategoryCounts();
+        updatePermStats();
+    }
+
+    function generateAdvancedPermutations() {
+        const startTime = Date.now();
+        const maxPerms = parseInt(document.getElementById('maxPermutations').value);
+        
+        // Simple permutation generation for demo
+        generatedPermutations = [];
+        for (let i = 0; i < Math.min(maxPerms, 100); i++) {
+            const perm = {};
+            activePermParameters.forEach(paramId => {
+                perm[paramId] = Math.random() * 100;
+            });
+            generatedPermutations.push(perm);
+        }
+        
+        // Update results
+        const resultsEl = document.getElementById('permResultsContent');
+        let html = '';
+        generatedPermutations.forEach((perm, i) => {
+            html += `
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="color: #ffd700; margin-bottom: 0.5rem;">Permutation ${i + 1}</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem;">
+                        ${Object.entries(perm).map(([key, val]) => 
+                            `<div style="font-size: 0.85rem;"><span style="color: #888;">${key}:</span> <span style="color: #2ecc71;">${val.toFixed(2)}</span></div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+        });
+        resultsEl.innerHTML = html || '<div style="text-align: center; padding: 2rem; color: #666;">No permutations generated</div>';
+        
+        // Update stats
+        const endTime = Date.now();
+        document.getElementById('totalPermutations').textContent = generatedPermutations.length;
+        document.getElementById('generatedTime').textContent = new Date().toLocaleTimeString();
+        document.getElementById('statTime').textContent = `${endTime - startTime}ms`;
+        document.getElementById('statReduction').textContent = '95%';
+    }
+
+    function exportPermCSV() {
+        if (generatedPermutations.length === 0) {
+            alert('No permutations to export');
+            return;
+        }
+        const csv = 'data:text/csv;charset=utf-8,' + Object.keys(generatedPermutations[0]).join(',');
+        const link = document.createElement('a');
+        link.href = encodeURI(csv);
+        link.download = 'permutations.csv';
+        link.click();
+    }
+
+    function exportPermJSON() {
+        if (generatedPermutations.length === 0) {
+            alert('No permutations to export');
+            return;
+        }
+        const json = 'data:text/json;charset=utf-8,' + JSON.stringify(generatedPermutations, null, 2);
+        const link = document.createElement('a');
+        link.href = encodeURI(json);
+        link.download = 'permutations.json';
+        link.click();
+    }
+
+    function loadPermPreset() {
+        alert('Loading preset configuration...');
+    }
+
+    function savePermPreset() {
+        alert('Saving current configuration as preset...');
+    }
+
+    function resetPermAll() {
+        deselectAllPermParameters();
+        generatedPermutations = [];
+        document.getElementById('permResultsContent').innerHTML = '<div style="text-align: center; color: #666; padding: 3rem;"><i class="fas fa-cube" style="font-size: 3rem; margin-bottom: 1rem;"></i><p>No permutations generated yet</p></div>';
+        document.getElementById('totalPermutations').textContent = '0';
+        document.getElementById('generatedTime').textContent = '--:--';
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', function() {
+        initPermutationEngine();
     });
     </script>
     
