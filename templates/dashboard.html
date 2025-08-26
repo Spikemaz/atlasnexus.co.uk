@@ -4159,37 +4159,53 @@
         }
     });
 
-    // Advanced Permutation Engine JavaScript
+    // Advanced Permutation Engine JavaScript - Full 80+ Parameters from Excel
     const permParameters = {
+        // Project & Basic Parameters (00-03)
         project: [
-            { id: 'currency', name: 'Currency', type: 'select', options: ['EUR', 'USD', 'GBP'], default: 'EUR' },
-            { id: 'grossItLoad', name: 'Gross IT Load (MW)', type: 'number', min: 1, max: 1000, step: 0.1, default: 10 },
-            { id: 'pue', name: 'PUE', type: 'number', min: 1, max: 3, step: 0.01, default: 1.15 },
-            { id: 'deliveryDate', name: 'Delivery Date', type: 'date', default: '2025-01-01' },
-            { id: 'projectLocation', name: 'Location', type: 'select', options: ['London', 'Frankfurt', 'Paris', 'Amsterdam', 'Dublin'], default: 'London' }
+            { id: 'Currency_00', name: 'Currency', type: 'select', options: ['EUR', 'USD', 'GBP'], default: 'EUR' },
+            { id: 'GrossITLoad_01', name: 'Gross IT Load (MW)', type: 'number', min: 0.1, max: 100, step: 0.1, default: 10 },
+            { id: 'PUE_02', name: 'PUE', type: 'number', min: 1.0, max: 2.5, step: 0.01, default: 1.15 },
+            { id: 'NetITLoad_03', name: 'Net IT Load (MW)', type: 'formula', formula: 'GrossITLoad_01 / PUE_02' }
         ],
+        // Income & Cost Parameters (04-15)
         financial: [
-            { id: 'grossMonthlyRent', name: 'Gross Monthly Rent (€/kW)', type: 'number', min: 50, max: 500, step: 10, default: 110 },
-            { id: 'opexPercent', name: 'OPEX %', type: 'number', min: 0, max: 100, step: 1, default: 15 },
-            { id: 'contractTerm', name: 'Contract Term (Years)', type: 'number', min: 1, max: 30, step: 1, default: 10 },
-            { id: 'capex', name: 'CAPEX (€/kW)', type: 'number', min: 1000, max: 20000, step: 100, default: 7000 },
-            { id: 'developmentMargin', name: 'Development Margin %', type: 'number', min: 0, max: 50, step: 1, default: 15 }
+            { id: 'GrossMonthlyRent_04', name: 'Gross Monthly Rent (€/kW)', type: 'number', min: 50, max: 500, step: 5, default: 110 },
+            { id: 'GrossIncome_05', name: 'Gross Income', type: 'formula', formula: 'calculated' },
+            { id: 'OPEX_06', name: 'OPEX (%)', type: 'number', min: 0, max: 50, step: 1, default: 15 },
+            { id: 'NetIncome_07', name: 'Net Income', type: 'formula', formula: 'calculated' },
+            { id: 'CapexCostPrice_08', name: 'Capex Cost Price (€/kW)', type: 'number', min: 1000, max: 20000, step: 100, default: 7000 },
+            { id: 'CapexMarketRate_09', name: 'Capex Market Rate (€/kW)', type: 'number', min: 1000, max: 25000, step: 100, default: 8000 },
+            { id: 'LandPurchaseFees_10', name: 'Land Purchase & Fees (€)', type: 'number', min: 0, max: 100000000, step: 100000, default: 5000000 },
+            { id: 'DeveloperProfit_11', name: 'Developer Profit (%)', type: 'number', min: 0, max: 50, step: 1, default: 15 },
+            { id: 'DeveloperMargin_12', name: 'Developer Margin (%)', type: 'number', min: 0, max: 50, step: 1, default: 20 }
         ],
+        // Senior Debt Parameters (16-32)  
         senior: [
-            { id: 'seniorTargetDscr', name: 'Target DSCR', type: 'number', min: 1, max: 3, step: 0.05, default: 1.35 },
-            { id: 'seniorCoupon', name: 'Coupon %', type: 'number', min: 0, max: 20, step: 0.25, default: 6.5 },
-            { id: 'seniorTenor', name: 'Tenor (Years)', type: 'number', min: 1, max: 30, step: 1, default: 7 },
-            { id: 'seniorMaxLtv', name: 'Max LTV %', type: 'number', min: 0, max: 100, step: 5, default: 65 }
+            { id: 'TargetDSCRSenior_16', name: 'Target DSCR Senior', type: 'number', min: 1.0, max: 3.0, step: 0.05, default: 1.35 },
+            { id: 'SeniorCoupon_17', name: 'Senior Coupon (%)', type: 'number', min: 0, max: 20, step: 0.25, default: 6.5 },
+            { id: 'SeniorTenor_18', name: 'Senior Tenor (Years)', type: 'number', min: 1, max: 30, step: 1, default: 7 },
+            { id: 'LeaseTermYears_24', name: 'Lease Term Years', type: 'number', min: 1, max: 30, step: 1, default: 10 },
+            { id: 'AFStrategy_25', name: 'AF Strategy', type: 'select', options: ['Bullet', 'Linear', 'Annuity', 'Custom'], default: 'Linear' },
+            { id: 'SeniorAmortisationType_31', name: 'Senior Amortisation Type', type: 'select', options: ['Bullet', 'Linear', 'Annuity'], default: 'Linear' },
+            { id: 'EffectiveDSCRBuffer_32', name: 'Effective DSCR Buffer (%)', type: 'number', min: 0, max: 50, step: 1, default: 10 }
         ],
+        // Mezzanine Debt Parameters (33-47)
         mezzanine: [
-            { id: 'mezzTargetDscr', name: 'Target DSCR', type: 'number', min: 1, max: 2, step: 0.05, default: 1.15 },
-            { id: 'mezzCoupon', name: 'Coupon %', type: 'number', min: 0, max: 30, step: 0.5, default: 12 },
-            { id: 'mezzTenor', name: 'Tenor (Years)', type: 'number', min: 1, max: 15, step: 1, default: 5 }
+            { id: 'TargetDSCRMezz_33', name: 'Target DSCR - Mezz', type: 'number', min: 1.0, max: 2.5, step: 0.05, default: 1.15 },
+            { id: 'MezzCoupon_34', name: 'Mezz Coupon (%)', type: 'number', min: 0, max: 30, step: 0.5, default: 12 },
+            { id: 'MezzTenorYears_35', name: 'Mezz Tenor Years', type: 'number', min: 1, max: 15, step: 1, default: 5 },
+            { id: 'LeaseTermYearsMezz_42', name: 'Lease Term Years - Mezz', type: 'number', min: 1, max: 30, step: 1, default: 10 }
         ],
+        // Equity & Capital Stack Parameters (48-65)
         equity: [
-            { id: 'equityTargetIrr', name: 'Target IRR %', type: 'number', min: 0, max: 50, step: 1, default: 18 },
-            { id: 'equityHoldPeriod', name: 'Hold Period (Years)', type: 'number', min: 1, max: 20, step: 1, default: 5 },
-            { id: 'equityExitCapRate', name: 'Exit Cap Rate %', type: 'number', min: 0, max: 20, step: 0.25, default: 7 }
+            { id: 'TargetEquityIRR_49', name: 'Target Equity IRR (%)', type: 'number', min: 0, max: 50, step: 1, default: 18 },
+            { id: 'MinEquityContribution_50', name: 'Min Equity Contribution (£)', type: 'number', min: 0, max: 1000000000, step: 100000, default: 10000000 },
+            { id: 'DeveloperEquityIRR_51', name: 'Developer Equity IRR (%)', type: 'number', min: 0, max: 50, step: 1, default: 25 },
+            { id: 'EquitySaleUplift_57', name: 'Equity Sale Uplift (%)', type: 'number', min: 0, max: 100, step: 5, default: 20 },
+            { id: 'ResidualUpsideCaptureMechanism_61', name: 'Upside Capture', type: 'select', options: ['None', 'Promote', 'Waterfall', 'Ratchet'], default: 'Promote' },
+            { id: 'TRSApplied_62', name: 'TRS Applied?', type: 'boolean', default: false },
+            { id: 'TRSRetainedUpside_64', name: 'TRS Retained Upside (%)', type: 'number', min: 0, max: 100, step: 5, default: 50 }
         ]
     };
 

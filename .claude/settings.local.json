@@ -35,7 +35,8 @@
       "Bash(start test_syntax.html)",
       "Bash(powershell:*)",
       "Bash(start test_syntax2.html)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\templates\\dashboard_permutation_section.html\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"
