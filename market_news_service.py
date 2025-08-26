@@ -112,6 +112,20 @@ class MarketNewsService:
             
             content = self.generate_content(title, region, asset)
             
+            # Generate external URL based on source
+            external_urls = {
+                'ft': f'https://www.ft.com/stream/sectionsId/NTA3MzU3M2YtMDk3Ny00YmU2LWE4MTgtMTQzNTA1MDNjZDYw-U2VjdXJpdGlzYXRpb24=',
+                'citywire': f'https://citywire.com/wealth-manager/news/securitisation',
+                'greenst': f'https://www.greenstreet.com/insights/property-insights',
+                'propweek': f'https://www.propertyweek.com/news',
+                'benews': f'https://www.bebeez.it/en/category/private-debt/',
+                'bloomberg': f'https://www.bloomberg.com/markets/fixed-income',
+                'reuters': f'https://www.reuters.com/business/finance/',
+                'wsj': f'https://www.wsj.com/news/markets',
+                'euromoney': f'https://www.euromoney.com/the-big-stories',
+                'risk': f'https://www.risk.net/derivatives'
+            }
+            
             news_items.append({
                 'id': f'news_{i}',
                 'type': template_group['type'],
@@ -119,6 +133,7 @@ class MarketNewsService:
                 'content': content,
                 'source': self.sources[source_key],
                 'source_key': source_key,
+                'external_url': external_urls.get(source_key, 'https://www.ft.com/capital-markets'),
                 'time': time_str,
                 'timestamp': post_time.isoformat(),
                 'region': region,

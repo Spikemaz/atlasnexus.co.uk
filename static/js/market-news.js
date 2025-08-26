@@ -413,11 +413,20 @@ async function viewExpertHistory(expertId) {
 
 // Show expert history modal
 function showExpertHistoryModal(expert) {
-    // Remove any existing modal
+    // Remove any existing modal and backdrop
     const existingModal = document.getElementById('expertHistoryModal');
     if (existingModal) {
+        const modalInstance = bootstrap.Modal.getInstance(existingModal);
+        if (modalInstance) {
+            modalInstance.dispose();
+        }
         existingModal.remove();
     }
+    
+    // Remove any lingering modal backdrops
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('padding-right');
     
     // Create modal HTML
     const modalHTML = `
@@ -502,7 +511,15 @@ function showExpertHistoryModal(expert) {
     
     // Clean up modal after it's hidden
     modalElement.addEventListener('hidden.bs.modal', function() {
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+            modalInstance.dispose();
+        }
         modalElement.remove();
+        // Extra cleanup for any lingering backdrops
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('padding-right');
     });
 }
 
@@ -681,11 +698,20 @@ function loadMoreNews() {
 
 // Open news detail
 function openNewsDetail(item) {
-    // Remove any existing modal
+    // Remove any existing modal and backdrop
     const existingModal = document.getElementById('newsDetailModal');
     if (existingModal) {
+        const modalInstance = bootstrap.Modal.getInstance(existingModal);
+        if (modalInstance) {
+            modalInstance.dispose();
+        }
         existingModal.remove();
     }
+    
+    // Remove any lingering modal backdrops
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('padding-right');
     
     // Determine badge color and icons
     const badgeColors = {
@@ -788,6 +814,10 @@ function openNewsDetail(item) {
                     </div>
                     <div class="modal-footer border-top border-secondary">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        ${item.external_url ? `
+                        <a href="${item.external_url}" target="_blank" class="btn btn-info">
+                            <i class="fas fa-external-link-alt me-1"></i>Read on ${item.source}
+                        </a>` : ''}
                         <button type="button" class="btn btn-primary" onclick="shareArticle('${item.id}')">
                             <i class="fas fa-share-alt me-1"></i>Share
                         </button>
@@ -810,7 +840,15 @@ function openNewsDetail(item) {
     
     // Clean up modal after it's hidden
     modalElement.addEventListener('hidden.bs.modal', function() {
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+            modalInstance.dispose();
+        }
         modalElement.remove();
+        // Extra cleanup for any lingering backdrops
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('padding-right');
     });
 }
 
