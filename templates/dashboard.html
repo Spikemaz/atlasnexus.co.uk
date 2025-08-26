@@ -632,25 +632,25 @@
     <!-- Navigation Bar -->
     <div id="navBar" style="position: fixed; top: 115px; left: 0; right: 0; background: linear-gradient(90deg, #1e293b 0%, #334155 100%); border-bottom: 1px solid rgba(96, 165, 250, 0.3); z-index: 998; padding: 10px 0; transition: all 0.3s ease;">
         <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <button onclick="showSection('dashboard')" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+            <button class="nav-btn" data-section="dashboard" onclick="showSection('dashboard')" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-home"></i> Dashboard
             </button>
-            <button onclick="showSection('market')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+            <button class="nav-btn" data-section="market" onclick="showSection('market')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-chart-line"></i> Market
             </button>
-            <button onclick="showSection('analytics')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+            <button class="nav-btn" data-section="analytics" onclick="showSection('analytics')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-chart-bar"></i> Analytics
             </button>
-            <button onclick="showSection('risk')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+            <button class="nav-btn" data-section="risk" onclick="showSection('risk')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-shield-alt"></i> Risk
             </button>
-            <button onclick="showSection('portfolio')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+            <button class="nav-btn" data-section="portfolio" onclick="showSection('portfolio')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-briefcase"></i> Portfolio
             </button>
-            <button onclick="showSection('compliance')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+            <button class="nav-btn" data-section="compliance" onclick="showSection('compliance')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-gavel"></i> Compliance
             </button>
-            <button onclick="showSection('permutation')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+            <button class="nav-btn" data-section="permutation" onclick="showSection('permutation')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-cogs"></i> Engine
             </button>
         </div>
@@ -1946,76 +1946,7 @@
         let currentTab = 'overview';
         let currentSection = 'dashboard';
         
-        // Function to show different sections
-        function showSection(sectionName) {
-            // Hide all sections
-            const sections = ['dashboard', 'compliance-section', 'permutation-section'];
-            sections.forEach(function(section) {
-                const element = document.getElementById(section === 'dashboard' ? 'main-content' : section);
-                if (element) {
-                    element.style.display = 'none';
-                }
-            });
-            
-            // Show placeholder content for sections that don't exist yet
-            let contentArea = document.getElementById('main-content');
-            if (!contentArea) {
-                contentArea = document.querySelector('.content-area');
-            }
-            
-            // Update button styles
-            const buttons = document.querySelectorAll('#navBar button');
-            buttons.forEach(function(btn) {
-                btn.style.background = 'transparent';
-            });
-            
-            // Highlight active button
-            event.target.style.background = 'linear-gradient(90deg, #60a5fa, #3b82f6)';
-            
-            switch(sectionName) {
-                case 'dashboard':
-                    if (contentArea) contentArea.style.display = 'block';
-                    currentSection = 'dashboard';
-                    break;
-                    
-                case 'market':
-                    showPlaceholderContent('Market Analysis', 'Real-time market data, trends, and analysis tools will be displayed here.');
-                    break;
-                    
-                case 'analytics':
-                    showPlaceholderContent('Analytics Dashboard', 'Advanced analytics, charts, and performance metrics will be displayed here.');
-                    break;
-                    
-                case 'risk':
-                    showPlaceholderContent('Risk Management', 'Risk assessment tools, exposure analysis, and mitigation strategies will be displayed here.');
-                    break;
-                    
-                case 'portfolio':
-                    showPlaceholderContent('Portfolio Manager', 'Portfolio overview, asset allocation, and performance tracking will be displayed here.');
-                    break;
-                    
-                case 'compliance':
-                    const complianceSection = document.getElementById('compliance-section');
-                    if (complianceSection) {
-                        complianceSection.style.display = 'block';
-                    } else {
-                        showPlaceholderContent('Compliance & Regulatory', 'Compliance tracking, regulatory reports, and audit trails will be displayed here.');
-                    }
-                    break;
-                    
-                case 'permutation':
-                    const permSection = document.getElementById('permutation-section');
-                    if (permSection) {
-                        permSection.style.display = 'block';
-                    } else {
-                        showPlaceholderContent('Permutation Engine', 'Advanced permutation analysis and securitization engine tools will be displayed here.');
-                    }
-                    break;
-                    
-                default:
-                    if (contentArea) contentArea.style.display = 'block';
-            }
-        }
+        // Removed duplicate function - using the main showSection function instead
         
         function showPlaceholderContent(title, description) {
             let placeholderDiv = document.getElementById('placeholder-content');
@@ -3343,22 +3274,29 @@
         document.getElementById('compliance-section').style.display = 'none';
         document.getElementById('permutation-section').style.display = 'none';
         
-        // Remove active state from all buttons
+        // Reset all navigation buttons to inactive state
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.style.background = 'transparent';
             btn.style.color = '#60a5fa';
+            btn.style.border = '1px solid #60a5fa';
         });
         
-        // Show selected section and highlight active button
+        // Show selected section
         if (section === 'dashboard') {
             document.getElementById('main-dashboard').style.display = 'block';
-            document.querySelector('.dashboard-btn').style.background = 'linear-gradient(90deg, #60a5fa, #3b82f6)';
-            document.querySelector('.dashboard-btn').style.color = 'white';
         } else {
-            document.getElementById(section + '-section').style.display = 'block';
-            // Highlight active button
-            event.target.style.background = 'linear-gradient(90deg, #60a5fa, #3b82f6)';
-            event.target.style.color = 'white';
+            const sectionElement = document.getElementById(section + '-section');
+            if (sectionElement) {
+                sectionElement.style.display = 'block';
+            }
+        }
+        
+        // Highlight the active button
+        const activeButton = document.querySelector(`.nav-btn[data-section="${section}"]`);
+        if (activeButton) {
+            activeButton.style.background = 'linear-gradient(90deg, #60a5fa, #3b82f6)';
+            activeButton.style.color = 'white';
+            activeButton.style.border = '1px solid #60a5fa';
         }
     }
     
