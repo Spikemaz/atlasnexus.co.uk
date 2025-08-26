@@ -667,21 +667,21 @@
             // Show toolbar
             nav.style.display = 'block';
             icon.className = 'fas fa-chevron-up';
-            // Adjust padding for sections when toolbar is visible (140px to clear header + ticker + toolbar)
+            // Adjust padding for sections when toolbar is visible (170px for consistent spacing)
             sections.forEach(function(s) { 
-                if(s) s.style.paddingTop = '160px'; 
+                if(s) s.style.paddingTop = '170px'; 
             });
-            // Dashboard gets slightly more space
+            // Dashboard maintains its spacing
             if(mainDashboard) mainDashboard.style.marginTop = '165px';
         } else {
             // Hide toolbar
             nav.style.display = 'none';
             icon.className = 'fas fa-chevron-down';
-            // Reduce padding for sections when toolbar is hidden (120px to clear header + ticker)
+            // Reduce padding for sections when toolbar is hidden (135px for better visibility)
             sections.forEach(function(s) { 
-                if(s) s.style.paddingTop = '120px'; 
+                if(s) s.style.paddingTop = '135px'; 
             });
-            // Dashboard adjusts too
+            // Dashboard adjusts too (125px works well)
             if(mainDashboard) mainDashboard.style.marginTop = '125px';
         }
     })()" style="position: fixed; top: 115px; right: 20px; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; z-index: 999;">
@@ -1221,7 +1221,7 @@
     </div>
 
     <!-- Market Updates Section -->
-    <div id="market-section" style="display: none; padding: 160px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
+    <div id="market-section" style="display: none; padding: 170px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div class="container">
             <h2 class="text-white mb-4"><i class="fas fa-chart-line me-2"></i>Market Updates</h2>
             <div class="row g-4">
@@ -1276,7 +1276,7 @@
     </div>
 
     <!-- Data Section -->
-    <div id="data-section" style="display: none; padding: 160px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
+    <div id="data-section" style="display: none; padding: 170px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div class="container">
             <h2 class="text-white mb-4"><i class="fas fa-database me-2"></i>Data Center</h2>
             <div class="row g-4">
@@ -1331,7 +1331,7 @@
     </div>
 
     <!-- Analytics Section -->
-    <div id="analytics-section" style="display: none; padding: 160px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
+    <div id="analytics-section" style="display: none; padding: 170px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div class="container">
             <h2 class="text-white mb-4"><i class="fas fa-chart-bar me-2"></i>Analytics & Insights</h2>
             <div class="row g-4">
@@ -1382,7 +1382,7 @@
     </div>
 
     <!-- Risk Management Section -->
-    <div id="risk-section" style="display: none; padding: 160px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
+    <div id="risk-section" style="display: none; padding: 170px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div class="container">
             <h2 class="text-white mb-4"><i class="fas fa-shield-alt me-2"></i>Risk Management</h2>
             <div class="row g-4">
@@ -1463,7 +1463,7 @@
     </div>
 
     <!-- Portfolio Section -->
-    <div id="portfolio-section" style="display: none; padding: 160px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
+    <div id="portfolio-section" style="display: none; padding: 170px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div class="container">
             <h2 class="text-white mb-4"><i class="fas fa-briefcase me-2"></i>Portfolio Management</h2>
             <div class="row g-4">
@@ -1530,7 +1530,7 @@
     </div>
 
     <!-- Compliance Section -->
-    <div id="compliance-section" style="display: none; padding: 160px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
+    <div id="compliance-section" style="display: none; padding: 170px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div class="container">
             <h2 class="text-white mb-4"><i class="fas fa-gavel me-2"></i>Compliance & Regulatory</h2>
             <div class="row g-4">
@@ -1594,7 +1594,7 @@
     </div>
 
     <!-- Permutation Engine Command Centre Section -->
-    <div id="permutation-section" style="display: none; padding: 160px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
+    <div id="permutation-section" style="display: none; padding: 170px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div style="max-width: 1800px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
                 <h2 style="color: #60a5fa; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">
@@ -3198,12 +3198,12 @@
         // Check if toolbar is visible and set appropriate padding
         if (nav && nav.style.display !== 'none') {
             sections.forEach(function(s) { 
-                if(s) s.style.paddingTop = '160px'; 
+                if(s) s.style.paddingTop = '170px'; 
             });
             if(mainDashboard) mainDashboard.style.marginTop = '165px';
         } else {
             sections.forEach(function(s) { 
-                if(s) s.style.paddingTop = '120px'; 
+                if(s) s.style.paddingTop = '135px'; 
             });
             if(mainDashboard) mainDashboard.style.marginTop = '125px';
         }
