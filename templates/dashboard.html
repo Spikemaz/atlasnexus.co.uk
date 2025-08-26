@@ -3593,7 +3593,7 @@
         
         // Continue or complete
         if (permutationEngine.currentIteration < permutationEngine.totalIterations) {
-            setTimeout(() => simulatePermutationProcessing(), 100); // Simulate processing delay
+            setTimeout(function() { simulatePermutationProcessing(); }, 100); // Simulate processing delay
         } else {
             // Processing complete
             permutationEngine.status = 'completed';
