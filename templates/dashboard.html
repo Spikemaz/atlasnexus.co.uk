@@ -3037,30 +3037,30 @@
                 var rate = data.history[i];
                 var color = (i === data.history.length - 1) ? '#fbbf24' : '#94a3b8';
                 var weight = (i === data.history.length - 1) ? '600' : '400';
-                historyHTML += '<span style="color: ' + color + '; font-size: 0.75rem; font-weight: ' + weight + ';">' + rate.toFixed(2) + '%</span>';
+                historyHTML += '<span style="color: ' + color + '; font-size: 0.75rem; font-weight: ' + weight + '; margin: 0 2px;">' + rate.toFixed(2) + '%</span>';
             }
             
-            return '<div class="ticker-item" style="display: inline-flex; align-items: center; gap: 8px; margin: 0 12px;">' +
-                '<span class="ticker-symbol" style="color: #dbeafe; font-weight: 600;">' + symbol + ':</span>' +
-                '<span class="ticker-value" style="color: #fff; font-weight: 500;">' + formatValue(data.value) + '</span>' +
-                '<span style="color: #64748b; font-size: 0.65rem; margin-left: 8px;">History:</span>' +
+            return '<div style="display: inline-flex; align-items: center; gap: 8px; margin: 0 12px; color: white;">' +
+                '<span style="color: #dbeafe !important; font-weight: 600;">' + symbol + ':</span>' +
+                '<span style="color: #ffffff !important; font-weight: 500;">' + formatValue(data.value) + '</span>' +
+                '<span style="color: #64748b !important; font-size: 0.65rem; margin-left: 8px;">History:</span>' +
                 historyHTML +
                 '</div>' +
-                '<span class="ticker-separator" style="color: #475569; margin: 0 8px;">●</span>';
+                '<span style="color: #475569 !important; margin: 0 8px;">●</span>';
         }
         
-        // Regular ticker item
-        return '<div class="ticker-item" style="display: inline-flex; align-items: center; gap: 8px; margin: 0 12px;">' +
-            '<span class="ticker-symbol" style="color: #dbeafe; font-weight: 600;">' + symbol + ':</span>' +
-            '<span class="ticker-value" style="color: #fff; font-weight: 500;">' + formatValue(data.value) + '</span>' +
-            '<span style="color: #64748b; font-size: 0.7rem; margin-left: 4px;">24h</span>' +
-            '<span style="color: ' + getChangeColor(data.change24h) + '; font-size: 0.8rem; font-weight: 500;">' + formatChange(data.change24h) + '</span>' +
-            '<span style="color: #64748b; font-size: 0.7rem;">7d</span>' +
-            '<span style="color: ' + getChangeColor(data.change7d) + '; font-size: 0.8rem; font-weight: 500;">' + formatChange(data.change7d) + '</span>' +
-            '<span style="color: #64748b; font-size: 0.7rem;">30d</span>' +
-            '<span style="color: ' + getChangeColor(data.change30d) + '; font-size: 0.8rem; font-weight: 500;">' + formatChange(data.change30d) + '</span>' +
+        // Regular ticker item - ensure all text is visible with !important
+        return '<div style="display: inline-flex; align-items: center; gap: 8px; margin: 0 12px; color: white;">' +
+            '<span style="color: #dbeafe !important; font-weight: 600;">' + symbol + ':</span>' +
+            '<span style="color: #ffffff !important; font-weight: 500;">' + formatValue(data.value) + '</span>' +
+            '<span style="color: #64748b !important; font-size: 0.7rem; margin-left: 4px;">24h</span>' +
+            '<span style="color: ' + getChangeColor(data.change24h) + ' !important; font-size: 0.8rem; font-weight: 500;">' + formatChange(data.change24h) + '</span>' +
+            '<span style="color: #64748b !important; font-size: 0.7rem;">7d</span>' +
+            '<span style="color: ' + getChangeColor(data.change7d) + ' !important; font-size: 0.8rem; font-weight: 500;">' + formatChange(data.change7d) + '</span>' +
+            '<span style="color: #64748b !important; font-size: 0.7rem;">30d</span>' +
+            '<span style="color: ' + getChangeColor(data.change30d) + ' !important; font-size: 0.8rem; font-weight: 500;">' + formatChange(data.change30d) + '</span>' +
             '</div>' +
-            '<span class="ticker-separator" style="color: #475569; margin: 0 8px;">●</span>';
+            '<span style="color: #475569 !important; margin: 0 8px;">●</span>';
     }
 
     // Function to update ticker content without reinitializing
