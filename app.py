@@ -483,6 +483,8 @@ USERS_FILE = DATA_DIR / 'users.json'
 ADMIN_ACTIONS_FILE = DATA_DIR / 'admin_actions.json'
 LOGIN_ATTEMPTS_FILE = DATA_DIR / 'login_attempts.json'
 PROJECT_SPECS_FILE = DATA_DIR / 'project_specifications.json'
+PROJECT_DRAFTS_FILE = DATA_DIR / 'project_drafts.json'
+PROJECT_TIMELINES_FILE = DATA_DIR / 'project_timelines.json'
 
 # Email configuration - Try to import from email_config.py first
 try:
@@ -1822,16 +1824,28 @@ def verify_email():
                 password_expiry = datetime.now() + timedelta(days=30)
                 users = load_json_db(USERS_FILE)
                 users[email] = {
-                    **registrations[email],
+                    'email': email,
+                    'full_name': registrations[email].get('full_name', ''),
+                    'company_name': registrations[email].get('company_name', ''),
+                    'company_number': registrations[email].get('company_number', ''),
+                    'job_title': registrations[email].get('job_title', ''),
+                    'phone': registrations[email].get('phone', ''),
+                    'country_code': registrations[email].get('country_code', ''),
+                    'business_address': registrations[email].get('business_address', ''),
                     'password': password,
                     'password_expiry': password_expiry.isoformat(),
                     'admin_approved': True,
+                    'email_verified': True,
                     'account_type': account_type,
                     'login_count': 0,
                     'total_login_time': 0,
                     'last_login': None,
                     'login_history': [],
-                    'credentials_sent': True,  # Mark that credentials were sent
+                    'ip_history': [],
+                    'created_at': registrations[email].get('created_at', datetime.now().isoformat()),
+                    'approved_at': registrations[email].get('approved_at', datetime.now().isoformat()),
+                    'approved_by': registrations[email].get('approved_by', 'admin'),
+                    'credentials_sent': True,
                     'credentials_sent_at': datetime.now().isoformat()
                 }
                 save_json_db(USERS_FILE, users)
@@ -4264,6 +4278,176 @@ def upload_pipeline():
     # Similar to upload_excel but processes multiple projects at once
     # This is specifically for pipeline uploads
     return upload_excel_specifications()
+
+@app.route('/api/project-specifications/save-draft', methods=['POST'])
+def save_project_draft():
+    """Save project as draft for later completion"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+    
+    user_email = session.get(f'user_email_{ip_address}')
+    data = request.json
+    
+    # Load or create drafts file
+    drafts = load_json_db(PROJECT_DRAFTS_FILE)
+    
+    # Create draft ID if new, or use existing
+    draft_id = data.get('draft_id') or f"DRAFT_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{secrets.token_hex(4)}"
+    
+    # Save draft with all current data
+    drafts[draft_id] = {
+        'id': draft_id,
+        'user_email': user_email,
+        'last_saved': datetime.now().isoformat(),
+        'industry': data.get('industry', ''),
+        'project_data': data.get('project_data', {}),
+        'completion_percentage': calculate_completion_percentage(data.get('project_data', {}))
+    }
+    
+    save_json_db(PROJECT_DRAFTS_FILE, drafts)
+    
+    return jsonify({
+        'status': 'success',
+        'draft_id': draft_id,
+        'message': 'Draft saved successfully'
+    })
+
+@app.route('/api/project-specifications/timeline', methods=['POST'])
+def create_project_timeline():
+    """Generate project timeline and cash flow schedule"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+    
+    data = request.json
+    
+    # Extract project parameters
+    capex_total = float(data.get('capex_total', 0))
+    construction_start = data.get('construction_start_date', '')
+    construction_end = data.get('construction_end_date', '')
+    
+    # Generate timeline phases
+    timeline = {
+        'phases': [
+            {
+                'name': 'Pre-Development',
+                'duration_months': data.get('pre_dev_months', 6),
+                'capex_percentage': 5,
+                'capex_amount': capex_total * 0.05,
+                'status': data.get('pre_dev_status', 'planned')
+            },
+            {
+                'name': 'Design & Planning',
+                'duration_months': data.get('design_months', 9),
+                'capex_percentage': 10,
+                'capex_amount': capex_total * 0.10,
+                'status': data.get('design_status', 'planned')
+            },
+            {
+                'name': 'Legal & Permits',
+                'duration_months': data.get('legal_months', 6),
+                'capex_percentage': 5,
+                'capex_amount': capex_total * 0.05,
+                'status': data.get('legal_status', 'planned')
+            },
+            {
+                'name': 'Site Preparation',
+                'duration_months': data.get('site_prep_months', 3),
+                'capex_percentage': 15,
+                'capex_amount': capex_total * 0.15,
+                'status': data.get('site_prep_status', 'planned')
+            },
+            {
+                'name': 'Construction Phase 1',
+                'duration_months': data.get('construction1_months', 12),
+                'capex_percentage': 40,
+                'capex_amount': capex_total * 0.40,
+                'status': data.get('construction1_status', 'planned')
+            },
+            {
+                'name': 'Construction Phase 2',
+                'duration_months': data.get('construction2_months', 8),
+                'capex_percentage': 20,
+                'capex_amount': capex_total * 0.20,
+                'status': data.get('construction2_status', 'planned')
+            },
+            {
+                'name': 'Testing & Commissioning',
+                'duration_months': data.get('testing_months', 3),
+                'capex_percentage': 5,
+                'capex_amount': capex_total * 0.05,
+                'status': data.get('testing_status', 'planned')
+            }
+        ],
+        'total_duration_months': 0,
+        'total_capex': capex_total,
+        'cash_flow_schedule': []
+    }
+    
+    # Calculate total duration and generate monthly cash flow
+    total_months = sum(phase['duration_months'] for phase in timeline['phases'])
+    timeline['total_duration_months'] = total_months
+    
+    # Generate monthly cash flow schedule
+    if construction_start:
+        from datetime import datetime, timedelta
+        start_date = datetime.fromisoformat(construction_start)
+        
+        month_counter = 0
+        for phase in timeline['phases']:
+            monthly_amount = phase['capex_amount'] / phase['duration_months'] if phase['duration_months'] > 0 else 0
+            
+            for month in range(phase['duration_months']):
+                current_date = start_date + timedelta(days=30 * (month_counter + month))
+                timeline['cash_flow_schedule'].append({
+                    'month': month_counter + month + 1,
+                    'date': current_date.strftime('%Y-%m'),
+                    'phase': phase['name'],
+                    'amount': monthly_amount,
+                    'cumulative': sum(cf['amount'] for cf in timeline['cash_flow_schedule']) + monthly_amount
+                })
+            
+            month_counter += phase['duration_months']
+    
+    # Save timeline
+    timelines = load_json_db(PROJECT_TIMELINES_FILE)
+    timeline_id = f"TL_{data.get('project_id', 'UNKNOWN')}_{datetime.now().strftime('%Y%m%d')}"
+    timelines[timeline_id] = timeline
+    save_json_db(PROJECT_TIMELINES_FILE, timelines)
+    
+    return jsonify({
+        'status': 'success',
+        'timeline': timeline,
+        'timeline_id': timeline_id
+    })
+
+def calculate_completion_percentage(project_data):
+    """Calculate how complete a project specification is"""
+    required_fields = [
+        'project_name', 'deal_type', 'project_location', 
+        'capex_total', 'offtaker_rent_per_kwh', 'power_cost_per_kwh'
+    ]
+    
+    filled = sum(1 for field in required_fields if project_data.get(field))
+    return int((filled / len(required_fields)) * 100)
+
+@app.route('/api/project-specifications/industries', methods=['GET'])
+def get_industries():
+    """Get list of available industries"""
+    industries = [
+        {'code': 'DC', 'name': 'Data Centre', 'icon': '🖥️'},
+        {'code': 'RE', 'name': 'Renewable Energy', 'icon': '⚡'},
+        {'code': 'INF', 'name': 'Infrastructure', 'icon': '🏗️'},
+        {'code': 'LOG', 'name': 'Logistics', 'icon': '📦'},
+        {'code': 'COMM', 'name': 'Commercial Real Estate', 'icon': '🏢'},
+        {'code': 'IND', 'name': 'Industrial', 'icon': '🏭'},
+        {'code': 'RESI', 'name': 'Residential', 'icon': '🏠'},
+        {'code': 'MIXED', 'name': 'Mixed Use', 'icon': '🏙️'}
+    ]
+    return jsonify(industries)
 
 @app.route('/api/project-specifications/populate-engine', methods=['POST'])
 def populate_engine_from_spec():
