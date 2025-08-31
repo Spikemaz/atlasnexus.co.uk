@@ -43,7 +43,13 @@
       "Read(C:\\Users\\marcu\\Desktop\\Marcus Folder/**)",
       "Read(C:\\Users\\marcu\\Desktop\\Marcus Folder/**)",
       "Bash(git fetch:*)",
-      "Bash(git ls-tree:*)"
+      "Bash(git ls-tree:*)",
+      "Bash(start https://atlasnexus.co.uk)",
+      "Bash(for icon in favicon.ico favicon-padlock.ico favicon-hexagon.ico favicon-padlock.svg favicon-hexagon.svg)",
+      "Bash(do echo -n \"$icon: \")",
+      "Bash(for i in {1..3})",
+      "Bash(for endpoint in \"/\" \"/api/version\" \"/static/js/smooth-scroll.js\" \"/favicon.ico\")",
+      "Bash(do echo -n \"$endpoint: \")"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"
