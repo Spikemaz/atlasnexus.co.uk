@@ -354,6 +354,31 @@
             animation: warningPulse 1s infinite;
         }
         
+        /* Timer Help Tooltip */
+        .timer-help {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background: rgba(96, 165, 250, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.5);
+            border-radius: 50%;
+            color: #60a5fa;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 16px;
+            margin-left: 8px;
+            cursor: help;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .timer-help:hover {
+            background: rgba(96, 165, 250, 0.3);
+            border-color: #60a5fa;
+            transform: scale(1.1);
+        }
+        
         @keyframes warningPulse {
             0%, 100% { box-shadow: 0 0 10px rgba(255, 107, 107, 0.5); }
             50% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.8); }
@@ -914,8 +939,11 @@
     <!-- Clock Timer -->
     <div class="timer" id="timer">00:00:00</div>
     
-    <!-- Countdown Timer -->
-    <div class="countdown-timer" id="countdownTimer">15:00</div>
+    <!-- Countdown Timer with Warning -->
+    <div class="countdown-timer" id="countdownTimer">
+        15:00
+        <span class="timer-help" title="When this timer reaches 00:00, you will be automatically locked out for 30 minutes due to inactivity. Enter the site password before time runs out.">?</span>
+    </div>
     
     <!-- Main content -->
     <div class="main-content">
@@ -1085,7 +1113,8 @@
                 const minutes = Math.floor(remaining / 60000);
                 const seconds = Math.floor((remaining % 60000) / 1000);
                 const countdownEl = document.getElementById('countdownTimer');
-                countdownEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                // Update only the timer text, preserve the help icon
+                countdownEl.innerHTML = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}<span class="timer-help" title="When this timer reaches 00:00, you will be automatically locked out for 30 minutes due to inactivity. Enter the site password before time runs out.">?</span>`;
                 
                 // Change color based on time remaining
                 countdownEl.classList.remove('orange', 'red');

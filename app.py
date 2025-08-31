@@ -247,6 +247,74 @@ def send_lockout_notification(ip_address, failed_attempts, lockout_type='30min',
     
     send_email(admin_email, f'🚨 URGENT SECURITY ALERT: IP {ip_address} Locked Out - Possible Attack', email_html)
 
+def send_timeout_notification(ip_address):
+    """Send email notification when user times out on Gate1"""
+    admin_email = 'atlasnexushelp@gmail.com'
+    
+    # Get the unlock token from lockout data
+    lockouts = load_lockouts()
+    unlock_token = None
+    if ip_address in lockouts:
+        unlock_token = lockouts[ip_address].get('unlock_token')
+    
+    if not unlock_token:
+        unlock_token = secrets.token_urlsafe(32)
+    
+    # Get IP location info if available
+    tracking_file = os.path.join(DATA_DIR, 'ip_tracking.json')
+    tracking = load_json_db(tracking_file)
+    ip_info = tracking.get(ip_address, {})
+    
+    email_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                <h2 style="color: #f59e0b;">⏱️ Session Timeout Alert</h2>
+                <p>A user has been locked out due to session timeout (15 minutes of inactivity).</p>
+                
+                <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #fcd34d;">
+                    <h3 style="color: #d97706; margin-top: 0;">Timeout Details</h3>
+                    <p><strong>IP Address:</strong> <code>{ip_address}</code></p>
+                    <p><strong>Lockout Type:</strong> 30-minute timeout lockout</p>
+                    <p><strong>Reason:</strong> User was inactive for 15 minutes on authentication page</p>
+                    <p><strong>Time:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                    <p><strong>First Seen:</strong> {ip_info.get('first_seen', 'Unknown')}</p>
+                    <p><strong>Total Visits:</strong> {ip_info.get('total_visits', 0)}</p>
+                </div>
+                
+                <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #bae6fd;">
+                    <p style="color: #0369a1; margin: 0;">
+                        <strong>ℹ️ INFO:</strong> This may be a legitimate user who got distracted.
+                    </p>
+                    <p style="color: #0369a1; margin: 5px 0 0 0;">
+                        Consider unlocking if they contact you via email.
+                    </p>
+                </div>
+                
+                <div style="margin-top: 25px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <a href="https://atlasnexus.co.uk/admin-panel" 
+                       style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; 
+                              text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        📊 View Admin Panel
+                    </a>
+                    <a href="https://atlasnexus.co.uk/admin/unlock-ip?token={unlock_token}&ip={ip_address}" 
+                       style="display: inline-block; background: #22c55e; color: white; padding: 12px 30px; 
+                              text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        🔓 Unlock This User
+                    </a>
+                </div>
+                
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e5e5; color: #666; font-size: 12px;">
+                    <p>This is an automated timeout alert from AtlasNexus Security System.</p>
+                    <p>Alert sent to: atlasnexushelp@gmail.com</p>
+                </div>
+            </div>
+        </body>
+    </html>
+    """
+    
+    send_email(admin_email, f'⏱️ Session Timeout: IP {ip_address} Locked Out', email_html)
+
 def apply_ip_lockout(ip_address, lockout_type='24h', reason='', failed_passwords=None, duration_hours=24):
     """Apply a lockout to an IP address with detailed logging"""
     lockouts = load_lockouts()
@@ -910,19 +978,23 @@ def site_auth():
     
     # Check for timeout trigger
     if password == 'TIMEOUT_TRIGGER_BLOCK_NOW':
-        # Force block due to timeout
-        session[f'attempt_count_{ip_address}'] = MAX_ATTEMPTS_BEFORE_BLOCK
-        blocked_until = datetime.now() + timedelta(minutes=BLOCK_DURATION_MINUTES)
-        session[f'blocked_until_{ip_address}'] = blocked_until.isoformat()
-        # Generate reference code
-        import random
-        import string
-        ref_code = 'REF-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
-        session[f'reference_code_{ip_address}'] = ref_code
+        # Apply proper lockout for timeout and send notification
+        lockout_data = apply_ip_lockout(
+            ip_address, 
+            'blocked_30min', 
+            reason='Session timeout - user inactive for 15 minutes',
+            failed_passwords=['[SESSION TIMEOUT - No password entered]'],
+            duration_hours=0.5
+        )
+        
+        # Send timeout notification email
+        send_timeout_notification(ip_address)
+        
         return jsonify({
             'status': 'blocked',
             'message': 'Session timeout - blocked for 30 minutes',
-            'redirect': url_for('index')
+            'redirect': url_for('index'),
+            'reference_code': lockout_data.get('reference_code', 'REF-TIMEOUT')
         }), 403
     
     # Get current attempt count
