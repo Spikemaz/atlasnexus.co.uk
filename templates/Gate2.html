@@ -1600,7 +1600,24 @@
                 <div class="footer-section">
                     <h4>Connect</h4>
                     <span style="display: block; color: var(--silver-mist); font-size: 0.875rem; margin-bottom: var(--space-2); padding-left: var(--space-5); cursor: default; pointer-events: none;">Need help?</span>
-                    <a href="mailto:Support@AtlasNexus.co.uk" class="footer-link">Support@AtlasNexus.co.uk</a>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <a href="mailto:Support@AtlasNexus.co.uk" class="footer-link" style="margin: 0;">Support@AtlasNexus.co.uk</a>
+                        <button onclick="copyEmail()" 
+                                id="copyEmailBtn"
+                                style="background: rgba(96, 165, 250, 0.1); 
+                                       border: 1px solid rgba(96, 165, 250, 0.3); 
+                                       color: var(--platinum-gold); 
+                                       padding: 0.25rem 0.5rem; 
+                                       border-radius: 6px; 
+                                       font-size: 0.75rem; 
+                                       cursor: pointer; 
+                                       transition: all 0.3s ease;
+                                       font-family: var(--font-text);"
+                                onmouseover="this.style.background='rgba(96, 165, 250, 0.2)'; this.style.transform='scale(1.05)';"
+                                onmouseout="this.style.background='rgba(96, 165, 250, 0.1)'; this.style.transform='scale(1)';">
+                            Copy
+                        </button>
+                    </div>
                 </div>
             </div>
 

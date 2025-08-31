@@ -636,9 +636,21 @@
                 <i class="fas fa-home"></i> Dashboard
             </button>
             {% if account_type == 'external' %}
-            <!-- External accounts only see Dashboard and Projects -->
+            <!-- External accounts have streamlined project management tools -->
             <button class="nav-btn" onclick="window.location.href='/project-specifications'" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-folder"></i> Projects
+            </button>
+            <button class="nav-btn" data-section="documents" onclick="showSection('documents')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                <i class="fas fa-file-contract"></i> Documents
+            </button>
+            <button class="nav-btn" data-section="timeline" onclick="showSection('timeline')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                <i class="fas fa-calendar-alt"></i> Timeline
+            </button>
+            <button class="nav-btn" data-section="reports" onclick="showSection('reports')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                <i class="fas fa-file-pdf"></i> Reports
+            </button>
+            <button class="nav-btn" data-section="support" onclick="showSection('support')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                <i class="fas fa-headset"></i> Support
             </button>
             {% else %}
             <!-- Admin and Internal accounts see all options -->
