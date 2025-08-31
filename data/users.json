@@ -51,10 +51,18 @@
     "email_verified": true,
     "approved_at": "2025-08-31T22:00:00.000000",
     "approved_by": "email_approval",
-    "login_count": 0,
+    "login_count": 1,
     "total_login_time": 0,
-    "last_login": null,
-    "login_history": [],
-    "ip_history": []
+    "last_login": "2025-08-31T22:18:16.841285",
+    "login_history": [
+      {
+        "timestamp": "2025-08-31T22:18:16.841285",
+        "ip_address": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "ip_history": [
+      "127.0.0.1"
+    ]
   }
 }

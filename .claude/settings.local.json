@@ -51,7 +51,8 @@
       "Bash(for endpoint in \"/\" \"/api/version\" \"/static/js/smooth-scroll.js\" \"/favicon.ico\")",
       "Bash(do echo -n \"$endpoint: \")",
       "Bash(git diff-tree:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"

@@ -1,7 +1,7 @@
 {
   "127.0.0.1": {
     "first_seen": "2025-08-31T10:41:56.956594",
-    "last_seen": "2025-08-31T22:14:39.833688",
+    "last_seen": "2025-08-31T22:18:16.841953",
     "pages_visited": [
       {
         "page": "gate1",
@@ -78,11 +78,16 @@
       {
         "page": "admin_login",
         "timestamp": "2025-08-31T22:14:39.833699"
+      },
+      {
+        "page": "user_login",
+        "timestamp": "2025-08-31T22:18:16.841967"
       }
     ],
-    "total_visits": 19,
+    "total_visits": 20,
     "user_emails": [
-      "spikemaz8@aol.com"
+      "spikemaz8@aol.com",
+      "moore2marcus@gmail.com"
     ],
     "is_banned": false,
     "reached_pages": {

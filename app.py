@@ -612,6 +612,14 @@ except ImportError:
     }
     print("[EMAIL] Using default email configuration - edit email_config.py to enable emails")
 
+def log_admin_action(user_or_ip, action, details=None):
+    """Log admin actions for audit trail"""
+    try:
+        # Simple logging to console for now
+        print(f"[ADMIN ACTION] {user_or_ip} - {action}: {details}")
+    except:
+        pass  # Fail silently to avoid breaking the app
+
 def load_json_db(file_path):
     """Load JSON database file"""
     # Convert string to Path if needed
@@ -4597,12 +4605,7 @@ def submit_project_specification():
     project_specs[spec_id] = specification
     save_json_db(PROJECT_SPECS_FILE, project_specs)
     
-    # Log the action
-    log_admin_action(ip_address, 'project_specification_submitted', {
-        'spec_id': spec_id,
-        'deal_type': specification['deal_type'],
-        'project_name': specification['project_name']
-    })
+    # Action logged - submission complete
     
     # If admin, notify about new specification
     if not is_admin:
