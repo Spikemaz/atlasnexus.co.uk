@@ -283,12 +283,124 @@
         
         <!-- New Project Tab (hidden by default) -->
         <div id="new-tab" style="display: none;">
-            <div class="project-card">
-                <h2 style="color: #60a5fa; margin-bottom: 2rem;">
-                    <i class="fas fa-plus-circle"></i> Create New Project Specification
-                </h2>
-                <p style="color: #B8C0C8;">Project specification form will be implemented here.</p>
-                <!-- Form implementation would go here -->
+            <div class="row">
+                <!-- Download Templates Section -->
+                <div class="col-lg-6">
+                    <div class="project-card">
+                        <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">
+                            <i class="fas fa-download"></i> Download Templates
+                        </h3>
+                        <p style="color: #B8C0C8; margin-bottom: 1.5rem;">Download our templates to prepare your project specifications:</p>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <a href="/static/templates/AtlasNexus_Project_Template.docx" class="btn btn-outline-primary" style="background: transparent; border: 1px solid #60a5fa; color: #60a5fa; text-align: left;">
+                                <i class="fas fa-file-word"></i> Initial Project Template (.docx)
+                            </a>
+                            <a href="/static/templates/AtlasNexus_Final_Template.docx" class="btn btn-outline-primary" style="background: transparent; border: 1px solid #60a5fa; color: #60a5fa; text-align: left;">
+                                <i class="fas fa-file-word"></i> Final Documentation Template (.docx)
+                            </a>
+                            <a href="/static/templates/AtlasNexus_Individual_Project_Template.xlsx" class="btn btn-outline-success" style="background: transparent; border: 1px solid #22c55e; color: #22c55e; text-align: left;">
+                                <i class="fas fa-file-excel"></i> Individual Project Template (.xlsx)
+                            </a>
+                            <a href="/static/templates/AtlasNexus_Pipeline_Template.xlsx" class="btn btn-outline-success" style="background: transparent; border: 1px solid #22c55e; color: #22c55e; text-align: left;">
+                                <i class="fas fa-file-excel"></i> Pipeline Template (.xlsx)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upload Section -->
+                <div class="col-lg-6">
+                    <div class="project-card">
+                        <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">
+                            <i class="fas fa-upload"></i> Upload Project Specification
+                        </h3>
+                        <p style="color: #B8C0C8; margin-bottom: 1.5rem;">Upload your completed Excel file:</p>
+                        
+                        <form id="uploadForm" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="fileUpload" style="color: #B8C0C8;">Select Excel File (.xlsx or .xls)</label>
+                                <input type="file" class="form-control" id="fileUpload" accept=".xlsx,.xls" style="background: rgba(54, 64, 73, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); color: #E5E9F0;">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label style="color: #B8C0C8;">Upload Type</label>
+                                <div>
+                                    <input type="radio" name="uploadType" value="individual" id="individual" checked>
+                                    <label for="individual" style="color: #B8C0C8; margin-right: 2rem;">Individual Project</label>
+                                    
+                                    <input type="radio" name="uploadType" value="pipeline" id="pipeline">
+                                    <label for="pipeline" style="color: #B8C0C8;">Pipeline (Multiple Projects)</label>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100" style="background: linear-gradient(90deg, #60a5fa, #3b82f6);">
+                                <i class="fas fa-cloud-upload-alt"></i> Upload Project
+                            </button>
+                        </form>
+                        
+                        <div id="uploadStatus" class="mt-3" style="display: none;">
+                            <div class="alert" role="alert">
+                                <span id="statusMessage"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Manual Entry Form -->
+            <div class="project-card mt-3">
+                <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">
+                    <i class="fas fa-edit"></i> Or Enter Project Details Manually
+                </h3>
+                
+                <form id="manualForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label style="color: #B8C0C8;">Project Name</label>
+                            <input type="text" class="form-control" name="project_name" style="background: rgba(54, 64, 73, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); color: #E5E9F0;">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="color: #B8C0C8;">Industry Type</label>
+                            <select class="form-control" name="industry_type" style="background: rgba(54, 64, 73, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); color: #E5E9F0;">
+                                <option value="">Select Industry</option>
+                                <option value="Data Centre">Data Centre</option>
+                                <option value="Renewable Energy">Renewable Energy</option>
+                                <option value="Infrastructure">Infrastructure</option>
+                                <option value="Logistics">Logistics</option>
+                                <option value="Commercial Real Estate">Commercial Real Estate</option>
+                                <option value="Industrial">Industrial</option>
+                                <option value="Residential">Residential</option>
+                                <option value="Mixed Use">Mixed Use</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label style="color: #B8C0C8;">Total Project Value ($)</label>
+                            <input type="number" class="form-control" name="total_project_value" style="background: rgba(54, 64, 73, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); color: #E5E9F0;">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="color: #B8C0C8;">Expected ROI (%)</label>
+                            <input type="number" class="form-control" name="expected_roi" step="0.1" style="background: rgba(54, 64, 73, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); color: #E5E9F0;">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label style="color: #B8C0C8;">Project Description</label>
+                        <textarea class="form-control" name="description" rows="4" style="background: rgba(54, 64, 73, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); color: #E5E9F0;"></textarea>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-secondary" onclick="saveDraft()" style="background: transparent; border: 1px solid #60a5fa; color: #60a5fa;">
+                            <i class="fas fa-save"></i> Save as Draft
+                        </button>
+                        <button type="submit" class="btn btn-primary" style="background: linear-gradient(90deg, #60a5fa, #3b82f6);">
+                            <i class="fas fa-paper-plane"></i> Submit Project
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
         
@@ -336,6 +448,113 @@
             // Implement project view functionality
             console.log('Viewing project:', projectId);
             // Could redirect to a detailed view or open a modal
+        }
+        
+        // Handle Excel upload
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('fileUpload');
+            const uploadType = document.querySelector('input[name="uploadType"]:checked').value;
+            
+            if (!fileInput.files[0]) {
+                alert('Please select a file');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            const endpoint = uploadType === 'pipeline' 
+                ? '/api/project-specifications/upload-pipeline'
+                : '/api/project-specifications/upload-excel';
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                const statusDiv = document.getElementById('uploadStatus');
+                const statusMessage = document.getElementById('statusMessage');
+                
+                statusDiv.style.display = 'block';
+                if (result.status === 'success') {
+                    statusDiv.className = 'alert alert-success mt-3';
+                    statusMessage.textContent = result.message || 'Project uploaded successfully!';
+                    
+                    // Refresh page after 2 seconds
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    statusDiv.className = 'alert alert-danger mt-3';
+                    statusMessage.textContent = result.message || 'Upload failed';
+                }
+            } catch (error) {
+                const statusDiv = document.getElementById('uploadStatus');
+                const statusMessage = document.getElementById('statusMessage');
+                statusDiv.style.display = 'block';
+                statusDiv.className = 'alert alert-danger mt-3';
+                statusMessage.textContent = 'Error uploading file: ' + error.message;
+            }
+        });
+        
+        // Handle manual form submission
+        document.getElementById('manualForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/api/project-specifications/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    alert('Project submitted successfully!');
+                    window.location.reload();
+                } else {
+                    alert(result.message || 'Submission failed');
+                }
+            } catch (error) {
+                alert('Error submitting project: ' + error.message);
+            }
+        });
+        
+        // Save as draft
+        async function saveDraft() {
+            const formData = new FormData(document.getElementById('manualForm'));
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/api/project-specifications/save-draft', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    alert('Draft saved successfully!');
+                } else {
+                    alert(result.message || 'Failed to save draft');
+                }
+            } catch (error) {
+                alert('Error saving draft: ' + error.message);
+            }
         }
     </script>
 </body>
