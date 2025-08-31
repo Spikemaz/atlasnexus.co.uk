@@ -10,9 +10,17 @@
     "password": "SpikeMaz",
     "password_expiry": "2026-08-31T10:40:48.395969",
     "email_verified": true,
-    "last_login": null,
-    "login_count": 0,
-    "login_history": [],
-    "ip_history": []
+    "last_login": "2025-08-31T10:42:34.621265",
+    "login_count": 1,
+    "login_history": [
+      {
+        "timestamp": "2025-08-31T10:42:34.621265",
+        "ip_address": "127.0.0.1",
+        "success": true
+      }
+    ],
+    "ip_history": [
+      "127.0.0.1"
+    ]
   }
 }

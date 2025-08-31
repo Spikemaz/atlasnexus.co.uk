@@ -1,15 +1,29 @@
 {
   "127.0.0.1": {
     "first_seen": "2025-08-31T10:41:56.956594",
-    "last_seen": "2025-08-31T10:41:56.956614",
+    "last_seen": "2025-08-31T10:50:21.163625",
     "pages_visited": [
       {
         "page": "gate1",
         "timestamp": "2025-08-31T10:41:56.956620"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T10:42:26.453938"
+      },
+      {
+        "page": "admin_login",
+        "timestamp": "2025-08-31T10:42:34.621515"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T10:50:21.163682"
       }
     ],
-    "total_visits": 1,
-    "user_emails": [],
+    "total_visits": 4,
+    "user_emails": [
+      "spikemaz8@aol.com"
+    ],
     "is_banned": false,
     "reached_pages": {
       "gate1": true,

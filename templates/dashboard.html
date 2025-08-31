@@ -610,11 +610,6 @@
                     <span style="width: 8px; height: 8px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 10px #00ff00;"></span>
                     Dashboard Active
                 </span>
-                {% if account_type == 'external' or is_admin %}
-                <a href="/project-specifications" style="background: linear-gradient(90deg, #10b981, #059669); color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-right: 8px; text-decoration: none; display: inline-block;">
-                    <i class="fas fa-file-alt"></i> Project Specs
-                </a>
-                {% endif %}
                 {% if is_admin %}
                 <a href="/admin-panel" style="background: linear-gradient(90deg, #fbbf24, #f59e0b); color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-right: 8px; text-decoration: none; display: inline-block;">
                     <i class="fas fa-cog"></i> Control Panel
@@ -640,6 +635,13 @@
             <button class="nav-btn" data-section="dashboard" onclick="showSection('dashboard')" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-home"></i> Dashboard
             </button>
+            {% if account_type == 'external' %}
+            <!-- External accounts only see Dashboard and Projects -->
+            <button class="nav-btn" onclick="window.location.href='/project-specifications'" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                <i class="fas fa-folder"></i> Projects
+            </button>
+            {% else %}
+            <!-- Admin and Internal accounts see all options -->
             <button class="nav-btn" data-section="market" onclick="showSection('market')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-chart-line"></i> Market
             </button>
@@ -655,9 +657,13 @@
             <button class="nav-btn" data-section="compliance" onclick="showSection('compliance')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-gavel"></i> Compliance
             </button>
+            <button class="nav-btn" onclick="window.location.href='/project-specifications'" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                <i class="fas fa-folder"></i> Projects
+            </button>
             <button class="nav-btn" data-section="permutation" onclick="showSection('permutation')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-cogs"></i> Engine
             </button>
+            {% endif %}
         </div>
     </div>
     
