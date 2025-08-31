@@ -52,7 +52,8 @@
       "Bash(do echo -n \"$endpoint: \")",
       "Bash(git diff-tree:*)",
       "Bash(git checkout:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\test_registration.py\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"

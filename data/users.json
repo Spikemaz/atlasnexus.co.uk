@@ -10,26 +10,11 @@
     "password": "SpikeMaz",
     "password_expiry": "2026-08-31T10:40:48.395969",
     "email_verified": true,
-    "last_login": "2025-08-31T22:14:39.833043",
-    "login_count": 4,
+    "last_login": "2025-08-31T22:35:54.878159",
+    "login_count": 7,
     "login_history": [
       {
-        "timestamp": "2025-08-31T10:42:34.621265",
-        "ip_address": "127.0.0.1",
-        "success": true
-      },
-      {
-        "timestamp": "2025-08-31T12:50:44.903219",
-        "ip_address": "127.0.0.1",
-        "success": true
-      },
-      {
-        "timestamp": "2025-08-31T21:55:24.778086",
-        "ip_address": "127.0.0.1",
-        "success": true
-      },
-      {
-        "timestamp": "2025-08-31T22:14:39.833043",
+        "timestamp": "2025-08-31T22:35:54.878159",
         "ip_address": "127.0.0.1",
         "success": true
       }
@@ -54,13 +39,7 @@
     "login_count": 1,
     "total_login_time": 0,
     "last_login": "2025-08-31T22:18:16.841285",
-    "login_history": [
-      {
-        "timestamp": "2025-08-31T22:18:16.841285",
-        "ip_address": "127.0.0.1",
-        "success": true
-      }
-    ],
+    "login_history": [],
     "ip_history": [
       "127.0.0.1"
     ]

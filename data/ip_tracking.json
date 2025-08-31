@@ -1,93 +1,20 @@
 {
   "127.0.0.1": {
-    "first_seen": "2025-08-31T10:41:56.956594",
-    "last_seen": "2025-08-31T22:18:16.841953",
+    "first_seen": "2025-08-31T22:35:31.348118",
+    "last_seen": "2025-08-31T22:35:54.878518",
     "pages_visited": [
       {
         "page": "gate1",
-        "timestamp": "2025-08-31T10:41:56.956620"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T10:42:26.453938"
+        "timestamp": "2025-08-31T22:35:31.348169"
       },
       {
         "page": "admin_login",
-        "timestamp": "2025-08-31T10:42:34.621515"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T10:50:21.163682"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T11:44:53.074944"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T11:44:59.120237"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T12:00:00.157033"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T12:03:57.170352"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T12:04:03.534490"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T12:43:38.534616"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T12:44:10.314816"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T12:46:23.159831"
-      },
-      {
-        "page": "admin_login",
-        "timestamp": "2025-08-31T12:50:44.903568"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T12:55:13.196670"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T21:45:12.012965"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T21:45:15.732320"
-      },
-      {
-        "page": "admin_login",
-        "timestamp": "2025-08-31T21:55:24.778660"
-      },
-      {
-        "page": "gate1",
-        "timestamp": "2025-08-31T21:57:45.805086"
-      },
-      {
-        "page": "admin_login",
-        "timestamp": "2025-08-31T22:14:39.833699"
-      },
-      {
-        "page": "user_login",
-        "timestamp": "2025-08-31T22:18:16.841967"
+        "timestamp": "2025-08-31T22:35:54.878525"
       }
     ],
-    "total_visits": 20,
+    "total_visits": 2,
     "user_emails": [
-      "spikemaz8@aol.com",
-      "moore2marcus@gmail.com"
+      "spikemaz8@aol.com"
     ],
     "is_banned": false,
     "reached_pages": {
