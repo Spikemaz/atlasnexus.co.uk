@@ -7,14 +7,33 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
+            /* Modern Financial Institution Palette - Matching Dashboard */
+            --deep-charcoal: #1A1D23;
+            --slate-grey: #2C3137;
+            --steel-blue: #364049;
+            --silver-mist: #92969C;
+            --silver-light: #B8C0C8;
+            --pearl-grey: #E5E9F0;
+            --pure-white: #FFFFFF;
+            
+            /* Accent Colors */
+            --platinum-gold: #60a5fa;
+            --amber-yellow: #93c5fd;
+            --market-green: #22C55E;
+            --market-red: #EF4444;
+            --emerald-green: #059669;
+            --crimson-red: #B91C1C;
+            --royal-blue: #4169E1;
+            
+            /* Legacy mappings */
             --primary: #1e3a5f;
-            --secondary: #3b82f6;
-            --danger: #dc2626;
-            --success: #10b981;
+            --secondary: #60a5fa;
+            --danger: #EF4444;
+            --success: #22C55E;
             --warning: #f59e0b;
-            --dark: #111827;
-            --light: #f3f4f6;
-            --border: #e5e7eb;
+            --dark: #1A1D23;
+            --light: #364049;
+            --border: rgba(96, 165, 250, 0.2);
         }
 
         * {
@@ -25,15 +44,17 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--deep-charcoal);
+            color: var(--pearl-grey);
             min-height: 100vh;
         }
 
         .header {
-            background: rgba(30, 58, 95, 0.95);
+            background: linear-gradient(135deg, rgba(20, 25, 45, 0.95) 0%, rgba(10, 15, 30, 0.95) 100%);
             padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(96, 165, 250, 0.2);
         }
 
         .header-content {
@@ -72,10 +93,11 @@
 
         /* Sidebar */
         .sidebar {
-            background: white;
+            background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%);
+            border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 10px;
             padding: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             height: fit-content;
             position: sticky;
             top: 2rem;
@@ -89,9 +111,10 @@
             width: 100%;
             padding: 0.75rem;
             margin-bottom: 0.5rem;
-            border: 2px solid transparent;
+            border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 8px;
-            background: var(--light);
+            background: rgba(26, 32, 46, 0.6);
+            color: var(--silver-light);
             cursor: pointer;
             transition: all 0.3s;
             text-align: left;
@@ -101,14 +124,15 @@
         }
 
         .industry-btn:hover {
-            background: var(--secondary);
-            color: white;
+            background: rgba(96, 165, 250, 0.2);
+            border-color: var(--platinum-gold);
+            color: var(--platinum-gold);
         }
 
         .industry-btn.active {
-            background: var(--secondary);
+            background: linear-gradient(90deg, #60a5fa, #3b82f6);
             color: white;
-            border-color: var(--primary);
+            border-color: var(--platinum-gold);
         }
 
         .project-list {
@@ -119,19 +143,23 @@
         .project-item {
             padding: 0.75rem;
             margin-bottom: 0.5rem;
-            background: var(--light);
+            background: rgba(26, 32, 46, 0.6);
+            border: 1px solid rgba(96, 165, 250, 0.1);
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
+            color: var(--silver-light);
         }
 
         .project-item:hover {
-            background: #e5e7eb;
+            background: rgba(96, 165, 250, 0.15);
+            border-color: rgba(96, 165, 250, 0.3);
         }
 
         .project-item.active {
-            background: var(--secondary);
+            background: linear-gradient(90deg, #60a5fa, #3b82f6);
             color: white;
+            border-color: var(--platinum-gold);
         }
 
         .project-status {
@@ -159,10 +187,11 @@
 
         /* Main Content */
         .main-content {
-            background: white;
+            background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%);
+            border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 10px;
             padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         .content-header {
@@ -171,7 +200,7 @@
             align-items: center;
             margin-bottom: 2rem;
             padding-bottom: 1rem;
-            border-bottom: 2px solid var(--border);
+            border-bottom: 1px solid rgba(96, 165, 250, 0.2);
         }
 
         .save-controls {
@@ -189,17 +218,17 @@
         }
 
         .btn-primary {
-            background: var(--secondary);
+            background: linear-gradient(90deg, #60a5fa, #3b82f6);
             color: white;
         }
 
         .btn-success {
-            background: var(--success);
+            background: linear-gradient(90deg, #22C55E, #059669);
             color: white;
         }
 
         .btn-warning {
-            background: var(--warning);
+            background: linear-gradient(90deg, #f59e0b, #d97706);
             color: white;
         }
 
@@ -222,13 +251,13 @@
             border: none;
             cursor: pointer;
             font-size: 1rem;
-            color: #6b7280;
+            color: var(--silver-mist);
             transition: all 0.3s;
             position: relative;
         }
 
         .tab.active {
-            color: var(--secondary);
+            color: var(--platinum-gold);
         }
 
         .tab.active::after {
@@ -253,7 +282,7 @@
         .timeline-container {
             margin: 2rem 0;
             padding: 1.5rem;
-            background: #f9fafb;
+            background: rgba(44, 49, 55, 0.6);
             border-radius: 10px;
         }
 
@@ -268,7 +297,7 @@
             top: 0;
             bottom: 0;
             width: 2px;
-            background: var(--border);
+            background: rgba(96, 165, 250, 0.2);
         }
 
         .timeline-phase {
@@ -284,7 +313,7 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: white;
+            background: rgba(44, 49, 55, 0.8);
             border: 3px solid var(--secondary);
         }
 
@@ -297,7 +326,7 @@
         }
 
         .phase-card {
-            background: white;
+            background: rgba(44, 49, 55, 0.8);
             padding: 1rem;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -325,7 +354,7 @@
             gap: 1rem;
             margin-top: 0.5rem;
             font-size: 0.875rem;
-            color: #6b7280;
+            color: var(--silver-mist);
         }
 
         /* Cash Flow Chart */
@@ -334,7 +363,7 @@
             height: 400px;
             margin: 2rem 0;
             padding: 1rem;
-            background: white;
+            background: rgba(44, 49, 55, 0.8);
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
@@ -371,7 +400,7 @@
         .form-section {
             margin-bottom: 2rem;
             padding: 1.5rem;
-            background: #f9fafb;
+            background: rgba(44, 49, 55, 0.6);
             border-radius: 8px;
         }
 
@@ -430,7 +459,7 @@
         .update-item {
             padding: 0.75rem;
             margin-bottom: 0.5rem;
-            background: white;
+            background: rgba(44, 49, 55, 0.8);
             border-radius: 5px;
             display: flex;
             justify-content: space-between;
@@ -439,7 +468,7 @@
 
         .update-time {
             font-size: 0.875rem;
-            color: #6b7280;
+            color: var(--silver-mist);
         }
 
         /* Tooltips */
@@ -503,13 +532,15 @@
         <div class="header-content">
             <div class="logo">AtlasNexus - Project Management Portal</div>
             <div class="user-info">
-                <span>{{ username }} ({{ account_type }})</span>
-                <button onclick="saveDraft()" class="btn btn-warning">💾 Save Draft</button>
+                <span style="color: #B8C0C8;">{{ username }} ({{ account_type }})</span>
+                <a href="/dashboard" class="btn" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 0.75rem 1.5rem; border-radius: 5px; text-decoration: none; margin-right: 0.5rem;">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+                <button onclick="saveDraft()" class="btn btn-warning">Save Draft</button>
                 {% if is_admin %}
                 <a href="/admin-panel" class="btn btn-primary">Admin Panel</a>
                 {% endif %}
-                <a href="/dashboard" class="btn btn-primary">Dashboard</a>
-                <button onclick="logout()" class="btn" style="background: var(--danger); color: white;">Logout</button>
+                <button onclick="logout()" class="btn" style="background: linear-gradient(90deg, #ef4444, #dc2626); color: white;">Logout</button>
             </div>
         </div>
     </div>
