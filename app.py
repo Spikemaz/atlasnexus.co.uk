@@ -494,7 +494,8 @@ def audit_project():
         'registration-submitted.html',  # Added for new registration flow
         'admin_panel.html',  # Admin control panel
         'securitisation_engine.html',  # Securitization/Permutation engine
-        'permutation_engine.html'  # Advanced permutation engine
+        'permutation_engine.html',  # Advanced permutation engine
+        'project_specifications_enhanced.html'  # Project specifications portal
     }
     
     # Files that should NEVER exist (delete immediately)
