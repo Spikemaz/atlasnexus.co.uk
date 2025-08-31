@@ -2547,9 +2547,10 @@ def admin_approve_user():
 
 @app.route('/admin/quick-approve')
 def admin_quick_approve():
-    """Quick approve from email link"""
+    """Quick approve from email link - shows account type selection"""
     token = request.args.get('token')
     email = request.args.get('email')
+    account_type = request.args.get('account_type')
     
     if not token or not email:
         return "Invalid approval link", 400
@@ -2569,14 +2570,195 @@ def admin_quick_approve():
         </html>
         """, 400
     
+    # If no account type selected yet, show selection page
+    if not account_type:
+        registration = registrations[email]
+        return f"""
+        <html>
+        <head>
+            <title>Approve User - Select Account Type</title>
+            <style>
+                body {{
+                    background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%);
+                    color: white;
+                    font-family: Arial, sans-serif;
+                    padding: 50px;
+                    min-height: 100vh;
+                    margin: 0;
+                }}
+                .container {{
+                    max-width: 700px;
+                    margin: 0 auto;
+                    background: rgba(44, 49, 55, 0.95);
+                    padding: 40px;
+                    border-radius: 20px;
+                    border: 1px solid rgba(96, 165, 250, 0.3);
+                }}
+                h1 {{
+                    color: #60a5fa;
+                    text-align: center;
+                    margin-bottom: 30px;
+                }}
+                .user-info {{
+                    background: rgba(0, 0, 0, 0.3);
+                    padding: 20px;
+                    border-radius: 10px;
+                    margin-bottom: 30px;
+                }}
+                .info-row {{
+                    display: flex;
+                    justify-content: space-between;
+                    margin: 10px 0;
+                    padding: 5px 0;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                }}
+                .info-label {{
+                    color: #94a3b8;
+                }}
+                .info-value {{
+                    color: #fff;
+                    font-weight: 600;
+                }}
+                .account-types {{
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 20px;
+                    margin: 30px 0;
+                }}
+                .account-type-card {{
+                    background: rgba(0, 0, 0, 0.2);
+                    border: 2px solid rgba(96, 165, 250, 0.2);
+                    border-radius: 15px;
+                    padding: 25px;
+                    text-align: center;
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                    text-decoration: none;
+                    color: white;
+                    display: block;
+                }}
+                .account-type-card:hover {{
+                    border-color: #60a5fa;
+                    background: rgba(96, 165, 250, 0.1);
+                    transform: translateY(-2px);
+                }}
+                .account-type-card h3 {{
+                    color: #60a5fa;
+                    margin-bottom: 15px;
+                    font-size: 24px;
+                }}
+                .account-type-card p {{
+                    color: #b0b0b0;
+                    font-size: 14px;
+                    line-height: 1.5;
+                }}
+                .features {{
+                    text-align: left;
+                    margin-top: 15px;
+                    font-size: 13px;
+                }}
+                .features li {{
+                    margin: 5px 0;
+                    color: #94a3b8;
+                }}
+                .cancel-btn {{
+                    display: inline-block;
+                    background: rgba(239, 68, 68, 0.2);
+                    border: 1px solid #ef4444;
+                    color: #ef4444;
+                    padding: 12px 30px;
+                    text-decoration: none;
+                    border-radius: 8px;
+                    margin-top: 20px;
+                }}
+                .note {{
+                    background: rgba(251, 191, 36, 0.1);
+                    border: 1px solid rgba(251, 191, 36, 0.3);
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin-top: 20px;
+                    font-size: 14px;
+                    color: #fbbf24;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Select Account Type for Approval</h1>
+                
+                <div class="user-info">
+                    <h3 style="color: #93c5fd; margin-top: 0;">Applicant Information</h3>
+                    <div class="info-row">
+                        <span class="info-label">Name:</span>
+                        <span class="info-value">{registration.get('full_name', 'N/A')}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">{email}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Company:</span>
+                        <span class="info-value">{registration.get('company_name', 'N/A')}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Job Title:</span>
+                        <span class="info-value">{registration.get('job_title', 'N/A')}</span>
+                    </div>
+                </div>
+                
+                <h2 style="text-align: center; color: #93c5fd;">Choose Account Type:</h2>
+                
+                <div class="account-types">
+                    <a href="/admin/quick-approve?token={token}&email={email}&account_type=internal" class="account-type-card">
+                        <h3>🏢 Internal Account</h3>
+                        <p>For employees and internal stakeholders</p>
+                        <ul class="features">
+                            <li>✓ Full dashboard access</li>
+                            <li>✓ All analytics tools</li>
+                            <li>✓ Complete securitization features</li>
+                            <li>✓ Administrative capabilities</li>
+                            <li>✓ Project management</li>
+                        </ul>
+                    </a>
+                    
+                    <a href="/admin/quick-approve?token={token}&email={email}&account_type=external" class="account-type-card">
+                        <h3>🌐 External Account</h3>
+                        <p>For clients and external partners</p>
+                        <ul class="features">
+                            <li>✓ Limited dashboard access</li>
+                            <li>✓ View-only analytics</li>
+                            <li>✓ Document access</li>
+                            <li>✓ Support tickets</li>
+                            <li>✓ Reports viewing</li>
+                        </ul>
+                    </a>
+                </div>
+                
+                <div class="note">
+                    <strong>⚠️ Important:</strong> This selection determines the user's access level and available features. 
+                    Internal accounts have full system access, while external accounts have restricted permissions suitable for clients.
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="/admin/quick-reject?token={token}&email={email}" class="cancel-btn">
+                        ✗ Reject Application Instead
+                    </a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+    
+    # Process approval with selected account type
     # Use the pre-generated password or create a new one if missing
     password = registrations[email].get('generated_password', generate_secure_password())
     password_expiry = datetime.now() + timedelta(days=30)
     
-    # Create user account
+    # Create user account with selected account type
     users = load_json_db(USERS_FILE)
     users[email] = {
         **registrations[email],
+        'account_type': account_type,  # Use selected account type
         'password': password,
         'password_expiry': password_expiry.isoformat(),
         'admin_approved': True,
@@ -2595,6 +2777,7 @@ def admin_quick_approve():
     save_json_db(REGISTRATIONS_FILE, registrations)
     
     # Send approval email with password
+    account_type_display = "Internal" if account_type == "internal" else "External"
     user_email_html = f"""
     <html>
         <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
@@ -2603,7 +2786,8 @@ def admin_quick_approve():
                 <p>Congratulations! Your email has been verified and your application has been approved by our admin team.</p>
                 <p>Welcome to AtlasNexus - Your institutional securitisation platform.</p>
                 <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border: 2px solid #3b82f6; margin: 20px 0;">
-                    <h3 style="color: #1e40af; margin-top: 0;">Your Login Credentials:</h3>
+                    <h3 style="color: #1e40af; margin-top: 0;">Your Account Details:</h3>
+                    <p><strong>Account Type:</strong> <span style="color: #059669; font-weight: bold;">{account_type_display}</span></p>
                     <p><strong>Email:</strong> {email}</p>
                     <p><strong>Password:</strong> <code style="background: #e5e7eb; padding: 4px 8px; border-radius: 4px; font-size: 16px;">{password}</code></p>
                     <p style="color: #666; font-size: 14px; margin-top: 10px;">⏱ This password expires in 30 days</p>
@@ -2623,12 +2807,13 @@ def admin_quick_approve():
     <html>
     <body style="background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%); color: white; font-family: Arial; padding: 50px; text-align: center; min-height: 100vh;">
         <div style="max-width: 600px; margin: 0 auto; background: rgba(44, 49, 55, 0.95); padding: 40px; border-radius: 20px; border: 2px solid #22c55e;">
-            <h1 style="color: #22c55e; font-size: 3rem;">APPROVED</h1>
+            <h1 style="color: #22c55e; font-size: 3rem;">✓ APPROVED</h1>
             <h2 style="color: #22c55e;">Application Approved!</h2>
-            <p style="font-size: 18px; margin: 20px 0;">User <strong>{email}</strong> has been approved.</p>
+            <p style="font-size: 18px; margin: 20px 0;">User <strong>{email}</strong> has been approved as an <strong>{account_type_display}</strong> account.</p>
             <div style="background: rgba(34, 197, 94, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
-                <p>Generated Password: <code style="background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px;">{password}</code></p>
-                <p style="color: #94a3b8; font-size: 14px;">This has been emailed to the user</p>
+                <p><strong>Account Type:</strong> {account_type_display}</p>
+                <p><strong>Generated Password:</strong> <code style="background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px;">{password}</code></p>
+                <p style="color: #94a3b8; font-size: 14px; margin-top: 10px;">Credentials have been emailed to the user</p>
             </div>
             <a href="/dashboard" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; margin-top: 20px;">Go to Dashboard</a>
         </div>
@@ -4315,13 +4500,13 @@ def project_specifications():
     
     username = session.get(f'username_{ip_address}', 'User')
     
-    # Render the project specifications template
-    return render_template('project_specifications.html',
-                         user_specs=user_specs if not is_admin else [],
-                         all_specs=all_specs if is_admin else [],
-                         is_admin=is_admin,
+    # Use enhanced version for full functionality
+    return render_template('project_specifications_enhanced.html',
                          username=username,
-                         user_email=user_email)
+                         is_admin=is_admin,
+                         account_type=account_type,
+                         user_specs=user_specs,
+                         all_specs=all_specs)
 
 @app.route('/api/project-specifications/submit', methods=['POST'])
 def submit_project_specification():

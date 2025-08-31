@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Specifications - AtlasNexus</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --secondary: #3b82f6;
+            --danger: #dc2626;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --dark: #111827;
+            --light: #f3f4f6;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(30, 58, 95, 0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .industry-selector {
+            margin-bottom: 2rem;
+        }
+
+        .industry-btn {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            background: var(--light);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .industry-btn:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .industry-btn.active {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .project-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .project-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: var(--light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .project-item:hover {
+            background: #e5e7eb;
+        }
+
+        .project-item.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .project-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 0.25rem;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-submitted {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Main Content */
+        .main-content {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .save-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #6b7280;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--secondary);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--secondary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Timeline Visualization */
+        .timeline-container {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #f9fafb;
+            border-radius: 10px;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 50px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-phase {
+            position: relative;
+            padding-left: 100px;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: 40px;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid var(--secondary);
+        }
+
+        .timeline-marker.completed {
+            background: var(--success);
+        }
+
+        .timeline-marker.in-progress {
+            background: var(--warning);
+        }
+
+        .phase-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .phase-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .phase-name {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .phase-amount {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .phase-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* Cash Flow Chart */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Progress Indicator */
+        .progress-indicator {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), #059669);
+            transition: width 0.5s ease;
+        }
+
+        /* Form Sections */
+        .form-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        /* Status Updates */
+        .status-updates {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f0f9ff;
+            border-radius: 8px;
+            border: 1px solid #3b82f6;
+        }
+
+        .update-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .update-time {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid var(--light);
+            border-top: 4px solid var(--secondary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">AtlasNexus - Project Management Portal</div>
+            <div class="user-info">
+                <span>{{ username }} ({{ account_type }})</span>
+                <button onclick="saveDraft()" class="btn btn-warning">💾 Save Draft</button>
+                {% if is_admin %}
+                <a href="/admin-panel" class="btn btn-primary">Admin Panel</a>
+                {% endif %}
+                <a href="/dashboard" class="btn btn-primary">Dashboard</a>
+                <button onclick="logout()" class="btn" style="background: var(--danger); color: white;">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="dashboard-grid">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="industry-selector">
+                    <h3 style="margin-bottom: 1rem;">Select Industry</h3>
+                    <button class="industry-btn active" onclick="selectIndustry('DC')">
+                        🖥️ Data Centre
+                    </button>
+                    <button class="industry-btn" onclick="selectIndustry('RE')">
+                        ⚡ Renewable Energy
+                    </button>
+                    <button class="industry-btn" onclick="selectIndustry('INF')">
+                        🏗️ Infrastructure
+                    </button>
+                    <button class="industry-btn" onclick="selectIndustry('LOG')">
+                        📦 Logistics
+                    </button>
+                    <button class="industry-btn" onclick="selectIndustry('COMM')">
+                        🏢 Commercial
+                    </button>
+                </div>
+
+                <div class="project-list">
+                    <h3 style="margin-bottom: 1rem;">Your Projects</h3>
+                    <div id="projectList">
+                        <!-- Projects will be loaded here -->
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="createNewProject()">
+                        + New Project
+                    </button>
+                </div>
+
+                <div style="margin-top: 2rem; padding: 1rem; background: #f0f9ff; border-radius: 8px;">
+                    <h4 style="margin-bottom: 0.5rem;">Quick Actions</h4>
+                    <button class="btn btn-success" style="width: 100%; margin-bottom: 0.5rem;" onclick="showUploadModal()">
+                        📤 Upload Excel
+                    </button>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="downloadTemplates()">
+                        📥 Download Templates
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="content-header">
+                    <h2 id="projectTitle">New Project Specification</h2>
+                    <div class="save-controls">
+                        <span id="saveStatus" style="color: var(--success); margin-right: 1rem;"></span>
+                        <button onclick="generateTimeline()" class="btn btn-warning">📊 Generate Timeline</button>
+                        <button onclick="submitProject()" class="btn btn-success">✅ Submit Project</button>
+                    </div>
+                </div>
+
+                <!-- Progress Indicator -->
+                <div class="progress-indicator">
+                    <div class="progress-header">
+                        <span>Project Completion</span>
+                        <span id="completionPercentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('details')">Project Details</button>
+                    <button class="tab" onclick="switchTab('financial')">Financial Information</button>
+                    <button class="tab" onclick="switchTab('timeline')">Timeline & Phases</button>
+                    <button class="tab" onclick="switchTab('cashflow')">Cash Flow Analysis</button>
+                    <button class="tab" onclick="switchTab('documents')">Documents</button>
+                </div>
+
+                <!-- Project Details Tab -->
+                <div id="details-tab" class="tab-content active">
+                    <form id="projectForm">
+                        <div class="form-section">
+                            <h3 class="section-title">Basic Information</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Project Code</label>
+                                    <input type="text" name="project_code" placeholder="DAR001" onchange="updateProgress()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Project Name *</label>
+                                    <input type="text" name="project_name" required onchange="updateProgress()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Deal Type *</label>
+                                    <select name="deal_type" required onchange="updateProgress()">
+                                        <option value="">Select Type</option>
+                                        <option value="Data Centre">Data Centre</option>
+                                        <option value="Renewable Energy">Renewable Energy</option>
+                                        <option value="Infrastructure">Infrastructure</option>
+                                        <option value="Logistics">Logistics</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Location *</label>
+                                    <input type="text" name="project_location" required onchange="updateProgress()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="section-title">Site Information</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Site Address</label>
+                                    <input type="text" name="site_address" onchange="updateProgress()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Site Size (sqm)</label>
+                                    <input type="number" name="site_size_sqm" onchange="updateProgress()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Data Centre Capacity (MW)</label>
+                                    <input type="number" name="data_centre_capacity_mw" step="0.1" onchange="updateProgress()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Expected PUE</label>
+                                    <input type="number" name="expected_pue" value="1.3" step="0.01" onchange="updateProgress()">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Financial Information Tab -->
+                <div id="financial-tab" class="tab-content">
+                    <div class="form-section">
+                        <h3 class="section-title">Capital Expenditure (CapEx)</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Land Purchase (£)</label>
+                                <input type="number" name="capex_land_purchase" onchange="calculateTotalCapex()">
+                            </div>
+                            <div class="form-group">
+                                <label>Building & Construction (£)</label>
+                                <input type="number" name="capex_building" onchange="calculateTotalCapex()">
+                            </div>
+                            <div class="form-group">
+                                <label>Infrastructure (£)</label>
+                                <input type="number" name="capex_infrastructure" onchange="calculateTotalCapex()">
+                            </div>
+                            <div class="form-group">
+                                <label>IT Equipment (£)</label>
+                                <input type="number" name="capex_it_equipment" onchange="calculateTotalCapex()">
+                            </div>
+                            <div class="form-group">
+                                <label>Professional Fees (£)</label>
+                                <input type="number" name="capex_professional_fees" onchange="calculateTotalCapex()">
+                            </div>
+                            <div class="form-group">
+                                <label>Contingency (£)</label>
+                                <input type="number" name="capex_contingency" onchange="calculateTotalCapex()">
+                            </div>
+                            <div class="form-group" style="background: #f0f9ff; padding: 1rem; border-radius: 5px;">
+                                <label style="font-weight: bold;">Total CapEx (£)</label>
+                                <input type="number" name="capex_total" readonly style="font-weight: bold; font-size: 1.2rem;">
+                            </div>
+                            <div class="form-group">
+                                <label>Market CapEx Estimate (£)</label>
+                                <input type="number" name="market_capex_estimate" onchange="updateProgress()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">Revenue & Costs</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Offtaker Name</label>
+                                <input type="text" name="offtaker_name" onchange="updateProgress()">
+                            </div>
+                            <div class="form-group">
+                                <label>Rent per kWh (£) *</label>
+                                <input type="number" name="offtaker_rent_per_kwh" step="0.001" required onchange="updateProgress()">
+                            </div>
+                            <div class="form-group">
+                                <label>Power Cost per kWh (£) *</label>
+                                <input type="number" name="power_cost_per_kwh" step="0.001" required onchange="updateProgress()">
+                            </div>
+                            <div class="form-group">
+                                <label>Lease Term (Years)</label>
+                                <input type="number" name="lease_term_years" onchange="updateProgress()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline & Phases Tab -->
+                <div id="timeline-tab" class="tab-content">
+                    <div class="timeline-container">
+                        <h3 class="section-title">Project Development Timeline</h3>
+                        
+                        <div class="form-section">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Construction Start Date</label>
+                                    <input type="date" name="construction_start_date" onchange="updateTimeline()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Target Completion Date</label>
+                                    <input type="date" name="construction_end_date" onchange="updateTimeline()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="timeline" id="timelineContainer">
+                            <div class="timeline-line"></div>
+                            
+                            <div class="timeline-phase">
+                                <div class="timeline-marker"></div>
+                                <div class="phase-card">
+                                    <div class="phase-header">
+                                        <span class="phase-name">Pre-Development</span>
+                                        <span class="phase-amount">£0</span>
+                                    </div>
+                                    <div class="phase-details">
+                                        <div>
+                                            <label>Duration (months)</label>
+                                            <input type="number" name="pre_dev_months" value="6" min="1" max="24" onchange="updateTimeline()">
+                                        </div>
+                                        <div>
+                                            <label>Status</label>
+                                            <select name="pre_dev_status" onchange="updatePhaseStatus(this)">
+                                                <option value="planned">Planned</option>
+                                                <option value="in-progress">In Progress</option>
+                                                <option value="completed">Completed</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label>CapEx %</label>
+                                            <input type="number" value="5" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="timeline-phase">
+                                <div class="timeline-marker"></div>
+                                <div class="phase-card">
+                                    <div class="phase-header">
+                                        <span class="phase-name">Design & Planning</span>
+                                        <span class="phase-amount">£0</span>
+                                    </div>
+                                    <div class="phase-details">
+                                        <div>
+                                            <label>Duration (months)</label>
+                                            <input type="number" name="design_months" value="9" min="1" max="24" onchange="updateTimeline()">
+                                        </div>
+                                        <div>
+                                            <label>Status</label>
+                                            <select name="design_status" onchange="updatePhaseStatus(this)">
+                                                <option value="planned">Planned</option>
+                                                <option value="in-progress">In Progress</option>
+                                                <option value="completed">Completed</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label>CapEx %</label>
+                                            <input type="number" value="10" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="timeline-phase">
+                                <div class="timeline-marker"></div>
+                                <div class="phase-card">
+                                    <div class="phase-header">
+                                        <span class="phase-name">Legal & Permits</span>
+                                        <span class="phase-amount">£0</span>
+                                    </div>
+                                    <div class="phase-details">
+                                        <div>
+                                            <label>Duration (months)</label>
+                                            <input type="number" name="legal_months" value="6" min="1" max="24" onchange="updateTimeline()">
+                                        </div>
+                                        <div>
+                                            <label>Status</label>
+                                            <select name="legal_status" onchange="updatePhaseStatus(this)">
+                                                <option value="planned">Planned</option>
+                                                <option value="in-progress">In Progress</option>
+                                                <option value="completed">Completed</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label>CapEx %</label>
+                                            <input type="number" value="5" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="timeline-phase">
+                                <div class="timeline-marker"></div>
+                                <div class="phase-card">
+                                    <div class="phase-header">
+                                        <span class="phase-name">Construction Phase 1</span>
+                                        <span class="phase-amount">£0</span>
+                                    </div>
+                                    <div class="phase-details">
+                                        <div>
+                                            <label>Duration (months)</label>
+                                            <input type="number" name="construction1_months" value="12" min="1" max="36" onchange="updateTimeline()">
+                                        </div>
+                                        <div>
+                                            <label>Status</label>
+                                            <select name="construction1_status" onchange="updatePhaseStatus(this)">
+                                                <option value="planned">Planned</option>
+                                                <option value="in-progress">In Progress</option>
+                                                <option value="completed">Completed</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label>CapEx %</label>
+                                            <input type="number" value="40" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="timeline-phase">
+                                <div class="timeline-marker"></div>
+                                <div class="phase-card">
+                                    <div class="phase-header">
+                                        <span class="phase-name">Testing & Commissioning</span>
+                                        <span class="phase-amount">£0</span>
+                                    </div>
+                                    <div class="phase-details">
+                                        <div>
+                                            <label>Duration (months)</label>
+                                            <input type="number" name="testing_months" value="3" min="1" max="12" onchange="updateTimeline()">
+                                        </div>
+                                        <div>
+                                            <label>Status</label>
+                                            <select name="testing_status" onchange="updatePhaseStatus(this)">
+                                                <option value="planned">Planned</option>
+                                                <option value="in-progress">In Progress</option>
+                                                <option value="completed">Completed</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label>CapEx %</label>
+                                            <input type="number" value="5" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="status-updates">
+                            <h4>Recent Updates</h4>
+                            <div id="statusUpdates">
+                                <!-- Updates will be shown here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cash Flow Analysis Tab -->
+                <div id="cashflow-tab" class="tab-content">
+                    <div class="chart-container">
+                        <h3 class="section-title">Monthly Cash Flow Projection</h3>
+                        <canvas id="cashFlowChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3 class="section-title">Cumulative CapEx Drawdown</h3>
+                        <canvas id="cumulativeChart"></canvas>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">Cash Flow Summary</h3>
+                        <div id="cashFlowSummary">
+                            <!-- Summary will be generated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents Tab -->
+                <div id="documents-tab" class="tab-content">
+                    <div class="form-section">
+                        <h3 class="section-title">Project Documents</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <a href="/download-template/initial" class="btn btn-primary">
+                                📝 Download Initial Submission
+                            </a>
+                            <a href="/download-template/final" class="btn btn-primary">
+                                📄 Download Final Submission
+                            </a>
+                            <a href="/download-template/pipeline" class="btn btn-primary">
+                                📊 Download Pipeline Template
+                            </a>
+                            <a href="/download-template/individual" class="btn btn-primary">
+                                📋 Download Project Template
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">Upload Documents</h3>
+                        <input type="file" id="documentUpload" multiple accept=".pdf,.doc,.docx,.xls,.xlsx">
+                        <div id="uploadedDocuments" style="margin-top: 1rem;">
+                            <!-- Uploaded documents will be listed here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProject = {};
+        let currentIndustry = 'DC';
+        let cashFlowChart = null;
+        let cumulativeChart = null;
+        let autoSaveTimer = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProjects();
+            initializeCharts();
+            setupAutoSave();
+        });
+
+        // Industry Selection
+        function selectIndustry(industry) {
+            currentIndustry = industry;
+            document.querySelectorAll('.industry-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            loadProjects();
+        }
+
+        // Load Projects
+        async function loadProjects() {
+            try {
+                const response = await fetch('/api/project-specifications/list');
+                const projects = await response.json();
+                
+                const projectList = document.getElementById('projectList');
+                projectList.innerHTML = '';
+                
+                projects.filter(p => p.industry === currentIndustry).forEach(project => {
+                    const item = document.createElement('div');
+                    item.className = 'project-item';
+                    item.onclick = () => loadProject(project.id);
+                    item.innerHTML = `
+                        <div style="font-weight: bold;">${project.project_name || 'Untitled'}</div>
+                        <div style="font-size: 0.875rem; color: #6b7280;">${project.id}</div>
+                        <span class="project-status status-${project.status}">${project.status}</span>
+                    `;
+                    projectList.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+
+        // Create New Project
+        function createNewProject() {
+            currentProject = {
+                industry: currentIndustry,
+                status: 'draft'
+            };
+            document.getElementById('projectForm').reset();
+            document.getElementById('projectTitle').textContent = 'New Project Specification';
+            updateProgress();
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            if (tabName === 'cashflow') {
+                updateCashFlowCharts();
+            }
+        }
+
+        // Calculate Total CapEx
+        function calculateTotalCapex() {
+            const fields = [
+                'capex_land_purchase',
+                'capex_building',
+                'capex_infrastructure',
+                'capex_it_equipment',
+                'capex_professional_fees',
+                'capex_contingency'
+            ];
+            
+            let total = 0;
+            fields.forEach(field => {
+                const input = document.querySelector(`[name="${field}"]`);
+                if (input) {
+                    total += parseFloat(input.value) || 0;
+                }
+            });
+            
+            document.querySelector('[name="capex_total"]').value = total;
+            updateTimeline();
+            updateProgress();
+        }
+
+        // Update Timeline
+        function updateTimeline() {
+            const capexTotal = parseFloat(document.querySelector('[name="capex_total"]').value) || 0;
+            const phasePercentages = [5, 10, 5, 15, 40, 20, 5];
+            
+            document.querySelectorAll('.phase-amount').forEach((element, index) => {
+                if (index < phasePercentages.length) {
+                    const amount = capexTotal * (phasePercentages[index] / 100);
+                    element.textContent = '£' + amount.toLocaleString('en-GB', {maximumFractionDigits: 0});
+                }
+            });
+        }
+
+        // Update Phase Status
+        function updatePhaseStatus(select) {
+            const marker = select.closest('.timeline-phase').querySelector('.timeline-marker');
+            marker.className = 'timeline-marker';
+            
+            if (select.value === 'completed') {
+                marker.classList.add('completed');
+            } else if (select.value === 'in-progress') {
+                marker.classList.add('in-progress');
+            }
+            
+            // Add status update
+            addStatusUpdate(`Phase "${select.closest('.phase-card').querySelector('.phase-name').textContent}" status changed to ${select.value}`);
+        }
+
+        // Add Status Update
+        function addStatusUpdate(message) {
+            const updates = document.getElementById('statusUpdates');
+            const update = document.createElement('div');
+            update.className = 'update-item';
+            update.innerHTML = `
+                <span>${message}</span>
+                <span class="update-time">${new Date().toLocaleTimeString()}</span>
+            `;
+            updates.insertBefore(update, updates.firstChild);
+        }
+
+        // Update Progress
+        function updateProgress() {
+            const form = document.getElementById('projectForm');
+            const formData = new FormData(form);
+            
+            const requiredFields = ['project_name', 'deal_type', 'project_location', 'capex_total', 'offtaker_rent_per_kwh', 'power_cost_per_kwh'];
+            let filled = 0;
+            
+            requiredFields.forEach(field => {
+                if (formData.get(field)) filled++;
+            });
+            
+            const percentage = Math.round((filled / requiredFields.length) * 100);
+            document.getElementById('completionPercentage').textContent = percentage + '%';
+            document.getElementById('progressFill').style.width = percentage + '%';
+        }
+
+        // Initialize Charts
+        function initializeCharts() {
+            const cashFlowCtx = document.getElementById('cashFlowChart');
+            const cumulativeCtx = document.getElementById('cumulativeChart');
+            
+            if (cashFlowCtx) {
+                cashFlowChart = new Chart(cashFlowCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Monthly Cash Flow (£)',
+                            data: [],
+                            backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '£' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            if (cumulativeCtx) {
+                cumulativeChart = new Chart(cumulativeCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Cumulative CapEx (£)',
+                            data: [],
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '£' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Update Cash Flow Charts
+        async function updateCashFlowCharts() {
+            const formData = collectFormData();
+            
+            try {
+                const response = await fetch('/api/project-specifications/timeline', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success' && result.timeline) {
+                    const timeline = result.timeline;
+                    
+                    // Update monthly cash flow chart
+                    if (cashFlowChart && timeline.cash_flow_schedule) {
+                        const labels = timeline.cash_flow_schedule.map(cf => cf.date);
+                        const data = timeline.cash_flow_schedule.map(cf => cf.amount);
+                        
+                        cashFlowChart.data.labels = labels;
+                        cashFlowChart.data.datasets[0].data = data;
+                        cashFlowChart.update();
+                    }
+                    
+                    // Update cumulative chart
+                    if (cumulativeChart && timeline.cash_flow_schedule) {
+                        const labels = timeline.cash_flow_schedule.map(cf => cf.date);
+                        const data = timeline.cash_flow_schedule.map(cf => cf.cumulative);
+                        
+                        cumulativeChart.data.labels = labels;
+                        cumulativeChart.data.datasets[0].data = data;
+                        cumulativeChart.update();
+                    }
+                    
+                    // Update summary
+                    updateCashFlowSummary(timeline);
+                }
+            } catch (error) {
+                console.error('Error updating cash flow:', error);
+            }
+        }
+
+        // Update Cash Flow Summary
+        function updateCashFlowSummary(timeline) {
+            const summary = document.getElementById('cashFlowSummary');
+            
+            let html = '<table style="width: 100%;">';
+            html += '<thead><tr><th>Phase</th><th>Duration</th><th>Amount</th><th>% of Total</th></tr></thead>';
+            html += '<tbody>';
+            
+            timeline.phases.forEach(phase => {
+                html += `<tr>
+                    <td>${phase.name}</td>
+                    <td>${phase.duration_months} months</td>
+                    <td>£${phase.capex_amount.toLocaleString('en-GB', {maximumFractionDigits: 0})}</td>
+                    <td>${phase.capex_percentage}%</td>
+                </tr>`;
+            });
+            
+            html += `<tr style="font-weight: bold; background: #f0f4f8;">
+                <td>TOTAL</td>
+                <td>${timeline.total_duration_months} months</td>
+                <td>£${timeline.total_capex.toLocaleString('en-GB', {maximumFractionDigits: 0})}</td>
+                <td>100%</td>
+            </tr>`;
+            
+            html += '</tbody></table>';
+            summary.innerHTML = html;
+        }
+
+        // Collect Form Data
+        function collectFormData() {
+            const formData = {};
+            document.querySelectorAll('input, select, textarea').forEach(element => {
+                if (element.name) {
+                    formData[element.name] = element.value;
+                }
+            });
+            return { project_data: formData, industry: currentIndustry };
+        }
+
+        // Save Draft
+        async function saveDraft() {
+            const formData = collectFormData();
+            formData.draft_id = currentProject.draft_id;
+            
+            try {
+                const response = await fetch('/api/project-specifications/save-draft', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    currentProject.draft_id = result.draft_id;
+                    document.getElementById('saveStatus').textContent = '✓ Saved';
+                    setTimeout(() => {
+                        document.getElementById('saveStatus').textContent = '';
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Error saving draft:', error);
+            }
+        }
+
+        // Setup Auto Save
+        function setupAutoSave() {
+            document.querySelectorAll('input, select, textarea').forEach(element => {
+                element.addEventListener('change', () => {
+                    clearTimeout(autoSaveTimer);
+                    autoSaveTimer = setTimeout(saveDraft, 5000);
+                });
+            });
+        }
+
+        // Generate Timeline
+        async function generateTimeline() {
+            await updateCashFlowCharts();
+            switchTab('timeline');
+        }
+
+        // Submit Project
+        async function submitProject() {
+            const formData = collectFormData();
+            
+            try {
+                const response = await fetch('/api/project-specifications/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData.project_data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    alert('Project submitted successfully!\nProject ID: ' + result.spec_id);
+                    loadProjects();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error submitting project: ' + error.message);
+            }
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
+            }
+        }
+    </script>
+</body>
+</html>
