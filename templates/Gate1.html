@@ -948,6 +948,61 @@
     
     <!-- Main content -->
     <div class="main-content">
+        {% if recently_unlocked %}
+        <!-- Welcome back notification for unlocked users -->
+        <div id="unlockNotification" style="
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.95) 0%, rgba(22, 163, 74, 0.95) 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 10000;
+            text-align: center;
+            animation: slideDown 0.5s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        ">
+            <h3 style="margin: 0 0 10px 0; font-size: 1.3em;">🔓 Welcome Back!</h3>
+            <p style="margin: 0; opacity: 0.95;">Your access has been restored. You have a fresh 15-minute timer.</p>
+        </div>
+        <script>
+            // Auto-hide the notification after 5 seconds
+            setTimeout(function() {
+                const notification = document.getElementById('unlockNotification');
+                if (notification) {
+                    notification.style.animation = 'slideUp 0.5s ease-in';
+                    setTimeout(function() {
+                        notification.style.display = 'none';
+                    }, 500);
+                }
+            }, 5000);
+        </script>
+        <style>
+            @keyframes slideDown {
+                from {
+                    transform: translateX(-50%) translateY(-100px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(-50%) translateY(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideUp {
+                from {
+                    transform: translateX(-50%) translateY(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(-50%) translateY(-100px);
+                    opacity: 0;
+                }
+            }
+        </style>
+        {% endif %}
         <div class="auth-wrapper">
             <div class="auth-container">
                 <h1 class="auth-title">

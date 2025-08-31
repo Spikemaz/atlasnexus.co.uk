@@ -862,6 +862,15 @@ def index():
     # Track IP access
     track_ip_access(ip_address, 'gate1')
     
+    # Check if this IP was recently unlocked
+    recently_unlocked = session.get(f'recently_unlocked_{ip_address}', False)
+    if recently_unlocked:
+        # Clear the unlock flag but keep the variable for display
+        session.pop(f'recently_unlocked_{ip_address}', None)
+        unlock_time = session.pop(f'unlock_time_{ip_address}', None)
+        # Reset the countdown timer for a fresh 15 minutes
+        session.pop(f'countdown_start_{ip_address}', None)  # Clear old timer to force reset
+    
     # Check if IP is banned
     if check_ip_ban(ip_address):
         return "Access Denied - Your IP has been banned", 403
@@ -951,7 +960,7 @@ def index():
     if session.get(f'site_authenticated_{ip_address}'):
         return redirect(url_for('secure_login'))
     
-    return render_template('Gate1.html', state='normal')
+    return render_template('Gate1.html', state='normal', recently_unlocked=recently_unlocked)
 
 @app.route('/site-auth', methods=['POST'])
 def site_auth():
@@ -2975,19 +2984,29 @@ def admin_unlock_ip():
         'timestamp': datetime.now().isoformat()
     })
     
+    # Store unlock notification in session for the unlocked IP
+    session[f'recently_unlocked_{ip_address}'] = True
+    session[f'unlock_time_{ip_address}'] = datetime.now().isoformat()
+    
     return f"""
     <html>
     <head>
         <title>IP Unlocked Successfully</title>
-        <meta http-equiv="refresh" content="5;url=https://atlasnexus.co.uk/admin-panel">
+        <meta http-equiv="refresh" content="3;url=https://atlasnexus.co.uk/">
     </head>
     <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
-        <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px; border: 2px solid #22c55e;">
+        <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px; border: 2px solid #22c55e; max-width: 600px;">
             <h1 style="color: #22c55e;">✅ IP Unlocked Successfully</h1>
             <p style="font-size: 18px;">IP Address: <code style="background: #333; padding: 5px 10px; border-radius: 5px;">{ip_address}</code></p>
-            <p>The IP has been removed from the lockout list.</p>
-            <p style="color: #999; margin-top: 20px;">Redirecting to admin panel in 5 seconds...</p>
-            <a href="https://atlasnexus.co.uk/admin-panel" style="display: inline-block; margin-top: 20px; background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to Admin Panel</a>
+            <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0 0 10px 0; color: #22c55e;"><strong>For the unlocked user:</strong></p>
+                <p style="margin: 0; color: #e2e8f0;">You can now access the site with a fresh 15-minute timer.</p>
+            </div>
+            <p style="color: #f59e0b; font-size: 1.1em;">Redirecting in 3 seconds...</p>
+            <div style="margin-top: 20px;">
+                <a href="https://atlasnexus.co.uk/" style="display: inline-block; background: #22c55e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 5px;">Go to Site Now</a>
+                <a href="https://atlasnexus.co.uk/admin-panel" style="display: inline-block; background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 5px;">Admin Panel</a>
+            </div>
         </div>
     </body>
     </html>
