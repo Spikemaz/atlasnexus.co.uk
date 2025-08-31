@@ -294,7 +294,12 @@
 
         /* Animation Classes */
         .fade-in-up {
-            animation: fadeInUp 0.8s ease;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .fade-in-up.animated {
+            animation: fadeInUp 0.8s ease forwards;
         }
 
         @keyframes fadeInUp {
@@ -3471,6 +3476,14 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM loaded, initializing...');
         
+        // Trigger animations only once on initial page load
+        setTimeout(() => {
+            const fadeElements = document.querySelectorAll('.fade-in-up');
+            fadeElements.forEach(element => {
+                element.classList.add('animated');
+            });
+        }, 100);
+        
         // Set initial padding for sections based on toolbar state
         var nav = document.getElementById('navBar');
         var mainDashboard = document.getElementById('main-dashboard');
@@ -3578,19 +3591,17 @@
     
     // Show section based on navigation
     function showSection(section) {
-        // Hide all sections
-        document.getElementById('main-dashboard').style.display = 'none';
-        document.getElementById('market-section').style.display = 'none';
-        document.getElementById('data-section').style.display = 'none';
-        document.getElementById('analytics-section').style.display = 'none';
-        document.getElementById('risk-section').style.display = 'none';
-        document.getElementById('portfolio-section').style.display = 'none';
-        document.getElementById('compliance-section').style.display = 'none';
-        document.getElementById('permutation-section').style.display = 'none';
-        document.getElementById('documents-section').style.display = 'none';
-        document.getElementById('timeline-section').style.display = 'none';
-        document.getElementById('reports-section').style.display = 'none';
-        document.getElementById('support-section').style.display = 'none';
+        // Hide all sections without re-triggering animations
+        const allSections = ['main-dashboard', 'market-section', 'data-section', 'analytics-section', 
+                           'risk-section', 'portfolio-section', 'compliance-section', 'permutation-section',
+                           'documents-section', 'timeline-section', 'reports-section', 'support-section'];
+        
+        allSections.forEach(sectionId => {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.style.display = 'none';
+            }
+        });
         
         // Reset all navigation buttons to inactive state
         document.querySelectorAll('.nav-btn').forEach(btn => {
