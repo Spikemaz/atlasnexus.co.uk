@@ -3785,6 +3785,81 @@ def admin_system_config():
         log_admin_action(ip_address, 'config_update', {'updated_settings': list(new_config.keys())})
         return jsonify({'status': 'success', 'message': 'Configuration updated'})
 
+@app.route('/download-template/<template_type>')
+def download_template(template_type):
+    """Download template files"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return redirect(url_for('secure_login'))
+    
+    templates_dir = os.path.join('static', 'templates')
+    
+    # Map template types to files
+    templates = {
+        'pipeline': 'AtlasNexus_Pipeline_Template.xlsx',
+        'individual': 'AtlasNexus_Individual_Project_Template.xlsx',
+        'initial': 'initial_submission_template.html',
+        'final': 'final_submission_template.html'
+    }
+    
+    if template_type not in templates:
+        return "Template not found", 404
+    
+    file_path = os.path.join(templates_dir, templates[template_type])
+    
+    # Check if file exists, if not create it
+    if not os.path.exists(file_path):
+        # Create templates if they don't exist
+        create_template_files()
+    
+    try:
+        return send_file(file_path, as_attachment=True, download_name=templates[template_type])
+    except Exception as e:
+        return f"Error downloading template: {str(e)}", 500
+
+def create_template_files():
+    """Create template files if they don't exist"""
+    templates_dir = os.path.join('static', 'templates')
+    os.makedirs(templates_dir, exist_ok=True)
+    
+    # Create Pipeline Template
+    pipeline_data = {
+        'Project Code': ['DAR001', 'DAR002'],
+        'Project Name': ['London DC1', 'Manchester DC2'],
+        'Deal Type': ['Data Centre', 'Data Centre'],
+        'Country': ['UK', 'UK'],
+        'Location': ['London', 'Manchester'],
+        'Site Size (sqm)': [50000, 45000],
+        'Data Centre Capacity (MW)': [100, 80],
+        'Construction Start': ['2025-01-01', '2025-03-01'],
+        'Construction End': ['2026-12-31', '2027-03-31'],
+        'Total CapEx (£)': [325000000, 260000000],
+        'Offtaker Name': ['HyperCloud Inc', 'DataStream Ltd'],
+        'Rent per kWh (£)': [0.15, 0.14],
+        'Lease Term (Years)': [15, 12],
+        'Power Cost per kWh (£)': [0.08, 0.075]
+    }
+    
+    try:
+        with pd.ExcelWriter(os.path.join(templates_dir, 'AtlasNexus_Pipeline_Template.xlsx'), engine='openpyxl') as writer:
+            pd.DataFrame(pipeline_data).to_excel(writer, sheet_name='Pipeline', index=False)
+    except:
+        pass
+    
+    # Create Individual Template
+    individual_data = {
+        'Field': ['Project Code', 'Project Name', 'Deal Type', 'Location', 'Total CapEx (£)'],
+        'Value': ['DAR001', 'Project Name', 'Data Centre', 'Location', 100000000]
+    }
+    
+    try:
+        with pd.ExcelWriter(os.path.join(templates_dir, 'AtlasNexus_Individual_Project_Template.xlsx'), engine='openpyxl') as writer:
+            pd.DataFrame(individual_data).to_excel(writer, sheet_name='Project', index=False)
+    except:
+        pass
+
 @app.route('/securitization-engine')
 def securitization_engine():
     """Securitization/Permutation Engine - Admin only"""

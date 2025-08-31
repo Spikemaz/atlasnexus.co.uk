@@ -1,14 +1,62 @@
 {
   "127.0.0.1": {
     "first_seen": "2025-08-25T21:54:36.243846",
-    "last_seen": "2025-08-25T21:54:36.244099",
+    "last_seen": "2025-08-31T10:18:11.865335",
     "pages_visited": [
       {
         "page": "gate1",
         "timestamp": "2025-08-25T21:54:36.244104"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T09:55:05.774817"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T09:56:20.482314"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T09:57:22.333259"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T09:58:05.369502"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T09:59:37.784673"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T10:11:32.936070"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T10:14:20.210949"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T10:15:51.944703"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T10:16:12.175072"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T10:16:43.153902"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T10:17:42.510970"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-08-31T10:18:11.865349"
       }
     ],
-    "total_visits": 1,
+    "total_visits": 13,
     "user_emails": [],
     "is_banned": false,
     "reached_pages": {

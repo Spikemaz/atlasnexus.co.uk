@@ -38,7 +38,10 @@
       "Bash(timeout:*)",
       "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\templates\\dashboard_permutation_section.html\")",
       "Read(C:\\Users\\marcu\\Desktop\\Marcus Folder/**)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(start http://localhost:5000)",
+      "Read(C:\\Users\\marcu\\Desktop\\Marcus Folder/**)",
+      "Read(C:\\Users\\marcu\\Desktop\\Marcus Folder/**)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"
