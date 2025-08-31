@@ -7,6 +7,22 @@
   ],
   "routes": [
     {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/static/favicon.ico"
+    },
+    {
+      "src": "/favicon-padlock.svg",
+      "dest": "/static/favicon-padlock.svg"
+    },
+    {
+      "src": "/favicon-hexagon.svg",
+      "dest": "/static/favicon-hexagon.svg"
+    },
+    {
       "src": "/(.*)",
       "dest": "app.py"
     }

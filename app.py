@@ -2263,7 +2263,7 @@ def risk_management():
     # For now, redirect to dashboard with risk section
     return redirect(url_for('dashboard') + '#risk')
 
-# ==================== MARKET DATA PROXY ====================
+# ==================== FAVICON ROUTES ====================
 @app.route('/favicon.ico')
 def favicon():
     """Serve favicon - ICO for better compatibility"""
@@ -2271,6 +2271,18 @@ def favicon():
         return send_file('static/favicon.ico', mimetype='image/x-icon')
     else:
         return send_file('static/favicon.svg', mimetype='image/svg+xml')
+
+@app.route('/favicon-padlock.svg')
+def favicon_padlock():
+    """Serve padlock favicon for Gate1"""
+    return send_file('static/favicon-padlock.svg', mimetype='image/svg+xml')
+
+@app.route('/favicon-hexagon.svg')
+def favicon_hexagon():
+    """Serve hexagon favicon for main site"""
+    return send_file('static/favicon-hexagon.svg', mimetype='image/svg+xml')
+
+# ==================== MARKET DATA PROXY ====================
 
 @app.route('/api/market-data/fred/<series_id>')
 def proxy_fred_api(series_id):
