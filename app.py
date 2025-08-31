@@ -731,9 +731,13 @@ def generate_secure_password():
 
 def send_email(to_email, subject, html_content, retry_count=1):
     """Send email notification immediately with minimal retry"""
+    print(f"[EMAIL] Attempting to send email to {to_email} with subject: {subject[:50]}...")
+    
     if not EMAIL_CONFIG['sender_password']:
-        print(f"[EMAIL] Would send to {to_email}: {subject}")
+        print(f"[EMAIL] No password configured - Would send to {to_email}: {subject}")
         return True  # Simulate success in development
+    
+    print(f"[EMAIL] Using sender: {EMAIL_CONFIG['sender_email']}, SMTP: {EMAIL_CONFIG['smtp_server']}:{EMAIL_CONFIG['smtp_port']}")
     
     for attempt in range(retry_count + 1):
         try:
@@ -745,16 +749,20 @@ def send_email(to_email, subject, html_content, retry_count=1):
             html_part = MIMEText(html_content, 'html')
             msg.attach(html_part)
             
+            print(f"[EMAIL] Connecting to SMTP server (attempt {attempt + 1})...")
             # Use a shorter timeout for faster connection
-            server = smtplib.SMTP(EMAIL_CONFIG['smtp_server'], EMAIL_CONFIG['smtp_port'], timeout=5)
+            server = smtplib.SMTP(EMAIL_CONFIG['smtp_server'], EMAIL_CONFIG['smtp_port'], timeout=10)
             try:
+                print(f"[EMAIL] Starting TLS...")
                 server.ehlo()
                 server.starttls()
                 server.ehlo()
+                print(f"[EMAIL] Logging in as {EMAIL_CONFIG['sender_email']}...")
                 server.login(EMAIL_CONFIG['sender_email'], EMAIL_CONFIG['sender_password'])
+                print(f"[EMAIL] Sending message...")
                 server.send_message(msg)
                 server.quit()
-                print(f"[EMAIL] Sent successfully to {to_email} (attempt {attempt + 1})")
+                print(f"[EMAIL SUCCESS] ✅ Sent to {to_email} - Subject: {subject}")
                 return True
             finally:
                 try:
@@ -763,14 +771,21 @@ def send_email(to_email, subject, html_content, retry_count=1):
                     pass  # Ignore cleanup errors
                     
         except smtplib.SMTPAuthenticationError as e:
-            print(f"[EMAIL ERROR] Authentication failed: {e}")
+            print(f"[EMAIL ERROR] ❌ Authentication failed for {EMAIL_CONFIG['sender_email']}: {e}")
+            print(f"[EMAIL ERROR] Check app password in email_config.py")
             break  # Don't retry auth errors
+        except smtplib.SMTPException as e:
+            print(f"[EMAIL ERROR] ❌ SMTP error on attempt {attempt + 1}: {e}")
         except Exception as e:
-            print(f"[EMAIL ERROR] Attempt {attempt + 1} failed to send to {to_email}: {e}")
-            if attempt < retry_count:
-                # No delay for immediate sending
-                continue
+            print(f"[EMAIL ERROR] ❌ Unexpected error on attempt {attempt + 1}: {type(e).__name__}: {e}")
+            import traceback
+            traceback.print_exc()
             
+        if attempt < retry_count:
+            print(f"[EMAIL] Retrying...")
+            continue
+    
+    print(f"[EMAIL FAILED] ❌ Failed to send email to {to_email} after {retry_count + 1} attempts")
     return False
 
 def send_email_async(to_email, subject, html_content):
@@ -1656,12 +1671,13 @@ def register():
     """
     
         # Send admin notification immediately
-        print(f"[REGISTRATION] Sending admin notification for {data['email']}...")
+        print(f"[REGISTRATION] Sending admin notification for {data['email']} to {EMAIL_CONFIG['admin_email']}...")
+        print(f"[REGISTRATION] Email config - Server: {EMAIL_CONFIG['smtp_server']}, From: {EMAIL_CONFIG['sender_email']}")
         admin_sent = send_email(EMAIL_CONFIG['admin_email'], 'New Registration - Action Required', admin_html)
         if admin_sent:
-            print(f"[REGISTRATION] Admin notification sent successfully")
+            print(f"[REGISTRATION] Admin notification sent successfully to {EMAIL_CONFIG['admin_email']}")
         else:
-            print(f"[REGISTRATION] Failed to send admin notification for {data['email']}")
+            print(f"[REGISTRATION] Failed to send admin notification for {data['email']} to {EMAIL_CONFIG['admin_email']}")
         
         # Store registration in session for awaiting page
         session[f'registration_pending_{ip_address}'] = data['email']
