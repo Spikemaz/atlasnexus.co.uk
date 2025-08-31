@@ -36,7 +36,9 @@
       "Bash(powershell:*)",
       "Bash(start test_syntax2.html)",
       "Bash(timeout:*)",
-      "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\templates\\dashboard_permutation_section.html\")"
+      "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\templates\\dashboard_permutation_section.html\")",
+      "Read(C:\\Users\\marcu\\Desktop\\Marcus Folder/**)",
+      "Bash(pip install:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"

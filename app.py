@@ -21,6 +21,9 @@ from email.mime.multipart import MIMEMultipart
 import threading
 import time
 import requests
+import pandas as pd
+import io
+from werkzeug.utils import secure_filename
 
 # Try to import securitization_engine if available
 try:
@@ -479,6 +482,7 @@ REGISTRATIONS_FILE = DATA_DIR / 'registrations.json'
 USERS_FILE = DATA_DIR / 'users.json'
 ADMIN_ACTIONS_FILE = DATA_DIR / 'admin_actions.json'
 LOGIN_ATTEMPTS_FILE = DATA_DIR / 'login_attempts.json'
+PROJECT_SPECS_FILE = DATA_DIR / 'project_specifications.json'
 
 # Email configuration - Try to import from email_config.py first
 try:
@@ -1324,8 +1328,24 @@ def register():
         users = load_json_db(USERS_FILE)
         
         # Check if email already exists in either database
-        if data['email'] in registrations or data['email'] in users:
-            return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
+        if data['email'] in registrations:
+            registration = registrations[data['email']]
+            # Check if email is verified
+            if registration.get('email_verified'):
+                return jsonify({'status': 'error', 'message': 'This email has already been verified. Please login instead.'}), 400
+            else:
+                # If not verified, check if it's expired (older than 1 hour)
+                created_at = datetime.fromisoformat(registration.get('created_at'))
+                if datetime.now() - created_at > timedelta(hours=1):
+                    # Remove expired registration to allow re-registration
+                    del registrations[data['email']]
+                    save_json_db(REGISTRATIONS_FILE, registrations)
+                else:
+                    return jsonify({'status': 'error', 'message': 'Registration pending. Please check your email for verification link or wait for the current registration to expire.'}), 400
+        
+        # Check if user already exists in users database (fully registered)
+        if data['email'] in users:
+            return jsonify({'status': 'error', 'message': 'This email is already registered. Please login with your credentials.'}), 400
         
         # Save registration
         registrations[data['email']] = data
@@ -1618,6 +1638,59 @@ def resend_verification():
         return jsonify({'status': 'success', 'message': 'Verification email resent'})
     else:
         return jsonify({'status': 'error', 'message': 'Failed to send email'}), 500
+
+@app.route('/check-email-availability', methods=['POST'])
+def check_email_availability():
+    """Check if an email is available for registration"""
+    data = request.get_json()
+    email = data.get('email', '').lower().strip()
+    
+    if not email:
+        return jsonify({'available': False, 'message': 'Email is required'}), 400
+    
+    registrations = load_json_db(REGISTRATIONS_FILE)
+    users = load_json_db(USERS_FILE)
+    
+    # Check if email exists in users database (fully registered)
+    if email in users:
+        return jsonify({
+            'available': False, 
+            'message': 'This email is already registered. Please login instead.',
+            'verified': True,
+            'action': 'login'
+        })
+    
+    # Check if email exists in registrations
+    if email in registrations:
+        registration = registrations[email]
+        if registration.get('email_verified'):
+            return jsonify({
+                'available': False,
+                'message': 'This email has been verified. Please login instead.',
+                'verified': True,
+                'action': 'login'
+            })
+        else:
+            # Check if registration expired
+            created_at = datetime.fromisoformat(registration.get('created_at'))
+            if datetime.now() - created_at > timedelta(hours=1):
+                return jsonify({
+                    'available': True,
+                    'message': 'Previous registration expired. You can register again.',
+                    'expired': True
+                })
+            else:
+                return jsonify({
+                    'available': False,
+                    'message': 'Registration pending. Check your email for verification link.',
+                    'verified': False,
+                    'action': 'wait'
+                })
+    
+    return jsonify({
+        'available': True,
+        'message': 'Email is available for registration.'
+    })
 
 @app.route('/check-verification-status', methods=['GET', 'POST'])
 def check_verification_status():
@@ -3776,6 +3849,401 @@ def permutation_engine():
                          is_internal=is_internal,
                          account_type=account_type,
                          username=username)
+
+@app.route('/project-specifications')
+def project_specifications():
+    """Project specifications page for external clients and admins"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return redirect(url_for('secure_login'))
+    
+    # Get user info
+    user_email = session.get(f'user_email_{ip_address}')
+    is_admin = session.get(f'is_admin_{ip_address}', False)
+    users = load_json_db(USERS_FILE)
+    
+    # Check if user is external or admin (both can access this)
+    account_type = 'external'
+    if user_email in users:
+        account_type = users[user_email].get('account_type', 'external')
+    
+    # Only external clients and admins can access
+    if account_type not in ['external', 'admin'] and not is_admin:
+        return redirect(url_for('dashboard'))
+    
+    # Load existing project specifications
+    project_specs = load_json_db(PROJECT_SPECS_FILE)
+    
+    # Filter specs based on user type
+    user_specs = []
+    all_specs = []
+    
+    if is_admin:
+        # Admin sees all specifications
+        all_specs = list(project_specs.values())
+    else:
+        # External clients see only their own
+        for spec_id, spec in project_specs.items():
+            if spec.get('submitted_by') == user_email:
+                user_specs.append(spec)
+    
+    username = session.get(f'username_{ip_address}', 'User')
+    
+    return render_template('project_specifications.html',
+                         username=username,
+                         is_admin=is_admin,
+                         account_type=account_type,
+                         user_specs=user_specs,
+                         all_specs=all_specs)
+
+@app.route('/api/project-specifications/submit', methods=['POST'])
+def submit_project_specification():
+    """Submit a new project specification"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+    
+    # Get user info
+    user_email = session.get(f'user_email_{ip_address}')
+    username = session.get(f'username_{ip_address}')
+    is_admin = session.get(f'is_admin_{ip_address}', False)
+    
+    # Get account type
+    users = load_json_db(USERS_FILE)
+    account_type = 'external'
+    if user_email in users:
+        account_type = users[user_email].get('account_type', 'external')
+    
+    # Only external clients and admins can submit
+    if account_type not in ['external', 'admin'] and not is_admin:
+        return jsonify({'status': 'error', 'message': 'Access denied'}), 403
+    
+    data = request.json
+    
+    # Generate unique ID
+    spec_id = f"PROJ_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{secrets.token_hex(4)}"
+    
+    # Create specification object
+    specification = {
+        'id': spec_id,
+        'submitted_by': user_email,
+        'submitted_by_name': username,
+        'submission_date': datetime.now().isoformat(),
+        'status': 'pending_review',
+        
+        # Deal Information
+        'deal_type': data.get('deal_type', 'Data Centre'),
+        'project_name': data.get('project_name', ''),
+        'project_location': data.get('project_location', ''),
+        
+        # Site Information
+        'site_address': data.get('site_address', ''),
+        'site_size_sqm': data.get('site_size_sqm', 0),
+        'data_centre_capacity_mw': data.get('data_centre_capacity_mw', 0),
+        
+        # Construction Information
+        'construction_start_date': data.get('construction_start_date', ''),
+        'construction_end_date': data.get('construction_end_date', ''),
+        'construction_cost': data.get('construction_cost', 0),
+        'development_cost': data.get('development_cost', 0),
+        
+        # CapEx Figures
+        'capex_land_purchase': data.get('capex_land_purchase', 0),
+        'capex_building': data.get('capex_building', 0),
+        'capex_infrastructure': data.get('capex_infrastructure', 0),
+        'capex_it_equipment': data.get('capex_it_equipment', 0),
+        'capex_professional_fees': data.get('capex_professional_fees', 0),
+        'capex_contingency': data.get('capex_contingency', 0),
+        'capex_total': data.get('capex_total', 0),
+        
+        # Market CapEx (for comparison)
+        'market_capex_estimate': data.get('market_capex_estimate', 0),
+        
+        # Offtaker Information
+        'offtaker_name': data.get('offtaker_name', ''),
+        'offtaker_credit_rating': data.get('offtaker_credit_rating', ''),
+        'offtaker_rent_per_kwh': data.get('offtaker_rent_per_kwh', 0),
+        'offtaker_annual_escalation': data.get('offtaker_annual_escalation', 0),
+        'lease_term_years': data.get('lease_term_years', 0),
+        
+        # Power & Utilities
+        'power_cost_per_kwh': data.get('power_cost_per_kwh', 0),
+        'expected_pue': data.get('expected_pue', 1.5),  # Power Usage Effectiveness
+        
+        # Additional Notes
+        'notes': data.get('notes', ''),
+        
+        # Engine Integration Status
+        'engine_populated': False,
+        'engine_populated_date': None
+    }
+    
+    # Load and save specifications
+    project_specs = load_json_db(PROJECT_SPECS_FILE)
+    project_specs[spec_id] = specification
+    save_json_db(PROJECT_SPECS_FILE, project_specs)
+    
+    # Log the action
+    log_admin_action(ip_address, 'project_specification_submitted', {
+        'spec_id': spec_id,
+        'deal_type': specification['deal_type'],
+        'project_name': specification['project_name']
+    })
+    
+    # If admin, notify about new specification
+    if not is_admin:
+        # Send notification to admin (implement email notification if needed)
+        pass
+    
+    return jsonify({
+        'status': 'success',
+        'message': 'Project specification submitted successfully',
+        'spec_id': spec_id
+    })
+
+@app.route('/api/project-specifications/upload-excel', methods=['POST'])
+def upload_excel_specifications():
+    """Upload Excel file with project specifications"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+    
+    # Get user info
+    user_email = session.get(f'user_email_{ip_address}')
+    username = session.get(f'username_{ip_address}')
+    is_admin = session.get(f'is_admin_{ip_address}', False)
+    
+    # Get account type
+    users = load_json_db(USERS_FILE)
+    account_type = 'external'
+    if user_email in users:
+        account_type = users[user_email].get('account_type', 'external')
+    
+    # Only external clients and admins can upload
+    if account_type not in ['external', 'admin'] and not is_admin:
+        return jsonify({'status': 'error', 'message': 'Access denied'}), 403
+    
+    if 'file' not in request.files:
+        return jsonify({'status': 'error', 'message': 'No file uploaded'}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({'status': 'error', 'message': 'No file selected'}), 400
+    
+    # Check file extension
+    allowed_extensions = ['.xlsx', '.xls', '.csv']
+    file_ext = os.path.splitext(file.filename)[1].lower()
+    
+    if file_ext not in allowed_extensions:
+        return jsonify({'status': 'error', 'message': 'Invalid file type. Please upload Excel or CSV file'}), 400
+    
+    try:
+        # Read the file based on extension
+        if file_ext == '.csv':
+            df = pd.read_csv(io.BytesIO(file.read()))
+        else:
+            # Read Excel file - try to find the right sheet
+            excel_file = pd.ExcelFile(io.BytesIO(file.read()))
+            
+            # Look for pipeline or project sheet
+            sheet_name = None
+            for sheet in excel_file.sheet_names:
+                if any(keyword in sheet.lower() for keyword in ['pipeline', 'project', 'data', 'capex']):
+                    sheet_name = sheet
+                    break
+            
+            if not sheet_name:
+                sheet_name = excel_file.sheet_names[0]  # Use first sheet as fallback
+            
+            df = pd.read_excel(excel_file, sheet_name=sheet_name)
+        
+        # Process the dataframe and extract project information
+        projects_imported = []
+        project_specs = load_json_db(PROJECT_SPECS_FILE)
+        
+        # Try to map columns to our fields
+        column_mapping = {
+            'project_name': ['project name', 'project', 'name', 'deal name'],
+            'deal_type': ['deal type', 'type', 'asset type', 'asset class'],
+            'project_location': ['location', 'site', 'region', 'country'],
+            'capex_total': ['total capex', 'capex', 'total cost', 'investment'],
+            'capex_land_purchase': ['land', 'land purchase', 'land cost'],
+            'capex_building': ['building', 'construction', 'building cost'],
+            'capex_infrastructure': ['infrastructure', 'infra'],
+            'capex_it_equipment': ['it equipment', 'it', 'equipment'],
+            'offtaker_name': ['offtaker', 'tenant', 'customer'],
+            'offtaker_rent_per_kwh': ['rent', 'rent per kwh', 'rental'],
+            'power_cost_per_kwh': ['power cost', 'electricity', 'power'],
+            'lease_term_years': ['lease term', 'term', 'years'],
+            'construction_start_date': ['start date', 'construction start', 'start'],
+            'construction_end_date': ['end date', 'construction end', 'completion'],
+            'data_centre_capacity_mw': ['capacity', 'mw', 'it load', 'power capacity']
+        }
+        
+        # Normalize column names
+        df.columns = [col.lower().strip() for col in df.columns]
+        
+        for index, row in df.iterrows():
+            # Skip empty rows
+            if pd.isna(row.get('project name', row.get('project', ''))):
+                continue
+            
+            # Generate unique ID
+            spec_id = f"PROJ_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{secrets.token_hex(4)}_{index}"
+            
+            # Extract data with mapping
+            specification = {
+                'id': spec_id,
+                'submitted_by': user_email,
+                'submitted_by_name': username,
+                'submission_date': datetime.now().isoformat(),
+                'status': 'pending_review',
+                'source': 'excel_upload',
+                'original_filename': secure_filename(file.filename)
+            }
+            
+            # Map fields from Excel to our structure
+            for our_field, possible_columns in column_mapping.items():
+                value = None
+                for col in possible_columns:
+                    if col in df.columns and not pd.isna(row.get(col)):
+                        value = row[col]
+                        break
+                
+                # Convert dates if needed
+                if 'date' in our_field and value:
+                    try:
+                        if isinstance(value, str):
+                            value = pd.to_datetime(value).strftime('%Y-%m-%d')
+                        elif hasattr(value, 'strftime'):
+                            value = value.strftime('%Y-%m-%d')
+                    except:
+                        pass
+                
+                # Convert numbers if needed
+                if any(keyword in our_field for keyword in ['capex', 'cost', 'rent', 'capacity', 'term', 'size']):
+                    try:
+                        value = float(str(value).replace(',', '').replace('£', '').replace('$', '')) if value else 0
+                    except:
+                        value = 0
+                
+                specification[our_field] = value if value is not None else ''
+            
+            # Fill in missing fields with defaults
+            for field in ['deal_type', 'project_name', 'project_location', 'site_address', 
+                         'site_size_sqm', 'data_centre_capacity_mw', 'construction_cost',
+                         'development_cost', 'capex_professional_fees', 'capex_contingency',
+                         'market_capex_estimate', 'offtaker_credit_rating', 
+                         'offtaker_annual_escalation', 'expected_pue', 'notes']:
+                if field not in specification:
+                    specification[field] = 'Data Centre' if field == 'deal_type' else (1.5 if field == 'expected_pue' else '')
+            
+            # Add engine integration fields
+            specification['engine_populated'] = False
+            specification['engine_populated_date'] = None
+            
+            # Save specification
+            project_specs[spec_id] = specification
+            projects_imported.append({
+                'id': spec_id,
+                'name': specification.get('project_name', 'Unnamed Project')
+            })
+        
+        # Save all specifications
+        save_json_db(PROJECT_SPECS_FILE, project_specs)
+        
+        # Log the action
+        log_admin_action(ip_address, 'excel_upload', {
+            'filename': file.filename,
+            'projects_imported': len(projects_imported)
+        })
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'Successfully imported {len(projects_imported)} projects',
+            'projects': projects_imported
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Error processing file: {str(e)}'
+        }), 500
+
+@app.route('/api/project-specifications/upload-pipeline', methods=['POST'])
+def upload_pipeline():
+    """Upload entire project pipeline from Excel"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+    
+    # Similar to upload_excel but processes multiple projects at once
+    # This is specifically for pipeline uploads
+    return upload_excel_specifications()
+
+@app.route('/api/project-specifications/populate-engine', methods=['POST'])
+def populate_engine_from_spec():
+    """Populate permutation engine with project specification data - Admin only"""
+    ip_address = get_real_ip()
+    
+    # Only admins can populate engine
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    data = request.json
+    spec_id = data.get('spec_id')
+    
+    if not spec_id:
+        return jsonify({'status': 'error', 'message': 'Specification ID required'}), 400
+    
+    # Load specifications
+    project_specs = load_json_db(PROJECT_SPECS_FILE)
+    
+    if spec_id not in project_specs:
+        return jsonify({'status': 'error', 'message': 'Specification not found'}), 404
+    
+    spec = project_specs[spec_id]
+    
+    # Mark as populated
+    spec['engine_populated'] = True
+    spec['engine_populated_date'] = datetime.now().isoformat()
+    spec['status'] = 'in_engine'
+    
+    # Save updated specification
+    project_specs[spec_id] = spec
+    save_json_db(PROJECT_SPECS_FILE, project_specs)
+    
+    # Log the action
+    log_admin_action(ip_address, 'engine_populated_from_spec', {
+        'spec_id': spec_id,
+        'project_name': spec['project_name']
+    })
+    
+    # Return the specification data for the engine
+    return jsonify({
+        'status': 'success',
+        'message': 'Data populated to engine successfully',
+        'engine_data': {
+            'project_name': spec['project_name'],
+            'location': spec['project_location'],
+            'capacity_mw': spec['data_centre_capacity_mw'],
+            'capex_total': spec['capex_total'],
+            'offtaker_rent': spec['offtaker_rent_per_kwh'],
+            'power_cost': spec['power_cost_per_kwh'],
+            'lease_term': spec['lease_term_years'],
+            'construction_cost': spec['construction_cost'],
+            'development_cost': spec['development_cost']
+        }
+    })
 
 @app.route('/api/securitization/run', methods=['POST'])
 def run_securitization():
