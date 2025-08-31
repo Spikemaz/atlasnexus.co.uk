@@ -609,7 +609,7 @@ except ImportError:
         'smtp_port': 587,
         'sender_email': os.environ.get('SENDER_EMAIL', 'atlasnexushelp@gmail.com'),
         'sender_password': os.environ.get('SENDER_PASSWORD', ''),
-        'admin_email': os.environ.get('ADMIN_EMAIL', 'spikemaz8@aol.com')
+        'admin_email': os.environ.get('ADMIN_EMAIL', 'atlasnexushelp@gmail.com')
     }
     print("[EMAIL] Using default email configuration - edit email_config.py to enable emails")
 
