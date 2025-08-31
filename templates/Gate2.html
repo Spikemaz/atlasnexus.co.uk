@@ -2450,6 +2450,65 @@
             }
         });
 
+        // Check email availability
+        let emailCheckTimeout;
+        function checkEmailAvailability(email) {
+            // Clear any previous timeout
+            if (emailCheckTimeout) {
+                clearTimeout(emailCheckTimeout);
+            }
+            
+            // Don't check if email is empty or invalid
+            if (!email || !email.includes('@')) {
+                document.getElementById('emailAvailabilityMessage').style.display = 'none';
+                return;
+            }
+            
+            // Debounce the check
+            emailCheckTimeout = setTimeout(() => {
+                fetch('/check-email-availability', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const messageDiv = document.getElementById('emailAvailabilityMessage');
+                    messageDiv.style.display = 'block';
+                    
+                    if (data.available) {
+                        messageDiv.style.color = '#22c55e';
+                        messageDiv.innerHTML = '✓ ' + data.message;
+                    } else {
+                        messageDiv.style.color = '#ef4444';
+                        messageDiv.innerHTML = '✗ ' + data.message;
+                        
+                        // If email is already registered, offer to switch to login
+                        if (data.action === 'login') {
+                            messageDiv.innerHTML += ' <a href="#" onclick="switchToLoginWithEmail(\'' + email + '\'); return false;" style="color: #60a5fa; text-decoration: underline;">Go to login</a>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking email availability:', error);
+                });
+            }, 500); // Wait 500ms after user stops typing
+        }
+        
+        // Helper function to switch to login tab with pre-filled email
+        function switchToLoginWithEmail(email) {
+            switchTab('login');
+            setTimeout(() => {
+                const loginEmail = document.getElementById('loginEmail');
+                if (loginEmail) {
+                    loginEmail.value = email;
+                    loginEmail.focus();
+                }
+            }, 100);
+        }
+
         // Handle registration submission
         function handleRegistration(event) {
             console.log('Registration form submitted!');
