@@ -3980,7 +3980,8 @@ def project_specifications():
     
     username = session.get(f'username_{ip_address}', 'User')
     
-    return render_template('project_specifications.html',
+    # Use enhanced version
+    return render_template('project_specifications_enhanced.html',
                          username=username,
                          is_admin=is_admin,
                          account_type=account_type,
@@ -4433,6 +4434,49 @@ def calculate_completion_percentage(project_data):
     
     filled = sum(1 for field in required_fields if project_data.get(field))
     return int((filled / len(required_fields)) * 100)
+
+@app.route('/api/project-specifications/list', methods=['GET'])
+def list_project_specifications():
+    """List all project specifications for current user"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify([])
+    
+    user_email = session.get(f'user_email_{ip_address}')
+    is_admin = session.get(f'is_admin_{ip_address}', False)
+    
+    # Load specifications and drafts
+    specs = load_json_db(PROJECT_SPECS_FILE)
+    drafts = load_json_db(PROJECT_DRAFTS_FILE)
+    
+    projects = []
+    
+    # Add submitted projects
+    for spec_id, spec in specs.items():
+        if is_admin or spec.get('submitted_by') == user_email:
+            projects.append({
+                'id': spec_id,
+                'project_name': spec.get('project_name', 'Untitled'),
+                'status': spec.get('status', 'submitted'),
+                'industry': spec.get('deal_type', 'DC'),
+                'last_updated': spec.get('submission_date', ''),
+                'completion': 100
+            })
+    
+    # Add drafts
+    for draft_id, draft in drafts.items():
+        if draft.get('user_email') == user_email:
+            projects.append({
+                'id': draft_id,
+                'project_name': draft.get('project_data', {}).get('project_name', 'Draft Project'),
+                'status': 'draft',
+                'industry': draft.get('industry', 'DC'),
+                'last_updated': draft.get('last_saved', ''),
+                'completion': draft.get('completion_percentage', 0)
+            })
+    
+    return jsonify(projects)
 
 @app.route('/api/project-specifications/industries', methods=['GET'])
 def get_industries():
