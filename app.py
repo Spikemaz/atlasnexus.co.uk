@@ -2223,14 +2223,8 @@ def data_sources():
 
 @app.route('/compliance')
 def compliance():
-    """Compliance page - public info or authenticated tool"""
-    ip_address = get_real_ip()
-    
-    # If not authenticated, show public compliance info
-    if not session.get(f'user_authenticated_{ip_address}'):
-        return render_template('compliance_public.html')
-    
-    # If authenticated, show the compliance tool
+    """Compliance page - available to all"""
+    # Show compliance page (works for both authenticated and non-authenticated users)
     return render_template('compliance.html')
 
 @app.route('/portfolio')
