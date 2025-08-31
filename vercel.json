@@ -27,6 +27,14 @@
       "dest": "/static/favicon-hexagon.svg"
     },
     {
+      "src": "/favicon-padlock.ico",
+      "dest": "/static/favicon-padlock.ico"
+    },
+    {
+      "src": "/favicon-hexagon.ico",
+      "dest": "/static/favicon-hexagon.ico"
+    },
+    {
       "src": "/(.*)",
       "dest": "app.py"
     }

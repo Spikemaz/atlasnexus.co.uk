@@ -1,1 +1,16 @@
-{"projectId":"prj_EEINrMPTWUVzqU2MMRqM0pCSmKt1","orgId":"team_LST0prvQwGZ61zFW3PXE5Mvs","projectName":"atlasnexus-securitization"}
+{
+  "projectId": "prj_EEINrMPTWUVzqU2MMRqM0pCSmKt1",
+  "orgId": "team_LST0prvQwGZ61zFW3PXE5Mvs",
+  "projectName": "atlasnexus-securitization",
+  "settings": {
+    "createdAt": 1755270427373,
+    "framework": null,
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": null,
+    "outputDirectory": null,
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "22.x"
+  }
+}

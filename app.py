@@ -2387,6 +2387,16 @@ def favicon_hexagon():
     """Serve hexagon favicon for main site"""
     return send_file('static/favicon-hexagon.svg', mimetype='image/svg+xml')
 
+@app.route('/favicon-padlock.ico')
+def favicon_padlock_ico():
+    """Serve padlock ICO favicon for Gate1 (Chrome compatibility)"""
+    return send_file('static/favicon-padlock.ico', mimetype='image/x-icon')
+
+@app.route('/favicon-hexagon.ico')
+def favicon_hexagon_ico():
+    """Serve hexagon ICO favicon for main site (Chrome compatibility)"""
+    return send_file('static/favicon-hexagon.ico', mimetype='image/x-icon')
+
 # ==================== MARKET DATA PROXY ====================
 
 @app.route('/api/market-data/fred/<series_id>')
