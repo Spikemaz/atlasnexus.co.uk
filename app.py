@@ -336,7 +336,7 @@ IS_VERCEL = ENVIRONMENT == 'vercel'
 IS_PRODUCTION = ENVIRONMENT in ['production', 'vercel']
 
 # Settings (same for both environments except where noted)
-PASSWORDS = ['SpikeMaz', 'RedAMC', 'PartnerAccess']
+PASSWORDS = ['SpikeMaz', 'RedAMC']  # Only these two passwords work for Gate1
 GLOBAL_UNLOCK_CODE = 'Ronabambi'
 BLOCK_DURATION_MINUTES = 30
 LOCKOUT_DURATION_HOURS = 24
@@ -3980,13 +3980,8 @@ def project_specifications():
     
     username = session.get(f'username_{ip_address}', 'User')
     
-    # Use enhanced version
-    return render_template('project_specifications_enhanced.html',
-                         username=username,
-                         is_admin=is_admin,
-                         account_type=account_type,
-                         user_specs=user_specs,
-                         all_specs=all_specs)
+    # Return simple redirect to dashboard with project section
+    return redirect(url_for('dashboard') + '#projects')
 
 @app.route('/api/project-specifications/submit', methods=['POST'])
 def submit_project_specification():
