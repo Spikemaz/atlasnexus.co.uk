@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Padlock icon with gold/silver gradient -->
+  <defs>
+    <linearGradient id="padlockGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c0c0c0;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="shackleGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e5e5e5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a0a0a0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Shackle (top part of padlock) -->
+  <path d="M 16 4 C 11 4 7 8 7 13 L 7 15 L 10 15 L 10 13 C 10 9.5 12.5 7 16 7 C 19.5 7 22 9.5 22 13 L 22 15 L 25 15 L 25 13 C 25 8 21 4 16 4 Z" 
+        fill="url(#shackleGradient)" 
+        stroke="#666" 
+        stroke-width="0.5"/>
+  
+  <!-- Lock body -->
+  <rect x="6" y="14" width="20" height="14" rx="2" ry="2" 
+        fill="url(#padlockGradient)" 
+        stroke="#996515" 
+        stroke-width="0.5"/>
+  
+  <!-- Keyhole -->
+  <circle cx="16" cy="20" r="2" fill="#1a1a1a"/>
+  <rect x="15" y="20" width="2" height="5" fill="#1a1a1a"/>
+</svg>
