@@ -2,14 +2,14 @@
 (function() {
     'use strict';
     
-    // Configuration
+    // Configuration - Smoother and slower settings
     const config = {
-        scrollSpeed: 40, // Pixels per key press
-        smoothDuration: 200, // Animation duration in ms
-        continuousScrollSpeed: 8, // Speed for held keys
-        scrollAcceleration: 1.05, // Acceleration factor when holding
-        maxScrollSpeed: 50, // Maximum scroll speed
-        debounceDelay: 10 // Debounce delay for smooth scrolling
+        scrollSpeed: 20, // Reduced from 40 - Pixels per key press
+        smoothDuration: 400, // Increased from 200 - Animation duration in ms for smoother transitions
+        continuousScrollSpeed: 3, // Reduced from 8 - Much slower speed for held keys
+        scrollAcceleration: 1.02, // Reduced from 1.05 - Slower acceleration when holding
+        maxScrollSpeed: 25, // Reduced from 50 - Lower maximum scroll speed
+        debounceDelay: 15 // Increased from 10 - More debounce for smoother scrolling
     };
     
     // State management
@@ -39,8 +39,8 @@
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
-            // Easing function (ease-out cubic)
-            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            // Easing function (ease-in-out-sine for smoother transitions)
+            const easeProgress = -(Math.cos(Math.PI * progress) - 1) / 2;
             
             window.scrollTo(0, startY + distance * easeProgress);
             
@@ -129,13 +129,13 @@
                 
                 // Calculate scroll distance (one viewport height)
                 const viewportHeight = window.innerHeight;
-                const scrollDistance = viewportHeight * 0.9; // 90% of viewport
+                const scrollDistance = viewportHeight * 0.75; // Reduced from 90% to 75% for more control
                 const direction = e.key === 'PageUp' ? -1 : 1;
                 
-                // Smooth scroll to target
+                // Smooth scroll to target with longer duration
                 const currentY = window.pageYOffset;
                 const targetY = currentY + (scrollDistance * direction);
-                smoothScrollTo(targetY, 300);
+                smoothScrollTo(targetY, 600); // Increased from 300 for smoother page scrolling
                 break;
                 
             case 'Home':
@@ -168,10 +168,10 @@
                         animationFrame = null;
                     }
                     
-                    // Apply smooth deceleration
+                    // Apply smooth deceleration with reduced momentum
                     const currentY = window.pageYOffset;
-                    const momentum = currentScrollSpeed * scrollDirection * 5;
-                    smoothScrollTo(currentY + momentum, 150);
+                    const momentum = currentScrollSpeed * scrollDirection * 2; // Reduced from 5 for smoother stop
+                    smoothScrollTo(currentY + momentum, 300); // Increased duration for smoother deceleration
                 }
             }
         }

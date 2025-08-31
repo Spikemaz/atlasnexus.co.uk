@@ -4315,8 +4315,13 @@ def project_specifications():
     
     username = session.get(f'username_{ip_address}', 'User')
     
-    # Return simple redirect to dashboard with project section
-    return redirect(url_for('dashboard') + '#projects')
+    # Render the project specifications template
+    return render_template('project_specifications.html',
+                         user_specs=user_specs if not is_admin else [],
+                         all_specs=all_specs if is_admin else [],
+                         is_admin=is_admin,
+                         username=username,
+                         user_email=user_email)
 
 @app.route('/api/project-specifications/submit', methods=['POST'])
 def submit_project_specification():

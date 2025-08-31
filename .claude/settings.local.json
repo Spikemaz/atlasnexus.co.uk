@@ -49,7 +49,8 @@
       "Bash(do echo -n \"$icon: \")",
       "Bash(for i in {1..3})",
       "Bash(for endpoint in \"/\" \"/api/version\" \"/static/js/smooth-scroll.js\" \"/favicon.ico\")",
-      "Bash(do echo -n \"$endpoint: \")"
+      "Bash(do echo -n \"$endpoint: \")",
+      "Bash(git diff-tree:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"
