@@ -170,7 +170,7 @@ def check_ip_lockout(ip_address):
 
 def send_lockout_notification(ip_address, failed_attempts, lockout_type='30min'):
     """Send email notification to admin when IP gets locked out"""
-    admin_email = 'spikemaz8@aol.com'
+    admin_email = 'atlasnexushelp@gmail.com'
     
     # Format the failed attempts
     attempts_html = ""
@@ -207,21 +207,31 @@ def send_lockout_notification(ip_address, failed_attempts, lockout_type='30min')
                 
                 <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #bae6fd;">
                     <p style="color: #0369a1; margin: 0;">
-                        <strong>Action Required:</strong> Review the failed attempts. If suspicious, consider a permanent ban.
+                        <strong>⚠️ IMMEDIATE ACTION REQUIRED:</strong> Potential security attack detected.
+                    </p>
+                    <p style="color: #0369a1; margin: 5px 0 0 0;">
+                        Review the failed attempts immediately. If suspicious, apply permanent ban.
                     </p>
                 </div>
                 
-                <a href="https://atlasnexus.co.uk/admin-panel" 
-                   style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; 
-                          text-decoration: none; border-radius: 5px;">
-                    View Admin Panel
-                </a>
+                <div style="margin-top: 25px;">
+                    <a href="https://atlasnexus.co.uk/admin-panel" 
+                       style="display: inline-block; background: #dc2626; color: white; padding: 12px 30px; 
+                              text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        ⚡ Access Admin Panel Now
+                    </a>
+                </div>
+                
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e5e5; color: #666; font-size: 12px;">
+                    <p>This is an automated security alert from AtlasNexus Security System.</p>
+                    <p>Alert sent to: atlasnexushelp@gmail.com</p>
+                </div>
             </div>
         </body>
     </html>
     """
     
-    send_email(admin_email, f'Security Alert: IP {ip_address} Locked Out', email_html)
+    send_email(admin_email, f'🚨 URGENT SECURITY ALERT: IP {ip_address} Locked Out - Possible Attack', email_html)
 
 def apply_ip_lockout(ip_address, lockout_type='24h', reason='', failed_passwords=None, duration_hours=24):
     """Apply a lockout to an IP address with detailed logging"""
@@ -576,8 +586,8 @@ def generate_secure_password():
     
     return f"{word}{digits}"
 
-def send_email(to_email, subject, html_content, retry_count=2):
-    """Send email notification with retry logic"""
+def send_email(to_email, subject, html_content, retry_count=1):
+    """Send email notification immediately with minimal retry"""
     if not EMAIL_CONFIG['sender_password']:
         print(f"[EMAIL] Would send to {to_email}: {subject}")
         return True  # Simulate success in development
@@ -592,8 +602,8 @@ def send_email(to_email, subject, html_content, retry_count=2):
             html_part = MIMEText(html_content, 'html')
             msg.attach(html_part)
             
-            # Use a timeout and explicit connection handling
-            server = smtplib.SMTP(EMAIL_CONFIG['smtp_server'], EMAIL_CONFIG['smtp_port'], timeout=10)
+            # Use a shorter timeout for faster connection
+            server = smtplib.SMTP(EMAIL_CONFIG['smtp_server'], EMAIL_CONFIG['smtp_port'], timeout=5)
             try:
                 server.ehlo()
                 server.starttls()
@@ -615,7 +625,7 @@ def send_email(to_email, subject, html_content, retry_count=2):
         except Exception as e:
             print(f"[EMAIL ERROR] Attempt {attempt + 1} failed to send to {to_email}: {e}")
             if attempt < retry_count:
-                time.sleep(1)  # Wait 1 second before retry
+                # No delay for immediate sending
                 continue
             
     return False
