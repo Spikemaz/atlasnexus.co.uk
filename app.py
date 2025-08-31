@@ -3067,40 +3067,68 @@ def admin_unlock_ip():
     session.permanent = True
     session.modified = True
     
-    return f"""
-    <html>
-    <head>
-        <title>IP Unlocked Successfully</title>
-        <meta http-equiv="refresh" content="5;url=/">
-        <script>
-            // Clear local storage to ensure fresh start
-            localStorage.clear();
-            sessionStorage.clear();
-            
-            // Redirect to home page after 5 seconds
-            setTimeout(function() {{
-                window.location.href = '/';
-            }}, 5000);
-        </script>
-    </head>
-    <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
-        <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px; border: 2px solid #22c55e; max-width: 600px;">
-            <h1 style="color: #22c55e;">✅ IP Unlocked Successfully</h1>
-            <p style="font-size: 18px;">IP Address: <code style="background: #333; padding: 5px 10px; border-radius: 5px;">{ip_address}</code></p>
-            <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 0 0 10px 0; color: #22c55e;"><strong>Access Restored!</strong></p>
-                <p style="margin: 0; color: #e2e8f0;">The user at this IP can now access the site immediately.</p>
-                <p style="margin: 10px 0 0 0; color: #94a3b8; font-size: 14px;">All lockout data and failed attempts have been cleared.</p>
+    # Check if the person unlocking is an admin
+    current_ip = get_real_ip()
+    is_admin_unlocking = session.get(f'is_admin_{current_ip}', False)
+    
+    if is_admin_unlocking:
+        # Admin is unlocking someone else's IP - don't redirect them
+        return f"""
+        <html>
+        <head>
+            <title>IP Unlocked Successfully</title>
+        </head>
+        <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+            <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px; border: 2px solid #22c55e; max-width: 600px;">
+                <h1 style="color: #22c55e;">✅ IP Unlocked Successfully</h1>
+                <p style="font-size: 18px;">IP Address: <code style="background: #333; padding: 5px 10px; border-radius: 5px;">{ip_address}</code></p>
+                <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0 0 10px 0; color: #22c55e;"><strong>Admin Action Completed</strong></p>
+                    <p style="margin: 0; color: #e2e8f0;">You have successfully unlocked IP: {ip_address}</p>
+                    <p style="margin: 10px 0 0 0; color: #94a3b8; font-size: 14px;">The user at this IP can now access the site with a fresh session.</p>
+                </div>
+                <div style="margin-top: 20px;">
+                    <a href="/admin-panel" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 5px;">Return to Admin Panel</a>
+                    <a href="/dashboard" style="display: inline-block; background: #64748b; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 5px;">Go to Dashboard</a>
+                </div>
+                <p style="margin-top: 20px; color: #64748b; font-size: 14px;">This page can be closed safely.</p>
             </div>
-            <p style="color: #f59e0b; font-size: 1.1em;">Redirecting to Gate1 in 5 seconds...</p>
-            <div style="margin-top: 20px;">
-                <a href="/" style="display: inline-block; background: #22c55e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 5px;">Go to Gate1 Now</a>
-                <a href="/admin-panel" style="display: inline-block; background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 5px;">Admin Panel</a>
+        </body>
+        </html>
+        """
+    else:
+        # The locked user themselves clicked the unlock link (shouldn't normally happen but handle it)
+        return f"""
+        <html>
+        <head>
+            <title>IP Unlocked Successfully</title>
+            <meta http-equiv="refresh" content="3;url=/">
+            <script>
+                // Clear local storage to ensure fresh start
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Redirect to home page after 3 seconds
+                setTimeout(function() {{
+                    window.location.href = '/';
+                }}, 3000);
+            </script>
+        </head>
+        <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+            <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px; border: 2px solid #22c55e; max-width: 600px;">
+                <h1 style="color: #22c55e;">✅ Access Restored</h1>
+                <p style="font-size: 18px;">Your IP has been unlocked</p>
+                <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0; color: #e2e8f0;">You can now access the site with a fresh 15-minute session.</p>
+                </div>
+                <p style="color: #f59e0b; font-size: 1.1em;">Redirecting to Gate1 in 3 seconds...</p>
+                <div style="margin-top: 20px;">
+                    <a href="/" style="display: inline-block; background: #22c55e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Continue to Site</a>
+                </div>
             </div>
-        </div>
-    </body>
-    </html>
-    """
+        </body>
+        </html>
+        """
 
 @app.route('/admin/ban-ip-email')
 def admin_ban_ip_email():
