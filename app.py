@@ -168,9 +168,13 @@ def check_ip_lockout(ip_address):
     
     return None
 
-def send_lockout_notification(ip_address, failed_attempts, lockout_type='30min'):
+def send_lockout_notification(ip_address, failed_attempts, lockout_type='30min', unlock_token=None):
     """Send email notification to admin when IP gets locked out"""
     admin_email = 'atlasnexushelp@gmail.com'
+    
+    # Use provided token or generate a new one (for backward compatibility)
+    if not unlock_token:
+        unlock_token = secrets.token_urlsafe(32)
     
     # Format the failed attempts
     attempts_html = ""
@@ -214,11 +218,21 @@ def send_lockout_notification(ip_address, failed_attempts, lockout_type='30min')
                     </p>
                 </div>
                 
-                <div style="margin-top: 25px;">
+                <div style="margin-top: 25px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
                     <a href="https://atlasnexus.co.uk/admin-panel" 
                        style="display: inline-block; background: #dc2626; color: white; padding: 12px 30px; 
                               text-decoration: none; border-radius: 5px; font-weight: bold;">
-                        ⚡ Access Admin Panel Now
+                        ⚡ Access Admin Panel
+                    </a>
+                    <a href="https://atlasnexus.co.uk/admin/unlock-ip?token={unlock_token}&ip={ip_address}" 
+                       style="display: inline-block; background: #22c55e; color: white; padding: 12px 30px; 
+                              text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        🔓 Unlock This IP
+                    </a>
+                    <a href="https://atlasnexus.co.uk/admin/ban-ip-email?token={unlock_token}&ip={ip_address}" 
+                       style="display: inline-block; background: #991b1b; color: white; padding: 12px 30px; 
+                              text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        🚫 Permanent Ban
                     </a>
                 </div>
                 
@@ -240,16 +254,17 @@ def apply_ip_lockout(ip_address, lockout_type='24h', reason='', failed_passwords
     # Debug logging
     print(f"[LOCKOUT] Applying {lockout_type} to IP {ip_address} for {duration_hours} hours. Reason: {reason}")
     
-    # Send email notification for 30-minute lockouts
-    if lockout_type == 'blocked_30min' and failed_passwords:
-        send_lockout_notification(ip_address, failed_passwords, '30-minute lockout')
+    # Generate unlock token for email actions
+    unlock_token = secrets.token_urlsafe(32)
     
     if lockout_type == 'permanent':
         lockouts[ip_address] = {
             'permanent': True,
             'locked_at': datetime.now().isoformat(),
             'reason': reason,
-            'failed_passwords': failed_passwords or []
+            'failed_passwords': failed_passwords or [],
+            'unlock_token': unlock_token,
+            'unlock_token_expires': (datetime.now() + timedelta(hours=24)).isoformat()
         }
     else:
         # Timed lockout (30min, 24h, or custom)
@@ -270,11 +285,19 @@ def apply_ip_lockout(ip_address, lockout_type='24h', reason='', failed_passwords
             'locked_at': datetime.now().isoformat(),
             'duration_hours': duration_hours,
             'reason': reason,
-            'failed_passwords': failed_passwords or existing.get('failed_passwords', [])
+            'failed_passwords': failed_passwords or existing.get('failed_passwords', []),
+            'unlock_token': unlock_token,
+            'unlock_token_expires': (datetime.now() + timedelta(hours=24)).isoformat()
         }
     
+    # Save lockouts first before sending email
     success = save_lockouts(lockouts)
     print(f"[LOCKOUT] Save status: {success}, File: {LOCKOUT_FILE}")
+    
+    # Send email notification for 30-minute lockouts AFTER saving
+    if lockout_type == 'blocked_30min' and failed_passwords:
+        send_lockout_notification(ip_address, failed_passwords, '30-minute lockout', unlock_token)
+    
     return lockouts[ip_address]
 
 def modify_ip_ban(ip_address, action, duration_days=None):
@@ -2792,6 +2815,201 @@ def logout():
     session.pop(f'login_start_time_{ip_address}', None)
     
     return redirect(url_for('secure_login'))
+
+@app.route('/admin/unlock-ip')
+def admin_unlock_ip():
+    """Unlock an IP address via email link with token authentication"""
+    token = request.args.get('token')
+    ip_address = request.args.get('ip')
+    
+    if not token or not ip_address:
+        return """
+        <html>
+        <head><title>Invalid Request</title></head>
+        <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+            <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px;">
+                <h1 style="color: #ef4444;">❌ Invalid Request</h1>
+                <p>Missing required parameters.</p>
+            </div>
+        </body>
+        </html>
+        """, 400
+    
+    lockouts = load_lockouts()
+    
+    # Verify token and IP
+    if ip_address not in lockouts:
+        return """
+        <html>
+        <head><title>IP Not Found</title></head>
+        <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+            <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px;">
+                <h1 style="color: #f59e0b;">⚠️ IP Not Locked</h1>
+                <p>This IP address is not currently locked out.</p>
+            </div>
+        </body>
+        </html>
+        """, 404
+    
+    lockout_data = lockouts[ip_address]
+    stored_token = lockout_data.get('unlock_token')
+    token_expires = lockout_data.get('unlock_token_expires')
+    
+    # Check if token matches and hasn't expired
+    if stored_token != token:
+        return """
+        <html>
+        <head><title>Invalid Token</title></head>
+        <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+            <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px;">
+                <h1 style="color: #ef4444;">🔒 Invalid Token</h1>
+                <p>The unlock token is invalid or has been used.</p>
+            </div>
+        </body>
+        </html>
+        """, 403
+    
+    if token_expires and datetime.fromisoformat(token_expires) < datetime.now():
+        return """
+        <html>
+        <head><title>Token Expired</title></head>
+        <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+            <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px;">
+                <h1 style="color: #ef4444;">⏱️ Token Expired</h1>
+                <p>This unlock link has expired (valid for 24 hours).</p>
+            </div>
+        </body>
+        </html>
+        """, 403
+    
+    # Remove the lockout
+    del lockouts[ip_address]
+    save_lockouts(lockouts)
+    
+    # Log the action
+    log_admin_action('email_unlock', 'ip_unlocked', {
+        'ip': ip_address,
+        'method': 'email_link',
+        'timestamp': datetime.now().isoformat()
+    })
+    
+    return f"""
+    <html>
+    <head>
+        <title>IP Unlocked Successfully</title>
+        <meta http-equiv="refresh" content="5;url=https://atlasnexus.co.uk/admin-panel">
+    </head>
+    <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+        <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px; border: 2px solid #22c55e;">
+            <h1 style="color: #22c55e;">✅ IP Unlocked Successfully</h1>
+            <p style="font-size: 18px;">IP Address: <code style="background: #333; padding: 5px 10px; border-radius: 5px;">{ip_address}</code></p>
+            <p>The IP has been removed from the lockout list.</p>
+            <p style="color: #999; margin-top: 20px;">Redirecting to admin panel in 5 seconds...</p>
+            <a href="https://atlasnexus.co.uk/admin-panel" style="display: inline-block; margin-top: 20px; background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to Admin Panel</a>
+        </div>
+    </body>
+    </html>
+    """
+
+@app.route('/admin/ban-ip-email')
+def admin_ban_ip_email():
+    """Permanently ban an IP address via email link with token authentication"""
+    token = request.args.get('token')
+    ip_address = request.args.get('ip')
+    
+    if not token or not ip_address:
+        return """
+        <html>
+        <head><title>Invalid Request</title></head>
+        <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+            <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px;">
+                <h1 style="color: #ef4444;">❌ Invalid Request</h1>
+                <p>Missing required parameters.</p>
+            </div>
+        </body>
+        </html>
+        """, 400
+    
+    lockouts = load_lockouts()
+    
+    # Verify token
+    if ip_address not in lockouts:
+        return """
+        <html>
+        <head><title>IP Not Found</title></head>
+        <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+            <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px;">
+                <h1 style="color: #f59e0b;">⚠️ IP Not Found</h1>
+                <p>This IP address lockout was not found.</p>
+            </div>
+        </body>
+        </html>
+        """, 404
+    
+    lockout_data = lockouts[ip_address]
+    stored_token = lockout_data.get('unlock_token')
+    token_expires = lockout_data.get('unlock_token_expires')
+    
+    # Check if token matches and hasn't expired
+    if stored_token != token:
+        return """
+        <html>
+        <head><title>Invalid Token</title></head>
+        <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+            <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px;">
+                <h1 style="color: #ef4444;">🔒 Invalid Token</h1>
+                <p>The action token is invalid or has been used.</p>
+            </div>
+        </body>
+        </html>
+        """, 403
+    
+    if token_expires and datetime.fromisoformat(token_expires) < datetime.now():
+        return """
+        <html>
+        <head><title>Token Expired</title></head>
+        <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+            <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px;">
+                <h1 style="color: #ef4444;">⏱️ Token Expired</h1>
+                <p>This action link has expired (valid for 24 hours).</p>
+            </div>
+        </body>
+        </html>
+        """, 403
+    
+    # Apply permanent ban
+    lockouts[ip_address] = {
+        'permanent': True,
+        'locked_at': datetime.now().isoformat(),
+        'reason': 'Banned via email link after security alert',
+        'failed_passwords': lockout_data.get('failed_passwords', [])
+    }
+    save_lockouts(lockouts)
+    
+    # Log the action
+    log_admin_action('email_ban', 'ip_banned_permanently', {
+        'ip': ip_address,
+        'method': 'email_link',
+        'timestamp': datetime.now().isoformat()
+    })
+    
+    return f"""
+    <html>
+    <head>
+        <title>IP Banned Successfully</title>
+        <meta http-equiv="refresh" content="5;url=https://atlasnexus.co.uk/admin-panel">
+    </head>
+    <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+        <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px; border: 2px solid #dc2626;">
+            <h1 style="color: #dc2626;">🚫 IP Permanently Banned</h1>
+            <p style="font-size: 18px;">IP Address: <code style="background: #333; padding: 5px 10px; border-radius: 5px;">{ip_address}</code></p>
+            <p>This IP has been permanently banned from accessing the site.</p>
+            <p style="color: #999; margin-top: 20px;">Redirecting to admin panel in 5 seconds...</p>
+            <a href="https://atlasnexus.co.uk/admin-panel" style="display: inline-block; margin-top: 20px; background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to Admin Panel</a>
+        </div>
+    </body>
+    </html>
+    """
 
 @app.route('/admin')
 def admin():
