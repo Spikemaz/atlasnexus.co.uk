@@ -380,6 +380,36 @@ def modify_ip_ban(ip_address, action, duration_days=None):
         if ip_address in lockouts:
             del lockouts[ip_address]
             save_lockouts(lockouts)
+            
+            # Clear ALL session data for this IP to ensure fresh start
+            from auth_helpers import clear_session
+            clear_session(ip_address)
+            
+            # Also clear any lockout-specific session keys
+            keys_to_clear = [
+                f'site_auth_failed_{ip_address}',
+                f'lockout_until_{ip_address}',
+                f'blocked_until_{ip_address}',
+                f'lockout_reference_{ip_address}',
+                f'lockout_reason_{ip_address}'
+            ]
+            
+            for key in keys_to_clear:
+                if key in session:
+                    session.pop(key)
+            
+            # Clear any attempts tracking
+            attempts = load_json_db(os.path.join(DATA_DIR, 'ip_attempts_log.json'))
+            if ip_address in attempts:
+                del attempts[ip_address]
+                save_json_db(os.path.join(DATA_DIR, 'ip_attempts_log.json'), attempts)
+            
+            # Store unlock notification
+            session[f'recently_unlocked_{ip_address}'] = True
+            session[f'unlock_time_{ip_address}'] = datetime.now().isoformat()
+            session.permanent = True
+            session.modified = True
+            
             return True
     
     elif action == 'extend' and duration_days:
@@ -3001,6 +3031,29 @@ def admin_unlock_ip():
     del lockouts[ip_address]
     save_lockouts(lockouts)
     
+    # Clear ALL session data for this IP to ensure fresh start
+    from auth_helpers import clear_session
+    clear_session(ip_address)
+    
+    # Also clear any lockout-specific session keys
+    keys_to_clear = [
+        f'site_auth_failed_{ip_address}',
+        f'lockout_until_{ip_address}',
+        f'blocked_until_{ip_address}',
+        f'lockout_reference_{ip_address}',
+        f'lockout_reason_{ip_address}'
+    ]
+    
+    for key in keys_to_clear:
+        if key in session:
+            session.pop(key)
+    
+    # Clear any attempts tracking
+    attempts = load_json_db(os.path.join(DATA_DIR, 'ip_attempts_log.json'))
+    if ip_address in attempts:
+        del attempts[ip_address]
+        save_json_db(os.path.join(DATA_DIR, 'ip_attempts_log.json'), attempts)
+    
     # Log the action
     log_admin_action('email_unlock', 'ip_unlocked', {
         'ip': ip_address,
@@ -3008,28 +3061,41 @@ def admin_unlock_ip():
         'timestamp': datetime.now().isoformat()
     })
     
-    # Store unlock notification in session for the unlocked IP
+    # Store unlock notification
     session[f'recently_unlocked_{ip_address}'] = True
     session[f'unlock_time_{ip_address}'] = datetime.now().isoformat()
+    session.permanent = True
+    session.modified = True
     
     return f"""
     <html>
     <head>
         <title>IP Unlocked Successfully</title>
-        <meta http-equiv="refresh" content="3;url=https://atlasnexus.co.uk/">
+        <meta http-equiv="refresh" content="5;url=/">
+        <script>
+            // Clear local storage to ensure fresh start
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Redirect to home page after 5 seconds
+            setTimeout(function() {{
+                window.location.href = '/';
+            }}, 5000);
+        </script>
     </head>
     <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
         <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px; border: 2px solid #22c55e; max-width: 600px;">
             <h1 style="color: #22c55e;">✅ IP Unlocked Successfully</h1>
             <p style="font-size: 18px;">IP Address: <code style="background: #333; padding: 5px 10px; border-radius: 5px;">{ip_address}</code></p>
             <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 0 0 10px 0; color: #22c55e;"><strong>For the unlocked user:</strong></p>
-                <p style="margin: 0; color: #e2e8f0;">You can now access the site with a fresh 15-minute timer.</p>
+                <p style="margin: 0 0 10px 0; color: #22c55e;"><strong>Access Restored!</strong></p>
+                <p style="margin: 0; color: #e2e8f0;">The user at this IP can now access the site immediately.</p>
+                <p style="margin: 10px 0 0 0; color: #94a3b8; font-size: 14px;">All lockout data and failed attempts have been cleared.</p>
             </div>
-            <p style="color: #f59e0b; font-size: 1.1em;">Redirecting in 3 seconds...</p>
+            <p style="color: #f59e0b; font-size: 1.1em;">Redirecting to Gate1 in 5 seconds...</p>
             <div style="margin-top: 20px;">
-                <a href="https://atlasnexus.co.uk/" style="display: inline-block; background: #22c55e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 5px;">Go to Site Now</a>
-                <a href="https://atlasnexus.co.uk/admin-panel" style="display: inline-block; background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 5px;">Admin Panel</a>
+                <a href="/" style="display: inline-block; background: #22c55e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 5px;">Go to Gate1 Now</a>
+                <a href="/admin-panel" style="display: inline-block; background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 5px;">Admin Panel</a>
             </div>
         </div>
     </body>
