@@ -70,7 +70,8 @@ def load_lockouts():
             data = json.load(f)
             # Don't auto-clean, keep all records for admin panel
             return data
-    except:
+    except Exception as e:
+        print(f"[ERROR] Failed to load data: {e}")
         return {}
 
 def save_lockouts(lockouts):
@@ -79,7 +80,8 @@ def save_lockouts(lockouts):
         with open(LOCKOUT_FILE, 'w') as f:
             json.dump(lockouts, f, indent=2, default=str)
         return True
-    except:
+    except Exception as e:
+        print(f"[ERROR] Failed to save data: {e}")
         return False
 
 def load_attempt_logs():
@@ -89,7 +91,8 @@ def load_attempt_logs():
     try:
         with open(ATTEMPT_LOG_FILE, 'r') as f:
             return json.load(f)
-    except:
+    except Exception as e:
+        print(f"[ERROR] Failed to load data: {e}")
         return {}
 
 def save_attempt_logs(logs):
@@ -98,7 +101,8 @@ def save_attempt_logs(logs):
         with open(ATTEMPT_LOG_FILE, 'w') as f:
             json.dump(logs, f, indent=2, default=str)
         return True
-    except:
+    except Exception as e:
+        print(f"[ERROR] Failed to save data: {e}")
         return False
 
 def log_failed_attempt(ip_address, password_attempted, attempt_type='site_auth', user_agent=None):
@@ -468,6 +472,14 @@ def audit_project():
     # ALLOWED files (everything else gets flagged)
     allowed_files = {
         'app.py',
+        'config.py',  # Configuration module
+        'utils.py',  # Utility functions
+        'auth_helpers.py',  # Authentication helpers
+        'ip_management.py',  # IP management module
+        'email_config.py',  # Email configuration
+        'securitization_engine.py',  # Securitization calculations
+        'market_news_service.py',  # Market news service
+        'real_news_service.py',  # Real news service
         'local.bat',
         'live.bat', 
         'README.txt',
@@ -569,8 +581,8 @@ def kill_port_5000():
             for pid in pids:
                 subprocess.run(['taskkill', '/F', '/PID', pid], capture_output=True)
                 print(f"Killed existing server (PID: {pid})")
-        except:
-            pass
+        except Exception:
+            pass  # Silent fail for subprocess cleanup
 
 # ==================== DATABASE ====================
 # Simple file-based database for registrations
@@ -619,7 +631,7 @@ def log_admin_action(user_or_ip, action, details=None):
     try:
         # Simple logging to console for now
         print(f"[ADMIN ACTION] {user_or_ip} - {action}: {details}")
-    except:
+    except Exception:
         pass  # Fail silently to avoid breaking the app
 
 def load_json_db(file_path):
@@ -717,8 +729,8 @@ def send_email(to_email, subject, html_content, retry_count=1):
             finally:
                 try:
                     server.quit()
-                except:
-                    pass
+                except Exception:
+                    pass  # Ignore cleanup errors
                     
         except smtplib.SMTPAuthenticationError as e:
             print(f"[EMAIL ERROR] Authentication failed: {e}")
@@ -2462,99 +2474,9 @@ def proxy_fred_api(series_id):
 # ==================== ADMIN ENDPOINTS ====================
 @app.route('/admin/approve-user', methods=['POST'])
 def admin_approve_user():
-    """Admin approve user"""
-    ip_address = get_real_ip()
-    
-    # Verify admin access
-    if not session.get(f'is_admin_{ip_address}'):
-        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
-    
-    email = request.json.get('email')
-    
-    # Load registrations
-    registrations = load_json_db(REGISTRATIONS_FILE)
-    
-    if email not in registrations:
-        return jsonify({'status': 'error', 'message': 'Registration not found'}), 404
-    
-    # Use the pre-generated password or create a new one if missing
-    password = registrations[email].get('generated_password', generate_secure_password())
-    
-    # Update registration with approval info
-    registrations[email]['generated_password'] = password
-    registrations[email]['admin_approved'] = True
-    registrations[email]['approved_at'] = datetime.now().isoformat()
-    registrations[email]['approved_by'] = session.get(f'user_email_{ip_address}', 'spikemaz8@aol.com')
-    save_json_db(REGISTRATIONS_FILE, registrations)
-    
-    # Check if email is verified
-    email_verified = registrations[email].get('email_verified', False)
-    
-    # Only create user account if email is verified
-    if email_verified:
-        password_expiry = datetime.now() + timedelta(days=30)
-        users = load_json_db(USERS_FILE)
-        users[email] = {
-            **registrations[email],
-            'password': password,
-            'password_expiry': password_expiry.isoformat(),
-            'admin_approved': True,
-            'login_count': 0,
-            'total_login_time': 0,
-            'last_login': None,
-            'login_history': [],
-            'approved_by': session.get(f'user_email_{ip_address}', 'spikemaz8@aol.com')
-        }
-        save_json_db(USERS_FILE, users)
-    
-    # Log admin action
-    admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
-    if not isinstance(admin_actions, list):
-        admin_actions = []
-    admin_actions.append({
-        'action': 'user_approved',
-        'email': email,
-        'timestamp': datetime.now().isoformat(),
-        'admin': 'spikemaz8@aol.com'
-    })
-    save_json_db(ADMIN_ACTIONS_FILE, admin_actions)
-    
-    # Only send email if user has verified their email
-    if email_verified:
-        email_html = f"""
-        <html>
-            <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
-                <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
-                    <h2 style="color: #333;">Account Approved - AtlasNexus</h2>
-                    <p>Your account has been approved. You can now login with the following credentials:</p>
-                    <div style="background: #f0f0f0; padding: 20px; border-radius: 5px; margin: 20px 0;">
-                        <p><strong>Email:</strong> {email}</p>
-                        <p><strong>Password:</strong> {password}</p>
-                        <p style="color: #666; font-size: 14px;">This password expires in 30 days</p>
-                    </div>
-                    <a href="{get_base_url()}secure-login" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Login Now</a>
-                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-                    <p style="color: #999; font-size: 12px;">For security, please change your password after first login.</p>
-                </div>
-            </body>
-        </html>
-        """
-        
-        send_email(email, 'Account Approved - AtlasNexus', email_html)
-        
-        return jsonify({
-            'status': 'success',
-            'message': f'User approved. Password sent to {email}',
-            'password': password  # Show to admin for reference
-        })
-    else:
-        # User not yet verified - credentials will be sent after verification
-        return jsonify({
-            'status': 'success',
-            'message': f'User approved. Credentials will be sent after email verification.',
-            'password': password  # Show to admin for reference
-        })
-
+    """Admin approve user - redirects to advanced version for consistency"""
+    # Use the advanced version which has password selection options
+    return admin_approve_user_advanced()
 @app.route('/admin/quick-approve')
 def admin_quick_approve():
     """Quick approve from email link - shows configuration page for password and account type"""
@@ -4296,8 +4218,8 @@ def create_template_files():
     try:
         with pd.ExcelWriter(os.path.join(templates_dir, 'AtlasNexus_Pipeline_Template.xlsx'), engine='openpyxl') as writer:
             pd.DataFrame(pipeline_data).to_excel(writer, sheet_name='Pipeline', index=False)
-    except:
-        pass
+    except Exception as e:
+        print(f"[ERROR] Failed to create template: {e}")
     
     # Create Individual Template
     individual_data = {
@@ -4308,8 +4230,8 @@ def create_template_files():
     try:
         with pd.ExcelWriter(os.path.join(templates_dir, 'AtlasNexus_Individual_Project_Template.xlsx'), engine='openpyxl') as writer:
             pd.DataFrame(individual_data).to_excel(writer, sheet_name='Project', index=False)
-    except:
-        pass
+    except Exception as e:
+        print(f"[ERROR] Failed to create template: {e}")
 
 @app.route('/securitization-engine')
 def securitization_engine():
@@ -4646,15 +4568,15 @@ def upload_excel_specifications():
                             value = pd.to_datetime(value).strftime('%Y-%m-%d')
                         elif hasattr(value, 'strftime'):
                             value = value.strftime('%Y-%m-%d')
-                    except:
-                        pass
+                    except Exception:
+                        pass  # Keep original value if date conversion fails
                 
                 # Convert numbers if needed
                 if any(keyword in our_field for keyword in ['capex', 'cost', 'rent', 'capacity', 'term', 'size']):
                     try:
                         value = float(str(value).replace(',', '').replace('£', '').replace('$', '')) if value else 0
-                    except:
-                        value = 0
+                    except (ValueError, TypeError):
+                        value = 0  # Default to 0 if conversion fails
                 
                 specification[our_field] = value if value is not None else ''
             
