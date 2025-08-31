@@ -10,8 +10,8 @@
     "password": "SpikeMaz",
     "password_expiry": "2026-08-31T10:40:48.395969",
     "email_verified": true,
-    "last_login": "2025-08-31T21:55:24.778086",
-    "login_count": 3,
+    "last_login": "2025-08-31T22:14:39.833043",
+    "login_count": 4,
     "login_history": [
       {
         "timestamp": "2025-08-31T10:42:34.621265",
@@ -25,6 +25,11 @@
       },
       {
         "timestamp": "2025-08-31T21:55:24.778086",
+        "ip_address": "127.0.0.1",
+        "success": true
+      },
+      {
+        "timestamp": "2025-08-31T22:14:39.833043",
         "ip_address": "127.0.0.1",
         "success": true
       }
