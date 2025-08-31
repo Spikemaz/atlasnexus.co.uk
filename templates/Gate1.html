@@ -355,76 +355,6 @@
             animation: warningPulse 1s infinite;
         }
         
-        /* Timer Help Button */
-        .timer-help {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            background: rgba(96, 165, 250, 0.2);
-            border: 1px solid rgba(96, 165, 250, 0.5);
-            border-radius: 50%;
-            color: #60a5fa;
-            font-size: 12px;
-            font-weight: bold;
-            text-align: center;
-            line-height: 16px;
-            margin-left: 8px;
-            cursor: help;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        
-        .timer-help:hover {
-            background: rgba(96, 165, 250, 0.3);
-            border-color: #60a5fa;
-            transform: scale(1.1);
-        }
-        
-        /* Simple Tooltip Box */
-        #timerTooltip {
-            display: none;
-            position: fixed;
-            width: 320px;
-            background: #1e293b;
-            color: #e2e8f0;
-            text-align: left;
-            border-radius: 8px;
-            padding: 15px;
-            z-index: 99999;
-            border: 1px solid #60a5fa;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            font-size: 13px;
-            line-height: 1.5;
-        }
-        
-        #timerTooltip.show {
-            display: block;
-        }
-        
-        #timerTooltip h4 {
-            color: #60a5fa;
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            border-bottom: 1px solid rgba(96, 165, 250, 0.2);
-            padding-bottom: 5px;
-        }
-        
-        #timerTooltip p {
-            margin: 8px 0;
-        }
-        
-        #timerTooltip ul {
-            margin: 5px 0;
-            padding-left: 20px;
-        }
-        
-        #timerTooltip .warning {
-            color: #fbbf24;
-            font-weight: 600;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(251, 191, 36, 0.2);
-        }
         
         @keyframes warningPulse {
             0%, 100% { box-shadow: 0 0 10px rgba(255, 107, 107, 0.5); }
@@ -986,23 +916,9 @@
     <!-- Clock Timer -->
     <div class="timer" id="timer">00:00:00</div>
     
-    <!-- Countdown Timer with Warning -->
+    <!-- Countdown Timer -->
     <div class="countdown-timer" id="countdownTimer">
         15:00
-        <span class="timer-help" id="timerHelpBtn" title="Click for timer information">?</span>
-    </div>
-    
-    <!-- Tooltip (separate from button) -->
-    <div id="timerTooltip">
-        <h4>⏱️ Session Timer Information</h4>
-        <p>This timer shows your remaining session time. You have <strong>15 minutes</strong> to enter the correct site password.</p>
-        <p>The timer will change color as time runs out:</p>
-        <ul>
-            <li>🟢 Green: More than 10 minutes</li>
-            <li>🟠 Orange: 5-10 minutes remaining</li>
-            <li>🔴 Red: Less than 5 minutes</li>
-        </ul>
-        <p class="warning">⚠️ When timer reaches 00:00: You will be locked out for 30 minutes</p>
     </div>
     
     <!-- Main content -->
@@ -1228,12 +1144,8 @@
                 const minutes = Math.floor(remaining / 60000);
                 const seconds = Math.floor((remaining % 60000) / 1000);
                 const countdownEl = document.getElementById('countdownTimer');
-                // Update only the timer text, preserve the help button
-                const timerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                countdownEl.innerHTML = timerText + '<span class="timer-help" id="timerHelpBtn" title="Click for timer information">?</span>';
-                
-                // Re-attach tooltip event listener
-                setupTooltip();
+                // Update only the timer text
+                countdownEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
                 
                 // Change color based on time remaining
                 countdownEl.classList.remove('orange', 'red');
@@ -1250,44 +1162,6 @@
             updateCountdown();
         }
         initCountdown();
-        
-        // Setup tooltip functionality
-        function setupTooltip() {
-            const helpBtn = document.getElementById('timerHelpBtn');
-            const tooltip = document.getElementById('timerTooltip');
-            
-            if (helpBtn && tooltip) {
-                // Remove any existing listeners
-                helpBtn.onmouseenter = null;
-                helpBtn.onmouseleave = null;
-                helpBtn.onclick = null;
-                
-                // Show tooltip on hover
-                helpBtn.onmouseenter = function(e) {
-                    const rect = helpBtn.getBoundingClientRect();
-                    tooltip.style.top = (rect.bottom + 10) + 'px';
-                    tooltip.style.left = (rect.left - 150 + (rect.width / 2)) + 'px';
-                    tooltip.classList.add('show');
-                };
-                
-                // Hide tooltip when mouse leaves
-                helpBtn.onmouseleave = function() {
-                    tooltip.classList.remove('show');
-                };
-                
-                // Also work on click for mobile
-                helpBtn.onclick = function(e) {
-                    e.preventDefault();
-                    const rect = helpBtn.getBoundingClientRect();
-                    tooltip.style.top = (rect.bottom + 10) + 'px';
-                    tooltip.style.left = (rect.left - 150 + (rect.width / 2)) + 'px';
-                    tooltip.classList.toggle('show');
-                };
-            }
-        }
-        
-        // Initial tooltip setup
-        setupTooltip();
         
         // Cursor glow follow
         const cursorGlow = document.getElementById('cursorGlow');
