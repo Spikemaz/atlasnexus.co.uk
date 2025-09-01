@@ -3601,11 +3601,9 @@ def admin_delete_data():
                 print(f"[ADMIN] Deleted login attempts for {identifier}")
                 
         elif data_type == 'registration':
-            registrations = load_registrations_data()
-            if identifier in registrations:
-                del registrations[identifier]
-                save_json_db(REGISTRATIONS_FILE, registrations)
-                print(f"[ADMIN] Deleted registration for {identifier}")
+            # Delete from cloud database
+            delete_registration_data(identifier)
+            print(f"[ADMIN] Deleted registration for {identifier}")
                 
         elif data_type == 'expired_registration':
             expired = load_json_db('data/expired_registrations.json')
@@ -3839,7 +3837,7 @@ def admin_approve_user_advanced():
             
             registrations[email]['credentials_sent'] = True
             registrations[email]['credentials_sent_at'] = datetime.now().isoformat()
-            save_json_db(REGISTRATIONS_FILE, registrations)
+            save_registration_data(email, registrations[email])
             
             return jsonify({
                 'status': 'success', 
@@ -4124,7 +4122,7 @@ def admin_update_password():
     registrations = load_registrations_data()
     if email in registrations:
         registrations[email]['generated_password'] = new_password
-        save_json_db(REGISTRATIONS_FILE, registrations)
+        save_registration_data(email, registrations[email])
     
     # Update in users if they exist
     users = load_users_data()
@@ -4183,17 +4181,11 @@ def admin_delete_user():
     if not email:
         return jsonify({'status': 'error', 'message': 'Email required'}), 400
     
-    # Delete from users
-    users = load_users_data()
-    if email in users:
-        del users[email]
-        save_user_data(email, users[email])
+    # Delete from users (cloud database)
+    delete_user_data(email)
     
-    # Delete from registrations
-    registrations = load_registrations_data()
-    if email in registrations:
-        del registrations[email]
-        save_json_db(REGISTRATIONS_FILE, registrations)
+    # Also delete from registrations if exists
+    delete_registration_data(email)
     
     # Log the action
     log_admin_action(ip_address, 'user_delete', {
