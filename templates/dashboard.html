@@ -2772,8 +2772,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-calculate derived fields
     const updateDerivedFields = () => {
         // NetITLoad_09 = GrossITLoad_02 / PUE_03
-        const grossIT = parseFloat(document.getElementById('GrossITLoad_02').value) || 100;
-        const pue = parseFloat(document.getElementById('PUE_03').value) || 1.30;
+        const grossIT = parseFloat(document.getElementById('GrossITLoad_02')?.value) || 100;
+        const pue = parseFloat(document.getElementById('PUE_03')?.value) || 1.30;
         const netIT = grossIT / pue;
         
         // Update display if exists
@@ -2783,11 +2783,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // GrossIncome_10 = GrossMonthlyRent_07 * 12
-        const monthlyRent = parseFloat(document.getElementById('GrossMonthlyRent_07').value) || 2500000;
+        const monthlyRent = parseFloat(document.getElementById('GrossMonthlyRent_07')?.value) || 2500000;
         const grossIncome = monthlyRent * 12;
         
         // NetIncome_11 based on OPEX mode
-        const opex = parseFloat(document.getElementById('OPEX_08').value) || 25;
+        const opex = parseFloat(document.getElementById('OPEX_08')?.value) || 25;
         const netIncome = grossIncome * (1 - opex/100);
         
         return { netIT, grossIncome, netIncome };
@@ -2821,7 +2821,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Apply max permutations limit
-        const maxPermutations = parseInt(document.getElementById('MaxPermutations_108').value) || 150000;
+        const maxPermutations = parseInt(document.getElementById('MaxPermutations_108')?.value) || 150000;
         totalPermutations = Math.min(totalPermutations, maxPermutations);
         
         document.getElementById('est-scenarios').textContent = totalPermutations.toLocaleString();
@@ -2916,28 +2916,28 @@ async function runGeneration(mode) {
     const config = {
         GrossMonthlyRent_07: {
             enabled: document.getElementById('GrossMonthlyRent_07_range').checked,
-            value: parseFloat(document.getElementById('GrossMonthlyRent_07').value),
-            min: parseFloat(document.getElementById('GrossMonthlyRent_07_min').value) || 500000,
-            max: parseFloat(document.getElementById('GrossMonthlyRent_07_max').value) || 5000000,
+            value: parseFloat(document.getElementById('GrossMonthlyRent_07')?.value) || 2500000,
+            min: parseFloat(document.getElementById('GrossMonthlyRent_07_min')?.value) || 500000,
+            max: parseFloat(document.getElementById('GrossMonthlyRent_07_max')?.value) || 5000000,
             step: 50000
         },
         OPEX_08: {
             enabled: document.getElementById('OPEX_08_range').checked,
-            value: parseFloat(document.getElementById('OPEX_08').value),
-            min: parseFloat(document.getElementById('OPEX_08_min').value) || 15,
-            max: parseFloat(document.getElementById('OPEX_08_max').value) || 35,
+            value: parseFloat(document.getElementById('OPEX_08')?.value) || 25,
+            min: parseFloat(document.getElementById('OPEX_08_min')?.value) || 15,
+            max: parseFloat(document.getElementById('OPEX_08_max')?.value) || 35,
             step: 1
         },
         TargetDSCRSenior_37: {
             enabled: document.getElementById('TargetDSCRSenior_37_range') ? document.getElementById('TargetDSCRSenior_37_range').checked : false,
-            value: parseFloat(document.getElementById('TargetDSCRSenior_37').value),
+            value: parseFloat(document.getElementById('TargetDSCRSenior_37')?.value) || 1.30,
             min: 1.20,
             max: 1.50,
             step: 0.05
         },
         SeniorCoupon_38: {
             enabled: document.getElementById('SeniorCoupon_38_range') ? document.getElementById('SeniorCoupon_38_range').checked : false,
-            value: parseFloat(document.getElementById('SeniorCoupon_38').value),
+            value: parseFloat(document.getElementById('SeniorCoupon_38')?.value) || 5.00,
             min: 3.5,
             max: 7.0,
             step: 0.25
@@ -2945,9 +2945,9 @@ async function runGeneration(mode) {
     };
     
     // Get fixed inputs
-    const grossIT = parseFloat(document.getElementById('GrossITLoad_02').value) || 100;
-    const pue = parseFloat(document.getElementById('PUE_03').value) || 1.30;
-    const seniorTenor = parseFloat(document.getElementById('SeniorTenorY_39').value) || 25;
+    const grossIT = parseFloat(document.getElementById('GrossITLoad_02')?.value) || 100;
+    const pue = parseFloat(document.getElementById('PUE_03')?.value) || 1.30;
+    const seniorTenor = parseFloat(document.getElementById('SeniorTenorY_39')?.value) || 25;
     const rankingObjective = document.getElementById('RankingObjective_109').value || 'Composite';
     
     // Show loading indicator
@@ -2969,7 +2969,7 @@ async function runGeneration(mode) {
                 SeniorTenorY_39: seniorTenor,
                 mode: mode,
                 RankingObjective_109: rankingObjective,
-                MaxPermutations_108: parseInt(document.getElementById('MaxPermutations_108').value) || 150000
+                MaxPermutations_108: parseInt(document.getElementById('MaxPermutations_108')?.value) || 150000
             })
         });
         

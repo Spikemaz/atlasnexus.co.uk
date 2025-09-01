@@ -27,8 +27,7 @@ verify_result*.html
 cookies*.txt
 *.txt
 
-# Advanced permutation engine (uses numpy, not compatible with Vercel)
-permutation_engine_advanced.py
+# Advanced permutation engine (now Vercel-compatible, no numpy)
 
 # IDE and system files
 .vscode/
