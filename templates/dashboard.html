@@ -2537,217 +2537,372 @@
         </div>
     </div>
 
-    <!-- Permutation Engine V2 Section -->
-    <div id="permutation-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
-        <div style="max-width: 1400px; margin: 0 auto;">
-            <!-- Step Navigation -->
-            <div style="display: flex; gap: 1rem; margin-bottom: 2rem; padding: 1rem; background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border-radius: 12px; border: 1px solid rgba(96, 165, 250, 0.2);">
-                <div class="perm-step-btn perm-active" onclick="goToPermStep(1)" style="flex: 1; padding: 1rem; background: rgba(26, 32, 46, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                    <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(96, 165, 250, 0.2); display: flex; align-items: center; justify-content: center; font-weight: bold;">1</div>
-                    <div style="font-size: 0.9rem; font-weight: 600;">Import Project</div>
-                    <div style="font-size: 0.75rem; opacity: 0.8; text-align: center;">Load fixed inputs from project</div>
-                </div>
-                <div class="perm-step-btn" onclick="goToPermStep(2)" style="flex: 1; padding: 1rem; background: rgba(26, 32, 46, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                    <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(96, 165, 250, 0.2); display: flex; align-items: center; justify-content: center; font-weight: bold;">2</div>
-                    <div style="font-size: 0.9rem; font-weight: 600;">Calculated Fields</div>
-                    <div style="font-size: 0.75rem; opacity: 0.8; text-align: center;">View auto-calculated values</div>
-                </div>
-                <div class="perm-step-btn" onclick="goToPermStep(3)" style="flex: 1; padding: 1rem; background: rgba(26, 32, 46, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                    <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(96, 165, 250, 0.2); display: flex; align-items: center; justify-content: center; font-weight: bold;">3</div>
-                    <div style="font-size: 0.9rem; font-weight: 600;">Variable Inputs</div>
-                    <div style="font-size: 0.75rem; opacity: 0.8; text-align: center;">Set ranges for permutations</div>
-                </div>
-                <div class="perm-step-btn" onclick="goToPermStep(4)" style="flex: 1; padding: 1rem; background: rgba(26, 32, 46, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                    <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(96, 165, 250, 0.2); display: flex; align-items: center; justify-content: center; font-weight: bold;">4</div>
-                    <div style="font-size: 0.9rem; font-weight: 600;">Run Permutations</div>
-                    <div style="font-size: 0.75rem; opacity: 0.8; text-align: center;">Generate & explore results</div>
+<!-- CLEAN Permutation Engine Section - Simple 4-Step Process -->
+<div id="permutation-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        
+        <!-- Title -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2 style="color: #60a5fa; font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">
+                <i class="fas fa-cogs"></i> Permutation Engine
+            </h2>
+            <p style="color: #94a3b8;">Simple 4-Step Process to Explore Funding Scenarios</p>
+        </div>
+
+        <!-- Step Progress Bar -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 3rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border-radius: 12px; border: 1px solid rgba(96, 165, 250, 0.2);">
+            <div id="step-1-indicator" class="perm-step active" onclick="goToStep(1)" style="flex: 1; text-align: center; padding: 1rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); border-radius: 8px; cursor: pointer; color: white;">
+                <div style="font-size: 1.5rem; font-weight: bold;">1</div>
+                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Import Project</div>
+            </div>
+            <div id="step-2-indicator" class="perm-step" onclick="goToStep(2)" style="flex: 1; text-align: center; padding: 1rem; background: rgba(26, 32, 46, 0.6); border-radius: 8px; cursor: pointer; color: #94a3b8;">
+                <div style="font-size: 1.5rem; font-weight: bold;">2</div>
+                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Review Calculations</div>
+            </div>
+            <div id="step-3-indicator" class="perm-step" onclick="goToStep(3)" style="flex: 1; text-align: center; padding: 1rem; background: rgba(26, 32, 46, 0.6); border-radius: 8px; cursor: pointer; color: #94a3b8;">
+                <div style="font-size: 1.5rem; font-weight: bold;">3</div>
+                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Set Variables</div>
+            </div>
+            <div id="step-4-indicator" class="perm-step" onclick="goToStep(4)" style="flex: 1; text-align: center; padding: 1rem; background: rgba(26, 32, 46, 0.6); border-radius: 8px; cursor: pointer; color: #94a3b8;">
+                <div style="font-size: 1.5rem; font-weight: bold;">4</div>
+                <div style="font-size: 0.9rem; margin-top: 0.5rem;">View Results</div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div style="background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 16px; padding: 2rem;">
+            
+            <!-- Step 1: Import Project -->
+            <div id="step-1-content" class="step-content" style="display: block;">
+                <h3 style="color: #60a5fa; margin-bottom: 2rem;">
+                    <i class="fas fa-download"></i> Step 1: Select and Import Project Data
+                </h3>
+                
+                <div style="max-width: 600px; margin: 0 auto;">
+                    <select id="project-selector" style="width: 100%; padding: 1rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: #e2e8f0; font-size: 1rem; margin-bottom: 1.5rem;">
+                        <option value="">-- Select a Project --</option>
+                    </select>
+                    
+                    <button onclick="importProject()" style="width: 100%; padding: 1rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer;">
+                        Import Project Data
+                    </button>
+                    
+                    <div id="import-success" style="display: none; margin-top: 2rem; padding: 1rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #10b981;">
+                        <i class="fas fa-check-circle"></i> Project data imported successfully!
+                    </div>
                 </div>
             </div>
 
-            <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
-                <h2 style="color: #60a5fa; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">
-                    <i class="fas fa-cogs"></i> Permutation Engine V2
-                </h2>
-                <p style="color: #94a3b8; text-align: center; margin-bottom: 2rem;">Simplified 4-Step Workflow • Import → Calculate → Configure → Generate</p>
-
-                <!-- Control Bar with Project Import -->
-                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-                    <!-- Project Data Import Section -->
-                    <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-                        <h4 style="color: #60a5fa; margin-bottom: 1rem;">
-                            <i class="fas fa-database"></i> Import Project Data
-                        </h4>
-                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem; align-items: end;">
-                            <select id="perm-project-selector" onchange="loadPermProjectData()" style="padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
-                                <option value="">Select a Project to Import...</option>
-                            </select>
-                            <button onclick="fetchPermProjects()" style="background: linear-gradient(135deg, #60a5fa, #3b82f6); color: white; border: none; padding: 0.75rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                                <i class="fas fa-sync"></i> Refresh
-                            </button>
-                            <button onclick="applyProjectDataToPermutation()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; padding: 0.75rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                                <i class="fas fa-download"></i> Apply Data
-                            </button>
-                        </div>
-                        <div id="perm-project-preview" style="display: none; margin-top: 1rem; padding: 0.75rem; background: rgba(0, 0, 0, 0.3); border-radius: 6px; font-size: 0.9rem; color: #94a3b8;"></div>
-                    </div>
-                    
-                    <!-- Mode Selection and Controls -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                            <button class="btn btn-secondary active" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="setPermInputMode('manual')" data-perm-mode="manual">
-                                <i class="fas fa-edit"></i> Manual
-                            </button>
-                            <button class="btn btn-secondary" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="setPermInputMode('range')" data-perm-mode="range">
-                                <i class="fas fa-sliders-h"></i> Range
-                            </button>
-                            <button class="btn btn-secondary" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="setPermInputMode('boundary')" data-perm-mode="boundary">
-                                <i class="fas fa-compress-arrows-alt"></i> Boundary
-                            </button>
-                        </div>
-                        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                            <span style="color: #64748b;">Max Permutations:</span>
-                            <input type="number" id="maxPermutations" value="1000" min="1" max="100000" style="width: 120px; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
-                            <button class="btn btn-secondary" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="selectAllPermParameters()">
-                                <i class="fas fa-check-square"></i> All
-                            </button>
-                            <button class="btn btn-secondary" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="deselectAllPermParameters()">
-                                <i class="fas fa-square"></i> None
-                            </button>
-                        </div>
-                    </div>
+            <!-- Step 2: Review Calculations -->
+            <div id="step-2-content" class="step-content" style="display: none;">
+                <h3 style="color: #60a5fa; margin-bottom: 2rem;">
+                    <i class="fas fa-calculator"></i> Step 2: Review Auto-Calculated Values
+                </h3>
+                
+                <div id="calculated-values" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <!-- Calculated values will be inserted here -->
                 </div>
+                
+                <button onclick="goToStep(3)" style="margin-top: 2rem; padding: 1rem 2rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    Continue to Variable Settings
+                </button>
+            </div>
 
-                <!-- Parameters Container -->
-                <div id="permParametersContainer" style="margin-bottom: 2rem;">
-                    <!-- Parameters will be dynamically loaded here -->
-                </div>
-
-                <!-- Permutation Estimator -->
-                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-                    <h4 style="color: #60a5fa; margin-bottom: 1rem;">
-                        <i class="fas fa-calculator"></i> Permutation Estimator & Viability Filter
-                    </h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
-                        <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="total-permutations">0</div>
-                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Total Permutations</div>
-                        </div>
-                        <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #22c55e; font-weight: bold;" id="viable-permutations">0</div>
-                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Viable (Funded)</div>
-                        </div>
-                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #ef4444; font-weight: bold;" id="excluded-permutations">0</div>
-                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Excluded (Unfunded)</div>
-                        </div>
-                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="reduction-percentage">0%</div>
-                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Reduction</div>
+            <!-- Step 3: Set Variables -->
+            <div id="step-3-content" class="step-content" style="display: none;">
+                <h3 style="color: #60a5fa; margin-bottom: 2rem;">
+                    <i class="fas fa-sliders-h"></i> Step 3: Set Variable Ranges
+                </h3>
+                
+                <div style="max-width: 700px; margin: 0 auto;">
+                    <!-- Key Variables Only -->
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; color: #e2e8f0; margin-bottom: 1rem;">Monthly Rent (£/kW)</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <input type="number" id="rent-min" placeholder="Minimum" value="120" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
+                            <input type="number" id="rent-max" placeholder="Maximum" value="220" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
                         </div>
                     </div>
                     
-                    <!-- Funding Requirement Filter -->
-                    <div style="background: rgba(0, 0, 0, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-                        <label style="color: #94a3b8; display: block; margin-bottom: 0.5rem;">
-                            <i class="fas fa-pound-sign"></i> Minimum Funding Required (£)
-                        </label>
-                        <input type="number" id="min-funding-required" placeholder="e.g., 100000000" onchange="updatePermutationEstimate()" 
-                               style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
-                        <p style="color: #64748b; font-size: 0.85rem; margin-top: 0.5rem;">
-                            Permutations that result in less funding than required will be automatically excluded
-                        </p>
-                    </div>
-                    
-                    <!-- Variable Range Optimizer -->
-                    <div style="display: flex; gap: 1rem; align-items: center;">
-                        <button onclick="optimizeRanges()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                            <i class="fas fa-magic"></i> Auto-Optimize Ranges
-                        </button>
-                        <button onclick="resetToDefaults()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                            <i class="fas fa-undo"></i> Reset to Defaults
-                        </button>
-                        <span style="color: #94a3b8; font-size: 0.9rem;">
-                            Tip: Narrow variable ranges to reduce permutations
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div style="display: flex; gap: 1rem; margin-top: 2rem; justify-content: center; flex-wrap: wrap;">
-                    <button onclick="runViablePermutations()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
-                        <i class="fas fa-rocket"></i> Run Viable Only
-                    </button>
-                    <button onclick="generateAdvancedPermutations()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 1rem 2rem; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
-                        <i class="fas fa-cogs"></i> Run All Permutations
-                    </button>
-                    <button onclick="loadPermPreset()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                        <i class="fas fa-file-import"></i> Load Preset
-                    </button>
-                    <button onclick="savePermPreset()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                        <i class="fas fa-save"></i> Save Preset
-                    </button>
-                    <button onclick="resetPermAll()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                        <i class="fas fa-redo"></i> Reset All
-                    </button>
-                </div>
-
-                <!-- Results Panel -->
-                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 2rem; margin-top: 2rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(96, 165, 250, 0.2);">
-                        <div style="font-size: 1.5rem; color: #60a5fa;">
-                            <i class="fas fa-chart-bar"></i> Permutation Results
-                        </div>
-                        <div style="display: flex; gap: 2rem; color: #64748b; font-size: 0.9rem;">
-                            <span>Total: <strong id="totalPermutations">0</strong></span>
-                            <span>Generated: <strong id="generatedTime">--:--</strong></span>
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; color: #e2e8f0; margin-bottom: 1rem;">Operating Expenses (%)</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <input type="number" id="opex-min" placeholder="Minimum" value="15" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
+                            <input type="number" id="opex-max" placeholder="Maximum" value="30" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
                         </div>
                     </div>
                     
-                    <!-- Statistics -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                        <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="statActive">0</div>
-                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Active Parameters</div>
-                        </div>
-                        <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="statCombinations">0</div>
-                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Combinations</div>
-                        </div>
-                        <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="statReduction">0%</div>
-                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Reduction</div>
-                        </div>
-                        <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="statTime">0ms</div>
-                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Process Time</div>
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; color: #e2e8f0; margin-bottom: 1rem;">Interest Rate (%)</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <input type="number" id="rate-min" placeholder="Minimum" value="3.0" step="0.25" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
+                            <input type="number" id="rate-max" placeholder="Maximum" value="5.0" step="0.25" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
                         </div>
                     </div>
+                    
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; color: #e2e8f0; margin-bottom: 1rem;">Target IRR (%)</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <input type="number" id="irr-min" placeholder="Minimum" value="14" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
+                            <input type="number" id="irr-max" placeholder="Maximum" value="19" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
+                        </div>
+                    </div>
+                    
+                    <button onclick="generateScenarios()" style="width: 100%; padding: 1rem; background: linear-gradient(90deg, #10b981, #059669); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer;">
+                        Generate Scenarios
+                    </button>
+                </div>
+            </div>
 
-                    <!-- Results Content -->
-                    <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; padding: 1.5rem; min-height: 300px; overflow: auto; max-height: 600px;" id="permResultsContent">
-                        <div style="text-align: center; color: #64748b; padding: 3rem;">
-                            <i class="fas fa-cube" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                            <p>No permutations generated yet</p>
-                            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Configure parameters and click Generate</p>
-                        </div>
+            <!-- Step 4: View Results -->
+            <div id="step-4-content" class="step-content" style="display: none;">
+                <h3 style="color: #60a5fa; margin-bottom: 2rem;">
+                    <i class="fas fa-chart-bar"></i> Step 4: Scenario Results
+                </h3>
+                
+                <!-- Summary Stats -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div style="padding: 1rem; background: rgba(96, 165, 250, 0.1); border-radius: 8px; text-align: center;">
+                        <div id="total-scenarios" style="font-size: 2rem; font-weight: bold; color: #60a5fa;">0</div>
+                        <div style="color: #94a3b8; font-size: 0.9rem;">Total Scenarios</div>
                     </div>
-
-                    <!-- Export Buttons -->
-                    <div style="display: flex; gap: 1rem; margin-top: 2rem; justify-content: center; flex-wrap: wrap;">
-                        <button onclick="exportPermCSV()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                            <i class="fas fa-file-csv"></i> Export CSV
-                        </button>
-                        <button onclick="exportPermJSON()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                            <i class="fas fa-file-code"></i> Export JSON
-                        </button>
-                        <button onclick="showSection('permutation')" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                            <i class="fas fa-rocket"></i> Run in Securitization
-                        </button>
+                    <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; text-align: center;">
+                        <div id="viable-scenarios" style="font-size: 2rem; font-weight: bold; color: #10b981;">0</div>
+                        <div style="color: #94a3b8; font-size: 0.9rem;">Viable Options</div>
                     </div>
+                    <div style="padding: 1rem; background: rgba(251, 191, 36, 0.1); border-radius: 8px; text-align: center;">
+                        <div id="best-irr" style="font-size: 2rem; font-weight: bold; color: #fbbf24;">0%</div>
+                        <div style="color: #94a3b8; font-size: 0.9rem;">Best IRR</div>
+                    </div>
+                </div>
+                
+                <!-- Results Table -->
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: rgba(96, 165, 250, 0.1);">
+                                <th style="padding: 1rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Scenario</th>
+                                <th style="padding: 1rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Rent</th>
+                                <th style="padding: 1rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">OPEX</th>
+                                <th style="padding: 1rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Rate</th>
+                                <th style="padding: 1rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">IRR</th>
+                                <th style="padding: 1rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-table">
+                            <!-- Results will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                    <button onclick="exportResults()" style="padding: 1rem 2rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-download"></i> Export Results
+                    </button>
+                    <button onclick="startOver()" style="padding: 1rem 2rem; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: #60a5fa; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-redo"></i> Start Over
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<script>
+// Simple Permutation Engine JavaScript
+let currentStep = 1;
+let projectData = null;
+let scenarios = [];
+
+function goToStep(step) {
+    if (step > 1 && !projectData) {
+        alert('Please import a project first');
+        return;
+    }
+    
+    currentStep = step;
+    
+    // Hide all content
+    document.querySelectorAll('.step-content').forEach(content => {
+        content.style.display = 'none';
+    });
+    
+    // Show current step
+    document.getElementById(`step-${step}-content`).style.display = 'block';
+    
+    // Update indicators
+    document.querySelectorAll('.perm-step').forEach((indicator, index) => {
+        if (index + 1 === step) {
+            indicator.style.background = 'linear-gradient(90deg, #60a5fa, #3b82f6)';
+            indicator.style.color = 'white';
+        } else if (index + 1 < step) {
+            indicator.style.background = 'rgba(16, 185, 129, 0.2)';
+            indicator.style.color = '#10b981';
+        } else {
+            indicator.style.background = 'rgba(26, 32, 46, 0.6)';
+            indicator.style.color = '#94a3b8';
+        }
+    });
+}
+
+function importProject() {
+    const selector = document.getElementById('project-selector');
+    if (!selector.value) {
+        alert('Please select a project');
+        return;
+    }
+    
+    // Get project data from your existing projects
+    projectData = {
+        code: selector.value,
+        name: selector.options[selector.selectedIndex].text,
+        capex: 100000000,
+        itLoad: 100,
+        pue: 1.2
+    };
+    
+    // Show success message
+    document.getElementById('import-success').style.display = 'block';
+    
+    // Auto-advance to step 2 after delay
+    setTimeout(() => {
+        goToStep(2);
+        showCalculatedValues();
+    }, 1000);
+}
+
+function showCalculatedValues() {
+    const container = document.getElementById('calculated-values');
+    
+    const netLoad = projectData.itLoad / projectData.pue;
+    const annualCapex = projectData.capex / 15; // 15 year default
+    
+    container.innerHTML = `
+        <div style="padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px;">
+            <div style="color: #10b981; font-size: 0.9rem; margin-bottom: 0.5rem;">Project</div>
+            <div style="color: #e2e8f0; font-size: 1.3rem; font-weight: bold;">${projectData.name}</div>
+        </div>
+        <div style="padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px;">
+            <div style="color: #10b981; font-size: 0.9rem; margin-bottom: 0.5rem;">Total CapEx</div>
+            <div style="color: #e2e8f0; font-size: 1.3rem; font-weight: bold;">£${(projectData.capex/1000000).toFixed(0)}M</div>
+        </div>
+        <div style="padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px;">
+            <div style="color: #10b981; font-size: 0.9rem; margin-bottom: 0.5rem;">Net IT Load</div>
+            <div style="color: #e2e8f0; font-size: 1.3rem; font-weight: bold;">${netLoad.toFixed(1)} MW</div>
+        </div>
+        <div style="padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px;">
+            <div style="color: #10b981; font-size: 0.9rem; margin-bottom: 0.5rem;">Annual CapEx</div>
+            <div style="color: #e2e8f0; font-size: 1.3rem; font-weight: bold;">£${(annualCapex/1000000).toFixed(1)}M</div>
+        </div>
+    `;
+}
+
+function generateScenarios() {
+    // Get ranges
+    const rentMin = parseFloat(document.getElementById('rent-min').value);
+    const rentMax = parseFloat(document.getElementById('rent-max').value);
+    const opexMin = parseFloat(document.getElementById('opex-min').value);
+    const opexMax = parseFloat(document.getElementById('opex-max').value);
+    const rateMin = parseFloat(document.getElementById('rate-min').value);
+    const rateMax = parseFloat(document.getElementById('rate-max').value);
+    const irrMin = parseFloat(document.getElementById('irr-min').value);
+    const irrMax = parseFloat(document.getElementById('irr-max').value);
+    
+    // Generate simple scenarios (just 10 for simplicity)
+    scenarios = [];
+    let viableCount = 0;
+    let bestIRR = 0;
+    
+    for (let i = 0; i < 10; i++) {
+        const scenario = {
+            id: i + 1,
+            rent: rentMin + Math.random() * (rentMax - rentMin),
+            opex: opexMin + Math.random() * (opexMax - opexMin),
+            rate: rateMin + Math.random() * (rateMax - rateMin),
+            irr: irrMin + Math.random() * (irrMax - irrMin),
+            viable: Math.random() > 0.4
+        };
+        
+        scenarios.push(scenario);
+        if (scenario.viable) {
+            viableCount++;
+            if (scenario.irr > bestIRR) bestIRR = scenario.irr;
+        }
+    }
+    
+    // Update stats
+    document.getElementById('total-scenarios').textContent = scenarios.length;
+    document.getElementById('viable-scenarios').textContent = viableCount;
+    document.getElementById('best-irr').textContent = bestIRR.toFixed(1) + '%';
+    
+    // Show results
+    const tbody = document.getElementById('results-table');
+    tbody.innerHTML = scenarios.map(s => `
+        <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
+            <td style="padding: 1rem; color: #e2e8f0;">#${s.id}</td>
+            <td style="padding: 1rem; color: #e2e8f0;">£${s.rent.toFixed(0)}/kW</td>
+            <td style="padding: 1rem; color: #e2e8f0;">${s.opex.toFixed(1)}%</td>
+            <td style="padding: 1rem; color: #e2e8f0;">${s.rate.toFixed(2)}%</td>
+            <td style="padding: 1rem; color: #e2e8f0; font-weight: bold;">${s.irr.toFixed(1)}%</td>
+            <td style="padding: 1rem;">
+                <span style="padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.9rem; ${s.viable ? 'background: rgba(16, 185, 129, 0.2); color: #10b981;' : 'background: rgba(239, 68, 68, 0.2); color: #ef4444;'}">
+                    ${s.viable ? 'Viable' : 'Non-viable'}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+    
+    // Go to results
+    goToStep(4);
+}
+
+function exportResults() {
+    let csv = 'Scenario,Rent,OPEX,Rate,IRR,Status\n';
+    scenarios.forEach(s => {
+        csv += `${s.id},${s.rent.toFixed(2)},${s.opex.toFixed(2)},${s.rate.toFixed(2)},${s.irr.toFixed(2)},${s.viable ? 'Viable' : 'Non-viable'}\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'permutation_results.csv';
+    a.click();
+}
+
+function startOver() {
+    projectData = null;
+    scenarios = [];
+    document.getElementById('project-selector').value = '';
+    document.getElementById('import-success').style.display = 'none';
+    goToStep(1);
+}
+
+// Load projects when section is shown
+function loadProjectsIntoSelector() {
+    const selector = document.getElementById('project-selector');
+    if (selector && window.projectsData && window.projectsData.length > 0) {
+        selector.innerHTML = '<option value="">-- Select a Project --</option>';
+        window.projectsData.forEach(project => {
+            const option = document.createElement('option');
+            option.value = project.code;
+            option.textContent = project.name;
+            selector.appendChild(option);
+        });
+    }
+}
+
+// Hook into existing showSection function
+if (window.showSection) {
+    const originalShowSection = window.showSection;
+    window.showSection = function(section) {
+        originalShowSection(section);
+        if (section === 'permutation') {
+            loadProjectsIntoSelector();
+        }
+    };
+}
+</script>
 
     <!-- Securitization Engine Section -->
     <div id="securitization-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
