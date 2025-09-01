@@ -5161,6 +5161,61 @@ def save_theme():
     
     return jsonify({'status': 'success', 'theme': theme})
 
+@app.route('/api/request-password-reset', methods=['POST'])
+def request_password_reset():
+    """Request a password reset email"""
+    ip_address = get_real_ip()
+    
+    # Verify authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    email = session.get(f'user_email_{ip_address}')
+    if not email:
+        return jsonify({'success': False, 'message': 'Email not found'}), 400
+    
+    # Generate reset token
+    reset_token = secrets.token_urlsafe(32)
+    expiry_time = datetime.now() + timedelta(hours=24)
+    
+    # Store reset token in user data
+    users = load_users_data()
+    if email in users:
+        users[email]['reset_token'] = reset_token
+        users[email]['reset_token_expiry'] = expiry_time.isoformat()
+        save_user_data(email, users[email])
+        
+        # Send reset email
+        reset_link = f"https://atlasnexus.co.uk/reset-password?token={reset_token}&email={email}"
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 10px;">
+                <h2 style="color: #4a9eff;">Password Reset Request</h2>
+                <p>Hello {users[email].get('username', 'User')},</p>
+                <p>You requested a password reset for your Atlas Nexus account.</p>
+                <p>Click the link below to reset your password:</p>
+                <a href="{reset_link}" style="display: inline-block; padding: 12px 24px; background: #4a9eff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">Reset Password</a>
+                <p style="color: #666; font-size: 14px;">This link will expire in 24 hours.</p>
+                <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="color: #999; font-size: 12px;">Atlas Nexus - Secure Financial Platform</p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Try to send email
+        if send_email(email, "Password Reset Request - Atlas Nexus", html_content):
+            print(f"[PASSWORD RESET] Email sent to {email}")
+            return jsonify({'success': True, 'message': 'Password reset email sent'})
+        else:
+            print(f"[PASSWORD RESET] Failed to send email to {email}")
+            return jsonify({'success': False, 'message': 'Failed to send email. Please contact support.'})
+    
+    return jsonify({'success': False, 'message': 'User not found'}), 404
+
 # ==================== DOCUMENT UPLOAD WITH BLOB STORAGE ====================
 @app.route('/api/documents/upload', methods=['POST'])
 def upload_document_endpoint():
