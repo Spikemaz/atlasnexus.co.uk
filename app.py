@@ -4024,7 +4024,15 @@ def run_permutation():
         return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
     
     try:
-        from permutation_engine import run_permutation_engine
+        # Try to import permutation engine
+        try:
+            from permutation_engine import run_permutation_engine
+        except ImportError:
+            # Fallback if module not available
+            return jsonify({
+                'status': 'error',
+                'message': 'Permutation engine not available'
+            }), 501
         
         # Get configuration from request
         config = request.json
