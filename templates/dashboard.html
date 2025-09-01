@@ -5753,17 +5753,24 @@
     <!-- Smooth Keyboard Scrolling -->
     <script src="{{ url_for('static', filename='js/smooth-scroll.js') }}"></script>
     
-    <!-- FORCE DARK BLUE COLOR - OVERRIDE EVERYTHING -->
+    <!-- FORCE DARK BLUE COLOR v2 - FINAL FIX -->
     <style>
+        /* DARK BLUE FOR EVERYTHING */
         .card, 
         div.card,
         .card.shadow-lg,
         .card.fade-in-up,
         .stat-card,
         div.stat-card,
-        .stat-card.hover-lift {
+        .stat-card.hover-lift,
+        div[class*="card"] {
             background: linear-gradient(135deg, #1e3a8a, #172554) !important;
             background-image: linear-gradient(135deg, #1e3a8a, #172554) !important;
+        }
+        
+        /* Override Bootstrap card backgrounds */
+        .card:not(.stat-card) {
+            background: linear-gradient(135deg, #1e3a8a, #172554) !important;
         }
         
         /* Fix table to show dark blue background */
