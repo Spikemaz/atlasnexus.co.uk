@@ -27,23 +27,16 @@ from werkzeug.utils import secure_filename
 
 # Try to import cloud database
 try:
-    from cloud_database import cloud_db, load_users as db_load_users, save_users as db_save_users
+    from cloud_database import load_users as db_load_users, save_users as db_save_users
     from cloud_database import load_registrations as db_load_registrations, save_registrations as db_save_registrations
     from cloud_database import load_admin_actions as db_load_admin_actions, add_admin_action as db_add_admin_action
     from cloud_database import reinitialize_db
     
-    # Try to connect at startup
-    CLOUD_DB_AVAILABLE = cloud_db.connected
+    # Don't check connection at import time - Vercel loads env vars after imports
+    CLOUD_DB_AVAILABLE = False
     
-    # If not connected but env var exists, try reinitializing
-    if not CLOUD_DB_AVAILABLE and os.environ.get('MONGODB_URI'):
-        print("[DATABASE] Retrying MongoDB connection...")
-        CLOUD_DB_AVAILABLE = reinitialize_db()
-    
-    if CLOUD_DB_AVAILABLE:
-        print("[DATABASE] Cloud database connected successfully")
-    else:
-        print("[DATABASE] Cloud database not configured - using local files")
+    # We'll initialize the connection on first request instead
+    print("[DATABASE] Cloud database module loaded - will connect on first request")
 except ImportError:
     CLOUD_DB_AVAILABLE = False
     print("[DATABASE] Cloud database module not available - using local files")
@@ -1220,10 +1213,25 @@ def site_auth():
             'message': f'Invalid code. {attempts_left} attempts remaining'
         }), 401
 
+def ensure_db_initialized():
+    """Ensure database is initialized - call this on first request"""
+    global CLOUD_DB_AVAILABLE
+    if not CLOUD_DB_AVAILABLE and os.environ.get('MONGODB_URI'):
+        try:
+            CLOUD_DB_AVAILABLE = reinitialize_db()
+            if CLOUD_DB_AVAILABLE:
+                print("[DATABASE] MongoDB Atlas connected on first request!")
+        except:
+            pass
+    return CLOUD_DB_AVAILABLE
+
 @app.route('/api/test-db')
 def test_db():
     """Test database connection endpoint"""
     try:
+        # Try to initialize DB if not already done
+        ensure_db_initialized()
+        
         # Check environment variable directly
         mongo_uri = os.environ.get('MONGODB_URI', '')
         

@@ -300,14 +300,24 @@ class CloudDatabase:
         except:
             return False
 
-# Global database instance
-cloud_db = CloudDatabase()
+# Global database instance - initialize as None first
+cloud_db = None
+
+def get_db():
+    """Get or create database instance"""
+    global cloud_db
+    if cloud_db is None:
+        cloud_db = CloudDatabase()
+    return cloud_db
 
 def reinitialize_db():
     """Reinitialize database connection"""
     global cloud_db
     cloud_db = CloudDatabase()
     return cloud_db.connected
+
+# Initialize on first import
+cloud_db = get_db()
 
 # Helper functions for backward compatibility
 def load_users():
