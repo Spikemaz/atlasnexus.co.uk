@@ -821,9 +821,6 @@
             </button>
             {% else %}
             <!-- Admin and Internal accounts see all options -->
-            <button class="nav-btn" data-section="projects" onclick="showSection('projects')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-                <i class="fas fa-folder"></i> Projects
-            </button>
             <button class="nav-btn" data-section="market" onclick="showSection('market')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-chart-line"></i> Market
             </button>
@@ -838,6 +835,9 @@
             </button>
             <button class="nav-btn" data-section="compliance" onclick="showSection('compliance')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-gavel"></i> Compliance
+            </button>
+            <button class="nav-btn" data-section="projects" onclick="showSection('projects')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                <i class="fas fa-folder"></i> Projects
             </button>
             <button class="nav-btn" data-section="permutation" onclick="showSection('permutation')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-cogs"></i> Permutation
@@ -5555,7 +5555,6 @@
     // Initialize projects when section becomes visible
     function initializeProjects() {
         loadProjects();
-        loadDeletedItems();
         setupProjectsDragAndDrop();
     }
 
@@ -5891,7 +5890,7 @@
         
         const modal = document.getElementById('delete-confirm-modal');
         const message = document.getElementById('delete-confirm-message');
-        message.textContent = 'Are you sure you want to delete this project? It will be moved to trash and automatically deleted after 7 days.';
+        message.textContent = 'Are you sure you want to delete this project? This action cannot be undone.';
         modal.style.display = 'flex';
     }
     
@@ -5906,7 +5905,7 @@
             
             const modal = document.getElementById('delete-confirm-modal');
             const message = document.getElementById('delete-confirm-message');
-            message.textContent = `Are you sure you want to delete this series? It contains ${series.projects.length} project(s). All projects will be moved to trash and automatically deleted after 7 days.`;
+            message.textContent = `Are you sure you want to delete this series? It contains ${series.projects.length} project(s). This action cannot be undone.`;
             modal.style.display = 'flex';
         } else {
             pendingDeleteItem = { id: seriesId };
@@ -5914,7 +5913,7 @@
             
             const modal = document.getElementById('delete-confirm-modal');
             const message = document.getElementById('delete-confirm-message');
-            message.textContent = 'Are you sure you want to delete this series? It will be moved to trash and automatically deleted after 7 days.';
+            message.textContent = 'Are you sure you want to delete this series? This action cannot be undone.';
             modal.style.display = 'flex';
         }
     }
@@ -5956,7 +5955,7 @@
                     renderProjects();
                     updateProjectStats();
                     saveSeriesData();
-                    loadDeletedItems(); // Refresh deleted items count
+                    // Deleted permanently
                 }
             } catch (error) {
                 console.error('Error deleting project:', error);
@@ -5982,7 +5981,7 @@
                 renderProjects();
                 updateProjectStats();
                 saveSeriesData();
-                loadDeletedItems(); // Refresh deleted items count
+                // Deleted permanently
             }
         }
         
@@ -6274,7 +6273,7 @@
         
         const modal = document.getElementById('delete-confirm-modal');
         const message = document.getElementById('delete-confirm-message');
-        message.textContent = 'Are you sure you want to delete this project? It will be moved to trash and automatically deleted after 7 days.';
+        message.textContent = 'Are you sure you want to delete this project? This action cannot be undone.';
         modal.style.display = 'flex';
     }
     
@@ -6289,7 +6288,7 @@
             
             const modal = document.getElementById('delete-confirm-modal');
             const message = document.getElementById('delete-confirm-message');
-            message.textContent = `Are you sure you want to delete this series? It contains ${series.projects.length} project(s). All projects will be moved to trash and automatically deleted after 7 days.`;
+            message.textContent = `Are you sure you want to delete this series? It contains ${series.projects.length} project(s). This action cannot be undone.`;
             modal.style.display = 'flex';
         } else {
             pendingDeleteItem = { id: seriesId };
@@ -6297,7 +6296,7 @@
             
             const modal = document.getElementById('delete-confirm-modal');
             const message = document.getElementById('delete-confirm-message');
-            message.textContent = 'Are you sure you want to delete this series? It will be moved to trash and automatically deleted after 7 days.';
+            message.textContent = 'Are you sure you want to delete this series? This action cannot be undone.';
             modal.style.display = 'flex';
         }
     }
@@ -6339,7 +6338,7 @@
                     renderProjects();
                     updateProjectStats();
                     saveSeriesData();
-                    loadDeletedItems(); // Refresh deleted items count
+                    // Deleted permanently
                 }
             } catch (error) {
                 console.error('Error deleting project:', error);
@@ -6365,7 +6364,7 @@
                 renderProjects();
                 updateProjectStats();
                 saveSeriesData();
-                loadDeletedItems(); // Refresh deleted items count
+                // Deleted permanently
             }
         }
         
