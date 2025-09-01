@@ -1184,7 +1184,7 @@
                             </div>
                         </div>
                         
-                        <button class="btn btn-primary w-100" onclick="window.location.href='/permutation-engine'">
+                        <button class="btn w-100" style="background: linear-gradient(135deg, #60a5fa, #3b82f6); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onclick="showSection('permutation')">
                             <i class="fas fa-rocket me-2"></i>Launch Engine
                         </button>
                     </div>
@@ -2118,32 +2118,32 @@
     <!-- Advanced Permutation Engine Section -->
     <div id="permutation-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div style="max-width: 1800px; margin: 0 auto;">
-            <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 2px solid #ffd700; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
-                <h2 style="color: #ffd700; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">
+            <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
+                <h2 style="color: #60a5fa; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">
                     <i class="fas fa-cogs"></i> Advanced Permutation Engine
                 </h2>
                 <p style="color: #94a3b8; text-align: center; margin-bottom: 2rem;">80+ Financial Parameters • Manual/Range/Boundary Modes • Real-time Generation</p>
 
                 <!-- Control Bar -->
-                <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <button class="btn btn-secondary active" onclick="setPermInputMode('manual')" data-perm-mode="manual">
+                        <button class="btn btn-secondary active" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="setPermInputMode('manual')" data-perm-mode="manual">
                             <i class="fas fa-edit"></i> Manual
                         </button>
-                        <button class="btn btn-secondary" onclick="setPermInputMode('range')" data-perm-mode="range">
+                        <button class="btn btn-secondary" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="setPermInputMode('range')" data-perm-mode="range">
                             <i class="fas fa-sliders-h"></i> Range
                         </button>
-                        <button class="btn btn-secondary" onclick="setPermInputMode('boundary')" data-perm-mode="boundary">
+                        <button class="btn btn-secondary" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="setPermInputMode('boundary')" data-perm-mode="boundary">
                             <i class="fas fa-compress-arrows-alt"></i> Boundary
                         </button>
                     </div>
                     <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                         <span style="color: #888;">Max Permutations:</span>
-                        <input type="number" id="maxPermutations" value="1000" min="1" max="100000" style="width: 120px; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 6px; color: white;">
-                        <button class="btn btn-secondary" onclick="selectAllPermParameters()">
+                        <input type="number" id="maxPermutations" value="1000" min="1" max="100000" style="width: 120px; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                        <button class="btn btn-secondary" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="selectAllPermParameters()">
                             <i class="fas fa-check-square"></i> All
                         </button>
-                        <button class="btn btn-secondary" onclick="deselectAllPermParameters()">
+                        <button class="btn btn-secondary" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="deselectAllPermParameters()">
                             <i class="fas fa-square"></i> None
                         </button>
                     </div>
@@ -2156,24 +2156,24 @@
 
                 <!-- Action Buttons -->
                 <div style="display: flex; gap: 1rem; margin-top: 2rem; justify-content: center; flex-wrap: wrap;">
-                    <button class="btn btn-primary" onclick="generateAdvancedPermutations()" style="padding: 1rem 2rem; font-size: 1rem;">
+                    <button onclick="generateAdvancedPermutations()" style="background: linear-gradient(135deg, #60a5fa, #3b82f6); color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
                         <i class="fas fa-cogs"></i> Generate Permutations
                     </button>
-                    <button class="btn btn-secondary" onclick="loadPermPreset()" style="padding: 1rem 2rem;">
+                    <button onclick="loadPermPreset()" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
                         <i class="fas fa-file-import"></i> Load Preset
                     </button>
-                    <button class="btn btn-secondary" onclick="savePermPreset()" style="padding: 1rem 2rem;">
+                    <button onclick="savePermPreset()" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
                         <i class="fas fa-save"></i> Save Preset
                     </button>
-                    <button class="btn btn-secondary" onclick="resetPermAll()" style="padding: 1rem 2rem;">
+                    <button onclick="resetPermAll()" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
                         <i class="fas fa-redo"></i> Reset All
                     </button>
                 </div>
 
                 <!-- Results Panel -->
-                <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 12px; padding: 2rem; margin-top: 2rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 215, 0, 0.1);">
-                        <div style="font-size: 1.5rem; color: #ffd700;">
+                <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(96, 165, 250, 0.2);">
+                        <div style="font-size: 1.5rem; color: #60a5fa;">
                             <i class="fas fa-chart-bar"></i> Permutation Results
                         </div>
                         <div style="display: flex; gap: 2rem; color: #888; font-size: 0.9rem;">
@@ -2184,26 +2184,26 @@
                     
                     <!-- Statistics -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                        <div style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="statActive">0</div>
-                            <div style="font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Active Parameters</div>
+                        <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="statActive">0</div>
+                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Active Parameters</div>
                         </div>
-                        <div style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="statCombinations">0</div>
-                            <div style="font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Combinations</div>
+                        <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="statCombinations">0</div>
+                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Combinations</div>
                         </div>
-                        <div style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="statReduction">0%</div>
-                            <div style="font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Reduction</div>
+                        <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="statReduction">0%</div>
+                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Reduction</div>
                         </div>
-                        <div style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="statTime">0ms</div>
-                            <div style="font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Process Time</div>
+                        <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="statTime">0ms</div>
+                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Process Time</div>
                         </div>
                     </div>
 
                     <!-- Results Content -->
-                    <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 8px; padding: 1.5rem; min-height: 300px; overflow: auto; max-height: 600px;" id="permResultsContent">
+                    <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; padding: 1.5rem; min-height: 300px; overflow: auto; max-height: 600px;" id="permResultsContent">
                         <div style="text-align: center; color: #666; padding: 3rem;">
                             <i class="fas fa-cube" style="font-size: 3rem; margin-bottom: 1rem;"></i>
                             <p>No permutations generated yet</p>
@@ -2213,13 +2213,13 @@
 
                     <!-- Export Buttons -->
                     <div style="display: flex; gap: 1rem; margin-top: 2rem; justify-content: center; flex-wrap: wrap;">
-                        <button class="btn btn-secondary" onclick="exportPermCSV()">
+                        <button onclick="exportPermCSV()" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">
                             <i class="fas fa-file-csv"></i> Export CSV
                         </button>
-                        <button class="btn btn-secondary" onclick="exportPermJSON()">
+                        <button onclick="exportPermJSON()" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">
                             <i class="fas fa-file-code"></i> Export JSON
                         </button>
-                        <button class="btn btn-secondary" onclick="window.location.href='/securitization-engine'">
+                        <button onclick="showSection('permutation')" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">
                             <i class="fas fa-rocket"></i> Run in Securitization
                         </button>
                     </div>
