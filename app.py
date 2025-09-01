@@ -4014,6 +4014,35 @@ def admin_resend_credentials():
     else:
         return jsonify({'status': 'error', 'message': 'Failed to send email'}), 500
 
+@app.route('/api/permutation/run', methods=['POST'])
+def run_permutation():
+    """Run the permutation engine with provided configuration"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    try:
+        from permutation_engine import run_permutation_engine
+        
+        # Get configuration from request
+        config = request.json
+        
+        # Run the engine
+        results = run_permutation_engine(config)
+        
+        return jsonify({
+            'status': 'success',
+            'results': results
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
 @app.route('/api/admin/users', methods=['GET'])
 def get_users_list():
     """Get list of all users (admin only)"""

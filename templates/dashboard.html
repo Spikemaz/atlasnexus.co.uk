@@ -2946,7 +2946,42 @@ async function runGeneration(mode) {
     const seniorTenor = parseFloat(document.getElementById('SeniorTenorY_39').value) || 25;
     const rankingObjective = document.getElementById('RankingObjective_109').value || 'Composite';
     
-    // Generate permutations based on enabled ranges
+    // Show loading indicator
+    const quickStats = document.getElementById('quick-stats');
+    quickStats.innerHTML = '<div style="text-align: center; color: #60a5fa;"><i class="fas fa-spinner fa-spin"></i> Running permutation engine...</div>';
+    quickStats.style.display = 'block';
+    
+    // Try to use the server-side engine first
+    try {
+        const response = await fetch('/api/permutation/run', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ...config,
+                GrossITLoad_02: grossIT,
+                PUE_03: pue,
+                SeniorTenorY_39: seniorTenor,
+                mode: mode,
+                RankingObjective_109: rankingObjective,
+                MaxPermutations_108: parseInt(document.getElementById('MaxPermutations_108').value) || 150000
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.status === 'success') {
+                // Process server results
+                processServerResults(data.results);
+                return;
+            }
+        }
+    } catch (error) {
+        console.log('Server engine not available, using client-side generation');
+    }
+    
+    // Fallback to client-side generation
     scenarios = [];
     const maxCount = mode === 'preview' ? 10 : (mode === 'viable' ? 500 : 1000);
     let viableCount = 0;
@@ -3022,8 +3057,45 @@ async function runGeneration(mode) {
     })
     
     // Update stats
-    document.getElementById('stat-total').textContent = scenarios.length;
-    document.getElementById('stat-viable').textContent = viableCount;
+    updateStats(scenarios.length, viableCount, bestIRR, bestDSCR);
+    
+    // Show results table
+    displayResults();
+}
+
+function processServerResults(results) {
+    // Convert server results to client format
+    scenarios = results.scenarios.map(s => ({
+        id: s.id,
+        rent: s.inputs.monthly_rent,
+        opex: s.inputs.opex,
+        coupon: s.inputs.senior_coupon,
+        dscr: s.outputs.dscr_min,
+        targetDSCR: s.inputs.target_dscr,
+        irr: s.outputs.equity_irr,
+        seniorRaise: s.outputs.senior_notional,
+        netIncome: s.inputs.monthly_rent * 12 * (1 - s.inputs.opex/100),
+        viable: s.viable,
+        rating: s.outputs.senior_rating,
+        wacc: s.outputs.wacc,
+        wal: s.outputs.senior_wal,
+        repoEligible: s.outputs.repo_eligible
+    }));
+    
+    const summary = results.summary || {};
+    updateStats(
+        results.total_scenarios,
+        results.viable_count,
+        summary.best_irr || 0,
+        summary.best_dscr || 0
+    );
+    
+    displayResults();
+}
+
+function updateStats(total, viable, bestIRR, bestDSCR) {
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-viable').textContent = viable;
     document.getElementById('stat-irr').textContent = bestIRR.toFixed(1) + '%';
     
     // Add best DSCR display if element exists
@@ -3032,10 +3104,25 @@ async function runGeneration(mode) {
         dscrStat.textContent = bestDSCR.toFixed(2) + 'x';
     }
     
-    document.getElementById('quick-stats').style.display = 'block';
-    
-    // Show results table
-    displayResults();
+    // Reset quick stats display
+    const quickStats = document.getElementById('quick-stats');
+    quickStats.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+            <div>
+                <div style="color: #10b981; font-size: 0.8rem;">Total</div>
+                <div id="stat-total" style="font-weight: bold; color: #e2e8f0;">${total}</div>
+            </div>
+            <div>
+                <div style="color: #10b981; font-size: 0.8rem;">Viable</div>
+                <div id="stat-viable" style="font-weight: bold; color: #e2e8f0;">${viable}</div>
+            </div>
+            <div>
+                <div style="color: #10b981; font-size: 0.8rem;">Best IRR</div>
+                <div id="stat-irr" style="font-weight: bold; color: #e2e8f0;">${bestIRR.toFixed(1)}%</div>
+            </div>
+        </div>
+    `;
+    quickStats.style.display = 'block';
 }
 
 function displayResults() {
