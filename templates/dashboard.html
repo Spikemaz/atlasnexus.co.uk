@@ -2907,7 +2907,7 @@ function quickPreview() {
     runGeneration('preview');
 }
 
-function runGeneration(mode) {
+async function runGeneration(mode) {
     // Get configuration for all fields with ranges enabled
     const config = {
         GrossMonthlyRent_07: {
@@ -7053,27 +7053,7 @@ if (window.showSection) {
         pendingDeleteType = null;
     }
     
-    // Save series data
-    async function saveSeriesData() {
-        try {
-            // Save to backend database (cloud storage)
-            const response = await fetch('/api/series', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',  // Include cookies for session
-                body: JSON.stringify({ series: seriesData, projects: projectsData })
-            });
-            
-            if (!response.ok) {
-                throw new Error('Failed to save data to server');
-            }
-            
-            console.log('Data saved to cloud successfully');
-        } catch (error) {
-            console.error('Error saving data:', error);
-            alert('Failed to save changes. Please check your connection and try again.');
-        }
-    }
+    /* DUPLICATE FUNCTION REMOVED - saveSeriesData is already defined above as an alias to saveProjects()
     END OF DUPLICATE FUNCTIONS */
 
     // Create a project card element
