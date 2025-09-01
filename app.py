@@ -665,7 +665,7 @@ def log_admin_action(user_or_ip, action, details=None):
         pass  # Fail silently to avoid breaking the app
 
 def load_json_db(file_path):
-    """Load JSON database file"""
+    """Load JSON database file with backup protection"""
     # Convert string to Path if needed
     if isinstance(file_path, str):
         file_path = Path(file_path)
@@ -677,6 +677,9 @@ def load_json_db(file_path):
                 # Ensure admin_actions is always a list
                 if 'admin_actions' in str(file_path) and isinstance(data, dict):
                     return list(data.values()) if data else []
+                # IMPORTANT: Log if users file is suspiciously empty
+                if 'users.json' in str(file_path) and isinstance(data, dict) and len(data) <= 1:
+                    print(f"[WARNING] Users file has {len(data)} users - this seems unusually low")
                 return data
         except Exception as e:
             print(f"Error loading {file_path}: {e}")
@@ -691,7 +694,32 @@ def load_json_db(file_path):
     return {}
 
 def save_json_db(file_path, data):
-    """Save JSON database file"""
+    """Save JSON database file with safety checks"""
+    # Convert string to Path if needed
+    if isinstance(file_path, str):
+        file_path = Path(file_path)
+    
+    # CRITICAL: Prevent accidental deletion of all users
+    if 'users.json' in str(file_path) and isinstance(data, dict):
+        # If we're about to save a users file with only 1 or 0 users
+        if len(data) <= 1:
+            # Check if there's an existing file with more users
+            if file_path.exists():
+                try:
+                    with open(file_path, 'r') as f:
+                        existing_data = json.load(f)
+                        if isinstance(existing_data, dict) and len(existing_data) > len(data):
+                            print(f"[SAFETY] Refusing to overwrite {len(existing_data)} users with only {len(data)} users")
+                            print(f"[SAFETY] This looks like accidental data loss - preserving existing users")
+                            # Merge the admin user if it's the only one being saved
+                            if len(data) == 1 and 'spikemaz8@aol.com' in data:
+                                existing_data['spikemaz8@aol.com'] = data['spikemaz8@aol.com']
+                                data = existing_data
+                            else:
+                                return  # Don't save, preserve existing data
+                except Exception:
+                    pass  # If we can't read existing file, proceed with save
+    
     with open(file_path, 'w') as f:
         json.dump(data, f, indent=2, default=str)
 
@@ -1534,6 +1562,9 @@ def register():
         registrations[data['email']] = data
         save_json_db(REGISTRATIONS_FILE, registrations)
         
+        # Trigger update notification for admin panel
+        session['data_changed'] = True
+        
         # Send verification email
         base_url = get_base_url()
         verification_link = f"{base_url}verify-email?token={data['verification_token']}&email={data['email']}"
@@ -1996,6 +2027,9 @@ def verify_email():
         registrations[email]['email_verified'] = True
         registrations[email]['verified_at'] = datetime.now().isoformat()
         save_json_db(REGISTRATIONS_FILE, registrations)
+        
+        # Trigger update notification for admin panel
+        session['data_changed'] = True
         
         # Check if user was already approved (approved before verification)
         if registrations[email].get('admin_approved'):
@@ -3283,9 +3317,11 @@ def admin_comprehensive_data():
                 'password': 'SpikeMaz',
                 'password_expiry': (datetime.now() + timedelta(days=365)).isoformat(),
                 'email_verified': True,
-                'login_count': users.get('spikemaz8@aol.com', {}).get('login_count', 0),
-                'last_login': users.get('spikemaz8@aol.com', {}).get('last_login', datetime.now().isoformat())
+                'login_count': 0,
+                'last_login': datetime.now().isoformat()
             }
+            # IMPORTANT: Save users file ONLY if we modified it
+            # This preserves all existing users
             save_json_db(USERS_FILE, users)
         
         # Ensure admin_actions is a list
@@ -3404,6 +3440,56 @@ def admin_delete_data():
     except Exception as e:
         print(f"[ADMIN ERROR] Failed to delete {data_type} {identifier}: {e}")
         return jsonify({'status': 'error', 'message': str(e)})
+
+@app.route('/admin/check-updates')
+def admin_check_updates():
+    """Lightweight endpoint to check if data has changed"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    # Get last check timestamp from request
+    last_check = request.args.get('last_check', '')
+    
+    # Calculate current data hash
+    registrations = load_json_db(REGISTRATIONS_FILE) or {}
+    users = load_json_db(USERS_FILE) or {}
+    lockouts = load_lockouts() or {}
+    
+    # Create a simple hash of current state
+    current_state = {
+        'registrations_count': len(registrations),
+        'users_count': len(users),
+        'lockouts_count': len(lockouts),
+        'pending_verifications': sum(1 for r in registrations.values() if not r.get('email_verified')),
+        'pending_approvals': sum(1 for r in registrations.values() if r.get('email_verified') and not r.get('admin_approved'))
+    }
+    
+    # Convert to string for comparison
+    state_hash = hashlib.md5(json.dumps(current_state, sort_keys=True).encode()).hexdigest()
+    
+    return jsonify({
+        'status': 'success',
+        'has_changes': session.get(f'last_data_hash_{ip_address}') != state_hash,
+        'state_hash': state_hash,
+        'stats': current_state
+    })
+
+@app.route('/admin/set-data-hash', methods=['POST'])
+def admin_set_data_hash():
+    """Store the current data hash in session"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    state_hash = request.json.get('state_hash')
+    session[f'last_data_hash_{ip_address}'] = state_hash
+    
+    return jsonify({'status': 'success'})
 
 @app.route('/terms')
 def terms():

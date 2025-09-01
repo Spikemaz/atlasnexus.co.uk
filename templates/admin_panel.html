@@ -2563,21 +2563,23 @@
             setTimeout(() => alert.remove(), 5000);
         }
 
-        // Auto-refresh variables
+        // Smart refresh variables
         let autoRefreshInterval = null;
         let sessionHeartbeatInterval = null;
         let lastUpdateTime = new Date();
-        const REFRESH_INTERVAL = 5000; // 5 seconds
+        let currentDataHash = null;
+        const CHECK_INTERVAL = 1000; // Check for changes every 1 second
         const HEARTBEAT_INTERVAL = 60000; // 1 minute
         
         function startAutoRefresh() {
             if (autoRefreshInterval) return; // Already running
             
+            // Use smart refresh that only updates when data changes
             autoRefreshInterval = setInterval(async () => {
                 if (document.getElementById('autoRefreshToggle').checked) {
-                    await silentRefresh();
+                    await checkForUpdates();
                 }
-            }, REFRESH_INTERVAL);
+            }, CHECK_INTERVAL);
             
             // Start session heartbeat
             sessionHeartbeatInterval = setInterval(async () => {
@@ -2595,6 +2597,33 @@
             updateLiveIndicator(false);
         }
         
+        async function checkForUpdates() {
+            try {
+                // First check if data has changed using lightweight endpoint
+                const checkResponse = await fetch('/admin/check-updates');
+                const checkData = await checkResponse.json();
+                
+                if (checkData.status === 'success' && checkData.has_changes) {
+                    // Data has changed, fetch the full update
+                    await silentRefresh();
+                    
+                    // Store the new hash
+                    currentDataHash = checkData.state_hash;
+                    await fetch('/admin/set-data-hash', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ state_hash: currentDataHash })
+                    });
+                    
+                    // Show subtle notification
+                    console.log('Data updated:', checkData.stats);
+                }
+                // If no changes, do nothing - saves bandwidth and processing
+            } catch (error) {
+                console.error('Failed to check for updates:', error);
+            }
+        }
+        
         async function silentRefresh() {
             try {
                 const response = await fetch('/admin/comprehensive-data');
@@ -2605,18 +2634,16 @@
                     adminData = data.data;
                     const newData = JSON.stringify(adminData);
                     
-                    // Only update UI if data changed
-                    if (oldData !== newData) {
-                        updateDashboardStats();
-                        updatePageContent();
-                        
-                        // Flash the live indicator
-                        const indicator = document.getElementById('liveIndicator');
-                        indicator.style.color = '#3b82f6';
-                        setTimeout(() => {
-                            indicator.querySelector('i').style.color = '#22c55e';
-                        }, 500);
-                    }
+                    // Update UI since we know data changed
+                    updateDashboardStats();
+                    updatePageContent();
+                    
+                    // Flash the live indicator
+                    const indicator = document.getElementById('liveIndicator');
+                    indicator.style.color = '#3b82f6';
+                    setTimeout(() => {
+                        indicator.querySelector('i').style.color = '#22c55e';
+                    }, 500);
                     
                     lastUpdateTime = new Date();
                     updateLastUpdateTime();
