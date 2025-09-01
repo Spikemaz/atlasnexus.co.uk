@@ -30,21 +30,25 @@ class CloudDatabase:
         
         if USE_MONGODB:
             try:
+                print(f"[DATABASE] Attempting MongoDB connection...")
+                print(f"[DATABASE] URI configured: {bool(MONGODB_URI)}")
                 # Connect to MongoDB Atlas with ServerApi
                 self.client = MongoClient(MONGODB_URI, server_api=ServerApi('1'), serverSelectionTimeoutMS=5000)
                 # Test connection
                 self.client.admin.command('ping')
                 self.db = self.client.atlasnexus
                 self.connected = True
-                print("[DATABASE] Connected to MongoDB Atlas")
+                print("[DATABASE] Connected to MongoDB Atlas successfully!")
                 
                 # Initialize collections
                 self._init_collections()
             except Exception as e:
-                print(f"[DATABASE] MongoDB connection failed: {e}")
+                print(f"[DATABASE] MongoDB connection failed: {str(e)}")
+                print(f"[DATABASE] Error type: {type(e).__name__}")
                 self.connected = False
         else:
-            print("[DATABASE] MongoDB URI not configured - using local storage")
+            print(f"[DATABASE] MongoDB URI not configured - using local storage")
+            print(f"[DATABASE] MONGODB_URI env var present: {bool(os.environ.get('MONGODB_URI'))}")
     
     def _init_collections(self):
         """Initialize database collections with indexes"""
