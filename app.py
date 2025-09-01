@@ -2223,7 +2223,7 @@ def verify_email():
                     'admin_approved': True,
                     'email_verified': True,
                     'account_type': account_type,
-                    'is_admin': False,  # CRITICAL: Set is_admin=False for all non-admin users
+                    'is_admin': (account_type == 'admin'),  # Set is_admin=True ONLY for admin accounts
                     'login_count': 0,
                     'total_login_time': 0,
                     'last_login': None,
@@ -2535,12 +2535,18 @@ def dashboard():
     
     username = session.get(f'username_{ip_address}', 'User')
     is_admin = session.get(f'is_admin_{ip_address}', False)
-    access_level = session.get(f'access_level_{ip_address}', 'external')
+    user_email = session.get(f'user_email_{ip_address}')
     
-    # Get account type for display
+    # Get actual account type from user data
+    users = load_users_data()
+    account_type = 'external'  # Default
+    if user_email and user_email in users:
+        account_type = users[user_email].get('account_type', 'external')
+    
+    # Get account type for display (capitalized)
     if is_admin:
         account_type_display = 'Admin'
-    elif access_level == 'internal':
+    elif account_type == 'internal':
         account_type_display = 'Internal'
     else:
         account_type_display = 'External'
@@ -2583,7 +2589,8 @@ def dashboard():
     return render_template('dashboard.html', 
                          username=username, 
                          is_admin=is_admin, 
-                         account_type=account_type_display,
+                         account_type=account_type,  # Pass lowercase for toolbar check
+                         account_type_display=account_type_display,  # Pass capitalized for display
                          pending_registrations=pending_registrations,
                          all_users=all_users)
 
@@ -2837,7 +2844,7 @@ def admin_process_approval():
             'password_expiry': password_expiry.isoformat(),
             'admin_approved': True,
             'account_type': account_type,
-            'is_admin': False,  # CRITICAL: Only admin accounts should have is_admin=True
+            'is_admin': (account_type == 'admin'),  # Set is_admin=True ONLY for admin accounts
             'email_verified': True,
             'login_count': 0,
             'total_login_time': 0,
@@ -3788,7 +3795,7 @@ def admin_approve_user_advanced():
             'admin_approved': True,
             'approved_at': datetime.now().isoformat(),
             'account_type': account_type,
-            'is_admin': False,  # CRITICAL: Only admin accounts should have is_admin=True
+            'is_admin': (account_type == 'admin'),  # Set is_admin=True ONLY for admin accounts
             'email_verified': True,
             'login_count': 0,
             'total_login_time': 0,
@@ -4065,6 +4072,8 @@ def update_project(project_id):
     # Load projects database
     PROJECTS_FILE = 'data/projects.json'
     projects = load_json_db(PROJECTS_FILE)
+    DELETED_FILE = 'data/deleted_items.json'
+    deleted_items = load_json_db(DELETED_FILE)
     
     if user_email not in projects:
         return jsonify({'status': 'error', 'message': 'User not found'}), 404
@@ -4084,17 +4093,168 @@ def update_project(project_id):
         return jsonify({'status': 'error', 'message': 'Project not found'}), 404
     
     elif request.method == 'DELETE':
-        # Delete project
+        # Soft delete project - move to deleted items
         for i, project in enumerate(user_projects):
             if project['id'] == project_id:
+                # Add deletion metadata
+                deleted_project = user_projects[i].copy()
+                deleted_project['deleted_at'] = datetime.now().isoformat()
+                deleted_project['restore_by'] = (datetime.now() + timedelta(days=7)).isoformat()
+                deleted_project['item_type'] = 'project'
+                
+                # Initialize deleted items for user if not exists
+                if user_email not in deleted_items:
+                    deleted_items[user_email] = []
+                
+                # Add to deleted items
+                deleted_items[user_email].append(deleted_project)
+                
+                # Remove from active projects
                 del user_projects[i]
+                
                 # Remove from order list
                 if project_id in projects[user_email]['order']:
                     projects[user_email]['order'].remove(project_id)
+                
+                # Save both databases
                 save_json_db(PROJECTS_FILE, projects)
-                return jsonify({'status': 'success', 'message': 'Project deleted'})
+                save_json_db(DELETED_FILE, deleted_items)
+                
+                return jsonify({'status': 'success', 'message': 'Project moved to trash'})
         
         return jsonify({'status': 'error', 'message': 'Project not found'}), 404
+
+@app.route('/api/deleted-items', methods=['GET'])
+def get_deleted_items():
+    """Get all deleted items for the current user"""
+    ip_address = get_real_ip()
+    user_email = session.get(f'user_email_{ip_address}')
+    
+    if not user_email:
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    DELETED_FILE = 'data/deleted_items.json'
+    deleted_items = load_json_db(DELETED_FILE)
+    
+    # Get user's deleted items
+    user_deleted = deleted_items.get(user_email, [])
+    
+    # Filter out items older than 7 days
+    current_time = datetime.now()
+    valid_items = []
+    expired_items = []
+    
+    for item in user_deleted:
+        restore_by = datetime.fromisoformat(item['restore_by'])
+        if current_time < restore_by:
+            # Calculate time remaining
+            time_remaining = restore_by - current_time
+            item['days_remaining'] = time_remaining.days
+            item['hours_remaining'] = time_remaining.seconds // 3600
+            valid_items.append(item)
+        else:
+            expired_items.append(item)
+    
+    # Remove expired items from database
+    if expired_items:
+        deleted_items[user_email] = valid_items
+        save_json_db(DELETED_FILE, deleted_items)
+    
+    return jsonify({'status': 'success', 'deleted_items': valid_items})
+
+@app.route('/api/deleted-items/restore', methods=['POST'])
+def restore_deleted_item():
+    """Restore a deleted item"""
+    ip_address = get_real_ip()
+    user_email = session.get(f'user_email_{ip_address}')
+    
+    if not user_email:
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    data = request.json
+    item_id = data.get('item_id')
+    item_type = data.get('item_type', 'project')
+    
+    if not item_id:
+        return jsonify({'status': 'error', 'message': 'Item ID required'}), 400
+    
+    DELETED_FILE = 'data/deleted_items.json'
+    deleted_items = load_json_db(DELETED_FILE)
+    
+    if user_email not in deleted_items:
+        return jsonify({'status': 'error', 'message': 'No deleted items found'}), 404
+    
+    # Find and restore the item
+    user_deleted = deleted_items[user_email]
+    restored_item = None
+    
+    for i, item in enumerate(user_deleted):
+        if item['id'] == item_id:
+            restored_item = user_deleted.pop(i)
+            break
+    
+    if not restored_item:
+        return jsonify({'status': 'error', 'message': 'Item not found in trash'}), 404
+    
+    # Remove deletion metadata
+    restored_item.pop('deleted_at', None)
+    restored_item.pop('restore_by', None)
+    restored_item.pop('item_type', None)
+    restored_item.pop('days_remaining', None)
+    restored_item.pop('hours_remaining', None)
+    
+    # Restore to appropriate location based on type
+    if item_type == 'project':
+        PROJECTS_FILE = 'data/projects.json'
+        projects = load_json_db(PROJECTS_FILE)
+        
+        if user_email not in projects:
+            projects[user_email] = {'projects': [], 'order': []}
+        
+        projects[user_email]['projects'].append(restored_item)
+        projects[user_email]['order'].append(restored_item['id'])
+        
+        save_json_db(PROJECTS_FILE, projects)
+    elif item_type == 'series':
+        # Handle series restoration (to be implemented)
+        pass
+    
+    # Save updated deleted items
+    save_json_db(DELETED_FILE, deleted_items)
+    
+    return jsonify({'status': 'success', 'message': f'{item_type.capitalize()} restored successfully'})
+
+@app.route('/api/deleted-items/permanent-delete', methods=['POST'])
+def permanent_delete_item():
+    """Permanently delete an item from trash"""
+    ip_address = get_real_ip()
+    user_email = session.get(f'user_email_{ip_address}')
+    
+    if not user_email:
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    data = request.json
+    item_id = data.get('item_id')
+    
+    if not item_id:
+        return jsonify({'status': 'error', 'message': 'Item ID required'}), 400
+    
+    DELETED_FILE = 'data/deleted_items.json'
+    deleted_items = load_json_db(DELETED_FILE)
+    
+    if user_email not in deleted_items:
+        return jsonify({'status': 'error', 'message': 'No deleted items found'}), 404
+    
+    # Find and permanently delete the item
+    user_deleted = deleted_items[user_email]
+    
+    for i, item in enumerate(user_deleted):
+        if item['id'] == item_id:
+            user_deleted.pop(i)
+            save_json_db(DELETED_FILE, deleted_items)
+            return jsonify({'status': 'success', 'message': 'Item permanently deleted'})
+    
+    return jsonify({'status': 'error', 'message': 'Item not found in trash'}), 404
 
 @app.route('/debug/ip-status')
 def debug_ip_status():
