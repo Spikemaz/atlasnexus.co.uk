@@ -5347,7 +5347,16 @@
                 throw new Error('Failed to load projects');
             }
 
-            projectsData = await response.json();
+            const data = await response.json();
+            // Ensure projectsData is always an array
+            if (Array.isArray(data)) {
+                projectsData = data;
+            } else if (data && typeof data === 'object') {
+                // If it's an object, try to extract projects array
+                projectsData = data.projects || [];
+            } else {
+                projectsData = [];
+            }
             
             loadingElement.style.display = 'none';
             
@@ -5624,6 +5633,14 @@
     function renderProjects() {
         const gridElement = document.getElementById('projects-grid');
         gridElement.innerHTML = '';
+
+        // Ensure arrays are valid
+        if (!Array.isArray(seriesData)) {
+            seriesData = [];
+        }
+        if (!Array.isArray(projectsData)) {
+            projectsData = [];
+        }
 
         // Render series first
         seriesData.forEach((series, seriesIndex) => {

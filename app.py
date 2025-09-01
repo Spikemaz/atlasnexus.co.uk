@@ -5542,7 +5542,7 @@ def calculate_completion_percentage(project_data):
 
 @app.route('/api/project-specifications/list', methods=['GET'])
 def list_project_specifications():
-    """List all project specifications for current user"""
+    """List all project specifications for current user or selected user (admin only)"""
     ip_address = get_real_ip()
     
     if not session.get(f'user_authenticated_{ip_address}'):
@@ -5550,6 +5550,13 @@ def list_project_specifications():
     
     user_email = session.get(f'user_email_{ip_address}')
     is_admin = session.get(f'is_admin_{ip_address}', False)
+    
+    # Check if admin is viewing another user's data
+    target_email = request.args.get('user_email', user_email)
+    
+    # Only admins can view other users' data
+    if target_email != user_email and not is_admin:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
     
     # Load specifications and drafts
     specs = load_json_db(PROJECT_SPECS_FILE)
@@ -5559,26 +5566,31 @@ def list_project_specifications():
     
     # Add submitted projects
     for spec_id, spec in specs.items():
-        if is_admin or spec.get('submitted_by') == user_email:
+        # For admin viewing mode or own projects
+        if (is_admin and target_email == 'all') or spec.get('submitted_by') == target_email:
             projects.append({
                 'id': spec_id,
                 'project_name': spec.get('project_name', 'Untitled'),
                 'status': spec.get('status', 'submitted'),
                 'industry': spec.get('deal_type', 'DC'),
                 'last_updated': spec.get('submission_date', ''),
-                'completion': 100
+                'completion': 100,
+                'submitted_by': spec.get('submitted_by', ''),
+                'submitter_name': spec.get('submitter_name', '')
             })
     
     # Add drafts
     for draft_id, draft in drafts.items():
-        if draft.get('user_email') == user_email:
+        if draft.get('user_email') == target_email or (is_admin and target_email == 'all'):
             projects.append({
                 'id': draft_id,
                 'project_name': draft.get('project_data', {}).get('project_name', 'Draft Project'),
                 'status': 'draft',
                 'industry': draft.get('industry', 'DC'),
                 'last_updated': draft.get('last_saved', ''),
-                'completion': draft.get('completion_percentage', 0)
+                'completion': draft.get('completion_percentage', 0),
+                'submitted_by': draft.get('user_email', ''),
+                'submitter_name': draft.get('username', '')
             })
     
     return jsonify(projects)
@@ -5597,6 +5609,130 @@ def get_industries():
         {'code': 'MIXED', 'name': 'Mixed Use', 'icon': '🏙️'}
     ]
     return jsonify(industries)
+
+@app.route('/api/project-specifications/<spec_id>', methods=['GET', 'PUT'])
+def get_or_update_project_specification(spec_id):
+    """Get or update a specific project specification"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+    
+    user_email = session.get(f'user_email_{ip_address}')
+    is_admin = session.get(f'is_admin_{ip_address}', False)
+    
+    # Load specifications
+    specs = load_json_db(PROJECT_SPECS_FILE)
+    drafts = load_json_db(PROJECT_DRAFTS_FILE)
+    
+    # Find the specification
+    spec = None
+    is_draft = False
+    
+    if spec_id in specs:
+        spec = specs[spec_id]
+    elif spec_id in drafts:
+        spec = drafts[spec_id]
+        is_draft = True
+    else:
+        return jsonify({'status': 'error', 'message': 'Specification not found'}), 404
+    
+    # Check permissions
+    spec_owner = spec.get('submitted_by') if not is_draft else spec.get('user_email')
+    if not is_admin and spec_owner != user_email:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+    
+    if request.method == 'GET':
+        return jsonify({
+            'status': 'success',
+            'data': spec,
+            'is_draft': is_draft,
+            'can_edit': is_admin or spec_owner == user_email
+        })
+    
+    elif request.method == 'PUT':
+        # Update the specification
+        update_data = request.json
+        
+        # Merge update data with existing spec
+        for key, value in update_data.items():
+            if key not in ['id', 'submitted_by', 'submission_date']:  # Protect certain fields
+                spec[key] = value
+        
+        # Add modification tracking
+        spec['last_modified'] = datetime.now().isoformat()
+        spec['modified_by'] = user_email
+        
+        # Save back to appropriate database
+        if is_draft:
+            drafts[spec_id] = spec
+            save_json_db(PROJECT_DRAFTS_FILE, drafts)
+        else:
+            specs[spec_id] = spec
+            save_json_db(PROJECT_SPECS_FILE, specs)
+        
+        # Log admin action if admin is editing another user's data
+        if is_admin and spec_owner != user_email:
+            log_admin_action(ip_address, 'modified_user_project', {
+                'spec_id': spec_id,
+                'owner': spec_owner,
+                'modifications': list(update_data.keys())
+            })
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Specification updated successfully'
+        })
+
+@app.route('/api/project-specifications/users', methods=['GET'])
+def get_users_with_projects():
+    """Get list of users who have projects (admin only)"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    # Load all data sources
+    specs = load_json_db(PROJECT_SPECS_FILE)
+    drafts = load_json_db(PROJECT_DRAFTS_FILE)
+    users = load_users_data()
+    
+    # Collect unique users with projects
+    users_with_projects = {}
+    
+    # From specifications
+    for spec in specs.values():
+        email = spec.get('submitted_by')
+        if email and email not in users_with_projects:
+            user_data = users.get(email, {})
+            users_with_projects[email] = {
+                'email': email,
+                'name': user_data.get('name', spec.get('submitter_name', 'Unknown')),
+                'company': user_data.get('company', 'N/A'),
+                'account_type': user_data.get('account_type', 'external'),
+                'project_count': 0,
+                'draft_count': 0
+            }
+        if email:
+            users_with_projects[email]['project_count'] += 1
+    
+    # From drafts
+    for draft in drafts.values():
+        email = draft.get('user_email')
+        if email and email not in users_with_projects:
+            user_data = users.get(email, {})
+            users_with_projects[email] = {
+                'email': email,
+                'name': user_data.get('name', draft.get('username', 'Unknown')),
+                'company': user_data.get('company', 'N/A'),
+                'account_type': user_data.get('account_type', 'external'),
+                'project_count': 0,
+                'draft_count': 0
+            }
+        if email:
+            users_with_projects[email]['draft_count'] += 1
+    
+    return jsonify(list(users_with_projects.values()))
 
 @app.route('/api/project-specifications/populate-engine', methods=['POST'])
 def populate_engine_from_spec():
@@ -6092,38 +6228,54 @@ def get_active_deals():
 @app.route('/api/real-news')
 def get_real_news():
     """Get real news from external sources"""
-    ip_address = get_real_ip()
-    
-    # Check authentication
-    if not session.get(f'user_authenticated_{ip_address}'):
-        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
-    
-    if not REAL_NEWS_AVAILABLE or not real_news_service:
-        # Fall back to AI-generated news if real news not available
-        if MARKET_NEWS_AVAILABLE and market_news_service:
+    try:
+        ip_address = get_real_ip()
+        
+        # Check authentication
+        if not session.get(f'user_authenticated_{ip_address}'):
+            return jsonify({'status': 'error', 'message': 'Not authenticated', 'news': []}), 401
+        
+        if not REAL_NEWS_AVAILABLE or not real_news_service:
+            # Fall back to AI-generated news if real news not available
+            if MARKET_NEWS_AVAILABLE and market_news_service:
+                return jsonify({
+                    'status': 'fallback',
+                    'message': 'Using AI-generated content',
+                    'news': market_news_service.generate_sample_news(20),
+                    'timestamp': datetime.now().isoformat()
+                })
+            # Return empty news array instead of error
             return jsonify({
-                'status': 'fallback',
-                'message': 'Using AI-generated content',
-                'news': market_news_service.generate_sample_news(20),
+                'status': 'unavailable',
+                'message': 'News service temporarily unavailable',
+                'news': [],
                 'timestamp': datetime.now().isoformat()
             })
-        return jsonify({'status': 'error', 'message': 'News service not available'}), 503
-    
-    # Get query parameters
-    region = request.args.get('region', 'all')
-    asset_class = request.args.get('asset', 'all')
-    limit = int(request.args.get('limit', 20))
-    
-    # Fetch real news
-    news_items = real_news_service.fetch_real_news(region, asset_class, limit)
-    
-    return jsonify({
-        'status': 'success',
-        'news': news_items,
-        'count': len(news_items),
-        'is_real': True,
-        'timestamp': datetime.now().isoformat()
-    })
+        
+        # Get query parameters
+        region = request.args.get('region', 'all')
+        asset_class = request.args.get('asset', 'all')
+        limit = int(request.args.get('limit', 20))
+        
+        # Fetch real news
+        news_items = real_news_service.fetch_real_news(region, asset_class, limit)
+        
+        return jsonify({
+            'status': 'success',
+            'news': news_items,
+            'count': len(news_items),
+            'is_real': True,
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        print(f"[API] Error in /api/real-news: {str(e)}")
+        # Return valid JSON on error
+        return jsonify({
+            'status': 'error',
+            'message': 'Failed to fetch news',
+            'news': [],
+            'timestamp': datetime.now().isoformat()
+        })
 
 @app.route('/api/ai-analysis')
 def get_ai_analysis():

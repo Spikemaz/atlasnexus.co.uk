@@ -1184,13 +1184,14 @@
                 storageCard.title = `Database: ${stats.database_name || 'atlasnexus'}\nUsers: ${stats.collections?.users || 0}\nRegistrations: ${stats.collections?.registrations || 0}\nRemaining: ${stats.storage_remaining_mb || 512} MB`;
             }
             
-            console.log('Dashboard Stats Update:', {
-                users: users,
-                registrations: Object.keys(adminData.registrations || {}).length,
-                pending: pending,
-                blocked: blocked,
-                mongodb: adminData.mongodb_stats
-            });
+            // Commented out to reduce console spam
+            // console.log('Dashboard Stats Update:', {
+            //     users: users,
+            //     registrations: Object.keys(adminData.registrations || {}).length,
+            //     pending: pending,
+            //     blocked: blocked,
+            //     mongodb: adminData.mongodb_stats
+            // });
             
             document.getElementById('totalUsers').textContent = users;
             document.getElementById('blockedIPs').textContent = blocked;
@@ -1317,8 +1318,8 @@
         function updateUsersTable(users) {
             const tbody = document.getElementById('usersTableBody');
             
-            console.log('updateUsersTable called with:', users); // Debug log
-            console.log('tbody element:', tbody); // Debug log
+            // console.log('updateUsersTable called with:', users); // Debug log
+            // console.log('tbody element:', tbody); // Debug log
             
             if (!tbody) {
                 console.error('usersTableBody element not found!');
@@ -1375,8 +1376,8 @@
             // Build table HTML
             let html = '';
             
-            console.log('Online users:', onlineUsers.length, onlineUsers); // Debug log
-            console.log('Offline users:', offlineUsers.length, offlineUsers); // Debug log
+            // console.log('Online users:', onlineUsers.length, onlineUsers); // Debug log
+            // console.log('Offline users:', offlineUsers.length, offlineUsers); // Debug log
             
             // Online users section
             if (onlineUsers.length > 0) {
@@ -1390,7 +1391,7 @@
                 html += offlineUsers.map(user => createUserRow(user)).join('');
             }
             
-            console.log('Final HTML:', html); // Debug log
+            // console.log('Final HTML:', html); // Debug log
             tbody.innerHTML = html || '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No users to display</td></tr>';
         }
         
@@ -2782,7 +2783,7 @@
                     headers: { 'Content-Type': 'application/json' }
                 });
             } catch (error) {
-                console.error('Heartbeat error:', error);
+                // Silent fail for heartbeat errors to reduce console spam
             }
         }
         
