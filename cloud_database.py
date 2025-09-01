@@ -15,10 +15,14 @@ import time
 # MongoDB Atlas connection
 # For production, set MONGODB_URI in Vercel environment variables
 # Format: mongodb+srv://username:password@cluster.mongodb.net/database
-MONGODB_URI = os.environ.get('MONGODB_URI', '')
+def get_mongodb_uri():
+    """Get MongoDB URI dynamically"""
+    return os.environ.get('MONGODB_URI', '')
 
-# Fallback to local file storage if MongoDB not configured
-USE_MONGODB = bool(MONGODB_URI)
+def should_use_mongodb():
+    """Check if MongoDB should be used"""
+    uri = get_mongodb_uri()
+    return bool(uri)
 
 class CloudDatabase:
     """Cloud-based persistent database"""
@@ -28,7 +32,10 @@ class CloudDatabase:
         self.db = None
         self.connected = False
         
-        if USE_MONGODB:
+        # Check for MongoDB URI at initialization time
+        MONGODB_URI = get_mongodb_uri()
+        
+        if MONGODB_URI:
             try:
                 print(f"[DATABASE] Attempting MongoDB connection...")
                 print(f"[DATABASE] URI configured: {bool(MONGODB_URI)}")
@@ -48,7 +55,7 @@ class CloudDatabase:
                 self.connected = False
         else:
             print(f"[DATABASE] MongoDB URI not configured - using local storage")
-            print(f"[DATABASE] MONGODB_URI env var present: {bool(os.environ.get('MONGODB_URI'))}")
+            print(f"[DATABASE] MONGODB_URI env var present: {bool(get_mongodb_uri())}")
     
     def _init_collections(self):
         """Initialize database collections with indexes"""
