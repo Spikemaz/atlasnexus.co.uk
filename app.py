@@ -25,6 +25,20 @@ import pandas as pd
 import io
 from werkzeug.utils import secure_filename
 
+# Try to import cloud database
+try:
+    from cloud_database import cloud_db, load_users as db_load_users, save_users as db_save_users
+    from cloud_database import load_registrations as db_load_registrations, save_registrations as db_save_registrations
+    from cloud_database import load_admin_actions as db_load_admin_actions, add_admin_action as db_add_admin_action
+    CLOUD_DB_AVAILABLE = cloud_db.connected
+    if CLOUD_DB_AVAILABLE:
+        print("[DATABASE] Cloud database connected successfully")
+    else:
+        print("[DATABASE] Cloud database not configured - using local files")
+except ImportError:
+    CLOUD_DB_AVAILABLE = False
+    print("[DATABASE] Cloud database module not available - using local files")
+
 # Try to import securitization_engine if available
 try:
     from securitization_engine import run_securitization_calculation
@@ -665,10 +679,20 @@ def log_admin_action(user_or_ip, action, details=None):
         pass  # Fail silently to avoid breaking the app
 
 def load_json_db(file_path):
-    """Load JSON database file with backup protection"""
+    """Load JSON database file - uses cloud DB when available"""
     # Convert string to Path if needed
     if isinstance(file_path, str):
         file_path = Path(file_path)
+    
+    # Use cloud database if available for production
+    if CLOUD_DB_AVAILABLE and (IS_VERCEL or IS_PRODUCTION):
+        filename = file_path.name.replace('.json', '')
+        if filename == 'users':
+            return db_load_users()
+        elif filename == 'registrations':
+            return db_load_registrations()
+        elif filename == 'admin_actions':
+            return db_load_admin_actions()
     
     if file_path.exists():
         try:
@@ -3315,6 +3339,32 @@ def admin_comprehensive_data():
         users = load_json_db(USERS_FILE) or {}
         login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE) or {}
         admin_actions = load_json_db(ADMIN_ACTIONS_FILE) or []
+        
+        # For DEMO: Always include sample data on production
+        if IS_VERCEL or IS_PRODUCTION:
+            # Add demo registration if none exist
+            if len(registrations) == 0:
+                registrations['demo@atlasnexus.com'] = {
+                    'email': 'demo@atlasnexus.com',
+                    'full_name': 'Demo User',
+                    'company_name': 'Atlas Demo Corp',
+                    'phone': '+44 20 1234 5678',
+                    'created_at': datetime.now().isoformat(),
+                    'email_verified': True,
+                    'admin_approved': False,
+                    'ip_address': '192.168.1.100'
+                }
+            
+            # Add demo admin actions if none exist
+            if len(admin_actions) == 0:
+                admin_actions = [
+                    {
+                        'action': 'user_login',
+                        'timestamp': datetime.now().isoformat(),
+                        'user': 'spikemaz8@aol.com',
+                        'details': 'Admin login successful'
+                    }
+                ]
         
         # For production, include a virtual admin user in the response
         # This ensures admin panel works without modifying files

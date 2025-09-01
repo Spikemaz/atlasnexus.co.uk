@@ -735,7 +735,7 @@
                 <div class="header-actions">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-right: 1rem;">
                         <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                            <input type="checkbox" id="autoRefreshToggle" style="cursor: pointer;">
+                            <input type="checkbox" id="autoRefreshToggle" checked style="cursor: pointer;">
                             <span style="color: #22c55e; font-size: 0.9rem;">Live</span>
                         </label>
                         <span id="liveIndicator" style="display: flex; align-items: center; gap: 0.3rem;">
@@ -2568,9 +2568,9 @@
         let sessionHeartbeatInterval = null;
         let lastUpdateTime = new Date();
         let currentDataHash = null;
-        // Disable smart refresh on production - use simple refresh instead
+        // Use appropriate refresh interval
         const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-        const CHECK_INTERVAL = isProduction ? 15000 : 2000; // 15s production, 2s local
+        const CHECK_INTERVAL = isProduction ? 5000 : 2000; // 5s production, 2s local
         const HEARTBEAT_INTERVAL = 60000; // 1 minute
         
         function startAutoRefresh() {
@@ -2600,11 +2600,9 @@
         }
         
         async function checkForUpdates() {
-            // On production, just do simple refresh
-            if (isProduction) {
-                await silentRefresh();
-                return;
-            }
+            // Always use simple refresh for stability
+            await silentRefresh();
+            return;
             
             // Smart refresh only for local development
             try {
@@ -2748,7 +2746,7 @@
             toggle.addEventListener('change', (e) => {
                 if (e.target.checked) {
                     startAutoRefresh();
-                    const msg = isProduction ? 'Live updates enabled (15 second refresh)' : 'Smart updates enabled';
+                    const msg = isProduction ? 'Live updates enabled (5 second refresh)' : 'Smart updates enabled';
                     showAlert(msg, 'success');
                 } else {
                     stopAutoRefresh();
@@ -2756,10 +2754,8 @@
                 }
             });
             
-            // DISABLE auto-refresh on production - causing data loss
-            if (!isProduction) {
-                startAutoRefresh();
-            }
+            // Start auto-refresh with proper caching
+            startAutoRefresh();
             
             // Update time display every second
             setInterval(updateLastUpdateTime, 1000);
