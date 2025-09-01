@@ -9,6 +9,7 @@ import json
 from datetime import datetime
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
+from pymongo.server_api import ServerApi
 import time
 
 # MongoDB Atlas connection
@@ -29,8 +30,8 @@ class CloudDatabase:
         
         if USE_MONGODB:
             try:
-                # Connect to MongoDB Atlas
-                self.client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
+                # Connect to MongoDB Atlas with ServerApi
+                self.client = MongoClient(MONGODB_URI, server_api=ServerApi('1'), serverSelectionTimeoutMS=5000)
                 # Test connection
                 self.client.admin.command('ping')
                 self.db = self.client.atlasnexus
