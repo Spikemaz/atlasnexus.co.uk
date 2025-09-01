@@ -1215,9 +1215,14 @@ def site_auth():
 def test_db():
     """Test database connection endpoint"""
     try:
+        # Check environment variable directly
+        mongo_uri = os.environ.get('MONGODB_URI', '')
+        
         db_status = {
             'cloud_db_available': CLOUD_DB_AVAILABLE,
-            'timestamp': datetime.now().isoformat()
+            'timestamp': datetime.now().isoformat(),
+            'env_var_present': bool(mongo_uri),
+            'env_var_length': len(mongo_uri)
         }
         
         if CLOUD_DB_AVAILABLE:
@@ -1237,7 +1242,8 @@ def test_db():
         return jsonify({
             'status': 'error',
             'message': str(e),
-            'cloud_db_available': CLOUD_DB_AVAILABLE
+            'cloud_db_available': CLOUD_DB_AVAILABLE,
+            'env_var_present': bool(os.environ.get('MONGODB_URI', ''))
         }), 500
 
 @app.route('/blocked')
