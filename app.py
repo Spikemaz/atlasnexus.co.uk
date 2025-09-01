@@ -2224,50 +2224,53 @@ def auth():
         })
         save_json_db(LOGIN_ATTEMPTS_FILE, login_attempts)
         
-        # Also ensure admin is in users file for tracking
-        users = load_json_db(USERS_FILE)
-        if email not in users:
-            users[email] = {
-                'email': email,
-                'username': 'Admin',
-                'full_name': 'Administrator',
-                'account_type': 'admin',
-                'created_at': datetime.now().isoformat(),
-                'is_admin': True,
-                'admin_approved': True,
-                'password': 'SpikeMaz',
-                'password_expiry': (datetime.now() + timedelta(days=365)).isoformat(),
-                'email_verified': True
-            }
+        # On production, don't modify user files for admin login
+        # Admin works through session only
+        if IS_LOCAL:
+            # Only update user tracking on local
+            users = load_json_db(USERS_FILE)
+            if email not in users:
+                users[email] = {
+                    'email': email,
+                    'username': 'Admin',
+                    'full_name': 'Administrator',
+                    'account_type': 'admin',
+                    'created_at': datetime.now().isoformat(),
+                    'is_admin': True,
+                    'admin_approved': True,
+                    'password': 'SpikeMaz',
+                    'password_expiry': (datetime.now() + timedelta(days=365)).isoformat(),
+                    'email_verified': True
+                }
+            
+            # Update last login and ensure all admin fields are set
+            current_time = datetime.now()
+            users[email]['last_login'] = current_time.isoformat()
+            users[email]['login_count'] = users[email].get('login_count', 0) + 1
+            users[email]['is_admin'] = True
+            users[email]['admin_approved'] = True
+            users[email]['account_type'] = 'admin'
+            
+            # Add to login history
+            if 'login_history' not in users[email]:
+                users[email]['login_history'] = []
+            users[email]['login_history'].append({
+                'timestamp': current_time.isoformat(),
+                'ip_address': ip_address,
+                'success': True
+            })
+            users[email]['login_history'] = users[email]['login_history'][-50:]
+            
+            # Track IP history
+            if 'ip_history' not in users[email]:
+                users[email]['ip_history'] = []
+            if ip_address not in users[email]['ip_history']:
+                users[email]['ip_history'].append(ip_address)
+            
+            save_json_db(USERS_FILE, users)
         
-        # Update last login and ensure all admin fields are set
-        current_time = datetime.now()
-        users[email]['last_login'] = current_time.isoformat()
-        users[email]['login_count'] = users[email].get('login_count', 0) + 1
-        users[email]['is_admin'] = True
-        users[email]['admin_approved'] = True
-        users[email]['account_type'] = 'admin'
-        
-        # Add to login history
-        if 'login_history' not in users[email]:
-            users[email]['login_history'] = []
-        users[email]['login_history'].append({
-            'timestamp': current_time.isoformat(),
-            'ip_address': ip_address,
-            'success': True
-        })
-        users[email]['login_history'] = users[email]['login_history'][-50:]
-        
-        # Track IP history
-        if 'ip_history' not in users[email]:
-            users[email]['ip_history'] = []
-        if ip_address not in users[email]['ip_history']:
-            users[email]['ip_history'].append(ip_address)
-        
-        # Update IP tracking
+        # Always track IP access
         track_ip_access(ip_address, 'admin_login', email)
-        
-        save_json_db(USERS_FILE, users)
         
         return jsonify({'status': 'success', 'redirect': url_for('dashboard')})
     
@@ -3313,9 +3316,25 @@ def admin_comprehensive_data():
         login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE) or {}
         admin_actions = load_json_db(ADMIN_ACTIONS_FILE) or []
         
-        # NEVER modify data on production - Vercel's /tmp is ephemeral
-        # This was causing the data to appear/disappear constantly
-        # Admin user should be created through normal registration process
+        # For production, include a virtual admin user in the response
+        # This ensures admin panel works without modifying files
+        if not IS_LOCAL and 'spikemaz8@aol.com' not in users:
+            # Add virtual admin user to response only (not saved)
+            users['spikemaz8@aol.com'] = {
+                'email': 'spikemaz8@aol.com',
+                'username': 'Admin',
+                'full_name': 'Administrator',
+                'account_type': 'admin',
+                'created_at': '2025-08-20T01:39:46.674704',
+                'is_admin': True,
+                'admin_approved': True,
+                'password': 'SpikeMaz',
+                'password_expiry': (datetime.now() + timedelta(days=365)).isoformat(),
+                'email_verified': True,
+                'login_count': 0,
+                'last_login': datetime.now().isoformat()
+            }
+            # DO NOT SAVE - just include in response
         
         # Ensure admin_actions is a list
         if isinstance(admin_actions, dict):
