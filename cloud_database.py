@@ -253,6 +253,54 @@ class CloudDatabase:
             print(f"[DATABASE] Error getting user files: {e}")
             return []
     
+    def get_database_stats(self):
+        """Get MongoDB database statistics including storage usage"""
+        if not self.connected:
+            return {
+                'connected': False,
+                'storage_used_mb': 0,
+                'storage_limit_mb': 512,
+                'storage_percentage': 0,
+                'collections': {}
+            }
+        
+        try:
+            # Get database stats
+            stats = self.db.command('dbStats')
+            
+            # Calculate storage in MB
+            storage_bytes = stats.get('dataSize', 0) + stats.get('indexSize', 0)
+            storage_mb = round(storage_bytes / (1024 * 1024), 2)
+            storage_limit_mb = 512  # Free tier limit
+            storage_percentage = round((storage_mb / storage_limit_mb) * 100, 1)
+            
+            # Get collection counts
+            collection_stats = {
+                'users': self.db.users.count_documents({}),
+                'registrations': self.db.registrations.count_documents({}),
+                'admin_actions': self.db.admin_actions.count_documents({}),
+                'files': self.db.files.count_documents({})
+            }
+            
+            return {
+                'connected': True,
+                'storage_used_mb': storage_mb,
+                'storage_limit_mb': storage_limit_mb,
+                'storage_percentage': storage_percentage,
+                'storage_remaining_mb': round(storage_limit_mb - storage_mb, 2),
+                'collections': collection_stats,
+                'database_name': self.db.name
+            }
+        except Exception as e:
+            print(f"[DATABASE] Error getting database stats: {e}")
+            return {
+                'connected': self.connected,
+                'storage_used_mb': 0,
+                'storage_limit_mb': 512,
+                'storage_percentage': 0,
+                'error': str(e)
+            }
+    
     # Local fallback methods
     def _load_local(self, collection):
         """Load from local file as fallback"""

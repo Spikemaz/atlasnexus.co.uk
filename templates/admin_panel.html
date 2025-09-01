@@ -810,6 +810,22 @@
                     <div class="stat-label">Uptime</div>
                     <span class="stat-change positive">Stable</span>
                 </div>
+                <div class="stat-card" id="mongodbStorageCard">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #13aa52 0%, #00684a 100%);">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="stat-value" id="mongodbUsage">0 MB</div>
+                    <div class="stat-label">MongoDB Usage</div>
+                    <div style="margin-top: 10px;">
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; height: 8px; overflow: hidden;">
+                            <div id="mongodbProgressBar" style="background: linear-gradient(90deg, #13aa52, #00684a); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; opacity: 0.7;">
+                            <span id="mongodbUsedText">0 MB used</span>
+                            <span>512 MB limit</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="content-section">
@@ -1145,11 +1161,34 @@
                 return !reg.admin_approved;
             }).length;
             
+            // Update MongoDB storage stats
+            if (adminData.mongodb_stats) {
+                const stats = adminData.mongodb_stats;
+                document.getElementById('mongodbUsage').textContent = `${stats.storage_used_mb || 0} MB`;
+                document.getElementById('mongodbUsedText').textContent = `${stats.storage_used_mb || 0} MB used`;
+                document.getElementById('mongodbProgressBar').style.width = `${stats.storage_percentage || 0}%`;
+                
+                // Color code based on usage
+                const progressBar = document.getElementById('mongodbProgressBar');
+                if (stats.storage_percentage > 80) {
+                    progressBar.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+                } else if (stats.storage_percentage > 60) {
+                    progressBar.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+                } else {
+                    progressBar.style.background = 'linear-gradient(90deg, #13aa52, #00684a)';
+                }
+                
+                // Add tooltip with detailed info
+                const storageCard = document.getElementById('mongodbStorageCard');
+                storageCard.title = `Database: ${stats.database_name || 'atlasnexus'}\nUsers: ${stats.collections?.users || 0}\nRegistrations: ${stats.collections?.registrations || 0}\nRemaining: ${stats.storage_remaining_mb || 512} MB`;
+            }
+            
             console.log('Dashboard Stats Update:', {
                 users: users,
                 registrations: Object.keys(adminData.registrations || {}).length,
                 pending: pending,
-                blocked: blocked
+                blocked: blocked,
+                mongodb: adminData.mongodb_stats
             });
             
             document.getElementById('totalUsers').textContent = users;

@@ -3464,6 +3464,9 @@ def admin_comprehensive_data():
         login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE) or {}
         admin_actions = cloud_db.load_admin_actions() or []
         
+        # Get MongoDB storage stats
+        mongodb_stats = cloud_db.get_database_stats()
+        
         # For DEMO: Always include sample data on production
         if IS_VERCEL or IS_PRODUCTION:
             # Add demo registration if none exist
@@ -3525,6 +3528,7 @@ def admin_comprehensive_data():
             'users': users,
             'admin_actions': admin_actions,
             'current_user_email': current_user_email,  # Add current user email
+            'mongodb_stats': mongodb_stats,  # Add MongoDB storage stats
             'statistics': {
                 'total_users': len(users) if isinstance(users, dict) else 0,
                 'total_registrations': len(registrations) if isinstance(registrations, dict) else 0,
