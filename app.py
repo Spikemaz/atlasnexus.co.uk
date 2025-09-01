@@ -30,7 +30,16 @@ try:
     from cloud_database import cloud_db, load_users as db_load_users, save_users as db_save_users
     from cloud_database import load_registrations as db_load_registrations, save_registrations as db_save_registrations
     from cloud_database import load_admin_actions as db_load_admin_actions, add_admin_action as db_add_admin_action
+    from cloud_database import reinitialize_db
+    
+    # Try to connect at startup
     CLOUD_DB_AVAILABLE = cloud_db.connected
+    
+    # If not connected but env var exists, try reinitializing
+    if not CLOUD_DB_AVAILABLE and os.environ.get('MONGODB_URI'):
+        print("[DATABASE] Retrying MongoDB connection...")
+        CLOUD_DB_AVAILABLE = reinitialize_db()
+    
     if CLOUD_DB_AVAILABLE:
         print("[DATABASE] Cloud database connected successfully")
     else:

@@ -303,6 +303,12 @@ class CloudDatabase:
 # Global database instance
 cloud_db = CloudDatabase()
 
+def reinitialize_db():
+    """Reinitialize database connection"""
+    global cloud_db
+    cloud_db = CloudDatabase()
+    return cloud_db.connected
+
 # Helper functions for backward compatibility
 def load_users():
     """Load all users"""

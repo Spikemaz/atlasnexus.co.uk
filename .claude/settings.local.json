@@ -62,7 +62,8 @@
       "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\clean_all_data.py\")",
       "Bash(for file in registrations.json users.json expired_registrations.json)",
       "Bash(do echo \"=== $file ===\")",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "WebFetch(domain:vercel.com)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"
