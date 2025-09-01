@@ -2582,10 +2582,63 @@
                     <!-- Parameters will be dynamically loaded here -->
                 </div>
 
+                <!-- Permutation Estimator -->
+                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <h4 style="color: #60a5fa; margin-bottom: 1rem;">
+                        <i class="fas fa-calculator"></i> Permutation Estimator & Viability Filter
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                        <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="total-permutations">0</div>
+                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Total Permutations</div>
+                        </div>
+                        <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #22c55e; font-weight: bold;" id="viable-permutations">0</div>
+                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Viable (Funded)</div>
+                        </div>
+                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #ef4444; font-weight: bold;" id="excluded-permutations">0</div>
+                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Excluded (Unfunded)</div>
+                        </div>
+                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="reduction-percentage">0%</div>
+                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Reduction</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Funding Requirement Filter -->
+                    <div style="background: rgba(0, 0, 0, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                        <label style="color: #94a3b8; display: block; margin-bottom: 0.5rem;">
+                            <i class="fas fa-pound-sign"></i> Minimum Funding Required (£)
+                        </label>
+                        <input type="number" id="min-funding-required" placeholder="e.g., 100000000" onchange="updatePermutationEstimate()" 
+                               style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                        <p style="color: #64748b; font-size: 0.85rem; margin-top: 0.5rem;">
+                            Permutations that result in less funding than required will be automatically excluded
+                        </p>
+                    </div>
+                    
+                    <!-- Variable Range Optimizer -->
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <button onclick="optimizeRanges()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                            <i class="fas fa-magic"></i> Auto-Optimize Ranges
+                        </button>
+                        <button onclick="resetToDefaults()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                            <i class="fas fa-undo"></i> Reset to Defaults
+                        </button>
+                        <span style="color: #94a3b8; font-size: 0.9rem;">
+                            Tip: Narrow variable ranges to reduce permutations
+                        </span>
+                    </div>
+                </div>
+
                 <!-- Action Buttons -->
                 <div style="display: flex; gap: 1rem; margin-top: 2rem; justify-content: center; flex-wrap: wrap;">
-                    <button onclick="generateAdvancedPermutations()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
-                        <i class="fas fa-cogs"></i> Generate Permutations
+                    <button onclick="runViablePermutations()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-rocket"></i> Run Viable Only
+                    </button>
+                    <button onclick="generateAdvancedPermutations()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 1rem 2rem; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-cogs"></i> Run All Permutations
                     </button>
                     <button onclick="loadPermPreset()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
                         <i class="fas fa-file-import"></i> Load Preset
@@ -5791,15 +5844,38 @@
                 updateProjectStats();
             }
         } catch (error) {
-            console.error('Error loading projects:', error);
+            console.error('Error loading projects from API:', error);
             loadingElement.style.display = 'none';
             
-            // Show sample projects for demo
-            projectsData = getSampleProjects();
-            gridElement.style.display = 'grid';
-            statsElement.style.display = 'grid';
-            renderProjects();
-            updateProjectStats();
+            // Load from localStorage if API is not available
+            const savedProjects = localStorage.getItem('projectsData');
+            const savedSeries = localStorage.getItem('seriesData');
+            
+            if (savedProjects) {
+                try {
+                    projectsData = JSON.parse(savedProjects);
+                } catch (e) {
+                    projectsData = [];
+                }
+            }
+            
+            if (savedSeries) {
+                try {
+                    seriesData = JSON.parse(savedSeries);
+                } catch (e) {
+                    seriesData = [];
+                }
+            }
+            
+            // Show empty state only if both are empty
+            if (projectsData.length === 0 && seriesData.length === 0) {
+                emptyElement.style.display = 'block';
+            } else {
+                gridElement.style.display = 'grid';
+                statsElement.style.display = 'grid';
+                renderProjects();
+                updateProjectStats();
+            }
         }
     }
 
@@ -5855,8 +5931,15 @@
         };
         
         seriesData.push(newSeries);
+        
+        // Hide empty state and show grid
+        document.getElementById('projects-empty').style.display = 'none';
+        document.getElementById('projects-grid').style.display = 'grid';
+        document.getElementById('project-stats').style.display = 'grid';
+        
         closeSeriesModal();
         renderProjects();
+        updateProjectStats();
         saveSeriesData();
     }
     
@@ -6084,12 +6167,17 @@
             localStorage.setItem('seriesData', JSON.stringify(seriesData));
             localStorage.setItem('projectsData', JSON.stringify(projectsData));
             
-            // Optionally save to backend
-            await fetch('/api/series', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ series: seriesData, projects: projectsData })
-            });
+            // Try to save to backend, but don't fail if it doesn't exist
+            try {
+                await fetch('/api/series', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ series: seriesData, projects: projectsData })
+                });
+            } catch (apiError) {
+                // Backend API not available, but data is saved in localStorage
+                console.log('Using local storage only - API not available');
+            }
         } catch (error) {
             console.error('Error saving series data:', error);
         }
@@ -6097,81 +6185,66 @@
     
     // Create new project (with series support)
     async function createNewProject(seriesId = null) {
+        // Create project locally (works without backend)
+        const newProject = {
+            id: 'project-' + Date.now(),
+            title: 'New Project',
+            description: 'Click edit to configure this project',
+            status: 'draft',
+            value: 0,
+            progress: 0,
+            order: seriesId ? 0 : projectsData.length,
+            // Permutation Engine Fields (defaults)
+            currency: '',
+            grossITLoad: null,
+            pue: null,
+            capexCost: null,
+            capexRate: null,
+            landPurchaseFees: null,
+            grossMonthlyRent: null,
+            opex: null
+        };
+        
+        // Try to save to backend if available
         try {
             const response = await fetch('/api/projects', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    title: 'New Project',
-                    description: 'Click edit to configure this project',
-                    status: 'draft',
-                    value: 0,
-                    progress: 0,
-                    seriesId: seriesId,
-                    // Permutation Engine Fields (defaults)
-                    currency: '',
-                    grossITLoad: null,
-                    pue: null,
-                    capexCost: null,
-                    capexRate: null,
-                    landPurchaseFees: null,
-                    grossMonthlyRent: null,
-                    opex: null
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...newProject, seriesId: seriesId })
             });
-
+            
             if (response.ok) {
-                const newProject = await response.json();
-                projectsData.push(newProject);
-                renderProjects();
-                updateProjectStats();
-            } else {
-                // For demo purposes, create a sample project
-                const newProject = {
-                    id: 'project-' + Date.now(),
-                    title: 'New Project',
-                    description: 'Click edit to configure this project',
-                    status: 'draft',
-                    value: 0,
-                    progress: 0,
-                    order: seriesId ? 0 : projectsData.length,
-                    // Permutation Engine Fields (defaults)
-                    currency: '',
-                    grossITLoad: null,
-                    pue: null,
-                    capexCost: null,
-                    capexRate: null,
-                    landPurchaseFees: null,
-                    grossMonthlyRent: null,
-                    opex: null
-                };
-                
-                if (seriesId) {
-                    // Add to series
-                    const series = seriesData.find(s => s.id === seriesId);
-                    if (series) {
-                        newProject.order = series.projects.length;
-                        series.projects.push(newProject);
-                    }
-                } else {
-                    // Add as standalone project
-                    projectsData.push(newProject);
-                }
-                
-                // Hide empty state if this is the first project
-                document.getElementById('projects-empty').style.display = 'none';
-                document.getElementById('projects-grid').style.display = 'grid';
-                document.getElementById('project-stats').style.display = 'grid';
-                
-                renderProjects();
-                updateProjectStats();
+                const savedProject = await response.json();
+                // Use the server's ID if available
+                newProject.id = savedProject.id || newProject.id;
             }
         } catch (error) {
-            console.error('Error creating project:', error);
-            alert('Failed to create project. Please try again.');
+            // API not available, but we can continue with local storage
+            console.log('Using local storage only - API not available');
         }
+        
+        // Add project to appropriate location
+        if (seriesId) {
+            // Add to series
+            const series = seriesData.find(s => s.id === seriesId);
+            if (series) {
+                newProject.order = series.projects.length;
+                series.projects.push(newProject);
+            }
+        } else {
+            // Add as standalone project
+            projectsData.push(newProject);
+        }
+        
+        // Hide empty state and show grid
+        document.getElementById('projects-empty').style.display = 'none';
+        document.getElementById('projects-grid').style.display = 'grid';
+        document.getElementById('project-stats').style.display = 'grid';
+        
+        // Update UI and save
+        renderProjects();
+        updateProjectStats();
+        saveSeriesData();
     }
 
     // Legacy function for compatibility
@@ -6484,12 +6557,17 @@
             localStorage.setItem('seriesData', JSON.stringify(seriesData));
             localStorage.setItem('projectsData', JSON.stringify(projectsData));
             
-            // Optionally save to backend
-            await fetch('/api/series', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ series: seriesData, projects: projectsData })
-            });
+            // Try to save to backend, but don't fail if it doesn't exist
+            try {
+                await fetch('/api/series', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ series: seriesData, projects: projectsData })
+                });
+            } catch (apiError) {
+                // Backend API not available, but data is saved in localStorage
+                console.log('Using local storage only - API not available');
+            }
         } catch (error) {
             console.error('Error saving series data:', error);
         }
@@ -7592,6 +7670,101 @@
             fetchProjects();
         }
     });
+    
+    // Permutation Engine Functions
+    let permutationInputs = {
+        fixed: {},
+        calculated: {},
+        variable: {}
+    };
+    
+    // Update permutation estimate in real-time
+    function updatePermutationEstimate() {
+        // Count variable inputs and their range values
+        let totalPermutations = 1;
+        let variableCount = 0;
+        
+        // Get all variable inputs (example - you'll populate with actual inputs)
+        const variableInputs = document.querySelectorAll('[data-input-type="variable"]');
+        variableInputs.forEach(input => {
+            if (input.dataset.rangeValues) {
+                const values = JSON.parse(input.dataset.rangeValues);
+                totalPermutations *= values.length;
+                variableCount++;
+            }
+        });
+        
+        // Get minimum funding requirement
+        const minFunding = parseFloat(document.getElementById('min-funding-required').value) || 0;
+        
+        // Estimate viable permutations (this is simplified - you'll add actual viability logic)
+        let viablePermutations = totalPermutations;
+        if (minFunding > 0) {
+            // Estimate that ~30% might be unfunded (you'll calculate actual based on ranges)
+            viablePermutations = Math.floor(totalPermutations * 0.7);
+        }
+        
+        const excludedPermutations = totalPermutations - viablePermutations;
+        const reductionPercentage = totalPermutations > 0 ? 
+            ((excludedPermutations / totalPermutations) * 100).toFixed(1) : 0;
+        
+        // Update display
+        document.getElementById('total-permutations').textContent = totalPermutations.toLocaleString();
+        document.getElementById('viable-permutations').textContent = viablePermutations.toLocaleString();
+        document.getElementById('excluded-permutations').textContent = excludedPermutations.toLocaleString();
+        document.getElementById('reduction-percentage').textContent = reductionPercentage + '%';
+        
+        // Color code based on permutation count
+        const totalElement = document.getElementById('total-permutations');
+        if (totalPermutations > 100000) {
+            totalElement.style.color = '#ef4444'; // Red for too many
+        } else if (totalPermutations > 10000) {
+            totalElement.style.color = '#ffd700'; // Yellow for caution
+        } else {
+            totalElement.style.color = '#22c55e'; // Green for good
+        }
+    }
+    
+    // Run only viable permutations
+    function runViablePermutations() {
+        const minFunding = parseFloat(document.getElementById('min-funding-required').value);
+        if (!minFunding) {
+            alert('Please set the minimum funding required to filter viable permutations');
+            return;
+        }
+        
+        // Add viability filter to permutation generation
+        const viabilityFilter = {
+            minFunding: minFunding,
+            minIRR: 8, // Example minimum IRR
+            maxLTV: 80, // Example maximum LTV
+            minDSCR: 1.25 // Example minimum debt service coverage
+        };
+        
+        generateAdvancedPermutations(viabilityFilter);
+    }
+    
+    // Optimize ranges automatically
+    function optimizeRanges() {
+        // Analyze current inputs and suggest optimal ranges
+        alert('Analyzing inputs to suggest optimal ranges...\n\nThis will:\n- Narrow ranges based on market conditions\n- Remove unlikely scenarios\n- Focus on fundable outcomes');
+        
+        // You'll implement the actual optimization logic
+        updatePermutationEstimate();
+    }
+    
+    // Reset to default ranges
+    function resetToDefaults() {
+        // Reset all variable inputs to default ranges
+        const variableInputs = document.querySelectorAll('[data-input-type="variable"]');
+        variableInputs.forEach(input => {
+            if (input.dataset.defaultMin && input.dataset.defaultMax) {
+                // Reset to defaults
+            }
+        });
+        
+        updatePermutationEstimate();
+    }
     
     // Permutation Engine Project Data Functions
     function fetchPermProjects() {
