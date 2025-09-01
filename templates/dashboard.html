@@ -2010,10 +2010,9 @@
                     <!-- Series and Projects will be loaded dynamically here -->
                 </div>
                 
-                <!-- Empty State -->
-                <div id="projects-empty" style="display: none; text-align: center; padding: 3rem; color: #64748b; border: 2px dashed rgba(96, 165, 250, 0.3); border-radius: 12px; margin-bottom: 2rem;">
-                    <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 1rem; color: #475569;"></i>
-                    <h3 style="color: #94a3b8; margin-bottom: 1rem;">Projects Dashboard</h3>
+                <!-- Empty State - Completely blank until user adds items -->
+                <div id="projects-empty" style="display: none;">
+                    <!-- Intentionally blank - items appear when user adds them -->
                 </div>
                 
                 <!-- Old drop zone indicator removed - now using inline placeholders -->
@@ -2037,27 +2036,7 @@
                         <p id="draft-count" style="color: #64748b; font-size: 2rem; font-weight: 700;">0</p>
                     </div>
                 </div>
-                
-                <!-- Deleted Items Section -->
-                <div id="deleted-items-section" style="display: none; margin-top: 2rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 1.5rem;">
-                    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem;">
-                        <h3 style="color: #ef4444; font-size: 1.25rem; font-weight: 700; margin: 0;">
-                            <i class="fas fa-trash-alt"></i> Deleted Items
-                        </h3>
-                        <button onclick="toggleDeletedItems()" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin-left: auto;">
-                            <i class="fas fa-chevron-up" id="deleted-toggle-icon"></i> Hide
-                        </button>
-                    </div>
-                    
-                    <div id="deleted-items-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
-                        <!-- Deleted items will be loaded here -->
-                    </div>
-                    
-                    <div id="deleted-items-empty" style="display: none; text-align: center; padding: 2rem; color: #64748b;">
-                        <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                        <p>No deleted items. Items in trash are permanently deleted after 7 days.</p>
-                    </div>
-                </div>
+                <!-- Trash feature removed for simplicity -->
             </div>
         </div>
     </div>
@@ -5724,7 +5703,8 @@
             
             loadingElement.style.display = 'none';
             
-            if (projectsData.length === 0) {
+            // Show empty state only if both projects and series are empty
+            if (projectsData.length === 0 && seriesData.length === 0) {
                 emptyElement.style.display = 'block';
             } else {
                 gridElement.style.display = 'grid';
