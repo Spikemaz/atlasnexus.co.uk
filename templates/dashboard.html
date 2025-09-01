@@ -7656,37 +7656,43 @@
     
     // Update permutation estimate in real-time
     function updatePermutationEstimate() {
-        // Count variable inputs and their range values
-        let totalPermutations = 1;
-        let variableCount = 0;
+        if (!window.PermutationEngine) return;
         
-        // Get all variable inputs (example - you'll populate with actual inputs)
-        const variableInputs = document.querySelectorAll('[data-input-type="variable"]');
-        variableInputs.forEach(input => {
-            if (input.dataset.rangeValues) {
-                const values = JSON.parse(input.dataset.rangeValues);
-                totalPermutations *= values.length;
-                variableCount++;
-            }
+        // Get current ranges from the engine
+        const ranges = PermutationEngine.getCurrentRanges();
+        
+        // Calculate total permutations
+        let totalPermutations = 1;
+        Object.values(ranges).forEach(range => {
+            totalPermutations *= range.length;
         });
         
         // Get minimum funding requirement
         const minFunding = parseFloat(document.getElementById('min-funding-required').value) || 0;
         
-        // Estimate viable permutations (this is simplified - you'll add actual viability logic)
-        let viablePermutations = totalPermutations;
+        // Estimate viable permutations based on constraints
+        let viableEstimate = totalPermutations;
+        
+        // Apply constraint reductions
+        // Lease-tenor matching reduces by ~85% (only matching pairs are valid)
+        viableEstimate *= 0.15;
+        
+        // Funding requirement reduces by another ~30%
         if (minFunding > 0) {
-            // Estimate that ~30% might be unfunded (you'll calculate actual based on ranges)
-            viablePermutations = Math.floor(totalPermutations * 0.7);
+            viableEstimate *= 0.7;
         }
         
-        const excludedPermutations = totalPermutations - viablePermutations;
+        // DSCR and IRR requirements reduce by another ~50%
+        viableEstimate *= 0.5;
+        
+        viableEstimate = Math.floor(viableEstimate);
+        const excludedPermutations = totalPermutations - viableEstimate;
         const reductionPercentage = totalPermutations > 0 ? 
             ((excludedPermutations / totalPermutations) * 100).toFixed(1) : 0;
         
         // Update display
         document.getElementById('total-permutations').textContent = totalPermutations.toLocaleString();
-        document.getElementById('viable-permutations').textContent = viablePermutations.toLocaleString();
+        document.getElementById('viable-permutations').textContent = viableEstimate.toLocaleString();
         document.getElementById('excluded-permutations').textContent = excludedPermutations.toLocaleString();
         document.getElementById('reduction-percentage').textContent = reductionPercentage + '%';
         
@@ -7709,15 +7715,86 @@
             return;
         }
         
-        // Add viability filter to permutation generation
-        const viabilityFilter = {
-            minFunding: minFunding,
-            minIRR: 8, // Example minimum IRR
-            maxLTV: 80, // Example maximum LTV
-            minDSCR: 1.25 // Example minimum debt service coverage
-        };
+        // Show loading
+        document.getElementById('sec-status').textContent = 'Generating viable permutations...';
         
-        generateAdvancedPermutations(viabilityFilter);
+        // Run permutation engine with constraints
+        const results = PermutationEngine.generatePermutations({
+            onlyViable: true,
+            minFunding: minFunding,
+            maxPermutations: 10000
+        });
+        
+        // Display results
+        displayPermutationResults(results);
+        
+        console.log(`Generated ${results.viable} viable permutations out of ${results.totalGenerated} total`);
+    }
+    
+    // Display permutation results
+    function displayPermutationResults(results) {
+        const container = document.getElementById('permResultsContent');
+        if (!container) return;
+        
+        if (results.permutations.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; color: #ef4444; padding: 3rem;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <p>No viable permutations found!</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">Try adjusting your ranges or constraints</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Create results table
+        let html = `
+            <div style="margin-bottom: 1rem;">
+                <span style="color: #60a5fa;">Found ${results.viable} viable permutations</span>
+                <span style="color: #64748b; margin-left: 1rem;">Excluded: ${results.excluded} (${results.reductionPercent}%)</span>
+            </div>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #60a5fa;">
+                            <th style="padding: 0.5rem; text-align: left; color: #60a5fa;">#</th>
+                            <th style="padding: 0.5rem; text-align: left; color: #60a5fa;">Monthly Rent</th>
+                            <th style="padding: 0.5rem; text-align: left; color: #60a5fa;">OPEX %</th>
+                            <th style="padding: 0.5rem; text-align: left; color: #60a5fa;">Senior DSCR</th>
+                            <th style="padding: 0.5rem; text-align: left; color: #60a5fa;">Senior Rate</th>
+                            <th style="padding: 0.5rem; text-align: left; color: #60a5fa;">Equity IRR</th>
+                            <th style="padding: 0.5rem; text-align: left; color: #60a5fa;">Total Stack</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        // Show first 100 results
+        results.permutations.slice(0, 100).forEach((perm, idx) => {
+            html += `
+                <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.2);">
+                    <td style="padding: 0.5rem; color: #94a3b8;">${idx + 1}</td>
+                    <td style="padding: 0.5rem; color: white;">£${(perm.GrossMonthlyRent_04 || 0).toLocaleString()}</td>
+                    <td style="padding: 0.5rem; color: white;">${perm.OPEX_06 || 0}%</td>
+                    <td style="padding: 0.5rem; color: white;">${(perm.TargetDSCRSenior_16 || 0).toFixed(2)}x</td>
+                    <td style="padding: 0.5rem; color: white;">${perm.SeniorCoupon_17 || 0}%</td>
+                    <td style="padding: 0.5rem; color: #22c55e;">${(perm.TargetEquityIRR || 0).toFixed(1)}%</td>
+                    <td style="padding: 0.5rem; color: #ffd700;">£${(perm.TotalCapitalStack || 0).toLocaleString()}</td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        if (results.permutations.length > 100) {
+            html += `<p style="color: #64748b; text-align: center; margin-top: 1rem;">Showing first 100 of ${results.permutations.length} results</p>`;
+        }
+        
+        container.innerHTML = html;
     }
     
     // Optimize ranges automatically
@@ -7804,45 +7881,41 @@
             return;
         }
         
-        // Map project data to permutation parameters
-        const mappings = {
-            'capex-total': currentPermProjectData.capex_total,
-            'capex-land': currentPermProjectData.capex_land_purchase,
-            'capex-building': currentPermProjectData.capex_building,
-            'capex-infrastructure': currentPermProjectData.capex_infrastructure,
-            'capex-it-equipment': currentPermProjectData.capex_it_equipment,
-            'capex-professional-fees': currentPermProjectData.capex_professional_fees,
-            'capex-contingency': currentPermProjectData.capex_contingency,
-            'market-capex': currentPermProjectData.market_capex_estimate,
-            'offtaker-rent': currentPermProjectData.offtaker_rent_per_kwh,
-            'offtaker-escalation': currentPermProjectData.offtaker_annual_escalation,
-            'power-capacity': currentPermProjectData.power_capacity_mw,
-            'it-load': currentPermProjectData.it_load_mw,
-            'pue': currentPermProjectData.expected_pue,
-            'construction-period': currentPermProjectData.construction_period_months,
-            'lease-term': currentPermProjectData.lease_term_years
-        };
-        
-        // Apply values to permutation inputs
-        Object.keys(mappings).forEach(paramId => {
-            const input = document.getElementById(`perm-${paramId}`);
-            if (input && mappings[paramId] !== undefined && mappings[paramId] !== null) {
-                input.value = mappings[paramId];
-                // Trigger change event to update any dependent fields
-                input.dispatchEvent(new Event('change'));
-            }
-        });
-        
-        // Show success message
-        const message = document.createElement('div');
-        message.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 1rem 2rem; border-radius: 8px; z-index: 10000; font-weight: 600;';
-        message.textContent = 'Project data applied successfully!';
-        document.body.appendChild(message);
-        
-        setTimeout(() => {
-            message.remove();
-        }, 2000);
+        // Load project data into the permutation engine
+        if (window.PermutationEngine) {
+            PermutationEngine.loadProjectData(currentPermProjectData);
+            
+            // Update the estimate display
+            updatePermutationEstimate();
+            
+            // Show success message
+            const message = document.createElement('div');
+            message.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 1rem 2rem; border-radius: 8px; z-index: 10000; font-weight: 600;';
+            message.innerHTML = `
+                <div style="text-align: center;">
+                    <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <div>Project data loaded into engine!</div>
+                    <div style="font-size: 0.9rem; margin-top: 0.5rem;">83 inputs configured</div>
+                </div>
+            `;
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.remove();
+            }, 3000);
+            
+            console.log('Project data applied to permutation engine:', currentPermProjectData);
+        }
     }
+    
+    // Initialize permutation engine on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.PermutationEngine) {
+            // Initialize with default values
+            updatePermutationEstimate();
+            console.log('Permutation Engine initialized with 83 inputs');
+        }
+    });
     </script>
     
     <!-- Market News Script -->
@@ -7850,6 +7923,9 @@
     
     <!-- Smooth Keyboard Scrolling -->
     <script src="{{ url_for('static', filename='js/smooth-scroll.js') }}"></script>
+    
+    <!-- Permutation Engine Core -->
+    <script src="{{ url_for('static', filename='js/permutation-engine.js') }}"></script>
     
     <!-- FORCE DARK BLUE COLOR v2 - FINAL FIX -->
     <style>
