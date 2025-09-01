@@ -3984,9 +3984,7 @@
         const ticker = document.getElementById('marketTicker');
         const container = document.getElementById('tickerContainer');
         
-        console.log('CreateTicker called - ticker element:', ticker);
-        console.log('CreateTicker called - container element:', container);
-        console.log('Market data:', marketData);
+        // Debug logs removed to reduce console noise
         
         if (!ticker || !container) {
             console.error('Ticker or container not found!');
@@ -4084,9 +4082,9 @@
         
         // Create three copies for seamless endless scrolling
         const singleContent = buildTickerContent();
-        console.log('Built ticker content length:', singleContent.length);
+        // Debug log removed
         ticker.innerHTML = singleContent + singleContent + singleContent;
-        console.log('Ticker innerHTML set, scrollWidth:', ticker.scrollWidth);
+        // Debug log removed
         
         // Setup drag functionality (only once)
         container.addEventListener('mousedown', startDrag);
@@ -6106,10 +6104,11 @@
                 });
                 
                 if (response.ok) {
+                    console.log('Project deleted successfully from backend');
                     // Remove from local data
                     if (pendingDeleteItem.seriesId) {
                         const series = seriesData.find(s => s.id === pendingDeleteItem.seriesId);
-                        if (series) {
+                        if (series && series.projects) {
                             series.projects = series.projects.filter(p => p.id !== pendingDeleteItem.id);
                         }
                     } else {
@@ -6118,11 +6117,16 @@
                     
                     renderProjects();
                     updateProjectStats();
-                    saveSeriesData();
-                    // Deleted permanently
+                    await saveSeriesData();
+                    showSaveIndicator('success');
+                } else {
+                    const errorData = await response.json();
+                    console.error('Delete failed:', errorData);
+                    alert(`Failed to delete project: ${errorData.message || 'Unknown error'}`);
                 }
             } catch (error) {
                 console.error('Error deleting project:', error);
+                alert('Failed to delete project. Please try again.');
             }
         } else if (pendingDeleteType === 'series') {
             // Handle series deletion
@@ -6550,10 +6554,11 @@
                 });
                 
                 if (response.ok) {
+                    console.log('Project deleted successfully from backend');
                     // Remove from local data
                     if (pendingDeleteItem.seriesId) {
                         const series = seriesData.find(s => s.id === pendingDeleteItem.seriesId);
-                        if (series) {
+                        if (series && series.projects) {
                             series.projects = series.projects.filter(p => p.id !== pendingDeleteItem.id);
                         }
                     } else {
@@ -6562,11 +6567,16 @@
                     
                     renderProjects();
                     updateProjectStats();
-                    saveSeriesData();
-                    // Deleted permanently
+                    await saveSeriesData();
+                    showSaveIndicator('success');
+                } else {
+                    const errorData = await response.json();
+                    console.error('Delete failed:', errorData);
+                    alert(`Failed to delete project: ${errorData.message || 'Unknown error'}`);
                 }
             } catch (error) {
                 console.error('Error deleting project:', error);
+                alert('Failed to delete project. Please try again.');
             }
         } else if (pendingDeleteType === 'series') {
             // Handle series deletion

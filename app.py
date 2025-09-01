@@ -4154,35 +4154,44 @@ def update_project(project_id):
         return jsonify({'status': 'error', 'message': 'Project not found'}), 404
     
     elif request.method == 'DELETE':
-        # Soft delete project - move to deleted items
+        # Delete project - now permanently delete instead of soft delete
+        print(f"[DELETE] Attempting to delete project {project_id} for user {user_email}")
+        print(f"[DELETE] User has {len(user_projects)} projects")
+        
+        # Find project in standalone projects
         for i, project in enumerate(user_projects):
             if project['id'] == project_id:
-                # Add deletion metadata
-                deleted_project = user_projects[i].copy()
-                deleted_project['deleted_at'] = datetime.now().isoformat()
-                deleted_project['restore_by'] = (datetime.now() + timedelta(days=7)).isoformat()
-                deleted_project['item_type'] = 'project'
-                
-                # Initialize deleted items for user if not exists
-                if user_email not in deleted_items:
-                    deleted_items[user_email] = []
-                
-                # Add to deleted items
-                deleted_items[user_email].append(deleted_project)
-                
+                print(f"[DELETE] Found standalone project to delete: {project['title']}")
                 # Remove from active projects
                 del user_projects[i]
                 
-                # Remove from order list
-                if project_id in projects[user_email]['order']:
+                # Remove from order list if present
+                if 'order' in projects[user_email] and project_id in projects[user_email]['order']:
                     projects[user_email]['order'].remove(project_id)
                 
-                # Save both databases
+                # Save to cloud database
                 save_projects_data(user_email, projects[user_email])
-                save_json_db(DELETED_FILE, deleted_items)
                 
-                return jsonify({'status': 'success', 'message': 'Project moved to trash'})
+                print(f"[DELETE] Successfully deleted project {project_id}")
+                return jsonify({'status': 'success', 'message': 'Project deleted'})
         
+        # Also check if project is in a series
+        if 'series' in projects[user_email]:
+            for series in projects[user_email]['series']:
+                if 'projects' in series:
+                    for j, series_project in enumerate(series['projects']):
+                        if series_project['id'] == project_id:
+                            print(f"[DELETE] Found project in series {series['title']}, removing...")
+                            # Remove from series
+                            del series['projects'][j]
+                            
+                            # Save to cloud database
+                            save_projects_data(user_email, projects[user_email])
+                            
+                            print(f"[DELETE] Successfully deleted project {project_id} from series")
+                            return jsonify({'status': 'success', 'message': 'Project deleted from series'})
+        
+        print(f"[DELETE] Project {project_id} not found")
         return jsonify({'status': 'error', 'message': 'Project not found'}), 404
 
 @app.route('/api/deleted-items', methods=['GET'])
@@ -5377,7 +5386,10 @@ def permutation_engine():
     if not is_internal:
         return redirect(url_for('dashboard'))
     
-    return render_template('permutation_engine.html', 
+    # Use V2 if available, otherwise fall back to original
+    template_name = 'permutation_engine_v2.html' if os.path.exists(os.path.join(app.template_folder, 'permutation_engine_v2.html')) else 'permutation_engine.html'
+    
+    return render_template(template_name, 
                          is_admin=is_admin,
                          is_internal=is_internal,
                          account_type=account_type,

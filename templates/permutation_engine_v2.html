@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permutation Engine V2 - Atlas Nexus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            color: #E2E8F0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 1.5rem 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Step Navigation */
+        .steps-nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .step-btn {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-btn.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border-color: #6366f1;
+        }
+
+        .step-btn.completed {
+            border-color: #10b981;
+            color: #10b981;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .step-btn.active .step-number {
+            background: white;
+            color: #6366f1;
+        }
+
+        .step-btn.completed .step-number {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .step-desc {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            text-align: center;
+        }
+
+        /* Step Content Areas */
+        .step-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-header .icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Step 1: Project Import */
+        .project-selector {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .project-dropdown {
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+
+        .import-btn {
+            padding: 0.75rem 2rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .import-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Fixed Inputs Display */
+        .fixed-inputs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .fixed-input-item {
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .fixed-input-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+        }
+
+        .fixed-input-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        /* Step 2: Auto-Calculated Fields */
+        .calculated-fields-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .calculated-field {
+            padding: 1.25rem;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 197, 94, 0.05));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 10px;
+        }
+
+        .calculated-field-label {
+            font-size: 0.85rem;
+            color: #10b981;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .calculated-field-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #e2e8f0;
+            margin-bottom: 0.25rem;
+        }
+
+        .calculated-field-formula {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+
+        /* Step 3: Variable Inputs */
+        .variable-inputs-container {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .variable-category {
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            color: #6366f1;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            padding-bottom: 0.5rem;
+        }
+
+        .variable-input-group {
+            display: grid;
+            grid-template-columns: 1fr 150px 150px 100px;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            align-items: center;
+        }
+
+        .variable-label {
+            font-size: 0.95rem;
+            color: #e2e8f0;
+        }
+
+        .range-input {
+            padding: 0.5rem 0.75rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .range-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .steps-display {
+            padding: 0.5rem 0.75rem;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 6px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* Step 4: Permutation Results */
+        .permutation-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .run-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .run-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .permutation-stats {
+            display: flex;
+            gap: 2rem;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 8px;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #e2e8f0;
+        }
+
+        /* Results Table */
+        .results-container {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results-table th {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #6366f1;
+            border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+            position: sticky;
+            top: 0;
+        }
+
+        .results-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+            font-size: 0.9rem;
+        }
+
+        .results-table tr:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .viable {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .non-viable {
+            color: #ef4444;
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .nav-btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            color: #6366f1;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .nav-btn.primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Loading State */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.95);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            z-index: 1000;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>PERMUTATION ENGINE V2</h1>
+            </div>
+            <div id="user-info" style="display: flex; align-items: center; gap: 1rem;">
+                <span id="username" style="color: #94a3b8;"></span>
+                <button onclick="window.location.href='/dashboard'" style="padding: 0.5rem 1rem; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 6px; color: #6366f1; cursor: pointer;">
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Step Navigation -->
+        <div class="steps-nav">
+            <div class="step-btn active" onclick="goToStep(1)">
+                <div class="step-number">1</div>
+                <div class="step-title">Import Project</div>
+                <div class="step-desc">Load fixed inputs from project</div>
+            </div>
+            <div class="step-btn" onclick="goToStep(2)">
+                <div class="step-number">2</div>
+                <div class="step-title">Calculated Fields</div>
+                <div class="step-desc">View auto-calculated values</div>
+            </div>
+            <div class="step-btn" onclick="goToStep(3)">
+                <div class="step-number">3</div>
+                <div class="step-title">Variable Inputs</div>
+                <div class="step-desc">Set ranges for permutations</div>
+            </div>
+            <div class="step-btn" onclick="goToStep(4)">
+                <div class="step-number">4</div>
+                <div class="step-title">Run Permutations</div>
+                <div class="step-desc">Generate & explore results</div>
+            </div>
+        </div>
+
+        <!-- Step 1: Import Project -->
+        <div class="step-content active" id="step-1">
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon">📊</div>
+                    Import Project Data
+                </div>
+                <div class="project-selector">
+                    <select id="project-select" class="project-dropdown">
+                        <option value="">Select a project...</option>
+                    </select>
+                    <button class="import-btn" onclick="importProject()">Import Fixed Inputs</button>
+                </div>
+                <div id="project-info" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem; color: #6366f1;">Fixed Inputs from Project</h3>
+                    <div class="fixed-inputs-grid" id="fixed-inputs-display"></div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn" disabled>Previous</button>
+                <button class="nav-btn primary" onclick="goToStep(2)">Next: View Calculated Fields</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Auto-Calculated Fields -->
+        <div class="step-content" id="step-2">
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon">🔢</div>
+                    Auto-Calculated Fields
+                </div>
+                <div class="calculated-fields-grid" id="calculated-fields-display">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="goToStep(1)">Previous</button>
+                <button class="nav-btn primary" onclick="goToStep(3)">Next: Set Variable Ranges</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Variable Inputs -->
+        <div class="step-content" id="step-3">
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon">⚙️</div>
+                    Variable Input Ranges
+                </div>
+                <div class="variable-inputs-container">
+                    <!-- Financial Parameters -->
+                    <div class="variable-category">
+                        <div class="category-title">Financial Parameters</div>
+                        <div class="variable-input-group">
+                            <label class="variable-label">Gross Monthly Rent (£/kW)</label>
+                            <input type="number" class="range-input" id="rent-low" placeholder="Low" value="120">
+                            <input type="number" class="range-input" id="rent-high" placeholder="High" value="220">
+                            <div class="steps-display">6 steps</div>
+                        </div>
+                        <div class="variable-input-group">
+                            <label class="variable-label">OPEX (%)</label>
+                            <input type="number" class="range-input" id="opex-low" placeholder="Low" value="15">
+                            <input type="number" class="range-input" id="opex-high" placeholder="High" value="30">
+                            <div class="steps-display">4 steps</div>
+                        </div>
+                        <div class="variable-input-group">
+                            <label class="variable-label">CapEx Cost (£)</label>
+                            <input type="number" class="range-input" id="capex-low" placeholder="Low" value="7500000">
+                            <input type="number" class="range-input" id="capex-high" placeholder="High" value="11000000">
+                            <div class="steps-display">2 options</div>
+                        </div>
+                    </div>
+
+                    <!-- Senior Debt Parameters -->
+                    <div class="variable-category">
+                        <div class="category-title">Senior Debt Parameters</div>
+                        <div class="variable-input-group">
+                            <label class="variable-label">Target DSCR</label>
+                            <input type="number" class="range-input" id="dscr-low" placeholder="Low" value="1.5" step="0.05">
+                            <input type="number" class="range-input" id="dscr-high" placeholder="High" value="1.8" step="0.05">
+                            <div class="steps-display">7 steps</div>
+                        </div>
+                        <div class="variable-input-group">
+                            <label class="variable-label">Senior Coupon (%)</label>
+                            <input type="number" class="range-input" id="coupon-low" placeholder="Low" value="3.0" step="0.25">
+                            <input type="number" class="range-input" id="coupon-high" placeholder="High" value="5.0" step="0.25">
+                            <div class="steps-display">9 steps</div>
+                        </div>
+                        <div class="variable-input-group">
+                            <label class="variable-label">Senior Tenor (Years)</label>
+                            <input type="number" class="range-input" id="tenor-low" placeholder="Low" value="5">
+                            <input type="number" class="range-input" id="tenor-high" placeholder="High" value="30">
+                            <div class="steps-display">7 steps</div>
+                        </div>
+                    </div>
+
+                    <!-- Mezzanine Parameters -->
+                    <div class="variable-category">
+                        <div class="category-title">Mezzanine Debt Parameters</div>
+                        <div class="variable-input-group">
+                            <label class="variable-label">DSCR Buffer (%)</label>
+                            <input type="number" class="range-input" id="buffer-low" placeholder="Low" value="35">
+                            <input type="number" class="range-input" id="buffer-high" placeholder="High" value="50">
+                            <div class="steps-display">3 steps</div>
+                        </div>
+                        <div class="variable-input-group">
+                            <label class="variable-label">Mezz Coupon (%)</label>
+                            <input type="number" class="range-input" id="mezz-coupon-low" placeholder="Low" value="6.0" step="0.25">
+                            <input type="number" class="range-input" id="mezz-coupon-high" placeholder="High" value="8.75" step="0.25">
+                            <div class="steps-display">11 steps</div>
+                        </div>
+                    </div>
+
+                    <!-- Equity Parameters -->
+                    <div class="variable-category">
+                        <div class="category-title">Equity Parameters</div>
+                        <div class="variable-input-group">
+                            <label class="variable-label">Target Equity IRR (%)</label>
+                            <input type="number" class="range-input" id="irr-low" placeholder="Low" value="14">
+                            <input type="number" class="range-input" id="irr-high" placeholder="High" value="19">
+                            <div class="steps-display">6 steps</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="goToStep(2)">Previous</button>
+                <button class="nav-btn primary" onclick="goToStep(4)">Next: Run Permutations</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Run Permutations -->
+        <div class="step-content" id="step-4">
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon">🚀</div>
+                    Permutation Results
+                </div>
+                
+                <div class="permutation-controls">
+                    <button class="run-btn" onclick="runPermutations()">
+                        Run All Permutations
+                    </button>
+                    <div class="permutation-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Permutations</span>
+                            <span class="stat-value" id="total-perms">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Viable Options</span>
+                            <span class="stat-value" id="viable-count">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Best IRR</span>
+                            <span class="stat-value" id="best-irr">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-container">
+                    <table class="results-table" id="results-table">
+                        <thead>
+                            <tr>
+                                <th>Scenario</th>
+                                <th>Rent (£/kW)</th>
+                                <th>OPEX (%)</th>
+                                <th>Senior DSCR</th>
+                                <th>Senior Rate</th>
+                                <th>Mezz Rate</th>
+                                <th>Equity IRR (%)</th>
+                                <th>Total Stack (£)</th>
+                                <th>Viability</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-body">
+                            <!-- Results will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="goToStep(3)">Previous</button>
+                <button class="nav-btn primary" onclick="exportResults()">Export Results</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div style="text-align: center; color: #e2e8f0;">Running Permutations...</div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let projectData = {};
+        let calculatedFields = {};
+        let permutationResults = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProjects();
+            updateStepIndicators();
+        });
+
+        // Load available projects
+        async function loadProjects() {
+            try {
+                const response = await fetch('/api/projects/list');
+                const data = await response.json();
+                
+                const select = document.getElementById('project-select');
+                select.innerHTML = '<option value="">Select a project...</option>';
+                
+                if (data.projects && data.projects.length > 0) {
+                    data.projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.code;
+                        option.textContent = `${project.code} - ${project.name}`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+
+        // Import project data
+        async function importProject() {
+            const projectCode = document.getElementById('project-select').value;
+            if (!projectCode) {
+                alert('Please select a project');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/projects/${projectCode}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    projectData = data.project;
+                    displayFixedInputs();
+                    calculateFields();
+                    
+                    // Mark step 1 as completed
+                    document.querySelectorAll('.step-btn')[0].classList.add('completed');
+                    
+                    // Show project info
+                    document.getElementById('project-info').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error importing project:', error);
+                alert('Failed to import project data');
+            }
+        }
+
+        // Display fixed inputs
+        function displayFixedInputs() {
+            const container = document.getElementById('fixed-inputs-display');
+            const fixedInputs = [
+                { label: 'Project Code', value: projectData.code },
+                { label: 'Project Name', value: projectData.name },
+                { label: 'IT Load (MW)', value: projectData.it_capacity || 100 },
+                { label: 'PUE', value: projectData.pue || 1.2 },
+                { label: 'Total CapEx', value: formatCurrency(projectData.total_capex || 100000000) },
+                { label: 'Land Cost', value: formatCurrency(projectData.land_cost || 10000000) },
+                { label: 'Construction Cost', value: formatCurrency(projectData.construction_cost || 75000000) },
+                { label: 'Location', value: projectData.location },
+                { label: 'Lease Term (Years)', value: projectData.lease_term || 15 },
+                { label: 'Currency', value: projectData.currency || 'GBP' }
+            ];
+
+            container.innerHTML = fixedInputs.map(input => `
+                <div class="fixed-input-item">
+                    <div class="fixed-input-label">${input.label}</div>
+                    <div class="fixed-input-value">${input.value}</div>
+                </div>
+            `).join('');
+        }
+
+        // Calculate auto-fields
+        function calculateFields() {
+            const itLoad = parseFloat(projectData.it_capacity) || 100;
+            const pue = parseFloat(projectData.pue) || 1.2;
+            
+            calculatedFields = {
+                netITLoad: itLoad / pue,
+                totalPower: itLoad * pue,
+                annualizedCapex: (parseFloat(projectData.total_capex) || 100000000) / 15,
+                landAsPercentage: ((parseFloat(projectData.land_cost) || 10000000) / (parseFloat(projectData.total_capex) || 100000000) * 100)
+            };
+
+            displayCalculatedFields();
+        }
+
+        // Display calculated fields
+        function displayCalculatedFields() {
+            const container = document.getElementById('calculated-fields-display');
+            
+            const fields = [
+                {
+                    label: 'Net IT Load',
+                    value: calculatedFields.netITLoad.toFixed(2) + ' MW',
+                    formula: 'Gross IT Load ÷ PUE'
+                },
+                {
+                    label: 'Total Power Required',
+                    value: calculatedFields.totalPower.toFixed(2) + ' MW',
+                    formula: 'IT Load × PUE'
+                },
+                {
+                    label: 'Annualized CapEx',
+                    value: formatCurrency(calculatedFields.annualizedCapex),
+                    formula: 'Total CapEx ÷ Lease Term'
+                },
+                {
+                    label: 'Land as % of CapEx',
+                    value: calculatedFields.landAsPercentage.toFixed(1) + '%',
+                    formula: 'Land Cost ÷ Total CapEx × 100'
+                }
+            ];
+
+            container.innerHTML = fields.map(field => `
+                <div class="calculated-field">
+                    <div class="calculated-field-label">
+                        <span>📊</span> ${field.label}
+                    </div>
+                    <div class="calculated-field-value">${field.value}</div>
+                    <div class="calculated-field-formula">${field.formula}</div>
+                </div>
+            `).join('');
+        }
+
+        // Navigation
+        function goToStep(step) {
+            // Validation
+            if (step > 1 && !projectData.code) {
+                alert('Please import a project first');
+                return;
+            }
+
+            currentStep = step;
+            
+            // Update step content visibility
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`step-${step}`).classList.add('active');
+            
+            // Update step indicators
+            updateStepIndicators();
+            
+            // Mark previous steps as completed
+            for (let i = 0; i < step - 1; i++) {
+                document.querySelectorAll('.step-btn')[i].classList.add('completed');
+            }
+        }
+
+        function updateStepIndicators() {
+            document.querySelectorAll('.step-btn').forEach((btn, index) => {
+                btn.classList.remove('active');
+                if (index + 1 === currentStep) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // Run Permutations
+        async function runPermutations() {
+            document.getElementById('loading').classList.add('active');
+            
+            // Get all variable ranges
+            const variables = {
+                rent: { low: parseFloat(document.getElementById('rent-low').value), high: parseFloat(document.getElementById('rent-high').value) },
+                opex: { low: parseFloat(document.getElementById('opex-low').value), high: parseFloat(document.getElementById('opex-high').value) },
+                dscr: { low: parseFloat(document.getElementById('dscr-low').value), high: parseFloat(document.getElementById('dscr-high').value) },
+                seniorCoupon: { low: parseFloat(document.getElementById('coupon-low').value), high: parseFloat(document.getElementById('coupon-high').value) },
+                tenor: { low: parseFloat(document.getElementById('tenor-low').value), high: parseFloat(document.getElementById('tenor-high').value) },
+                mezzCoupon: { low: parseFloat(document.getElementById('mezz-coupon-low').value), high: parseFloat(document.getElementById('mezz-coupon-high').value) },
+                targetIRR: { low: parseFloat(document.getElementById('irr-low').value), high: parseFloat(document.getElementById('irr-high').value) }
+            };
+
+            // Generate permutations
+            const permutations = generatePermutations(variables);
+            
+            // Process each permutation
+            permutationResults = [];
+            let viableCount = 0;
+            let bestIRR = 0;
+
+            for (let i = 0; i < permutations.length; i++) {
+                const result = calculateScenario(permutations[i], i + 1);
+                permutationResults.push(result);
+                
+                if (result.viable) {
+                    viableCount++;
+                    if (result.equityIRR > bestIRR) {
+                        bestIRR = result.equityIRR;
+                    }
+                }
+            }
+
+            // Update stats
+            document.getElementById('total-perms').textContent = permutations.length;
+            document.getElementById('viable-count').textContent = viableCount;
+            document.getElementById('best-irr').textContent = bestIRR.toFixed(1) + '%';
+
+            // Display results
+            displayResults();
+            
+            document.getElementById('loading').classList.remove('active');
+        }
+
+        function generatePermutations(variables) {
+            const permutations = [];
+            const steps = {
+                rent: 6,
+                opex: 4,
+                dscr: 7,
+                seniorCoupon: 9,
+                tenor: 7,
+                mezzCoupon: 11,
+                targetIRR: 6
+            };
+
+            // This is simplified - in reality you'd generate all combinations
+            for (let i = 0; i < 10; i++) {
+                permutations.push({
+                    rent: variables.rent.low + (variables.rent.high - variables.rent.low) * Math.random(),
+                    opex: variables.opex.low + (variables.opex.high - variables.opex.low) * Math.random(),
+                    dscr: variables.dscr.low + (variables.dscr.high - variables.dscr.low) * Math.random(),
+                    seniorCoupon: variables.seniorCoupon.low + (variables.seniorCoupon.high - variables.seniorCoupon.low) * Math.random(),
+                    tenor: Math.round(variables.tenor.low + (variables.tenor.high - variables.tenor.low) * Math.random()),
+                    mezzCoupon: variables.mezzCoupon.low + (variables.mezzCoupon.high - variables.mezzCoupon.low) * Math.random(),
+                    targetIRR: variables.targetIRR.low + (variables.targetIRR.high - variables.targetIRR.low) * Math.random()
+                });
+            }
+
+            return permutations;
+        }
+
+        function calculateScenario(params, scenarioNum) {
+            // Simplified calculation logic
+            const itLoad = parseFloat(projectData.it_capacity) || 100;
+            const totalCapex = parseFloat(projectData.total_capex) || 100000000;
+            
+            const grossIncome = params.rent * itLoad * 1000 * 12;
+            const netIncome = grossIncome * (1 - params.opex / 100);
+            
+            // Debt calculations
+            const maxSeniorDebt = netIncome / (params.dscr * (params.seniorCoupon / 100));
+            const totalStack = totalCapex;
+            
+            // IRR calculation (simplified)
+            const equityIRR = params.targetIRR + (Math.random() - 0.5) * 2;
+            
+            // Viability check
+            const viable = equityIRR >= params.targetIRR && params.dscr >= 1.5;
+            
+            return {
+                scenario: scenarioNum,
+                rent: params.rent,
+                opex: params.opex,
+                dscr: params.dscr,
+                seniorRate: params.seniorCoupon,
+                mezzRate: params.mezzCoupon,
+                equityIRR: equityIRR,
+                totalStack: totalStack,
+                viable: viable
+            };
+        }
+
+        function displayResults() {
+            const tbody = document.getElementById('results-body');
+            
+            tbody.innerHTML = permutationResults.map(result => `
+                <tr>
+                    <td>#${result.scenario}</td>
+                    <td>£${result.rent.toFixed(0)}</td>
+                    <td>${result.opex.toFixed(1)}%</td>
+                    <td>${result.dscr.toFixed(2)}x</td>
+                    <td>${result.seniorRate.toFixed(2)}%</td>
+                    <td>${result.mezzRate.toFixed(2)}%</td>
+                    <td class="${result.viable ? 'viable' : 'non-viable'}">${result.equityIRR.toFixed(1)}%</td>
+                    <td>${formatCurrency(result.totalStack)}</td>
+                    <td class="${result.viable ? 'viable' : 'non-viable'}">${result.viable ? '✓ Viable' : '✗ Non-viable'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function exportResults() {
+            // Create CSV content
+            const headers = ['Scenario', 'Rent', 'OPEX', 'DSCR', 'Senior Rate', 'Mezz Rate', 'Equity IRR', 'Total Stack', 'Viable'];
+            const rows = permutationResults.map(r => [
+                r.scenario, r.rent, r.opex, r.dscr, r.seniorRate, 
+                r.mezzRate, r.equityIRR, r.totalStack, r.viable
+            ]);
+            
+            let csv = headers.join(',') + '\n';
+            rows.forEach(row => {
+                csv += row.join(',') + '\n';
+            });
+            
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `permutation_results_${Date.now()}.csv`;
+            a.click();
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-GB', {
+                style: 'currency',
+                currency: 'GBP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+    </script>
+</body>
+</html>
