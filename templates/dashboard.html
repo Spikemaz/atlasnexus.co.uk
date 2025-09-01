@@ -1952,6 +1952,84 @@
                             </div>
                         </div>
                         
+                        <!-- Permutation Engine Input Fields -->
+                        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(96, 165, 250, 0.2);">
+                            <h3 style="color: #60a5fa; font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;">
+                                <i class="fas fa-calculator"></i> Permutation Engine Inputs
+                            </h3>
+                            <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 1rem;">Site-specific parameters for funding calculations</p>
+                            
+                            <!-- Required Fields Grid -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+                                        Currency <span style="color: #ef4444;">*</span>
+                                    </label>
+                                    <select id="edit-project-currency" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                        <option value="">Select Currency</option>
+                                        <option value="EUR">EUR (€)</option>
+                                        <option value="USD">USD ($)</option>
+                                        <option value="GBP">GBP (£)</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+                                        Gross IT Load (MW) <span style="color: #ef4444;">*</span>
+                                    </label>
+                                    <input type="number" id="edit-project-gross-it-load" step="0.01" placeholder="e.g., 10.5" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                </div>
+                                
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+                                        PUE <span style="color: #ef4444;">*</span>
+                                    </label>
+                                    <input type="number" id="edit-project-pue" step="0.01" min="1" placeholder="e.g., 1.2" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                </div>
+                                
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+                                        CapEx Cost Price <span style="color: #ef4444;">*</span>
+                                    </label>
+                                    <input type="number" id="edit-project-capex-cost" step="0.01" placeholder="Amount" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                </div>
+                                
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+                                        CapEx Market Rate (%) <span style="color: #ef4444;">*</span>
+                                    </label>
+                                    <input type="number" id="edit-project-capex-rate" step="0.01" placeholder="e.g., 5.5" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                </div>
+                                
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+                                        Land Purchase Fees <span style="color: #ef4444;">*</span>
+                                    </label>
+                                    <input type="number" id="edit-project-land-fees" step="0.01" placeholder="Amount" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                </div>
+                            </div>
+                            
+                            <!-- Optional Fields -->
+                            <div style="margin-top: 1rem;">
+                                <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 0.5rem;">Optional Parameters</p>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+                                            Gross Monthly Rent (kWh)
+                                        </label>
+                                        <input type="number" id="edit-project-monthly-rent" step="0.01" placeholder="Optional" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    </div>
+                                    
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+                                            OPEX
+                                        </label>
+                                        <input type="number" id="edit-project-opex" step="0.01" placeholder="Optional" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div style="margin-top: 1.5rem;">
                             <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Additional Details</label>
                             <textarea id="edit-project-details" rows="6" placeholder="Enter any additional project information, notes, or requirements" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; resize: vertical;"></textarea>
@@ -5799,12 +5877,32 @@
         const progressInput = document.getElementById('edit-project-progress');
         const detailsInput = document.getElementById('edit-project-details');
         
+        // Permutation Engine Fields
+        const currencyInput = document.getElementById('edit-project-currency');
+        const grossITLoadInput = document.getElementById('edit-project-gross-it-load');
+        const pueInput = document.getElementById('edit-project-pue');
+        const capexCostInput = document.getElementById('edit-project-capex-cost');
+        const capexRateInput = document.getElementById('edit-project-capex-rate');
+        const landFeesInput = document.getElementById('edit-project-land-fees');
+        const monthlyRentInput = document.getElementById('edit-project-monthly-rent');
+        const opexInput = document.getElementById('edit-project-opex');
+        
         if (titleInput) titleInput.value = project.title || '';
         if (statusInput) statusInput.value = project.status || 'draft';
         if (descInput) descInput.value = project.description || '';
         if (valueInput) valueInput.value = project.value || 0;
         if (progressInput) progressInput.value = project.progress || 0;
         if (detailsInput) detailsInput.value = project.details || '';
+        
+        // Populate Permutation Engine Fields
+        if (currencyInput) currencyInput.value = project.currency || '';
+        if (grossITLoadInput) grossITLoadInput.value = project.grossITLoad || '';
+        if (pueInput) pueInput.value = project.pue || '';
+        if (capexCostInput) capexCostInput.value = project.capexCost || '';
+        if (capexRateInput) capexRateInput.value = project.capexRate || '';
+        if (landFeesInput) landFeesInput.value = project.landPurchaseFees || '';
+        if (monthlyRentInput) monthlyRentInput.value = project.grossMonthlyRent || '';
+        if (opexInput) opexInput.value = project.opex || '';
         
         modal.style.display = 'flex';
     }
@@ -5827,6 +5925,16 @@
         currentEditingProject.value = parseInt(document.getElementById('edit-project-value').value) || 0;
         currentEditingProject.progress = parseInt(document.getElementById('edit-project-progress').value) || 0;
         currentEditingProject.details = document.getElementById('edit-project-details').value;
+        
+        // Update Permutation Engine Fields
+        currentEditingProject.currency = document.getElementById('edit-project-currency').value;
+        currentEditingProject.grossITLoad = parseFloat(document.getElementById('edit-project-gross-it-load').value) || null;
+        currentEditingProject.pue = parseFloat(document.getElementById('edit-project-pue').value) || null;
+        currentEditingProject.capexCost = parseFloat(document.getElementById('edit-project-capex-cost').value) || null;
+        currentEditingProject.capexRate = parseFloat(document.getElementById('edit-project-capex-rate').value) || null;
+        currentEditingProject.landPurchaseFees = parseFloat(document.getElementById('edit-project-land-fees').value) || null;
+        currentEditingProject.grossMonthlyRent = parseFloat(document.getElementById('edit-project-monthly-rent').value) || null;
+        currentEditingProject.opex = parseFloat(document.getElementById('edit-project-opex').value) || null;
         
         closeProjectEditModal();
         renderProjects();
@@ -6001,7 +6109,16 @@
                     status: 'draft',
                     value: 0,
                     progress: 0,
-                    seriesId: seriesId
+                    seriesId: seriesId,
+                    // Permutation Engine Fields (defaults)
+                    currency: '',
+                    grossITLoad: null,
+                    pue: null,
+                    capexCost: null,
+                    capexRate: null,
+                    landPurchaseFees: null,
+                    grossMonthlyRent: null,
+                    opex: null
                 })
             });
 
@@ -6019,7 +6136,16 @@
                     status: 'draft',
                     value: 0,
                     progress: 0,
-                    order: seriesId ? 0 : projectsData.length
+                    order: seriesId ? 0 : projectsData.length,
+                    // Permutation Engine Fields (defaults)
+                    currency: '',
+                    grossITLoad: null,
+                    pue: null,
+                    capexCost: null,
+                    capexRate: null,
+                    landPurchaseFees: null,
+                    grossMonthlyRent: null,
+                    opex: null
                 };
                 
                 if (seriesId) {
@@ -6061,8 +6187,7 @@
     
     // Edit project
     function editProject(projectId) {
-        console.log('Editing project:', projectId);
-        showProjectSpecifications(projectId, 'edit');
+        showProjectEditModal(projectId);
     }
 
     // Render projects in the grid
