@@ -1979,7 +1979,7 @@
                 </div>
                 
                 <!-- Dynamic Projects Grid with Drag & Drop -->
-                <div id="projects-grid" style="display: none; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; min-height: 200px;">
+                <div id="projects-grid" class="main-drop-zone" style="display: none; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; min-height: 200px; padding: 1rem; border: 2px dashed transparent; border-radius: 12px; transition: all 0.3s ease;">
                     <!-- Series and Projects will be loaded dynamically here -->
                 </div>
                 
@@ -5644,6 +5644,8 @@
         card.className = 'series-card';
         card.dataset.seriesId = series.id;
         card.dataset.index = seriesIndex;
+        card.dataset.type = 'series';
+        card.draggable = true; // Make series draggable
         
         const colorGradients = {
             purple: 'linear-gradient(135deg, #a855f7, #9333ea)',
@@ -5655,6 +5657,14 @@
         
         const gradient = colorGradients[series.color] || colorGradients.purple;
         
+        // Dynamic grid span based on project count
+        let gridSpan = 1; // Default for 0-1 projects
+        if (series.projects.length >= 2 && series.projects.length <= 3) {
+            gridSpan = 2; // Half row for 2-3 projects
+        } else if (series.projects.length >= 4) {
+            gridSpan = 3; // Full row for 4+ projects
+        }
+        
         card.style.cssText = `
             background: linear-gradient(135deg, #0a0e27, #020617);
             border: 2px solid transparent;
@@ -5664,8 +5674,10 @@
             padding: 1.5rem;
             margin: 0.75rem;
             position: relative;
-            grid-column: span 2;
+            grid-column: span ${gridSpan};
             min-height: 250px;
+            cursor: grab;
+            transition: all 0.3s ease;
         `;
         
         card.innerHTML = `
@@ -5687,9 +5699,9 @@
                 </div>
             </div>
             
-            <div class="series-projects" style="display: ${series.expanded ? 'grid' : 'none'}; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem;">
+            <div class="series-projects drop-zone" data-series-id="${series.id}" style="display: ${series.expanded ? 'grid' : 'none'}; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem; min-height: 100px; border: 2px dashed transparent; border-radius: 8px; transition: all 0.3s ease;">
                 ${series.projects.length > 0 ? series.projects.map((project, idx) => `
-                    <div class="project-in-series" data-project-id="${project.id}" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1rem; cursor: move;">
+                    <div class="project-in-series project-card" draggable="true" data-project-id="${project.id}" data-series-id="${series.id}" data-index="${idx}" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1rem; cursor: move;">
                         <div style="margin-bottom: 1rem;">
                             <h4 style="color: #60a5fa; font-size: 1rem; margin: 0 0 0.5rem 0;">${project.title}</h4>
                             <p style="color: #94a3b8; font-size: 0.875rem; margin: 0;">${project.description}</p>
@@ -5731,6 +5743,22 @@
                 `}
             </div>
         `;
+        
+        // Add drag event listeners for the series card
+        setupSeriesDragEvents(card);
+        
+        // Add drag event listeners for projects within the series
+        card.querySelectorAll('.project-in-series').forEach(projectCard => {
+            setupCardDragEvents(projectCard);
+        });
+        
+        // Make the series projects area a drop zone
+        const dropZone = card.querySelector('.series-projects');
+        if (dropZone) {
+            dropZone.addEventListener('dragover', handleSeriesDropZoneDragOver);
+            dropZone.addEventListener('drop', handleSeriesDropZoneDrop);
+            dropZone.addEventListener('dragleave', handleSeriesDropZoneLeave);
+        }
         
         return card;
     }
@@ -5891,6 +5919,128 @@
         grid.addEventListener('dragover', handleGridDragOver);
         grid.addEventListener('drop', handleGridDrop);
     }
+    
+    // Setup drag events for series cards
+    function setupSeriesDragEvents(card) {
+        card.addEventListener('dragstart', handleSeriesDragStart);
+        card.addEventListener('dragend', handleSeriesDragEnd);
+    }
+    
+    // Handle series drag start
+    function handleSeriesDragStart(e) {
+        // Check if we're dragging the series itself or a project within it
+        if (e.target.classList.contains('project-card')) {
+            // Let the project drag handler handle this
+            return;
+        }
+        
+        // Store that we're dragging a series
+        draggedElement = this;
+        draggedElement.dataset.dragType = 'series';
+        draggedIndex = parseInt(this.dataset.index);
+        
+        // Visual feedback
+        this.style.opacity = '0.4';
+        this.style.cursor = 'grabbing';
+        
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', '');
+        
+        // Stop propagation to prevent project cards from also being dragged
+        e.stopPropagation();
+    }
+    
+    // Handle series drag end
+    function handleSeriesDragEnd(e) {
+        this.style.opacity = '';
+        this.style.cursor = 'grab';
+        delete this.dataset.dragType;
+        
+        // Clean up any visual feedback
+        document.querySelectorAll('.drag-over-series').forEach(el => {
+            el.classList.remove('drag-over-series');
+        });
+    }
+    
+    // Handle drop zone drag over for series
+    function handleSeriesDropZoneDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Only accept project cards
+        if (draggedElement && draggedElement.classList.contains('project-card')) {
+            e.dataTransfer.dropEffect = 'move';
+            
+            // Visual feedback
+            this.style.border = '2px dashed rgba(96, 165, 250, 0.6)';
+            this.style.background = 'rgba(96, 165, 250, 0.05)';
+        }
+    }
+    
+    // Handle drop zone drop for series
+    function handleSeriesDropZoneDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!draggedElement || !draggedElement.classList.contains('project-card')) return;
+        
+        const targetSeriesId = this.dataset.seriesId;
+        const projectId = draggedElement.dataset.projectId;
+        const sourceSeriesId = draggedElement.dataset.seriesId;
+        
+        // Move project to this series
+        moveProjectToSeries(projectId, sourceSeriesId, targetSeriesId);
+        
+        // Reset visual feedback
+        this.style.border = '2px dashed transparent';
+        this.style.background = '';
+    }
+    
+    // Handle drop zone leave for series
+    function handleSeriesDropZoneLeave(e) {
+        this.style.border = '2px dashed transparent';
+        this.style.background = '';
+    }
+    
+    // Move project between series or to/from standalone
+    function moveProjectToSeries(projectId, sourceSeriesId, targetSeriesId) {
+        let project = null;
+        
+        // Find and remove project from source
+        if (sourceSeriesId && sourceSeriesId !== 'null') {
+            const sourceSeries = seriesData.find(s => s.id === sourceSeriesId);
+            if (sourceSeries) {
+                const projectIndex = sourceSeries.projects.findIndex(p => p.id === projectId);
+                if (projectIndex !== -1) {
+                    project = sourceSeries.projects.splice(projectIndex, 1)[0];
+                }
+            }
+        } else {
+            // Remove from standalone projects
+            const projectIndex = projectsData.findIndex(p => p.id === projectId);
+            if (projectIndex !== -1) {
+                project = projectsData.splice(projectIndex, 1)[0];
+            }
+        }
+        
+        // Add project to target
+        if (project) {
+            if (targetSeriesId && targetSeriesId !== 'null') {
+                const targetSeries = seriesData.find(s => s.id === targetSeriesId);
+                if (targetSeries) {
+                    targetSeries.projects.push(project);
+                }
+            } else {
+                // Add to standalone projects
+                projectsData.push(project);
+            }
+            
+            // Re-render and save
+            renderProjects();
+            updateProjectStats();
+            saveSeriesData();
+        }
+    }
 
     // Global variables for smooth drag and drop (removed duplicates - defined earlier)
     // let ghostPlaceholder = null; // Already defined at line 5232
@@ -5973,6 +6123,15 @@
     function handleDragStart(e) {
         draggedElement = this;
         draggedIndex = parseInt(this.dataset.index);
+        
+        // Store what type of element we're dragging
+        if (this.classList.contains('series-card')) {
+            draggedElement.dataset.dragType = 'series';
+        } else if (this.classList.contains('project-card')) {
+            draggedElement.dataset.dragType = 'project';
+            // Store the source series ID if dragging from a series
+            draggedElement.dataset.sourceSeriesId = this.dataset.seriesId || 'standalone';
+        }
         
         // Store original position for restoration
         originalNextSibling = this.nextSibling;
@@ -6065,10 +6224,19 @@
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
         
-        if (!draggedElement || !ghostPlaceholder) return;
+        if (!draggedElement) return;
         
+        // Visual feedback for main grid as drop zone
         const grid = document.getElementById('projects-grid');
-        const cards = [...grid.querySelectorAll('.project-card:not(.dragging)')];
+        if (draggedElement.classList.contains('project-card') && draggedElement.dataset.seriesId) {
+            // Show visual feedback when dragging a project from a series
+            grid.style.border = '2px dashed rgba(96, 165, 250, 0.4)';
+            grid.style.background = 'rgba(96, 165, 250, 0.02)';
+        }
+        
+        if (!ghostPlaceholder) return;
+        
+        const cards = [...grid.querySelectorAll('.project-card:not(.dragging), .series-card:not(.dragging)')];
         
         // Get mouse position
         const mouseX = e.clientX;
