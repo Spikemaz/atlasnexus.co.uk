@@ -587,7 +587,8 @@ def audit_project():
         'admin_approve_config.html',  # Admin approval configuration page
         'securitisation_engine.html',  # Securitization/Permutation engine
         'permutation_engine.html',  # Advanced permutation engine
-        'project_specifications_enhanced.html'  # Project specifications portal
+        'project_specifications_enhanced.html',  # Project specifications portal
+        'account.html'  # Account management page
     }
     
     # Files that should NEVER exist (delete immediately)
@@ -610,38 +611,42 @@ def audit_project():
         'templates/error.html'  # Old name for 404
     ]
     
-    # Delete forbidden files (with error handling)
-    for file in forbidden_files:
-        if os.path.exists(file):
+    # Only run file cleanup on local environment, not on Vercel
+    if not os.environ.get('VERCEL'):
+        # Delete forbidden files (with error handling)
+        for file in forbidden_files:
+            if os.path.exists(file):
+                try:
+                    os.remove(file)
+                    print(f"[DELETED] {file} - NOT ALLOWED!")
+                except Exception as e:
+                    print(f"[WARNING] Could not delete {file}: {e}")
+        
+        # Check root directory for unexpected files
+        root_files = [f for f in os.listdir('.') if os.path.isfile(f)]
+        for file in root_files:
+            if file not in allowed_files and not file.startswith('.'):
+                print(f"[WARNING] Unexpected file: {file}")
+        
+        # Check templates directory (with error handling)
+        if os.path.exists('templates'):
             try:
-                os.remove(file)
-                print(f"[DELETED] {file} - NOT ALLOWED!")
+                template_files = os.listdir('templates')
+                for file in template_files:
+                    if file not in allowed_templates:
+                        filepath = f'templates/{file}'
+                        try:
+                            os.remove(filepath)
+                            print(f"[DELETED] {filepath} - Only Gate1, Gate2, Dashboard, 404 allowed!")
+                        except Exception as e:
+                            print(f"[WARNING] Could not delete {filepath}: {e}")
             except Exception as e:
-                print(f"[WARNING] Could not delete {file}: {e}")
-    
-    # Check root directory for unexpected files
-    root_files = [f for f in os.listdir('.') if os.path.isfile(f)]
-    for file in root_files:
-        if file not in allowed_files and not file.startswith('.'):
-            print(f"[WARNING] Unexpected file: {file}")
-    
-    # Check templates directory (with error handling)
-    if os.path.exists('templates'):
-        try:
-            template_files = os.listdir('templates')
-            for file in template_files:
-                if file not in allowed_templates:
-                    filepath = f'templates/{file}'
-                    try:
-                        os.remove(filepath)
-                        print(f"[DELETED] {filepath} - Only Gate1, Gate2, Dashboard, 404 allowed!")
-                    except Exception as e:
-                        print(f"[WARNING] Could not delete {filepath}: {e}")
-        except Exception as e:
-            print(f"[WARNING] Could not check templates: {e}")
-    
-    # Report structure
-    print("[AUDIT] Project structure checked and cleaned")
+                print(f"[WARNING] Could not check templates: {e}")
+        
+        # Report structure
+        print("[AUDIT] Project structure checked and cleaned")
+    else:
+        print("[VERCEL] Skipping file cleanup in production environment")
 
 # ==================== KILL OLD SERVERS (LOCAL ONLY) ====================
 def kill_port_5000():
