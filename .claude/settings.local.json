@@ -67,7 +67,8 @@
       "WebSearch",
       "Bash(start https://vercel.com/account/billing)",
       "Bash(start https://vercel.com/marcus-moores-projects/atlasnexus-securitization/stores)",
-      "Bash(start https://vercel.com/marcus-moores-projects/atlasnexus-securitization/deployments)"
+      "Bash(start https://vercel.com/marcus-moores-projects/atlasnexus-securitization/deployments)",
+      "Bash(findstr:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"
