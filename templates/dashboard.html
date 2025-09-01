@@ -5816,20 +5816,30 @@
             emptyElement.style.display = 'none';
             statsElement.style.display = 'none';
 
-            const response = await fetch('/api/projects');
+            // Fetch both series and projects from the backend
+            const response = await fetch('/api/series');
             if (!response.ok) {
-                throw new Error('Failed to load projects');
+                throw new Error('Failed to load data');
             }
 
             const data = await response.json();
-            // Ensure projectsData is always an array
-            if (Array.isArray(data)) {
-                projectsData = data;
-            } else if (data && typeof data === 'object') {
-                // If it's an object, try to extract projects array
+            
+            // Extract series and projects from response
+            if (data.status === 'success') {
+                seriesData = data.series || [];
                 projectsData = data.projects || [];
             } else {
-                projectsData = [];
+                // Fallback for old API format
+                if (Array.isArray(data)) {
+                    projectsData = data;
+                    seriesData = [];
+                } else if (data && typeof data === 'object') {
+                    projectsData = data.projects || [];
+                    seriesData = data.series || [];
+                } else {
+                    projectsData = [];
+                    seriesData = [];
+                }
             }
             
             loadingElement.style.display = 'none';
@@ -5844,38 +5854,18 @@
                 updateProjectStats();
             }
         } catch (error) {
-            console.error('Error loading projects from API:', error);
+            console.error('Error loading data from server:', error);
             loadingElement.style.display = 'none';
             
-            // Load from localStorage if API is not available
-            const savedProjects = localStorage.getItem('projectsData');
-            const savedSeries = localStorage.getItem('seriesData');
+            // Show error message to user
+            alert('Failed to load your projects. Please refresh the page or check your connection.');
             
-            if (savedProjects) {
-                try {
-                    projectsData = JSON.parse(savedProjects);
-                } catch (e) {
-                    projectsData = [];
-                }
-            }
+            // Initialize with empty data
+            projectsData = [];
+            seriesData = [];
             
-            if (savedSeries) {
-                try {
-                    seriesData = JSON.parse(savedSeries);
-                } catch (e) {
-                    seriesData = [];
-                }
-            }
-            
-            // Show empty state only if both are empty
-            if (projectsData.length === 0 && seriesData.length === 0) {
-                emptyElement.style.display = 'block';
-            } else {
-                gridElement.style.display = 'grid';
-                statsElement.style.display = 'grid';
-                renderProjects();
-                updateProjectStats();
-            }
+            // Show empty state
+            emptyElement.style.display = 'block';
         }
     }
 
@@ -6163,23 +6153,21 @@
     // Save series data
     async function saveSeriesData() {
         try {
-            // Save to localStorage for persistence
-            localStorage.setItem('seriesData', JSON.stringify(seriesData));
-            localStorage.setItem('projectsData', JSON.stringify(projectsData));
+            // Save to backend database (cloud storage)
+            const response = await fetch('/api/series', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ series: seriesData, projects: projectsData })
+            });
             
-            // Try to save to backend, but don't fail if it doesn't exist
-            try {
-                await fetch('/api/series', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ series: seriesData, projects: projectsData })
-                });
-            } catch (apiError) {
-                // Backend API not available, but data is saved in localStorage
-                console.log('Using local storage only - API not available');
+            if (!response.ok) {
+                throw new Error('Failed to save data to server');
             }
+            
+            console.log('Data saved to cloud successfully');
         } catch (error) {
-            console.error('Error saving series data:', error);
+            console.error('Error saving data:', error);
+            alert('Failed to save changes. Please check your connection and try again.');
         }
     }
     
@@ -6553,23 +6541,21 @@
     // Save series data
     async function saveSeriesData() {
         try {
-            // Save to localStorage for persistence
-            localStorage.setItem('seriesData', JSON.stringify(seriesData));
-            localStorage.setItem('projectsData', JSON.stringify(projectsData));
+            // Save to backend database (cloud storage)
+            const response = await fetch('/api/series', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ series: seriesData, projects: projectsData })
+            });
             
-            // Try to save to backend, but don't fail if it doesn't exist
-            try {
-                await fetch('/api/series', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ series: seriesData, projects: projectsData })
-                });
-            } catch (apiError) {
-                // Backend API not available, but data is saved in localStorage
-                console.log('Using local storage only - API not available');
+            if (!response.ok) {
+                throw new Error('Failed to save data to server');
             }
+            
+            console.log('Data saved to cloud successfully');
         } catch (error) {
-            console.error('Error saving series data:', error);
+            console.error('Error saving data:', error);
+            alert('Failed to save changes. Please check your connection and try again.');
         }
     }
     END OF DUPLICATE FUNCTIONS */
@@ -7271,27 +7257,8 @@
 
     // Initialize projects when projects section is shown
     document.addEventListener('DOMContentLoaded', function() {
-        // Load saved series data from localStorage
-        const savedSeries = localStorage.getItem('seriesData');
-        const savedProjects = localStorage.getItem('projectsData');
-        
-        if (savedSeries) {
-            try {
-                seriesData = JSON.parse(savedSeries);
-            } catch (e) {
-                console.error('Error loading series data:', e);
-                seriesData = [];
-            }
-        }
-        
-        if (savedProjects) {
-            try {
-                projectsData = JSON.parse(savedProjects);
-            } catch (e) {
-                console.error('Error loading projects data:', e);
-                projectsData = [];
-            }
-        }
+        // Data will be loaded from cloud database when projects section is shown
+        // No localStorage needed - everything is stored in the cloud
         
         // Override the showSection function to initialize projects
         const originalShowSection = window.showSection;

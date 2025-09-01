@@ -4021,12 +4021,24 @@ def manage_projects():
         # Create new project
         data = request.json
         new_project = {
-            'id': f"project_{datetime.now().timestamp()}",
-            'name': data.get('name', 'New Project'),
+            'id': data.get('id', f"project_{datetime.now().timestamp()}"),
+            'title': data.get('title', 'New Project'),
             'description': data.get('description', ''),
-            'value': data.get('value', '€0'),
+            'value': data.get('value', 0),
             'progress': data.get('progress', 0),
-            'status': data.get('status', 'Draft'),
+            'status': data.get('status', 'draft'),
+            'details': data.get('details', ''),
+            # Permutation Engine Fields
+            'currency': data.get('currency', ''),
+            'grossITLoad': data.get('grossITLoad'),
+            'pue': data.get('pue'),
+            'capexCost': data.get('capexCost'),
+            'capexRate': data.get('capexRate'),
+            'landPurchaseFees': data.get('landPurchaseFees'),
+            'grossMonthlyRent': data.get('grossMonthlyRent'),
+            'opex': data.get('opex'),
+            'seriesId': data.get('seriesId'),
+            'order': data.get('order', 0),
             'created_at': datetime.now().isoformat(),
             'updated_at': datetime.now().isoformat()
         }
@@ -4035,7 +4047,7 @@ def manage_projects():
         projects[user_email]['order'].append(new_project['id'])
         save_json_db(PROJECTS_FILE, projects)
         
-        return jsonify({'status': 'success', 'project': new_project})
+        return jsonify(new_project)
 
 @app.route('/api/projects/order', methods=['POST'])
 def save_project_order():
@@ -4255,6 +4267,72 @@ def permanent_delete_item():
             return jsonify({'status': 'success', 'message': 'Item permanently deleted'})
     
     return jsonify({'status': 'error', 'message': 'Item not found in trash'}), 404
+
+@app.route('/api/series', methods=['GET', 'POST'])
+def manage_series():
+    """Get or create series for the current user"""
+    ip_address = get_real_ip()
+    user_email = session.get(f'user_email_{ip_address}')
+    
+    if not user_email:
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    # Load projects database (series are stored with projects)
+    PROJECTS_FILE = 'data/projects.json'
+    projects = load_json_db(PROJECTS_FILE)
+    
+    # Initialize user's data if not exists
+    if user_email not in projects:
+        projects[user_email] = {
+            'projects': [],
+            'series': [],
+            'order': []
+        }
+    
+    # Ensure series array exists
+    if 'series' not in projects[user_email]:
+        projects[user_email]['series'] = []
+    
+    if request.method == 'GET':
+        # Return user's series and projects
+        return jsonify({
+            'status': 'success',
+            'series': projects[user_email].get('series', []),
+            'projects': projects[user_email].get('projects', [])
+        })
+    
+    elif request.method == 'POST':
+        # Save both series and projects
+        data = request.json
+        
+        # Update series
+        if 'series' in data:
+            projects[user_email]['series'] = data['series']
+        
+        # Update projects if provided
+        if 'projects' in data:
+            # Update existing projects
+            for updated_project in data['projects']:
+                found = False
+                for i, existing_project in enumerate(projects[user_email]['projects']):
+                    if existing_project['id'] == updated_project['id']:
+                        projects[user_email]['projects'][i] = updated_project
+                        projects[user_email]['projects'][i]['updated_at'] = datetime.now().isoformat()
+                        found = True
+                        break
+                
+                # If not found, it's a new project
+                if not found:
+                    updated_project['created_at'] = datetime.now().isoformat()
+                    updated_project['updated_at'] = datetime.now().isoformat()
+                    projects[user_email]['projects'].append(updated_project)
+        
+        save_json_db(PROJECTS_FILE, projects)
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Data saved successfully'
+        })
 
 @app.route('/debug/ip-status')
 def debug_ip_status():
