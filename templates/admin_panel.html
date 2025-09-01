@@ -841,11 +841,12 @@
                                 <th>Action</th>
                                 <th>IP Address</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="activityTableBody">
                             <tr>
-                                <td colspan="5" style="text-align: center; padding: 2rem;">Loading activity data...</td>
+                                <td colspan="6" style="text-align: center; padding: 2rem;">Loading activity data...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1259,10 +1260,28 @@
             
             // Display top 10
             if (activities.length > 0) {
-                tbody.innerHTML = activities.slice(0, 10).map(activity => {
+                tbody.innerHTML = activities.slice(0, 10).map((activity, index) => {
                     const statusClass = activity.status === 'success' ? 'status-active' : 
                                        activity.status === 'failed' ? 'status-banned' : 
                                        'status-pending';
+                    
+                    // Determine what can be deleted based on activity type
+                    let deleteButton = '';
+                    if (activity.action === 'New Registration') {
+                        deleteButton = `<button class="action-btn action-delete" onclick="deleteActivityRegistration('${activity.user}')" title="Delete registration">
+                                            <i class="fas fa-trash"></i>
+                                        </button>`;
+                    } else if (activity.action === 'User Approved' || activity.action.includes('Login')) {
+                        deleteButton = `<button class="action-btn action-delete" onclick="deleteActivityUser('${activity.user}')" title="Delete user">
+                                            <i class="fas fa-trash"></i>
+                                        </button>`;
+                    } else {
+                        // For admin actions, allow clearing from log
+                        deleteButton = `<button class="action-btn" style="background: #64748b;" onclick="clearActivityLog(${index})" title="Clear from log">
+                                            <i class="fas fa-times"></i>
+                                        </button>`;
+                    }
+                    
                     return `
                         <tr>
                             <td>${activity.time.toLocaleString()}</td>
@@ -1270,11 +1289,12 @@
                             <td>${activity.action}</td>
                             <td><code>${activity.ip}</code></td>
                             <td><span class="status-badge ${statusClass}">${activity.status}</span></td>
+                            <td>${deleteButton}</td>
                         </tr>
                     `;
                 }).join('');
             } else {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No recent activity</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No recent activity</td></tr>';
             }
         }
         
@@ -1978,8 +1998,13 @@
                 
                 const data = await response.json();
                 if (data.status === 'success') {
-                    showAlert('User rejected', 'success');
+                    showAlert('User rejected and deleted', 'success');
+                    // Reload both tables since user is deleted from both
                     loadRegistrationsData();
+                    loadUsersData();
+                    loadDashboardData(); // Refresh activity too
+                } else {
+                    showAlert(data.message || 'Error rejecting user', 'danger');
                 }
             } catch (error) {
                 showAlert('Error rejecting user', 'danger');
@@ -2007,6 +2032,44 @@
             } catch (error) {
                 showAlert('Error deleting user', 'danger');
             }
+        }
+        
+        // Functions for deleting from activity table
+        async function deleteActivityRegistration(email) {
+            if (!confirm(`Delete registration for ${email}?`)) return;
+            
+            try {
+                const response = await fetch('/admin/reject-user', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, reason: 'Deleted from activity log'})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('Registration deleted', 'success');
+                    loadDashboardData();
+                    loadRegistrationsData();
+                    loadUsersData();
+                } else {
+                    showAlert(data.message || 'Error deleting registration', 'danger');
+                }
+            } catch (error) {
+                showAlert('Error deleting registration', 'danger');
+            }
+        }
+        
+        async function deleteActivityUser(email) {
+            if (!confirm(`Delete user ${email}?`)) return;
+            await deleteUser(email);
+            loadDashboardData(); // Refresh activity table
+        }
+        
+        function clearActivityLog(index) {
+            // For now, just reload to remove from view
+            // In future, could implement server-side activity log clearing
+            showAlert('Activity cleared from view', 'info');
+            loadDashboardData();
         }
         
         async function freezeUser(email) {

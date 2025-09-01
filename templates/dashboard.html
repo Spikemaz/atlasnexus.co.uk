@@ -5332,6 +5332,9 @@
     let ghostPlaceholder = null;
     let originalNextSibling = null;
     let lastValidDropTarget = null;
+    let draggedElement = null;
+    let draggedIndex = null;
+    let currentDropPosition = null;
 
     // Create ghost placeholder element
     function createGhostPlaceholder() {
@@ -5340,29 +5343,62 @@
         placeholder.style.cssText = `
             height: 200px;
             margin: 0.75rem;
-            border: 2px dashed rgba(96, 165, 250, 0.6);
+            border: 3px dashed rgba(96, 165, 250, 0.8);
             border-radius: 12px;
-            background: rgba(96, 165, 250, 0.1);
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(59, 130, 246, 0.05));
             position: relative;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transform: scale(0.9);
+            transform: scale(0.95);
+            animation: placeholderPulse 1.5s ease-in-out infinite;
         `;
+        
+        // Add animation keyframes
+        if (!document.querySelector('#drag-placeholder-styles')) {
+            const style = document.createElement('style');
+            style.id = 'drag-placeholder-styles';
+            style.textContent = `
+                @keyframes placeholderPulse {
+                    0%, 100% { 
+                        border-color: rgba(96, 165, 250, 0.8);
+                        background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(59, 130, 246, 0.05));
+                    }
+                    50% { 
+                        border-color: rgba(96, 165, 250, 1);
+                        background: linear-gradient(135deg, rgba(96, 165, 250, 0.15), rgba(59, 130, 246, 0.1));
+                    }
+                }
+                .project-card.dragging {
+                    opacity: 0.3 !important;
+                    transform: scale(0.95) !important;
+                    cursor: grabbing !important;
+                }
+                .project-card.drag-preview {
+                    position: fixed;
+                    pointer-events: none;
+                    z-index: 10000;
+                    opacity: 0.9;
+                    transform: rotate(2deg) scale(1.05);
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                }
+            `;
+            document.head.appendChild(style);
+        }
         
         // Add placeholder content
         const content = document.createElement('div');
         content.style.cssText = `
-            color: rgba(96, 165, 250, 0.8);
+            color: rgba(96, 165, 250, 0.9);
             font-size: 14px;
             text-align: center;
             pointer-events: none;
         `;
         content.innerHTML = `
-            <div style="font-size: 24px; margin-bottom: 8px;">↓</div>
-            <div>Drop here</div>
+            <div style="font-size: 28px; margin-bottom: 8px;">⬇</div>
+            <div style="font-weight: 600;">Drop here</div>
         `;
         placeholder.appendChild(content);
         
@@ -5377,9 +5413,15 @@
         // Store original position for restoration
         originalNextSibling = this.nextSibling;
         
-        // Create and insert ghost placeholder
+        // Create and insert ghost placeholder immediately at dragged element's position
         ghostPlaceholder = createGhostPlaceholder();
-        this.parentNode.insertBefore(ghostPlaceholder, this.nextSibling);
+        this.parentNode.insertBefore(ghostPlaceholder, this);
+        
+        // Move the dragged element out of the flow
+        this.style.position = 'fixed';
+        this.style.pointerEvents = 'none';
+        this.style.left = e.clientX + 'px';
+        this.style.top = e.clientY + 'px';
         
         // Animate placeholder in
         setTimeout(() => {
@@ -5387,24 +5429,33 @@
                 ghostPlaceholder.style.opacity = '1';
                 ghostPlaceholder.style.transform = 'scale(1)';
             }
-        }, 50);
+        }, 10);
         
         // Style the dragged element
         this.classList.add('dragging');
-        this.style.opacity = '0.4';
-        this.style.cursor = 'grabbing';
-        this.style.transform = 'rotate(5deg) scale(1.05)';
-        this.style.zIndex = '1000';
-        this.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.3)';
         
         // Add dragging class to grid for global styles
         document.getElementById('projects-grid').classList.add('dragging-active');
+        
+        // Create a custom drag image (optional, for better visual feedback)
+        const dragImage = this.cloneNode(true);
+        dragImage.style.position = 'absolute';
+        dragImage.style.top = '-1000px';
+        document.body.appendChild(dragImage);
+        e.dataTransfer.setDragImage(dragImage, e.offsetX, e.offsetY);
+        setTimeout(() => document.body.removeChild(dragImage), 0);
         
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/html', '');
     }
 
     function handleDragEnd(e) {
+        // Reset the dragged element's position
+        this.style.position = '';
+        this.style.pointerEvents = '';
+        this.style.left = '';
+        this.style.top = '';
+        
         // Clean up dragged element
         this.classList.remove('dragging');
         this.style.opacity = '';
@@ -5425,18 +5476,25 @@
                     ghostPlaceholder.parentNode.removeChild(ghostPlaceholder);
                 }
                 ghostPlaceholder = null;
-            }, 300);
+            }, 200);
         }
         
-        // Clean up all card effects
+        // Clean up all card effects with smooth transition
         document.querySelectorAll('.project-card').forEach(card => {
             card.classList.remove('drag-over', 'drag-over-top', 'drag-over-bottom');
             card.style.transform = '';
+            card.style.transition = 'transform 0.3s ease';
+            setTimeout(() => {
+                card.style.transition = '';
+            }, 300);
         });
         
         // Reset variables
+        draggedElement = null;
+        draggedIndex = null;
         lastValidDropTarget = null;
         originalNextSibling = null;
+        currentDropPosition = null;
     }
 
     function handleGridDragOver(e) {
@@ -5446,43 +5504,88 @@
         if (!draggedElement || !ghostPlaceholder) return;
         
         const grid = document.getElementById('projects-grid');
-        const afterElement = getDragAfterElement(grid, e.clientY);
         const cards = [...grid.querySelectorAll('.project-card:not(.dragging)')];
         
-        // Find the card we're hovering over
-        const hoveredCard = e.target.closest('.project-card');
+        // Get mouse position
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
         
-        if (hoveredCard && hoveredCard !== draggedElement) {
-            const hoveredRect = hoveredCard.getBoundingClientRect();
-            const mouseY = e.clientY;
-            const cardCenterY = hoveredRect.top + hoveredRect.height / 2;
+        // Find the closest insertion point
+        let closestCard = null;
+        let insertBefore = true;
+        let minDistance = Infinity;
+        
+        // Check each card to find the closest insertion point
+        cards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const cardCenterX = rect.left + rect.width / 2;
+            const cardCenterY = rect.top + rect.height / 2;
             
-            // Determine if we're in the top or bottom half
-            const isTopHalf = mouseY < cardCenterY;
+            // Calculate distance from mouse to card center
+            const distance = Math.sqrt(
+                Math.pow(mouseX - cardCenterX, 2) + 
+                Math.pow(mouseY - cardCenterY, 2)
+            );
             
-            // Remove previous hover effects
-            cards.forEach(card => {
-                card.classList.remove('drag-over-top', 'drag-over-bottom');
-            });
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestCard = card;
+                
+                // Determine if we should insert before or after based on mouse position
+                // For horizontal layouts, use X position; for vertical, use Y
+                const isHorizontalLayout = window.innerWidth > 768;
+                if (isHorizontalLayout) {
+                    insertBefore = mouseX < cardCenterX;
+                } else {
+                    insertBefore = mouseY < cardCenterY;
+                }
+            }
+        });
+        
+        // Clear all hover effects
+        cards.forEach(card => {
+            card.classList.remove('drag-over-top', 'drag-over-bottom');
+            card.style.transform = '';
+        });
+        
+        // Move placeholder to the appropriate position
+        if (closestCard) {
+            // Add visual feedback to the closest card
+            closestCard.classList.add(insertBefore ? 'drag-over-top' : 'drag-over-bottom');
             
-            // Add hover effect to current card
-            hoveredCard.classList.add(isTopHalf ? 'drag-over-top' : 'drag-over-bottom');
-            
-            // Move placeholder to appropriate position
-            if (isTopHalf) {
-                hoveredCard.parentNode.insertBefore(ghostPlaceholder, hoveredCard);
+            // Smoothly move placeholder
+            if (insertBefore) {
+                if (ghostPlaceholder.nextSibling !== closestCard) {
+                    grid.insertBefore(ghostPlaceholder, closestCard);
+                }
             } else {
-                hoveredCard.parentNode.insertBefore(ghostPlaceholder, hoveredCard.nextSibling);
+                if (ghostPlaceholder.previousSibling !== closestCard) {
+                    grid.insertBefore(ghostPlaceholder, closestCard.nextSibling);
+                }
             }
             
-            lastValidDropTarget = hoveredCard;
-        } else if (afterElement === null) {
-            // Dragging to the end
-            grid.appendChild(ghostPlaceholder);
-            cards.forEach(card => {
-                card.classList.remove('drag-over-top', 'drag-over-bottom');
+            // Add subtle animation to surrounding cards
+            const closestIndex = cards.indexOf(closestCard);
+            cards.forEach((card, index) => {
+                if (Math.abs(index - closestIndex) <= 1 && card !== closestCard) {
+                    card.style.transform = 'scale(0.98)';
+                    card.style.transition = 'transform 0.2s ease';
+                }
             });
+        } else if (cards.length === 0) {
+            // If no cards, append to grid
+            grid.appendChild(ghostPlaceholder);
+        } else {
+            // Check if we should append to the end
+            const lastCard = cards[cards.length - 1];
+            const lastCardRect = lastCard.getBoundingClientRect();
+            
+            if (mouseY > lastCardRect.bottom || mouseX > lastCardRect.right) {
+                grid.appendChild(ghostPlaceholder);
+            }
         }
+        
+        currentDropPosition = ghostPlaceholder.nextSibling;
     }
 
     function handleGridDrop(e) {
@@ -5508,12 +5611,25 @@
     }
 
     // Helper function to find the element after which we should insert
-    function getDragAfterElement(container, y) {
+    function getDragAfterElement(container, x, y) {
         const draggableElements = [...container.querySelectorAll('.project-card:not(.dragging)')];
+        
+        if (draggableElements.length === 0) return null;
+        
+        // Determine if we're in a horizontal or vertical layout
+        const isHorizontalLayout = window.innerWidth > 768;
         
         return draggableElements.reduce((closest, child) => {
             const box = child.getBoundingClientRect();
-            const offset = y - box.top - box.height / 2;
+            let offset;
+            
+            if (isHorizontalLayout) {
+                // For horizontal layout, use X position
+                offset = x - box.left - box.width / 2;
+            } else {
+                // For vertical layout, use Y position
+                offset = y - box.top - box.height / 2;
+            }
             
             if (offset < 0 && offset > closest.offset) {
                 return { offset: offset, element: child };

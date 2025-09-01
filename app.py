@@ -2967,13 +2967,20 @@ def admin_reject_user():
     
     # Delete from cloud database (no local fallback - we're cloud-only now)
     try:
+        print(f"[ADMIN-REJECT] Starting deletion for {email}")
+        
         # Delete registration
-        delete_registration_data(email)
+        reg_deleted = delete_registration_data(email)
+        print(f"[ADMIN-REJECT] Registration deletion result for {email}: {reg_deleted}")
+        
         # Also delete user if exists
-        delete_user_data(email)
-        print(f"[ADMIN] Deleted registration and user data for {email}")
+        user_deleted = delete_user_data(email)
+        print(f"[ADMIN-REJECT] User deletion result for {email}: {user_deleted}")
+        
+        print(f"[ADMIN-REJECT] Completed deletion for {email}")
     except Exception as e:
         print(f"[ERROR] Failed to delete user {email}: {e}")
+        return jsonify({'status': 'error', 'message': f'Failed to delete: {str(e)}'}), 500
     
     # Send detailed rejection email with reason
     email_html = f"""
