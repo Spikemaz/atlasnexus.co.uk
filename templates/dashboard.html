@@ -2602,7 +2602,15 @@
         let currentTab = 'overview';
         let currentSection = 'dashboard';
         
-        // Removed duplicate function - using the main showSection function instead
+        // Define showSection early so it's available for HTML onclick handlers
+        window.showSection = function(section) {
+            // This will be overridden with full implementation later
+            console.log('ShowSection called for:', section);
+            // Basic implementation to prevent errors
+            if (typeof window.fullShowSection === 'function') {
+                window.fullShowSection(section);
+            }
+        };
         
         function showPlaceholderContent(title, description) {
             let placeholderDiv = document.getElementById('placeholder-content');
@@ -3945,8 +3953,8 @@
     }
     
     
-    // Show section based on navigation - moved to global scope for HTML onclick handlers
-    window.showSection = function(section) {
+    // Full implementation of showSection - overwrites the placeholder
+    window.fullShowSection = window.showSection = function(section) {
         // Hide all sections without re-triggering animations
         const allSections = ['main-dashboard', 'market-section', 'data-section', 'analytics-section', 
                            'risk-section', 'portfolio-section', 'compliance-section', 'permutation-section',
