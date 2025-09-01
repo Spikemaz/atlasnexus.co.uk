@@ -1701,7 +1701,7 @@ def register():
         
         # Save registration
         save_registration_data(data['email'], data)
-        print(f"[REGISTRATION SAVED] {data['email']} - Cloud: {should_use_mongodb()}")
+        print(f"[REGISTRATION SAVED] {data['email']} - Cloud database")
         
         # Trigger update notification for admin panel
         session['data_changed'] = True
@@ -2909,13 +2909,9 @@ def admin_quick_reject():
         </html>
         """, 400
     
-    # Delete completely from system
-    if should_use_mongodb():
-        cloud_db.delete_registration(email)
-        cloud_db.delete_user(email)
-    else:
-        delete_registration_data(email)
-        delete_user_data(email)
+    # Delete completely from system (cloud database only)
+    delete_registration_data(email)
+    delete_user_data(email)
     
     # Send detailed rejection email
     rejection_email_html = f"""
@@ -2969,18 +2965,15 @@ def admin_reject_user():
     email = request.json.get('email')
     reason = request.json.get('reason', 'Application not approved')
     
-    
-    # Check if using cloud database
-    if should_use_mongodb():
-        # Delete from cloud database
-        cloud_db.delete_registration(email)
-        cloud_db.delete_user(email)  # Also delete if user exists
-    else:
-        # Delete from local files
-        registrations = load_registrations_data()
-        if email in registrations:
-            delete_registration_data(email)
-            delete_user_data(email)
+    # Delete from cloud database (no local fallback - we're cloud-only now)
+    try:
+        # Delete registration
+        delete_registration_data(email)
+        # Also delete user if exists
+        delete_user_data(email)
+        print(f"[ADMIN] Deleted registration and user data for {email}")
+    except Exception as e:
+        print(f"[ERROR] Failed to delete user {email}: {e}")
     
     # Send detailed rejection email with reason
     email_html = f"""
