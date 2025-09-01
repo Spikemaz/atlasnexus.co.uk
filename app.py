@@ -453,7 +453,7 @@ def save_registration_data(email, data):
     if should_use_mongodb():
         return cloud_db.save_registration(email, data)
     else:
-        registrations = load_json_db(REGISTRATIONS_FILE)
+        registrations = load_registrations_data()
         registrations[email] = data
         return save_json_db(REGISTRATIONS_FILE, registrations)
 
@@ -462,14 +462,14 @@ def load_registrations_data():
     if should_use_mongodb():
         return cloud_db.load_registrations()
     else:
-        return load_json_db(REGISTRATIONS_FILE)
+        return load_registrations_data()
 
 def delete_registration_data(email):
     """Delete registration from cloud or local storage"""
     if should_use_mongodb():
         return cloud_db.delete_registration(email)
     else:
-        registrations = load_json_db(REGISTRATIONS_FILE)
+        registrations = load_registrations_data()
         if email in registrations:
             del registrations[email]
             return save_json_db(REGISTRATIONS_FILE, registrations)
@@ -480,7 +480,7 @@ def save_user_data(email, data):
     if should_use_mongodb():
         return cloud_db.save_user(email, data)
     else:
-        users = load_json_db(USERS_FILE)
+        users = load_users_data()
         users[email] = data
         return save_json_db(USERS_FILE, users)
 
@@ -489,14 +489,14 @@ def load_users_data():
     if should_use_mongodb():
         return cloud_db.load_users()
     else:
-        return load_json_db(USERS_FILE)
+        return load_users_data()
 
 def delete_user_data(email):
     """Delete user from cloud or local storage"""
     if should_use_mongodb():
         return cloud_db.delete_user(email)
     else:
-        users = load_json_db(USERS_FILE)
+        users = load_users_data()
         if email in users:
             del users[email]
             return save_json_db(USERS_FILE, users)
@@ -1916,14 +1916,14 @@ def registration_expired():
     data = request.get_json()
     email = data.get('email', '').lower()
     
-    registrations = load_json_db(REGISTRATIONS_FILE)
+    registrations = load_registrations_data()
     
     if email in registrations:
         # Mark as expired instead of deleting
         registrations[email]['expired'] = True
         registrations[email]['expired_at'] = datetime.now().isoformat()
         registrations[email]['expired_reason'] = 'Email not verified within 10 minutes'
-        save_json_db(REGISTRATIONS_FILE, registrations)
+        save_registration_data(email, registrations[email])
         
         # Also save to expired file for tracking
         expired = load_json_db('data/expired_registrations.json')
@@ -1945,7 +1945,7 @@ def resend_verification():
     if not email:
         return jsonify({'status': 'error', 'message': 'Email required'}), 400
     
-    registrations = load_json_db(REGISTRATIONS_FILE)
+    registrations = load_registrations_data()
     if email not in registrations:
         return jsonify({'status': 'error', 'message': 'Registration not found'}), 404
     
@@ -1977,7 +1977,7 @@ def resend_verification():
     # Generate new verification token
     new_token = generate_verification_token()
     registrations[email]['verification_token'] = new_token
-    save_json_db(REGISTRATIONS_FILE, registrations)
+    save_registration_data(email, registrations[email])
     
     # Send new verification email
     base_url = get_base_url()
@@ -2025,8 +2025,8 @@ def check_email_availability():
     if not email:
         return jsonify({'available': False, 'message': 'Email is required'}), 400
     
-    registrations = load_json_db(REGISTRATIONS_FILE)
-    users = load_json_db(USERS_FILE)
+    registrations = load_registrations_data()
+    users = load_users_data()
     
     # Check if email exists in users database (fully registered)
     if email in users:
@@ -2083,7 +2083,7 @@ def check_verification_status():
     if not email:
         return jsonify({'verified': False})
     
-    registrations = load_json_db(REGISTRATIONS_FILE)
+    registrations = load_registrations_data()
     if email in registrations:
         is_verified = registrations[email].get('email_verified', False)
         is_approved = registrations[email].get('admin_approved', False)
@@ -2105,7 +2105,7 @@ def verify_email():
         return redirect(url_for('index'))
     
     # Load registrations
-    registrations = load_json_db(REGISTRATIONS_FILE)
+    registrations = load_registrations_data()
     
     if email in registrations and registrations[email]['verification_token'] == token:
         # Check if verification link has expired (24 hours)
@@ -2186,7 +2186,7 @@ def verify_email():
         
         registrations[email]['email_verified'] = True
         registrations[email]['verified_at'] = datetime.now().isoformat()
-        save_json_db(REGISTRATIONS_FILE, registrations)
+        save_registration_data(email, registrations[email])
         
         # Trigger update notification for admin panel
         session['data_changed'] = True
@@ -2200,7 +2200,7 @@ def verify_email():
             if password:
                 # Create user account now that they're verified
                 password_expiry = datetime.now() + timedelta(days=30)
-                users = load_json_db(USERS_FILE)
+                users = load_users_data()
                 users[email] = {
                     'email': email,
                     'full_name': registrations[email].get('full_name', ''),
@@ -2226,12 +2226,12 @@ def verify_email():
                     'credentials_sent': True,
                     'credentials_sent_at': datetime.now().isoformat()
                 }
-                save_json_db(USERS_FILE, users)
+                save_user_data(email, users[email])
                 
                 # Also update registration to mark credentials sent
                 registrations[email]['credentials_sent'] = True
                 registrations[email]['credentials_sent_at'] = datetime.now().isoformat()
-                save_json_db(REGISTRATIONS_FILE, registrations)
+                save_registration_data(email, registrations[email])
                 
                 # Send credentials email
                 base_url = get_base_url()
@@ -2379,7 +2379,7 @@ def auth():
         # Admin works through session only
         if IS_LOCAL:
             # Only update user tracking on local
-            users = load_json_db(USERS_FILE)
+            users = load_users_data()
             if email not in users:
                 users[email] = {
                     'email': email,
@@ -2418,7 +2418,7 @@ def auth():
             if ip_address not in users[email]['ip_history']:
                 users[email]['ip_history'].append(ip_address)
             
-            save_json_db(USERS_FILE, users)
+            save_user_data(email, users[email])
         
         # Always track IP access
         track_ip_access(ip_address, 'admin_login', email)
@@ -2426,7 +2426,7 @@ def auth():
         return jsonify({'status': 'success', 'redirect': url_for('dashboard')})
     
     # Check approved users
-    users = load_json_db(USERS_FILE)
+    users = load_users_data()
     if email in users:
         user = users[email]
         
@@ -2471,7 +2471,7 @@ def auth():
                 
                 # Save updated user data
                 users[email] = user
-                save_json_db(USERS_FILE, users)
+                save_user_data(email, users[email])
                 
                 # Track successful login attempt
                 login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE)
@@ -2539,8 +2539,8 @@ def dashboard():
     pending_registrations = []
     all_users = []
     if is_admin:
-        registrations = load_json_db(REGISTRATIONS_FILE)
-        users = load_json_db(USERS_FILE)
+        registrations = load_registrations_data()
+        users = load_users_data()
         
         # Get pending registrations
         for email, reg_data in registrations.items():
@@ -2732,7 +2732,7 @@ def admin_quick_approve():
         return "Invalid approval link", 400
     
     # Load registrations
-    registrations = load_json_db(REGISTRATIONS_FILE)
+    registrations = load_registrations_data()
     
     # Verify token
     if email not in registrations or registrations[email].get('approval_token') != token:
@@ -2752,8 +2752,7 @@ def admin_quick_approve():
     # Generate a password if not already exists
     if not registration.get('generated_password'):
         registration['generated_password'] = generate_secure_password()
-        registrations[email] = registration
-        save_json_db(REGISTRATIONS_FILE, registrations)
+        save_registration_data(email, registration)
     
     # Render the approval configuration template
     return render_template('admin_approve_config.html',
@@ -2780,7 +2779,7 @@ def admin_process_approval():
         return "Invalid approval request", 400
     
     # Load registrations
-    registrations = load_json_db(REGISTRATIONS_FILE)
+    registrations = load_registrations_data()
     
     # Verify token
     if email not in registrations or registrations[email].get('approval_token') != token:
@@ -2812,7 +2811,7 @@ def admin_process_approval():
     email_verified = registrations[email].get('email_verified', False)
     
     # Save updated registration
-    save_json_db(REGISTRATIONS_FILE, registrations)
+    save_registration_data(email, registrations[email])
     
     # Log the admin action
     log_admin_action('email_approval', 'user_approved', {'email': email, 'account_type': account_type})
@@ -2821,7 +2820,7 @@ def admin_process_approval():
     if email_verified:
         # Email is verified, create account and send credentials
         password_expiry = datetime.now() + timedelta(days=30)
-        users = load_json_db(USERS_FILE)
+        users = load_users_data()
         users[email] = {
             **registrations[email],
             'password': password,
@@ -2833,7 +2832,7 @@ def admin_process_approval():
             'last_login': None,
             'login_history': [],
         }
-        save_json_db(USERS_FILE, users)
+        save_user_data(email, users[email])
         
         # Send credentials email
         account_type_display = "Internal" if account_type == "internal" else "External"
@@ -2916,7 +2915,7 @@ def admin_quick_reject():
     
     
     # Load registrations
-    registrations = load_json_db(REGISTRATIONS_FILE)
+    registrations = load_registrations_data()
     
     # Verify token
     if email not in registrations or registrations[email].get('approval_token') != token:
@@ -2935,14 +2934,8 @@ def admin_quick_reject():
         cloud_db.delete_registration(email)
         cloud_db.delete_user(email)
     else:
-        del registrations[email]
-        save_json_db(REGISTRATIONS_FILE, registrations)
-        
-        # Also delete from users if exists
-        users = load_json_db(USERS_FILE)
-        if email in users:
-            del users[email]
-            save_json_db(USERS_FILE, users)
+        delete_registration_data(email)
+        delete_user_data(email)
     
     # Send detailed rejection email
     rejection_email_html = f"""
@@ -3004,16 +2997,10 @@ def admin_reject_user():
         cloud_db.delete_user(email)  # Also delete if user exists
     else:
         # Delete from local files
-        registrations = load_json_db(REGISTRATIONS_FILE)
+        registrations = load_registrations_data()
         if email in registrations:
-            del registrations[email]
-            save_json_db(REGISTRATIONS_FILE, registrations)
-        
-        # Also delete from users if exists
-        users = load_json_db(USERS_FILE)
-        if email in users:
-            del users[email]
-            save_json_db(USERS_FILE, users)
+            delete_registration_data(email)
+            delete_user_data(email)
     
     # Send detailed rejection email with reason
     email_html = f"""
@@ -3201,11 +3188,11 @@ def logout():
         session_duration = (datetime.now() - login_start).total_seconds()
         
         # Update user's total login time
-        users = load_json_db(USERS_FILE)
+        users = load_users_data()
         if email in users:
             users[email]['total_login_time'] = users[email].get('total_login_time', 0) + session_duration
             users[email]['last_logout'] = datetime.now().isoformat()
-            save_json_db(USERS_FILE, users)
+            save_user_data(email, users[email])
     
     # Clear user authentication only
     session.pop(f'user_authenticated_{ip_address}', None)
@@ -3501,8 +3488,8 @@ def admin_comprehensive_data():
     try:
         # Load all data sources with error handling
         lockouts = load_lockouts() or {}
-        registrations = load_json_db(REGISTRATIONS_FILE) or {}
-        users = load_json_db(USERS_FILE) or {}
+        registrations = load_registrations_data() or {}
+        users = load_users_data() or {}
         login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE) or {}
         admin_actions = load_json_db(ADMIN_ACTIONS_FILE) or []
         
@@ -3637,7 +3624,7 @@ def admin_delete_data():
                 print(f"[ADMIN] Deleted login attempts for {identifier}")
                 
         elif data_type == 'registration':
-            registrations = load_json_db(REGISTRATIONS_FILE)
+            registrations = load_registrations_data()
             if identifier in registrations:
                 del registrations[identifier]
                 save_json_db(REGISTRATIONS_FILE, registrations)
@@ -3691,8 +3678,8 @@ def admin_check_updates():
     last_check = request.args.get('last_check', '')
     
     # Calculate current data hash
-    registrations = load_json_db(REGISTRATIONS_FILE) or {}
-    users = load_json_db(USERS_FILE) or {}
+    registrations = load_registrations_data() or {}
+    users = load_users_data() or {}
     lockouts = load_lockouts() or {}
     
     # Create a simple hash of current state
@@ -3783,7 +3770,7 @@ def admin_approve_user_advanced():
     manual_password = data.get('manual_password')
     
     # Load registrations
-    registrations = load_json_db(REGISTRATIONS_FILE)
+    registrations = load_registrations_data()
     
     if email not in registrations:
         return jsonify({'status': 'error', 'message': 'Registration not found'}), 404
@@ -3803,12 +3790,12 @@ def admin_approve_user_advanced():
     registrations[email]['admin_approved'] = True
     registrations[email]['approved_at'] = datetime.now().isoformat()
     registrations[email]['approved_by'] = session.get(f'user_email_{ip_address}', 'spikemaz8@aol.com')
-    save_json_db(REGISTRATIONS_FILE, registrations)
+    save_registration_data(email, registrations[email])
     
     # Only create user account if email is already verified
     if email_verified:
         password_expiry = datetime.now() + timedelta(days=30)
-        users = load_json_db(USERS_FILE)
+        users = load_users_data()
         users[email] = {
             **registrations[email],
             'password': password,
@@ -3825,7 +3812,7 @@ def admin_approve_user_advanced():
             'credentials_sent': False,  # Will be updated when email is sent
             'credentials_sent_at': None
         }
-        save_json_db(USERS_FILE, users)
+        save_user_data(email, users[email])
     
     # Log admin action
     admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
@@ -3871,7 +3858,7 @@ def admin_approve_user_advanced():
         if email_sent:
             users[email]['credentials_sent'] = True
             users[email]['credentials_sent_at'] = datetime.now().isoformat()
-            save_json_db(USERS_FILE, users)
+            save_user_data(email, users[email])
             
             registrations[email]['credentials_sent'] = True
             registrations[email]['credentials_sent_at'] = datetime.now().isoformat()
@@ -3905,8 +3892,8 @@ def admin_resend_credentials():
     email = request.json.get('email')
     
     # Try to find user in both users and registrations
-    users = load_json_db(USERS_FILE)
-    registrations = load_json_db(REGISTRATIONS_FILE)
+    users = load_users_data()
+    registrations = load_registrations_data()
     
     user_data = None
     password = None
@@ -4157,18 +4144,18 @@ def admin_update_password():
         return jsonify({'status': 'error', 'message': 'Email and password required'}), 400
     
     # Update in registrations
-    registrations = load_json_db(REGISTRATIONS_FILE)
+    registrations = load_registrations_data()
     if email in registrations:
         registrations[email]['generated_password'] = new_password
         save_json_db(REGISTRATIONS_FILE, registrations)
     
     # Update in users if they exist
-    users = load_json_db(USERS_FILE)
+    users = load_users_data()
     if email in users:
         users[email]['password'] = new_password
         # Reset password expiry to 30 days from now
         users[email]['password_expiry'] = (datetime.now() + timedelta(days=30)).isoformat()
-        save_json_db(USERS_FILE, users)
+        save_user_data(email, users[email])
         
         # Send email if requested
         if send_email_flag:
@@ -4220,13 +4207,13 @@ def admin_delete_user():
         return jsonify({'status': 'error', 'message': 'Email required'}), 400
     
     # Delete from users
-    users = load_json_db(USERS_FILE)
+    users = load_users_data()
     if email in users:
         del users[email]
-        save_json_db(USERS_FILE, users)
+        save_user_data(email, users[email])
     
     # Delete from registrations
-    registrations = load_json_db(REGISTRATIONS_FILE)
+    registrations = load_registrations_data()
     if email in registrations:
         del registrations[email]
         save_json_db(REGISTRATIONS_FILE, registrations)
@@ -4255,7 +4242,7 @@ def admin_freeze_user():
         return jsonify({'status': 'error', 'message': 'Email required'}), 400
     
     # Update user status
-    users = load_json_db(USERS_FILE)
+    users = load_users_data()
     if email not in users:
         return jsonify({'status': 'error', 'message': 'User not found'}), 404
     
@@ -4263,7 +4250,7 @@ def admin_freeze_user():
     users[email]['frozen_at'] = datetime.now().isoformat()
     users[email]['freeze_reason'] = reason
     users[email]['frozen_by'] = session.get(f'user_email_{ip_address}')
-    save_json_db(USERS_FILE, users)
+    save_user_data(email, users[email])
     
     # Log the action
     log_admin_action(ip_address, 'user_freeze', {
@@ -4288,7 +4275,7 @@ def admin_unfreeze_user():
         return jsonify({'status': 'error', 'message': 'Email required'}), 400
     
     # Update user status
-    users = load_json_db(USERS_FILE)
+    users = load_users_data()
     if email not in users:
         return jsonify({'status': 'error', 'message': 'User not found'}), 404
     
@@ -4305,7 +4292,7 @@ def admin_unfreeze_user():
         'frozen_by': users[email].get('frozen_by'),
         'unfrozen_by': session.get(f'user_email_{ip_address}')
     })
-    save_json_db(USERS_FILE, users)
+    save_user_data(email, users[email])
     
     # Log the action
     log_admin_action(ip_address, 'user_unfreeze', {
@@ -4330,7 +4317,7 @@ def admin_edit_user():
         return jsonify({'status': 'error', 'message': 'Email required'}), 400
     
     # Update user
-    users = load_json_db(USERS_FILE)
+    users = load_users_data()
     if email not in users:
         return jsonify({'status': 'error', 'message': 'User not found'}), 404
     
@@ -4362,7 +4349,7 @@ def admin_edit_user():
     
     users[email]['last_modified'] = datetime.now().isoformat()
     users[email]['modified_by'] = session.get(f'user_email_{ip_address}')
-    save_json_db(USERS_FILE, users)
+    save_user_data(email, users[email])
     
     # Log the action
     log_admin_action(ip_address, 'user_edit', {
@@ -4382,8 +4369,8 @@ def admin_get_all_users():
     if not session.get(f'is_admin_{ip_address}'):
         return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
     
-    users = load_json_db(USERS_FILE)
-    registrations = load_json_db(REGISTRATIONS_FILE)
+    users = load_users_data()
+    registrations = load_registrations_data()
     
     # Combine users and registrations
     all_users = []
@@ -4619,7 +4606,7 @@ def account():
     account_type = session.get(f'account_type_{ip_address}', 'standard')
     
     # Get user creation date if available
-    users = load_json_db(USERS_FILE)
+    users = load_users_data()
     member_since = 'January 2024'
     if email in users:
         created_date = users[email].get('created_at', '')
@@ -4652,10 +4639,10 @@ def save_theme():
     # Save theme preference to user's data
     email = session.get(f'user_email_{ip_address}')
     if email:
-        users = load_json_db(USERS_FILE)
+        users = load_users_data()
         if email in users:
             users[email]['theme_preference'] = theme
-            save_json_db(USERS_FILE, users)
+            save_user_data(email, users[email])
     
     # Also store in session
     session[f'theme_{ip_address}'] = theme
@@ -4693,10 +4680,10 @@ def admin_heartbeat():
     # Update last activity in users file
     user_email = session.get(f'user_email_{ip_address}')
     if user_email:
-        users = load_json_db(USERS_FILE)
+        users = load_users_data()
         if user_email in users:
             users[user_email]['last_activity'] = datetime.now().isoformat()
-            save_json_db(USERS_FILE, users)
+            save_user_data(email, users[email])
     
     return jsonify({'status': 'success', 'timestamp': datetime.now().isoformat()})
 
@@ -4711,8 +4698,8 @@ def admin_system_stats():
     
     # Gather system stats
     stats = {
-        'total_users': len(load_json_db(USERS_FILE)),
-        'total_registrations': len(load_json_db(REGISTRATIONS_FILE)),
+        'total_users': len(load_users_data()),
+        'total_registrations': len(load_registrations_data()),
         'blocked_ips': len([ip for ip, data in load_lockouts().items() 
                           if data.get('is_banned') or (data.get('locked_until') and 
                           datetime.fromisoformat(data['locked_until']) > datetime.now())]),
@@ -4736,8 +4723,8 @@ def admin_export_data():
     
     # Compile all data
     export_data = {
-        'users': load_json_db(USERS_FILE),
-        'registrations': load_json_db(REGISTRATIONS_FILE),
+        'users': load_users_data(),
+        'registrations': load_registrations_data(),
         'lockouts': load_lockouts(),
         'login_attempts': load_json_db(LOGIN_ATTEMPTS_FILE),
         'admin_actions': load_json_db(ADMIN_ACTIONS_FILE),
@@ -4867,7 +4854,7 @@ def securitization_engine():
     
     # Get user's account type
     username = session.get(f'username_{ip_address}')
-    users = load_json_db(USERS_FILE)
+    users = load_users_data()
     account_type = 'external'  # Default
     
     if username in users:
@@ -4900,7 +4887,7 @@ def permutation_engine():
     
     # Get user's account type
     username = session.get(f'username_{ip_address}')
-    users = load_json_db(USERS_FILE)
+    users = load_users_data()
     account_type = 'external'  # Default
     
     if username in users:
@@ -4931,7 +4918,7 @@ def project_specifications():
     # Get user info
     user_email = session.get(f'user_email_{ip_address}')
     is_admin = session.get(f'is_admin_{ip_address}', False)
-    users = load_json_db(USERS_FILE)
+    users = load_users_data()
     
     # Check if user is external or admin (both can access this)
     account_type = 'external'
@@ -4983,7 +4970,7 @@ def submit_project_specification():
     is_admin = session.get(f'is_admin_{ip_address}', False)
     
     # Get account type
-    users = load_json_db(USERS_FILE)
+    users = load_users_data()
     account_type = 'external'
     if user_email in users:
         account_type = users[user_email].get('account_type', 'external')
@@ -5085,7 +5072,7 @@ def upload_excel_specifications():
     is_admin = session.get(f'is_admin_{ip_address}', False)
     
     # Get account type
-    users = load_json_db(USERS_FILE)
+    users = load_users_data()
     account_type = 'external'
     if user_email in users:
         account_type = users[user_email].get('account_type', 'external')
