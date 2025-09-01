@@ -824,7 +824,7 @@ def send_email(to_email, subject, html_content, retry_count=1):
                 print(f"[EMAIL] Sending message...")
                 server.send_message(msg)
                 server.quit()
-                print(f"[EMAIL SUCCESS] ✅ Sent to {to_email} - Subject: {subject}")
+                print(f"[EMAIL SUCCESS] Sent to {to_email} - Subject: {subject}")
                 return True
             finally:
                 try:
@@ -833,13 +833,13 @@ def send_email(to_email, subject, html_content, retry_count=1):
                     pass  # Ignore cleanup errors
                     
         except smtplib.SMTPAuthenticationError as e:
-            print(f"[EMAIL ERROR] ❌ Authentication failed for {EMAIL_CONFIG['sender_email']}: {e}")
+            print(f"[EMAIL ERROR] Authentication failed for {EMAIL_CONFIG['sender_email']}: {e}")
             print(f"[EMAIL ERROR] Check app password in email_config.py")
             break  # Don't retry auth errors
         except smtplib.SMTPException as e:
-            print(f"[EMAIL ERROR] ❌ SMTP error on attempt {attempt + 1}: {e}")
+            print(f"[EMAIL ERROR] SMTP error on attempt {attempt + 1}: {e}")
         except Exception as e:
-            print(f"[EMAIL ERROR] ❌ Unexpected error on attempt {attempt + 1}: {type(e).__name__}: {e}")
+            print(f"[EMAIL ERROR] Unexpected error on attempt {attempt + 1}: {type(e).__name__}: {e}")
             import traceback
             traceback.print_exc()
             
