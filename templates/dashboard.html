@@ -5355,10 +5355,171 @@
         const gridElement = document.getElementById('projects-grid');
         gridElement.innerHTML = '';
 
+        // Render series first
+        seriesData.forEach((series, seriesIndex) => {
+            const seriesCard = createSeriesCard(series, seriesIndex);
+            gridElement.appendChild(seriesCard);
+        });
+
+        // Then render standalone projects
         projectsData.forEach((project, index) => {
             const projectCard = createProjectCard(project, index);
             gridElement.appendChild(projectCard);
         });
+    }
+    
+    // Create series card with projects
+    function createSeriesCard(series, seriesIndex) {
+        const card = document.createElement('div');
+        card.className = 'series-card';
+        card.dataset.seriesId = series.id;
+        card.dataset.index = seriesIndex;
+        
+        const colorGradients = {
+            purple: 'linear-gradient(135deg, #a855f7, #9333ea)',
+            blue: 'linear-gradient(135deg, #60a5fa, #3b82f6)',
+            green: 'linear-gradient(135deg, #34d399, #10b981)',
+            orange: 'linear-gradient(135deg, #fb923c, #f97316)',
+            pink: 'linear-gradient(135deg, #f472b6, #ec4899)'
+        };
+        
+        const gradient = colorGradients[series.color] || colorGradients.purple;
+        
+        card.style.cssText = `
+            background: linear-gradient(135deg, #0a0e27, #020617);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            border-image: ${gradient} 1;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 0.75rem;
+            position: relative;
+            grid-column: span 2;
+            min-height: 250px;
+        `;
+        
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 8px; height: 40px; background: ${gradient}; border-radius: 4px;"></div>
+                    <div>
+                        <h3 style="color: white; font-size: 1.25rem; font-weight: 700; margin: 0;">${series.name}</h3>
+                        <p style="color: #94a3b8; font-size: 0.875rem; margin: 0.25rem 0 0 0;">${series.description || 'No description'}</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button onclick="createNewProject('${series.id}')" style="background: ${gradient}; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                        <i class="fas fa-plus"></i> Add Project
+                    </button>
+                    <button onclick="toggleSeriesExpand('${series.id}')" style="background: rgba(255, 255, 255, 0.1); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                        <i class="fas fa-chevron-${series.expanded ? 'up' : 'down'}"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="series-projects" style="display: ${series.expanded ? 'grid' : 'none'}; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                ${series.projects.length > 0 ? series.projects.map((project, idx) => `
+                    <div class="project-in-series" data-project-id="${project.id}" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1rem; cursor: move;">
+                        <div style="margin-bottom: 1rem;">
+                            <h4 style="color: #60a5fa; font-size: 1rem; margin: 0 0 0.5rem 0;">${project.title}</h4>
+                            <p style="color: #94a3b8; font-size: 0.875rem; margin: 0;">${project.description}</p>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <span class="status-badge" style="background: ${getStatusColor(project.status)}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem;">
+                                ${project.status}
+                            </span>
+                            <span style="color: #60a5fa; font-weight: 600;">${formatCurrency(project.value)}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                <span style="color: #94a3b8; font-size: 0.75rem;">Progress</span>
+                                <span style="color: #60a5fa; font-size: 0.75rem;">${project.progress}%</span>
+                            </div>
+                            <div style="background: rgba(96, 165, 250, 0.1); border-radius: 4px; height: 6px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #60a5fa, #3b82f6); height: 100%; width: ${project.progress}%; transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="showProjectEditModal('${project.id}')" style="flex: 1; background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="deleteProject('${project.id}', '${series.id}')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('') : `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; border: 2px dashed rgba(96, 165, 250, 0.2); border-radius: 12px;">
+                        <p style="color: #64748b;">No projects in this series yet</p>
+                        <button onclick="createNewProject('${series.id}')" style="margin-top: 1rem; background: ${gradient}; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                            <i class="fas fa-plus"></i> Add First Project
+                        </button>
+                    </div>
+                `}
+            </div>
+        `;
+        
+        return card;
+    }
+    
+    // Get status color helper
+    function getStatusColor(status) {
+        const colors = {
+            'draft': 'rgba(75, 85, 99, 0.8)',
+            'in-progress': 'rgba(96, 165, 250, 0.8)',
+            'active': 'rgba(34, 197, 94, 0.8)',
+            'completed': 'rgba(168, 85, 247, 0.8)'
+        };
+        return colors[status] || colors['draft'];
+    }
+    
+    // Toggle series expand/collapse
+    function toggleSeriesExpand(seriesId) {
+        const series = seriesData.find(s => s.id === seriesId);
+        if (series) {
+            series.expanded = !series.expanded;
+            renderProjects();
+            saveSeriesData();
+        }
+    }
+    
+    // Delete project
+    function deleteProject(projectId, seriesId = null) {
+        if (!confirm('Are you sure you want to delete this project?')) return;
+        
+        if (seriesId) {
+            const series = seriesData.find(s => s.id === seriesId);
+            if (series) {
+                series.projects = series.projects.filter(p => p.id !== projectId);
+            }
+        } else {
+            projectsData = projectsData.filter(p => p.id !== projectId);
+        }
+        
+        renderProjects();
+        updateProjectStats();
+        saveSeriesData();
+    }
+    
+    // Save series data
+    async function saveSeriesData() {
+        try {
+            // Save to localStorage for persistence
+            localStorage.setItem('seriesData', JSON.stringify(seriesData));
+            localStorage.setItem('projectsData', JSON.stringify(projectsData));
+            
+            // Optionally save to backend
+            await fetch('/api/series', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ series: seriesData, projects: projectsData })
+            });
+        } catch (error) {
+            console.error('Error saving series data:', error);
+        }
     }
 
     // Create a project card element
@@ -5825,6 +5986,7 @@
             totalValue: 0
         };
 
+        // Count standalone projects
         projectsData.forEach(project => {
             switch (project.status) {
                 case 'active':
@@ -5838,6 +6000,24 @@
                     break;
             }
             stats.totalValue += project.value || 0;
+        });
+        
+        // Count projects in series
+        seriesData.forEach(series => {
+            series.projects.forEach(project => {
+                switch (project.status) {
+                    case 'active':
+                        stats.active++;
+                        break;
+                    case 'in-progress':
+                        stats.inProgress++;
+                        break;
+                    case 'draft':
+                        stats.drafts++;
+                        break;
+                }
+                stats.totalValue += project.value || 0;
+            });
         });
 
         document.getElementById('active-count').textContent = stats.active;
