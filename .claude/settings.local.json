@@ -72,7 +72,8 @@
       "Bash(live.bat)",
       "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\test_fx_rates.py\")",
       "Bash(test:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(start https://vercel.com/marcus-moores-projects/atlasnexus-securitization)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"

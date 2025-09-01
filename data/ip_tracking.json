@@ -1,7 +1,7 @@
 {
   "127.0.0.1": {
     "first_seen": "2025-09-01T13:07:45.998408",
-    "last_seen": "2025-09-01T20:10:02.734143",
+    "last_seen": "2025-09-02T00:15:39.835644",
     "pages_visited": [
       {
         "page": "gate1",
@@ -54,9 +54,13 @@
       {
         "page": "gate1",
         "timestamp": "2025-09-01T20:10:02.734177"
+      },
+      {
+        "page": "gate1",
+        "timestamp": "2025-09-02T00:15:39.835653"
       }
     ],
-    "total_visits": 13,
+    "total_visits": 14,
     "user_emails": [
       "spikemaz8@aol.com"
     ],

@@ -6464,20 +6464,24 @@ if (window.showSection) {
         const statsElement = document.getElementById('project-stats');
 
         try {
+            console.log('Loading projects from API...');
+            
             // Only show loading spinner on first load or explicit request
-            if (showLoading && !window.projectsLoadedOnce) {
+            if (showLoading && loadingElement) {
                 loadingElement.style.display = 'block';
-                gridElement.style.display = 'none';
-                emptyElement.style.display = 'none';
-                statsElement.style.display = 'none';
+                if (gridElement) gridElement.style.display = 'none';
+                if (emptyElement) emptyElement.style.display = 'none';
+                if (statsElement) statsElement.style.display = 'none';
             }
 
             // Fetch both series and projects from the backend
             const response = await fetch('/api/series', {
                 credentials: 'include'  // Include cookies for session
             });
+            
             if (!response.ok) {
-                throw new Error('Failed to load data');
+                console.error('API response not OK:', response.status);
+                throw new Error(`Failed to load data: ${response.status}`);
             }
 
             const data = await response.json();
@@ -6526,17 +6530,24 @@ if (window.showSection) {
             
         } catch (error) {
             console.error('Error loading data from server:', error);
-            loadingElement.style.display = 'none';
-            
-            // Show error message to user
-            alert('Failed to load your projects. Please refresh the page or check your connection.');
+            if (loadingElement) loadingElement.style.display = 'none';
             
             // Initialize with empty data
             projectsData = [];
             seriesData = [];
             
-            // Show empty state
-            emptyElement.style.display = 'block';
+            // Show empty state if element exists
+            if (emptyElement) {
+                emptyElement.style.display = 'block';
+            }
+            if (gridElement) {
+                gridElement.style.display = 'none';
+            }
+            
+            // Only show alert for real errors, not on initial load
+            if (window.projectsLoadedOnce) {
+                alert('Failed to load your projects. Please refresh the page or check your connection.');
+            }
         }
     }
 
@@ -7802,10 +7813,17 @@ if (window.showSection) {
         // Override the showSection function to initialize projects
         const originalShowSection = window.showSection;
         window.showSection = function(sectionId) {
-            originalShowSection(sectionId);
-            if (sectionId === 'projects') {
+            if (originalShowSection) {
+                originalShowSection(sectionId);
+            }
+            if (sectionId === 'projects' && !window.projectsInitialized) {
                 // Always reload from cloud when switching to projects tab
+                console.log('Initializing projects section...');
                 setTimeout(initializeProjects, 100);
+                window.projectsInitialized = true;
+            } else if (sectionId === 'projects') {
+                // Just refresh if already initialized
+                loadProjects(false);
             }
         };
         
@@ -8211,10 +8229,11 @@ if (window.showSection) {
         alert('Template loaded with default values');
     }
     
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function() {
+    // Initialize securitization on page load
+    window.addEventListener('load', function() {
         // Auto-fetch projects if on securitization section
         if (window.location.hash === '#securitization') {
+            console.log('Loading securitization projects...');
             fetchProjects();
         }
     });
