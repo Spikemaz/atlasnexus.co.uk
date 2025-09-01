@@ -825,13 +825,17 @@ def generate_secure_password():
     
     return f"{word}{digits}"
 
-def send_email(to_email, subject, html_content, retry_count=1):
-    """Send email notification immediately with minimal retry"""
-    print(f"[EMAIL] Attempting to send email to {to_email} with subject: {subject[:50]}...")
+def send_email(to_email, subject, html_content, retry_count=2):
+    """Send email notification with improved logging and error handling"""
+    print(f"\n[EMAIL] ===== Email Send Request =====")
+    print(f"[EMAIL] To: {to_email}")
+    print(f"[EMAIL] Subject: {subject}")
+    print(f"[EMAIL] Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     if not EMAIL_CONFIG['sender_password']:
-        print(f"[EMAIL] No password configured - Would send to {to_email}: {subject}")
-        return True  # Simulate success in development
+        print(f"[EMAIL WARNING] No password configured in email_config.py")
+        print(f"[EMAIL] Would send to {to_email}: {subject}")
+        return False  # Return False when not configured
     
     print(f"[EMAIL] Using sender: {EMAIL_CONFIG['sender_email']}, SMTP: {EMAIL_CONFIG['smtp_server']}:{EMAIL_CONFIG['smtp_port']}")
     
@@ -858,7 +862,10 @@ def send_email(to_email, subject, html_content, retry_count=1):
                 print(f"[EMAIL] Sending message...")
                 server.send_message(msg)
                 server.quit()
-                print(f"[EMAIL SUCCESS] Sent to {to_email} - Subject: {subject}")
+                print(f"[EMAIL SUCCESS] ✅ Email sent successfully!")
+                print(f"[EMAIL] Recipient: {to_email}")
+                print(f"[EMAIL] Subject: {subject}")
+                print(f"[EMAIL] ===== Email Send Complete =====\n")
                 return True
             finally:
                 try:
@@ -3798,6 +3805,29 @@ def admin_approve_user_advanced():
     })
     save_json_db(ADMIN_ACTIONS_FILE, admin_actions)
     
+    # Send admin notification about the approval
+    admin_notification_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                <h2 style="color: #3b82f6;">User Approved</h2>
+                <p>An administrator has approved a new user account.</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p><strong>User Email:</strong> {email}</p>
+                    <p><strong>Account Type:</strong> {account_type.upper()}</p>
+                    <p><strong>Email Verified:</strong> {'Yes' if email_verified else 'No'}</p>
+                    <p><strong>Approved By:</strong> {session.get(f'user_email_{ip_address}', 'Admin')}</p>
+                    <p><strong>Approved At:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                </div>
+            </div>
+        </body>
+    </html>
+    """
+    
+    # Send admin notification
+    admin_notif_sent = send_email(EMAIL_CONFIG['admin_email'], f'User Approved: {email}', admin_notification_html)
+    print(f"[APPROVAL] Admin notification sent: {admin_notif_sent} to {EMAIL_CONFIG['admin_email']}")
+    
     # Only send credentials if email is verified
     if email_verified:
         base_url = get_base_url()
@@ -3820,8 +3850,10 @@ def admin_approve_user_advanced():
         </html>
         """
         
-        # Try to send email
+        # Try to send email with better error handling
+        print(f"[APPROVAL] Attempting to send credentials to {email}...")
         email_sent = send_email(email, 'AtlasNexus - Account Approved', email_html)
+        print(f"[APPROVAL] Credentials email sent: {email_sent} to {email}")
         
         # Update credentials_sent status
         if email_sent:
@@ -4794,7 +4826,7 @@ def admin_heartbeat():
         users = load_users_data()
         if user_email in users:
             users[user_email]['last_activity'] = datetime.now().isoformat()
-            save_user_data(email, users[email])
+            save_user_data(user_email, users[user_email])
     
     return jsonify({'status': 'success', 'timestamp': datetime.now().isoformat()})
 
