@@ -888,7 +888,7 @@
     </button>
 
     <!-- Main Dashboard Content -->
-    <div class="main-container" id="main-dashboard" style="display: none; margin-top: 165px; transition: margin-top 0.3s ease;">
+    <div class="main-container" id="main-dashboard" style="display: block; margin-top: 165px; transition: margin-top 0.3s ease;">
         <!-- Executive Dashboard Header -->
         <div class="row mb-4 fade-in-up">
             <div class="col-12">
@@ -4138,8 +4138,13 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM loaded, initializing...');
         
-        // Show dashboard section by default
-        showSection('dashboard');
+        // Dashboard is already visible by default, just update the nav button
+        const dashboardBtn = document.querySelector('.nav-btn[data-section="dashboard"]');
+        if (dashboardBtn) {
+            dashboardBtn.style.background = 'linear-gradient(135deg, #1e3a8a, #1e40af)';
+            dashboardBtn.style.color = 'white';
+            dashboardBtn.style.border = '1px solid #3b82f6';
+        }
         
         // Trigger animations only once on initial page load
         setTimeout(() => {
