@@ -30,7 +30,7 @@ try:
     from cloud_database import load_users as db_load_users, save_users as db_save_users
     from cloud_database import load_registrations as db_load_registrations, save_registrations as db_save_registrations
     from cloud_database import load_admin_actions as db_load_admin_actions, add_admin_action as db_add_admin_action
-    from cloud_database import reinitialize_db
+    from cloud_database import reinitialize_db, cloud_db
     
     # Don't check connection at import time - Vercel loads env vars after imports
     CLOUD_DB_AVAILABLE = False
