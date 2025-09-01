@@ -2537,14 +2537,38 @@
         </div>
     </div>
 
-    <!-- Advanced Permutation Engine Section -->
+    <!-- Permutation Engine V2 Section -->
     <div id="permutation-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
-        <div style="max-width: 1800px; margin: 0 auto;">
+        <div style="max-width: 1400px; margin: 0 auto;">
+            <!-- Step Navigation -->
+            <div style="display: flex; gap: 1rem; margin-bottom: 2rem; padding: 1rem; background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border-radius: 12px; border: 1px solid rgba(96, 165, 250, 0.2);">
+                <div class="perm-step-btn perm-active" onclick="goToPermStep(1)" style="flex: 1; padding: 1rem; background: rgba(26, 32, 46, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(96, 165, 250, 0.2); display: flex; align-items: center; justify-content: center; font-weight: bold;">1</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Import Project</div>
+                    <div style="font-size: 0.75rem; opacity: 0.8; text-align: center;">Load fixed inputs from project</div>
+                </div>
+                <div class="perm-step-btn" onclick="goToPermStep(2)" style="flex: 1; padding: 1rem; background: rgba(26, 32, 46, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(96, 165, 250, 0.2); display: flex; align-items: center; justify-content: center; font-weight: bold;">2</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Calculated Fields</div>
+                    <div style="font-size: 0.75rem; opacity: 0.8; text-align: center;">View auto-calculated values</div>
+                </div>
+                <div class="perm-step-btn" onclick="goToPermStep(3)" style="flex: 1; padding: 1rem; background: rgba(26, 32, 46, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(96, 165, 250, 0.2); display: flex; align-items: center; justify-content: center; font-weight: bold;">3</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Variable Inputs</div>
+                    <div style="font-size: 0.75rem; opacity: 0.8; text-align: center;">Set ranges for permutations</div>
+                </div>
+                <div class="perm-step-btn" onclick="goToPermStep(4)" style="flex: 1; padding: 1rem; background: rgba(26, 32, 46, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(96, 165, 250, 0.2); display: flex; align-items: center; justify-content: center; font-weight: bold;">4</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Run Permutations</div>
+                    <div style="font-size: 0.75rem; opacity: 0.8; text-align: center;">Generate & explore results</div>
+                </div>
+            </div>
+
             <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
                 <h2 style="color: #60a5fa; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">
-                    <i class="fas fa-cogs"></i> Advanced Permutation Engine
+                    <i class="fas fa-cogs"></i> Permutation Engine V2
                 </h2>
-                <p style="color: #94a3b8; text-align: center; margin-bottom: 2rem;">80+ Financial Parameters • Manual/Range/Boundary Modes • Real-time Generation</p>
+                <p style="color: #94a3b8; text-align: center; margin-bottom: 2rem;">Simplified 4-Step Workflow • Import → Calculate → Configure → Generate</p>
 
                 <!-- Control Bar with Project Import -->
                 <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
@@ -5835,17 +5859,20 @@
     }
     
     // Load projects from API
-    async function loadProjects() {
+    async function loadProjects(showLoading = true) {
         const loadingElement = document.getElementById('projects-loading');
         const gridElement = document.getElementById('projects-grid');
         const emptyElement = document.getElementById('projects-empty');
         const statsElement = document.getElementById('project-stats');
 
         try {
-            loadingElement.style.display = 'block';
-            gridElement.style.display = 'none';
-            emptyElement.style.display = 'none';
-            statsElement.style.display = 'none';
+            // Only show loading spinner on first load or explicit request
+            if (showLoading && !window.projectsLoadedOnce) {
+                loadingElement.style.display = 'block';
+                gridElement.style.display = 'none';
+                emptyElement.style.display = 'none';
+                statsElement.style.display = 'none';
+            }
 
             // Fetch both series and projects from the backend
             const response = await fetch('/api/series', {
@@ -5875,7 +5902,15 @@
                 }
             }
             
-            loadingElement.style.display = 'none';
+            // Hide loading smoothly
+            if (window.projectsLoadedOnce) {
+                loadingElement.style.display = 'none';
+            } else {
+                // First load - fade out loading
+                setTimeout(() => {
+                    loadingElement.style.display = 'none';
+                }, 100);
+            }
             
             // Show empty state only if both projects and series are empty
             if (projectsData.length === 0 && seriesData.length === 0) {
@@ -5886,6 +5921,11 @@
                 renderProjects();
                 updateProjectStats();
             }
+            
+            // Mark as loaded
+            window.projectsLoadedOnce = true;
+            window.lastProjectsLoad = Date.now();
+            
         } catch (error) {
             console.error('Error loading data from server:', error);
             loadingElement.style.display = 'none';
@@ -7472,11 +7512,19 @@
         // Auto-reload data when page becomes visible (user returns to tab)
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
-                // Page is now visible - reload if on projects section
+                // Page is now visible - only reload if been away for a while
                 const projectsSection = document.getElementById('projects-section');
                 if (projectsSection && projectsSection.style.display !== 'none') {
-                    console.log('Page became visible, reloading projects from cloud...');
-                    loadProjects();
+                    const now = Date.now();
+                    const lastLoad = window.lastProjectsLoad || 0;
+                    const timeSinceLastLoad = now - lastLoad;
+                    
+                    // Only reload if it's been more than 30 seconds
+                    if (timeSinceLastLoad > 30000) {
+                        console.log('Page became visible after 30s, refreshing data...');
+                        loadProjects(false); // Don't show loading spinner
+                        window.lastProjectsLoad = now;
+                    }
                 }
             }
         });
@@ -7485,12 +7533,20 @@
         window.addEventListener('focus', function() {
             const projectsSection = document.getElementById('projects-section');
             if (projectsSection && projectsSection.style.display !== 'none') {
-                console.log('Window focused, checking for updates...');
-                // Debounce to avoid multiple reloads
-                clearTimeout(window.reloadTimeout);
-                window.reloadTimeout = setTimeout(() => {
-                    loadProjects();
-                }, 500);
+                const now = Date.now();
+                const lastLoad = window.lastProjectsLoad || 0;
+                const timeSinceLastLoad = now - lastLoad;
+                
+                // Only reload if it's been more than 30 seconds
+                if (timeSinceLastLoad > 30000) {
+                    console.log('Window focused after 30s, refreshing data...');
+                    // Debounce to avoid multiple reloads
+                    clearTimeout(window.reloadTimeout);
+                    window.reloadTimeout = setTimeout(() => {
+                        loadProjects(false); // Don't show loading spinner
+                        window.lastProjectsLoad = Date.now();
+                    }, 500);
+                }
             }
         });
     });

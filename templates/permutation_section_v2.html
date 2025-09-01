@@ -1,0 +1,175 @@
+    <!-- Permutation Engine V2 Section (Simplified) -->
+    <div id="permutation-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
+        <div style="max-width: 1400px; margin: 0 auto;">
+            
+            <!-- Step Navigation -->
+            <div style="display: flex; gap: 1rem; margin-bottom: 2rem; padding: 1rem; background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border-radius: 12px; border: 1px solid rgba(96, 165, 250, 0.2);">
+                <div id="perm-step-1" class="perm-step-btn perm-active" onclick="goToPermStep(1)" style="flex: 1; padding: 1rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); border: 1px solid #60a5fa; border-radius: 8px; color: white; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <div style="width: 30px; height: 30px; border-radius: 50%; background: white; color: #60a5fa; display: flex; align-items: center; justify-content: center; font-weight: bold;">1</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Import Project</div>
+                    <div style="font-size: 0.75rem; opacity: 0.9; text-align: center;">Load fixed inputs</div>
+                </div>
+                <div id="perm-step-2" class="perm-step-btn" onclick="goToPermStep(2)" style="flex: 1; padding: 1rem; background: rgba(26, 32, 46, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(96, 165, 250, 0.2); display: flex; align-items: center; justify-content: center; font-weight: bold;">2</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Calculated Fields</div>
+                    <div style="font-size: 0.75rem; opacity: 0.8; text-align: center;">Auto-calculated values</div>
+                </div>
+                <div id="perm-step-3" class="perm-step-btn" onclick="goToPermStep(3)" style="flex: 1; padding: 1rem; background: rgba(26, 32, 46, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(96, 165, 250, 0.2); display: flex; align-items: center; justify-content: center; font-weight: bold;">3</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Variable Inputs</div>
+                    <div style="font-size: 0.75rem; opacity: 0.8; text-align: center;">Set ranges</div>
+                </div>
+                <div id="perm-step-4" class="perm-step-btn" onclick="goToPermStep(4)" style="flex: 1; padding: 1rem; background: rgba(26, 32, 46, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(96, 165, 250, 0.2); display: flex; align-items: center; justify-content: center; font-weight: bold;">4</div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Run & Explore</div>
+                    <div style="font-size: 0.75rem; opacity: 0.8; text-align: center;">Generate results</div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div style="background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 16px; padding: 2rem;">
+                
+                <!-- Step 1: Import Project -->
+                <div id="perm-content-1" class="perm-step-content" style="display: block;">
+                    <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">
+                        <i class="fas fa-database"></i> Step 1: Import Project Data
+                    </h3>
+                    <div style="background: rgba(15, 23, 42, 0.5); border-radius: 12px; padding: 1.5rem;">
+                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 1rem; margin-bottom: 1.5rem;">
+                            <select id="perm-project-select" style="padding: 0.75rem 1rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: #e2e8f0; font-size: 1rem;">
+                                <option value="">Select a project to import...</option>
+                            </select>
+                            <button onclick="importPermProject()" style="padding: 0.75rem 2rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                Import Fixed Inputs
+                            </button>
+                        </div>
+                        <div id="perm-fixed-inputs" style="display: none;">
+                            <h4 style="color: #60a5fa; margin-bottom: 1rem;">Fixed Inputs from Project</h4>
+                            <div id="perm-fixed-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Calculated Fields -->
+                <div id="perm-content-2" class="perm-step-content" style="display: none;">
+                    <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">
+                        <i class="fas fa-calculator"></i> Step 2: Auto-Calculated Fields
+                    </h3>
+                    <div id="perm-calculated-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;"></div>
+                </div>
+
+                <!-- Step 3: Variable Inputs -->
+                <div id="perm-content-3" class="perm-step-content" style="display: none;">
+                    <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">
+                        <i class="fas fa-sliders-h"></i> Step 3: Variable Input Ranges
+                    </h3>
+                    
+                    <!-- Financial Parameters -->
+                    <div style="background: rgba(15, 23, 42, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <h4 style="color: #60a5fa; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(96, 165, 250, 0.2); padding-bottom: 0.5rem;">Financial Parameters</h4>
+                        <div style="display: grid; gap: 1rem;">
+                            <div style="display: grid; grid-template-columns: 200px 150px 150px 100px; gap: 1rem; align-items: center;">
+                                <label style="color: #e2e8f0;">Gross Monthly Rent (£/kW)</label>
+                                <input type="number" id="rent-low" placeholder="Low" value="120" style="padding: 0.5rem 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: #e2e8f0;">
+                                <input type="number" id="rent-high" placeholder="High" value="220" style="padding: 0.5rem 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: #e2e8f0;">
+                                <div style="padding: 0.5rem 0.75rem; background: rgba(96, 165, 250, 0.1); border-radius: 6px; text-align: center; color: #94a3b8;">6 steps</div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 200px 150px 150px 100px; gap: 1rem; align-items: center;">
+                                <label style="color: #e2e8f0;">OPEX (%)</label>
+                                <input type="number" id="opex-low" placeholder="Low" value="15" style="padding: 0.5rem 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: #e2e8f0;">
+                                <input type="number" id="opex-high" placeholder="High" value="30" style="padding: 0.5rem 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: #e2e8f0;">
+                                <div style="padding: 0.5rem 0.75rem; background: rgba(96, 165, 250, 0.1); border-radius: 6px; text-align: center; color: #94a3b8;">4 steps</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Senior Debt Parameters -->
+                    <div style="background: rgba(15, 23, 42, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <h4 style="color: #60a5fa; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(96, 165, 250, 0.2); padding-bottom: 0.5rem;">Senior Debt Parameters</h4>
+                        <div style="display: grid; gap: 1rem;">
+                            <div style="display: grid; grid-template-columns: 200px 150px 150px 100px; gap: 1rem; align-items: center;">
+                                <label style="color: #e2e8f0;">Target DSCR</label>
+                                <input type="number" id="dscr-low" placeholder="Low" value="1.5" step="0.05" style="padding: 0.5rem 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: #e2e8f0;">
+                                <input type="number" id="dscr-high" placeholder="High" value="1.8" step="0.05" style="padding: 0.5rem 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: #e2e8f0;">
+                                <div style="padding: 0.5rem 0.75rem; background: rgba(96, 165, 250, 0.1); border-radius: 6px; text-align: center; color: #94a3b8;">7 steps</div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 200px 150px 150px 100px; gap: 1rem; align-items: center;">
+                                <label style="color: #e2e8f0;">Senior Coupon (%)</label>
+                                <input type="number" id="coupon-low" placeholder="Low" value="3.0" step="0.25" style="padding: 0.5rem 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: #e2e8f0;">
+                                <input type="number" id="coupon-high" placeholder="High" value="5.0" step="0.25" style="padding: 0.5rem 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: #e2e8f0;">
+                                <div style="padding: 0.5rem 0.75rem; background: rgba(96, 165, 250, 0.1); border-radius: 6px; text-align: center; color: #94a3b8;">9 steps</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Equity Parameters -->
+                    <div style="background: rgba(15, 23, 42, 0.3); border-radius: 12px; padding: 1.5rem;">
+                        <h4 style="color: #60a5fa; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(96, 165, 250, 0.2); padding-bottom: 0.5rem;">Equity Parameters</h4>
+                        <div style="display: grid; grid-template-columns: 200px 150px 150px 100px; gap: 1rem; align-items: center;">
+                            <label style="color: #e2e8f0;">Target Equity IRR (%)</label>
+                            <input type="number" id="irr-low" placeholder="Low" value="14" style="padding: 0.5rem 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: #e2e8f0;">
+                            <input type="number" id="irr-high" placeholder="High" value="19" style="padding: 0.5rem 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: #e2e8f0;">
+                            <div style="padding: 0.5rem 0.75rem; background: rgba(96, 165, 250, 0.1); border-radius: 6px; text-align: center; color: #94a3b8;">6 steps</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Run & Results -->
+                <div id="perm-content-4" class="perm-step-content" style="display: none;">
+                    <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">
+                        <i class="fas fa-rocket"></i> Step 4: Generate & Explore Results
+                    </h3>
+                    
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                        <button onclick="runPermutations()" style="padding: 1rem 2rem; background: linear-gradient(90deg, #10b981, #059669); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem;">
+                            Run All Permutations
+                        </button>
+                        <div style="display: flex; gap: 2rem; padding: 1rem; background: rgba(15, 23, 42, 0.5); border-radius: 8px; align-items: center;">
+                            <div>
+                                <div style="font-size: 0.8rem; color: #64748b;">Total Permutations</div>
+                                <div id="perm-total" style="font-size: 1.3rem; font-weight: bold; color: #e2e8f0;">0</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.8rem; color: #64748b;">Viable Options</div>
+                                <div id="perm-viable" style="font-size: 1.3rem; font-weight: bold; color: #10b981;">0</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.8rem; color: #64748b;">Best IRR</div>
+                                <div id="perm-best-irr" style="font-size: 1.3rem; font-weight: bold; color: #60a5fa;">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: rgba(96, 165, 250, 0.1);">
+                                    <th style="padding: 0.75rem; text-align: left; font-size: 0.85rem; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Scenario</th>
+                                    <th style="padding: 0.75rem; text-align: left; font-size: 0.85rem; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Rent (£/kW)</th>
+                                    <th style="padding: 0.75rem; text-align: left; font-size: 0.85rem; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">OPEX (%)</th>
+                                    <th style="padding: 0.75rem; text-align: left; font-size: 0.85rem; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">DSCR</th>
+                                    <th style="padding: 0.75rem; text-align: left; font-size: 0.85rem; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Senior Rate</th>
+                                    <th style="padding: 0.75rem; text-align: left; font-size: 0.85rem; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Equity IRR (%)</th>
+                                    <th style="padding: 0.75rem; text-align: left; font-size: 0.85rem; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Total Stack (£)</th>
+                                    <th style="padding: 0.75rem; text-align: left; font-size: 0.85rem; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Viability</th>
+                                </tr>
+                            </thead>
+                            <tbody id="perm-results-body">
+                                <!-- Results will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(96, 165, 250, 0.2);">
+                    <button id="perm-prev-btn" onclick="prevPermStep()" style="padding: 0.75rem 1.5rem; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: #60a5fa; cursor: pointer; font-weight: 600; display: none;">
+                        Previous
+                    </button>
+                    <button id="perm-next-btn" onclick="nextPermStep()" style="padding: 0.75rem 1.5rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        Next: View Calculated Fields
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
