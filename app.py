@@ -5067,26 +5067,74 @@ def account():
     # Get user information
     username = session.get(f'username_{ip_address}', 'User')
     email = session.get(f'user_email_{ip_address}', '')
-    account_type = session.get(f'account_type_{ip_address}', 'standard')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
     
-    # Get user creation date if available
+    # Determine account type based on email or session
+    if email:
+        if 'admin' in email.lower() or email == 'maz@atlasnexus.co.uk':
+            account_type = 'admin'
+        elif '@atlasnexus' in email.lower():
+            account_type = 'internal'
+        else:
+            account_type = 'external'
+    
+    # Get user data from database
     users = load_users_data()
     member_since = 'January 2024'
+    last_login = 'Today'
+    full_name = ''
+    company = ''
+    department = ''
+    phone = ''
+    location = ''
+    timezone = 'UTC'
+    
     if email in users:
-        created_date = users[email].get('created_at', '')
+        user_data = users[email]
+        created_date = user_data.get('created_at', '')
         if created_date:
             try:
                 dt = datetime.fromisoformat(created_date)
                 member_since = dt.strftime('%B %Y')
             except:
                 pass
+        
+        # Get personal information from user data
+        full_name = user_data.get('full_name', '')
+        company = user_data.get('company', '')
+        department = user_data.get('department', '')
+        phone = user_data.get('phone', '')
+        location = user_data.get('location', '')
+        timezone = user_data.get('timezone', 'UTC')
+        
+        # Get last login
+        last_login_dt = user_data.get('last_login', '')
+        if last_login_dt:
+            try:
+                dt = datetime.fromisoformat(last_login_dt)
+                today = datetime.now().date()
+                login_date = dt.date()
+                if login_date == today:
+                    last_login = f"Today at {dt.strftime('%H:%M')}"
+                elif login_date == today - timedelta(days=1):
+                    last_login = f"Yesterday at {dt.strftime('%H:%M')}"
+                else:
+                    last_login = dt.strftime('%B %d, %Y at %H:%M')
+            except:
+                last_login = 'Today'
     
     return render_template('account.html',
                          username=username,
                          email=email,
                          account_type=account_type,
                          member_since=member_since,
-                         last_login='Today')
+                         last_login=last_login,
+                         full_name=full_name,
+                         company=company,
+                         department=department,
+                         phone=phone,
+                         location=location,
+                         timezone=timezone)
 
 @app.route('/api/save-theme', methods=['POST'])
 def save_theme():

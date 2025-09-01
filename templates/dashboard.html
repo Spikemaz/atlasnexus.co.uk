@@ -2824,8 +2824,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const maxPermutations = parseInt(document.getElementById('MaxPermutations_108')?.value) || 150000;
         totalPermutations = Math.min(totalPermutations, maxPermutations);
         
-        document.getElementById('est-scenarios').textContent = totalPermutations.toLocaleString();
-        document.getElementById('est-time').textContent = '~' + Math.ceil(totalPermutations / 500) + 's';
+        const estScenariosEl = document.getElementById('est-scenarios');
+        const estTimeEl = document.getElementById('est-time');
+        if (estScenariosEl) estScenariosEl.textContent = totalPermutations.toLocaleString();
+        if (estTimeEl) estTimeEl.textContent = '~' + Math.ceil(totalPermutations / 500) + 's';
     };
     
     // Add listeners to all range inputs and checkboxes
@@ -8310,7 +8312,11 @@ if (window.showSection) {
     
     // Update permutation estimate in real-time
     function updatePermutationEstimate() {
-        if (!window.PermutationEngine) return;
+        // Early return if PermutationEngine is not available
+        if (!window.PermutationEngine || typeof window.PermutationEngine.getCurrentRanges !== 'function') {
+            console.log('PermutationEngine not available yet');
+            return;
+        }
         
         // Get current ranges from the engine
         const ranges = PermutationEngine.getCurrentRanges();
@@ -8322,7 +8328,8 @@ if (window.showSection) {
         });
         
         // Get minimum funding requirement
-        const minFunding = parseFloat(document.getElementById('min-funding-required').value) || 0;
+        const minFundingElement = document.getElementById('min-funding-required');
+        const minFunding = minFundingElement ? parseFloat(minFundingElement.value) || 0 : 0;
         
         // Estimate viable permutations based on constraints
         let viableEstimate = totalPermutations;
@@ -8363,7 +8370,8 @@ if (window.showSection) {
     
     // Run only viable permutations
     function runViablePermutations() {
-        const minFunding = parseFloat(document.getElementById('min-funding-required').value);
+        const minFundingElement = document.getElementById('min-funding-required');
+        const minFunding = minFundingElement ? parseFloat(minFundingElement.value) : 0;
         if (!minFunding) {
             alert('Please set the minimum funding required to filter viable permutations');
             return;
@@ -8564,11 +8572,14 @@ if (window.showSection) {
     
     // Initialize permutation engine on page load
     document.addEventListener('DOMContentLoaded', function() {
-        if (window.PermutationEngine) {
-            // Initialize with default values
-            updatePermutationEstimate();
-            console.log('Permutation Engine initialized with 83 inputs');
-        }
+        // Delay initialization to ensure all elements are loaded
+        setTimeout(function() {
+            if (window.PermutationEngine) {
+                // Initialize with default values
+                updatePermutationEstimate();
+                console.log('Permutation Engine initialized with 83 inputs');
+            }
+        }, 100);
     });
     </script>
     

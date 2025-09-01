@@ -137,16 +137,16 @@
             margin-bottom: 0.5rem;
         }
         
-        .theme-dark-blue .theme-preview {
-            background: linear-gradient(135deg, #1a1d2e, #0f3460);
-        }
-        
-        .theme-dark-green .theme-preview {
-            background: linear-gradient(135deg, #1a2e1a, #2d5a2d);
+        .theme-dark .theme-preview {
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
         }
         
         .theme-light .theme-preview {
             background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+        }
+        
+        .theme-blue .theme-preview {
+            background: linear-gradient(135deg, #1a1d2e, #0f3460);
         }
         
         .account-badge {
@@ -158,12 +158,17 @@
             text-transform: capitalize;
         }
         
-        .badge-premium {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #1a1a1a;
+        .badge-admin {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            color: white;
         }
         
-        .badge-standard {
+        .badge-internal {
+            background: linear-gradient(135deg, #4a9eff, #0066cc);
+            color: white;
+        }
+        
+        .badge-external {
             background: var(--primary-color-alpha);
             color: var(--primary-color);
         }
@@ -179,7 +184,7 @@
         }
     </style>
 </head>
-<body class="theme-dark-blue">
+<body class="theme-dark">
     <!-- Navigation -->
     <nav class="dashboard-nav">
         <div class="nav-container">
@@ -208,33 +213,83 @@
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
                     </svg>
-                    Profile Information
+                    Account Details
                 </h2>
                 <div class="account-info">
                     <div class="info-row">
                         <span class="info-label">Username</span>
-                        <span class="info-value">{{ username }}</span>
+                        <span class="info-value">{{ username|default('Not set') }}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Email</span>
-                        <span class="info-value">{{ email }}</span>
+                        <span class="info-value">{{ email|default('Not set') }}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Account Type</span>
-                        <span class="account-badge badge-{{ account_type }}">{{ account_type }}</span>
+                        <span class="account-badge badge-{{ account_type|default('external')|lower }}">{{ account_type|default('External')|upper }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Account Status</span>
+                        <span class="info-value" style="color: var(--success-color);">Active</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Member Since</span>
-                        <span class="info-value">{{ member_since }}</span>
+                        <span class="info-value">{{ member_since|default('Recently joined') }}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Last Login</span>
-                        <span class="info-value">{{ last_login }}</span>
+                        <span class="info-value">{{ last_login|default('Just now') }}</span>
                     </div>
                 </div>
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="editProfile()">Edit Profile</button>
-                    <button class="btn btn-secondary" onclick="changePassword()">Change Password</button>
+                    <button class="btn btn-secondary" onclick="requestPasswordReset()">Request Password Reset</button>
+                </div>
+                <div style="margin-top: 1rem; padding: 0.75rem; background: var(--warning-color-alpha, rgba(245, 158, 11, 0.1)); border-radius: 4px;">
+                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;">
+                        <strong>Note:</strong> Password reset links are sent via email and expire after 24 hours.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="account-section">
+                <h2>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <polyline points="17 11 19 13 23 9"></polyline>
+                    </svg>
+                    Personal Information
+                </h2>
+                <div class="account-info">
+                    <div class="info-row">
+                        <span class="info-label">Full Name</span>
+                        <span class="info-value">{{ full_name|default('Not provided') }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Company</span>
+                        <span class="info-value">{{ company|default('Not provided') }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Department</span>
+                        <span class="info-value">{{ department|default('Not provided') }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone</span>
+                        <span class="info-value">{{ phone|default('Not provided') }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Location</span>
+                        <span class="info-value">{{ location|default('Not provided') }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Timezone</span>
+                        <span class="info-value">{{ timezone|default('UTC') }}</span>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="updatePersonalInfo()">Update Information</button>
                 </div>
             </div>
 
@@ -256,17 +311,17 @@
                 </h2>
                 <p style="color: var(--text-secondary); margin-bottom: 1rem;">Choose your preferred theme</p>
                 <div class="theme-selector">
-                    <div class="theme-option theme-dark-blue active" onclick="changeTheme('dark-blue')">
+                    <div class="theme-option theme-dark active" onclick="changeTheme('dark')">
                         <div class="theme-preview"></div>
-                        <span>Dark Blue</span>
-                    </div>
-                    <div class="theme-option theme-dark-green" onclick="changeTheme('dark-green')">
-                        <div class="theme-preview"></div>
-                        <span>Dark Green</span>
+                        <span>Dark</span>
                     </div>
                     <div class="theme-option theme-light" onclick="changeTheme('light')">
                         <div class="theme-preview"></div>
                         <span>Light</span>
+                    </div>
+                    <div class="theme-option theme-blue" onclick="changeTheme('blue')">
+                        <div class="theme-preview"></div>
+                        <span>Blue</span>
                     </div>
                 </div>
             </div>
@@ -395,7 +450,7 @@
 
     <script>
         // Get current theme from localStorage or default
-        const currentTheme = localStorage.getItem('theme') || 'dark-blue';
+        const currentTheme = localStorage.getItem('theme') || 'dark';
         document.body.className = 'theme-' + currentTheme;
         
         // Update active theme option
@@ -430,8 +485,24 @@
             alert('Profile editing coming soon!');
         }
         
-        function changePassword() {
-            alert('Password change functionality coming soon!');
+        function requestPasswordReset() {
+            if (confirm('A password reset link will be sent to your registered email address. The link will expire in 24 hours. Continue?')) {
+                fetch('/api/request-password-reset', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Password reset email sent! Please check your inbox. The link will expire in 24 hours.');
+                    } else {
+                        alert('Failed to send reset email. Please try again later.');
+                    }
+                }).catch(error => {
+                    alert('An error occurred. Please try again later.');
+                });
+            }
         }
         
         function enableTwoFactor() {
@@ -444,6 +515,10 @@
         
         function saveNotifications() {
             alert('Notification preferences saved!');
+        }
+        
+        function updatePersonalInfo() {
+            alert('Personal information update form will be available soon. Please contact support to update your information.');
         }
     </script>
 </body>
