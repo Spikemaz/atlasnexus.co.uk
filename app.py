@@ -2223,6 +2223,7 @@ def verify_email():
                     'admin_approved': True,
                     'email_verified': True,
                     'account_type': account_type,
+                    'is_admin': False,  # CRITICAL: Set is_admin=False for all non-admin users
                     'login_count': 0,
                     'total_login_time': 0,
                     'last_login': None,
@@ -2498,8 +2499,9 @@ def auth():
                 session[f'user_email_{ip_address}'] = email
                 session[f'access_level_{ip_address}'] = 'user'
                 
-                # Check if user is actually an admin
-                if user.get('account_type') == 'admin':
+                # Check if user is actually an admin - MUST have both is_admin flag AND admin account_type
+                # This prevents any non-admin users from getting admin access
+                if user.get('is_admin', False) == True and user.get('account_type') == 'admin':
                     session[f'is_admin_{ip_address}'] = True
                 
                 return jsonify({'status': 'success', 'redirect': url_for('dashboard')})
@@ -2834,6 +2836,8 @@ def admin_process_approval():
             'password': password,
             'password_expiry': password_expiry.isoformat(),
             'admin_approved': True,
+            'account_type': account_type,
+            'is_admin': False,  # CRITICAL: Only admin accounts should have is_admin=True
             'email_verified': True,
             'login_count': 0,
             'total_login_time': 0,
@@ -3784,6 +3788,7 @@ def admin_approve_user_advanced():
             'admin_approved': True,
             'approved_at': datetime.now().isoformat(),
             'account_type': account_type,
+            'is_admin': False,  # CRITICAL: Only admin accounts should have is_admin=True
             'email_verified': True,
             'login_count': 0,
             'total_login_time': 0,
