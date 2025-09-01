@@ -3507,51 +3507,7 @@ def admin_comprehensive_data():
         # Get MongoDB storage stats
         mongodb_stats = cloud_db.get_database_stats()
         
-        # For DEMO: Always include sample data on production
-        if IS_VERCEL or IS_PRODUCTION:
-            # Add demo registration if none exist
-            if len(registrations) == 0:
-                registrations['demo@atlasnexus.com'] = {
-                    'email': 'demo@atlasnexus.com',
-                    'full_name': 'Demo User',
-                    'company_name': 'Atlas Demo Corp',
-                    'phone': '+44 20 1234 5678',
-                    'created_at': datetime.now().isoformat(),
-                    'email_verified': True,
-                    'admin_approved': False,
-                    'ip_address': '192.168.1.100'
-                }
-            
-            # Add demo admin actions if none exist
-            if len(admin_actions) == 0:
-                admin_actions = [
-                    {
-                        'action': 'user_login',
-                        'timestamp': datetime.now().isoformat(),
-                        'user': 'spikemaz8@aol.com',
-                        'details': 'Admin login successful'
-                    }
-                ]
-        
-        # For production, include a virtual admin user in the response
-        # This ensures admin panel works without modifying files
-        if not IS_LOCAL and 'spikemaz8@aol.com' not in users:
-            # Add virtual admin user to response only (not saved)
-            users['spikemaz8@aol.com'] = {
-                'email': 'spikemaz8@aol.com',
-                'username': 'Admin',
-                'full_name': 'Administrator',
-                'account_type': 'admin',
-                'created_at': '2025-08-20T01:39:46.674704',
-                'is_admin': True,
-                'admin_approved': True,
-                'password': 'SpikeMaz',
-                'password_expiry': (datetime.now() + timedelta(days=365)).isoformat(),
-                'email_verified': True,
-                'login_count': 0,
-                'last_login': datetime.now().isoformat()
-            }
-            # DO NOT SAVE - just include in response
+        # No demo data - using real cloud database only
         
         # Ensure admin_actions is a list
         if isinstance(admin_actions, dict):
