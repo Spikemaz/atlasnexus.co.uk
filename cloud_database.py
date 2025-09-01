@@ -104,7 +104,7 @@ class CloudDatabase:
     def load_users(self):
         """Load all users from database"""
         if not self.connected:
-            return self._load_local('users')
+            return {}
         
         try:
             users = {}
@@ -114,12 +114,13 @@ class CloudDatabase:
             return users
         except Exception as e:
             print(f"[DATABASE] Error loading users: {e}")
-            return self._load_local('users')
+            return {}
     
     def save_user(self, email, user_data):
         """Save or update a user"""
         if not self.connected:
-            return self._save_local_user(email, user_data)
+            print(f"[DATABASE] Not connected - cannot save user {email}")
+            return False
         
         try:
             user_data['email'] = email
@@ -139,7 +140,8 @@ class CloudDatabase:
             return False  # Never delete admin
         
         if not self.connected:
-            return self._delete_local_user(email)
+            print(f"[DATABASE] Not connected - cannot delete user {email}")
+            return False
         
         try:
             self.db.users.delete_one({'email': email})
@@ -151,7 +153,7 @@ class CloudDatabase:
     def load_registrations(self):
         """Load all registrations from database"""
         if not self.connected:
-            return self._load_local('registrations')
+            return {}
         
         try:
             registrations = {}
@@ -161,12 +163,13 @@ class CloudDatabase:
             return registrations
         except Exception as e:
             print(f"[DATABASE] Error loading registrations: {e}")
-            return self._load_local('registrations')
+            return {}
     
     def save_registration(self, email, reg_data):
         """Save or update a registration"""
         if not self.connected:
-            return self._save_local_registration(email, reg_data)
+            print(f"[DATABASE] Not connected - cannot save registration {email}")
+            return False
         
         try:
             reg_data['email'] = email
@@ -183,7 +186,8 @@ class CloudDatabase:
     def delete_registration(self, email):
         """Delete a registration"""
         if not self.connected:
-            return self._delete_local_registration(email)
+            print(f"[DATABASE] Not connected - cannot delete registration {email}")
+            return False
         
         try:
             self.db.registrations.delete_one({'email': email})
@@ -195,7 +199,8 @@ class CloudDatabase:
     def load_admin_actions(self):
         """Load admin actions log"""
         if not self.connected:
-            return self._load_local('admin_actions')
+            print("[DATABASE] Not connected - returning empty admin actions")
+            return []
         
         try:
             actions = []
@@ -210,7 +215,8 @@ class CloudDatabase:
     def add_admin_action(self, action):
         """Add an admin action to the log"""
         if not self.connected:
-            return self._add_local_admin_action(action)
+            print("[DATABASE] Not connected - cannot add admin action")
+            return False
         
         try:
             action['timestamp'] = datetime.now().isoformat()
