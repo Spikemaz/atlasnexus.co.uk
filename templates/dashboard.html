@@ -85,14 +85,21 @@
             color: #E5E9F0 !important;
         }
         
-        /* Table text colors */
+        /* Table text colors - Make table background match dark blue */
         .table-dark {
             color: #E5E9F0 !important;
+            background-color: transparent !important;
         }
         
         .table-dark th,
         .table-dark td {
             color: #E5E9F0 !important;
+            background-color: transparent !important;
+            border-color: rgba(96, 165, 250, 0.2) !important;
+        }
+        
+        .table-dark tbody tr:hover td {
+            background-color: rgba(96, 165, 250, 0.1) !important;
         }
         
         /* Ensure all paragraph text is visible */
