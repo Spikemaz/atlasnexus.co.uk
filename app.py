@@ -1517,9 +1517,9 @@ def register():
             if registration.get('email_verified'):
                 return jsonify({'status': 'error', 'message': 'This email has already been verified. Please login instead.'}), 400
             else:
-                # If not verified, check if it's expired (older than 1 hour)
+                # If not verified, check if it's expired (older than 24 hours)
                 created_at = datetime.fromisoformat(registration.get('created_at'))
-                if datetime.now() - created_at > timedelta(hours=1):
+                if datetime.now() - created_at > timedelta(hours=24):
                     # Remove expired registration to allow re-registration
                     del registrations[data['email']]
                     save_json_db(REGISTRATIONS_FILE, registrations)
@@ -1545,12 +1545,12 @@ def register():
                 <h2 style="color: #333;">Welcome to AtlasNexus</h2>
                 <p>Thank you for registering. Please verify your email address to continue.</p>
                 <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                    <p style="color: #856404; margin: 0; font-weight: bold;">⚠️ Important: This link expires in 1 hour!</p>
+                    <p style="color: #856404; margin: 0; font-weight: bold;">⚠️ Important: This link expires in 24 hours!</p>
                 </div>
                 <a href="{verification_link}" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Verify Email</a>
                 <p style="color: #666; font-size: 14px;">If the button doesn't work, copy this link: {verification_link}</p>
                 <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-                <p style="color: #999; font-size: 12px;">Once verified, your application will be reviewed. Link expires 1 hour after registration.</p>
+                <p style="color: #999; font-size: 12px;">Once verified, your application will be reviewed. Link expires 24 hours after registration.</p>
             </div>
         </body>
     </html>
@@ -1560,9 +1560,11 @@ def register():
         print(f"[REGISTRATION] Sending verification email to {data['email']}...")
         email_sent = send_email(data['email'], 'AtlasNexus - Verify Your Email', email_html)
         if email_sent:
-            print(f"[REGISTRATION] Verification email sent successfully to {data['email']}")
+            print(f"[REGISTRATION] ✅ Verification email sent successfully to {data['email']}")
         else:
-            print(f"[REGISTRATION] Failed to send verification email to {data['email']}")
+            print(f"[REGISTRATION] ⚠️ Failed to send verification email to {data['email']}")
+            # Still save registration even if email fails
+            print(f"[REGISTRATION] Registration saved. User can request email resend later.")
         
         # Generate approval token for email-based approval
         approval_token = generate_verification_token()
@@ -1672,12 +1674,12 @@ def register():
     
         # Send admin notification immediately
         print(f"[REGISTRATION] Sending admin notification for {data['email']} to {EMAIL_CONFIG['admin_email']}...")
-        print(f"[REGISTRATION] Email config - Server: {EMAIL_CONFIG['smtp_server']}, From: {EMAIL_CONFIG['sender_email']}")
         admin_sent = send_email(EMAIL_CONFIG['admin_email'], 'New Registration - Action Required', admin_html)
         if admin_sent:
-            print(f"[REGISTRATION] Admin notification sent successfully to {EMAIL_CONFIG['admin_email']}")
+            print(f"[REGISTRATION] ✅ Admin notification sent successfully to {EMAIL_CONFIG['admin_email']}")
         else:
-            print(f"[REGISTRATION] Failed to send admin notification for {data['email']} to {EMAIL_CONFIG['admin_email']}")
+            print(f"[REGISTRATION] ⚠️ Failed to send admin notification to {EMAIL_CONFIG['admin_email']}")
+            print(f"[REGISTRATION] Admin can still review registration in the dashboard")
         
         # Store registration in session for awaiting page
         session[f'registration_pending_{ip_address}'] = data['email']
@@ -1800,7 +1802,7 @@ def resend_verification():
                 <h2 style="color: #333;">Verification Email (Resent)</h2>
                 <p>You requested a new verification email. Please click the link below to verify your email address:</p>
                 <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                    <p style="color: #856404; margin: 0; font-weight: bold;">⚠️ Important: This link expires in 1 hour!</p>
+                    <p style="color: #856404; margin: 0; font-weight: bold;">⚠️ Important: This link expires in 24 hours!</p>
                 </div>
                 <div style="margin: 20px 0; padding: 20px; background: #f0f9ff; border-radius: 8px; border: 2px solid #3b82f6;">
                     <a href="{verification_link}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
@@ -1915,13 +1917,13 @@ def verify_email():
     registrations = load_json_db(REGISTRATIONS_FILE)
     
     if email in registrations and registrations[email]['verification_token'] == token:
-        # Check if verification link has expired (1 hour)
+        # Check if verification link has expired (24 hours)
         created_at = registrations[email].get('created_at')
         if created_at:
             created_time = datetime.fromisoformat(created_at)
             time_elapsed = datetime.now() - created_time
             
-            if time_elapsed > timedelta(hours=1):
+            if time_elapsed > timedelta(hours=24):
                 # Link has expired - show error message
                 return f"""
                 <html>
@@ -3455,24 +3457,16 @@ def admin_approve_user_advanced():
     else:
         password = generate_secure_password()
     
-    # Update registration with approval info but keep it in registrations
+    # Check if email is verified
+    email_verified = registrations[email].get('email_verified', False)
+    
+    # Update registration with approval info and keep it permanently
     registrations[email]['generated_password'] = password
     registrations[email]['account_type'] = account_type
     registrations[email]['admin_approved'] = True
     registrations[email]['approved_at'] = datetime.now().isoformat()
     registrations[email]['approved_by'] = session.get(f'user_email_{ip_address}', 'spikemaz8@aol.com')
     save_json_db(REGISTRATIONS_FILE, registrations)
-    
-    # Check if email is verified
-    email_verified = registrations[email].get('email_verified', False)
-    
-    # Store approval info in registrations but DON'T create user yet if not verified
-    # Keep user in registrations with approved status until they verify
-    registrations[email]['admin_approved'] = True
-    registrations[email]['approved_at'] = datetime.now().isoformat()
-    registrations[email]['approved_by'] = session.get(f'user_email_{ip_address}', 'spikemaz8@aol.com')
-    registrations[email]['generated_password'] = password  # Store the password for when they verify
-    registrations[email]['account_type'] = account_type
     
     # Only create user account if email is already verified
     if email_verified:
@@ -3495,12 +3489,6 @@ def admin_approve_user_advanced():
             'credentials_sent_at': None
         }
         save_json_db(USERS_FILE, users)
-    
-    save_json_db(REGISTRATIONS_FILE, registrations)
-    
-    # Update registration status
-    registrations[email]['admin_approved'] = True
-    save_json_db(REGISTRATIONS_FILE, registrations)
     
     # Log admin action
     admin_actions = load_json_db(ADMIN_ACTIONS_FILE)

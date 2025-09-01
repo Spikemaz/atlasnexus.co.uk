@@ -645,7 +645,7 @@
             </button>
             {% if account_type == 'external' %}
             <!-- External accounts have streamlined project management tools -->
-            <button class="nav-btn" onclick="window.location.href='/project-specifications'" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="projects" onclick="showSection('projects')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-folder"></i> Projects
             </button>
             <button class="nav-btn" data-section="documents" onclick="showSection('documents')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
@@ -662,7 +662,7 @@
             </button>
             {% else %}
             <!-- Admin and Internal accounts see all options -->
-            <button class="nav-btn" onclick="window.location.href='/project-specifications'" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="projects" onclick="showSection('projects')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-folder"></i> Projects
             </button>
             <button class="nav-btn" data-section="market" onclick="showSection('market')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
@@ -1576,6 +1576,137 @@
                 <a href="/compliance" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border: none;">
                     <i class="fas fa-arrow-right me-2"></i>Open Full Compliance Tool
                 </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects Section -->
+    <div id="projects-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
+        <div style="max-width: 1400px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
+                <h2 style="color: #60a5fa; font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">
+                    <i class="fas fa-folder"></i> Project Management
+                </h2>
+                
+                <!-- Project Creation Button -->
+                <div style="margin-bottom: 2rem;">
+                    <button onclick="openProjectModal()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-plus"></i> Create New Project
+                    </button>
+                </div>
+                
+                <!-- Active Projects Grid -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <!-- Project Card Example -->
+                    <div class="project-card" style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(96, 165, 250, 0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <h3 style="color: #93c5fd; font-size: 1.25rem; font-weight: 600;">Infrastructure Bond 2024</h3>
+                            <span style="background: #22c55e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">Active</span>
+                        </div>
+                        <p style="color: #94a3b8; margin-bottom: 1rem; font-size: 0.9rem;">€500M infrastructure financing project for renewable energy development</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <p style="color: #64748b; font-size: 0.8rem;">Value</p>
+                                <p style="color: #60a5fa; font-weight: 600;">€500M</p>
+                            </div>
+                            <div>
+                                <p style="color: #64748b; font-size: 0.8rem;">Progress</p>
+                                <p style="color: #60a5fa; font-weight: 600;">65%</p>
+                            </div>
+                        </div>
+                        <div style="background: rgba(96, 165, 250, 0.1); border-radius: 4px; height: 8px; margin-bottom: 1rem;">
+                            <div style="background: linear-gradient(90deg, #60a5fa, #3b82f6); border-radius: 4px; height: 100%; width: 65%;"></div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="viewProjectDetails('infrastructure-2024')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button onclick="editProject('infrastructure-2024')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Project Cards -->
+                    <div class="project-card" style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(96, 165, 250, 0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <h3 style="color: #93c5fd; font-size: 1.25rem; font-weight: 600;">Real Estate CLO</h3>
+                            <span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">In Progress</span>
+                        </div>
+                        <p style="color: #94a3b8; margin-bottom: 1rem; font-size: 0.9rem;">Commercial real estate collateralized loan obligation structure</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <p style="color: #64748b; font-size: 0.8rem;">Value</p>
+                                <p style="color: #60a5fa; font-weight: 600;">€750M</p>
+                            </div>
+                            <div>
+                                <p style="color: #64748b; font-size: 0.8rem;">Progress</p>
+                                <p style="color: #60a5fa; font-weight: 600;">40%</p>
+                            </div>
+                        </div>
+                        <div style="background: rgba(96, 165, 250, 0.1); border-radius: 4px; height: 8px; margin-bottom: 1rem;">
+                            <div style="background: linear-gradient(90deg, #f59e0b, #d97706); border-radius: 4px; height: 100%; width: 40%;"></div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="viewProjectDetails('realestate-clo')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button onclick="editProject('realestate-clo')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Draft Project Card -->
+                    <div class="project-card" style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(96, 165, 250, 0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <h3 style="color: #93c5fd; font-size: 1.25rem; font-weight: 600;">Auto Loan ABS</h3>
+                            <span style="background: #6b7280; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">Draft</span>
+                        </div>
+                        <p style="color: #94a3b8; margin-bottom: 1rem; font-size: 0.9rem;">Asset-backed securities for automotive loan portfolio</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <p style="color: #64748b; font-size: 0.8rem;">Value</p>
+                                <p style="color: #60a5fa; font-weight: 600;">€300M</p>
+                            </div>
+                            <div>
+                                <p style="color: #64748b; font-size: 0.8rem;">Progress</p>
+                                <p style="color: #60a5fa; font-weight: 600;">15%</p>
+                            </div>
+                        </div>
+                        <div style="background: rgba(96, 165, 250, 0.1); border-radius: 4px; height: 8px; margin-bottom: 1rem;">
+                            <div style="background: linear-gradient(90deg, #6b7280, #4b5563); border-radius: 4px; height: 100%; width: 15%;"></div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="viewProjectDetails('auto-abs')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button onclick="editProject('auto-abs')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project Statistics -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem;">
+                    <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                        <p style="color: #86efac; font-size: 0.9rem; margin-bottom: 0.5rem;">Active Projects</p>
+                        <p style="color: #22c55e; font-size: 2rem; font-weight: 700;">12</p>
+                    </div>
+                    <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                        <p style="color: #fcd34d; font-size: 0.9rem; margin-bottom: 0.5rem;">In Progress</p>
+                        <p style="color: #f59e0b; font-size: 2rem; font-weight: 700;">5</p>
+                    </div>
+                    <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                        <p style="color: #93c5fd; font-size: 0.9rem; margin-bottom: 0.5rem;">Total Value</p>
+                        <p style="color: #60a5fa; font-size: 2rem; font-weight: 700;">€2.5B</p>
+                    </div>
+                    <div style="background: rgba(107, 114, 128, 0.1); border: 1px solid rgba(107, 114, 128, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                        <p style="color: #9ca3af; font-size: 0.9rem; margin-bottom: 0.5rem;">Drafts</p>
+                        <p style="color: #6b7280; font-size: 2rem; font-weight: 700;">3</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -3594,7 +3725,7 @@
         // Hide all sections without re-triggering animations
         const allSections = ['main-dashboard', 'market-section', 'data-section', 'analytics-section', 
                            'risk-section', 'portfolio-section', 'compliance-section', 'permutation-section',
-                           'documents-section', 'timeline-section', 'reports-section', 'support-section'];
+                           'documents-section', 'timeline-section', 'reports-section', 'support-section', 'projects-section'];
         
         allSections.forEach(sectionId => {
             const element = document.getElementById(sectionId);
@@ -4869,6 +5000,106 @@
         
         // Here you would implement different view rendering
         console.log('Switching to timeline view:', view);
+    }
+    
+    // Project Management Functions
+    function openProjectModal() {
+        // Open project specifications in an iframe within the dashboard
+        showProjectSpecifications();
+    }
+    
+    function viewProjectDetails(projectId) {
+        // Open project details in iframe within dashboard
+        console.log('Viewing project:', projectId);
+        showProjectSpecifications(projectId, 'view');
+    }
+    
+    function editProject(projectId) {
+        // Open project in edit mode within dashboard
+        console.log('Editing project:', projectId);
+        showProjectSpecifications(projectId, 'edit');
+    }
+    
+    function showProjectSpecifications(projectId = null, mode = 'new') {
+        // Create or update iframe container
+        let projectContainer = document.getElementById('project-specifications-container');
+        
+        if (!projectContainer) {
+            // Create container if it doesn't exist
+            projectContainer = document.createElement('div');
+            projectContainer.id = 'project-specifications-container';
+            projectContainer.style.cssText = `
+                position: fixed;
+                top: 165px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: #0F1419;
+                z-index: 1000;
+                display: none;
+                padding: 20px;
+            `;
+            
+            // Add close button
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '<i class="fas fa-times"></i> Close Project View';
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 20px;
+                background: #ef4444;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                cursor: pointer;
+                z-index: 1001;
+                font-size: 14px;
+                font-weight: 600;
+            `;
+            closeBtn.onclick = closeProjectSpecifications;
+            
+            // Add iframe
+            const iframe = document.createElement('iframe');
+            iframe.id = 'project-specifications-iframe';
+            iframe.style.cssText = `
+                width: 100%;
+                height: calc(100% - 40px);
+                border: 2px solid #60a5fa;
+                border-radius: 12px;
+                margin-top: 40px;
+            `;
+            
+            projectContainer.appendChild(closeBtn);
+            projectContainer.appendChild(iframe);
+            document.body.appendChild(projectContainer);
+        }
+        
+        // Build URL with parameters
+        let url = '/project-specifications';
+        const params = [];
+        if (projectId) params.push('project=' + projectId);
+        if (mode) params.push('mode=' + mode);
+        if (params.length > 0) url += '?' + params.join('&');
+        
+        // Update iframe source and show container
+        const iframe = document.getElementById('project-specifications-iframe');
+        iframe.src = url;
+        projectContainer.style.display = 'block';
+        
+        // Hide the projects section to avoid overlap
+        document.getElementById('projects-section').style.display = 'none';
+    }
+    
+    function closeProjectSpecifications() {
+        const projectContainer = document.getElementById('project-specifications-container');
+        if (projectContainer) {
+            projectContainer.style.display = 'none';
+            // Clear iframe source to stop any running scripts
+            document.getElementById('project-specifications-iframe').src = 'about:blank';
+        }
+        // Show the projects section again
+        document.getElementById('projects-section').style.display = 'block';
     }
     
     // Document link hover effects
