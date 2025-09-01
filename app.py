@@ -30,6 +30,7 @@ try:
     from cloud_database import load_users as db_load_users, save_users as db_save_users
     from cloud_database import load_registrations as db_load_registrations, save_registrations as db_save_registrations
     from cloud_database import load_admin_actions as db_load_admin_actions, add_admin_action as db_add_admin_action
+    from cloud_database import load_projects as db_load_projects, save_project_data as db_save_project_data
     from cloud_database import reinitialize_db, cloud_db
     
     # Don't check connection at import time - Vercel loads env vars after imports
@@ -734,6 +735,8 @@ def load_json_db(file_path):
             return db_load_registrations()
         elif filename == 'admin_actions':
             return db_load_admin_actions()
+        elif filename == 'projects':
+            return db_load_projects()
     
     if file_path.exists():
         try:
@@ -4302,37 +4305,28 @@ def manage_series():
         })
     
     elif request.method == 'POST':
-        # Save both series and projects
-        data = request.json
-        
-        # Update series
-        if 'series' in data:
-            projects[user_email]['series'] = data['series']
-        
-        # Update projects if provided
-        if 'projects' in data:
-            # Update existing projects
-            for updated_project in data['projects']:
-                found = False
-                for i, existing_project in enumerate(projects[user_email]['projects']):
-                    if existing_project['id'] == updated_project['id']:
-                        projects[user_email]['projects'][i] = updated_project
-                        projects[user_email]['projects'][i]['updated_at'] = datetime.now().isoformat()
-                        found = True
-                        break
-                
-                # If not found, it's a new project
-                if not found:
-                    updated_project['created_at'] = datetime.now().isoformat()
-                    updated_project['updated_at'] = datetime.now().isoformat()
-                    projects[user_email]['projects'].append(updated_project)
-        
-        save_json_db(PROJECTS_FILE, projects)
-        
-        return jsonify({
-            'status': 'success',
-            'message': 'Data saved successfully'
-        })
+        try:
+            # Save both series and projects
+            data = request.json
+            
+            # Update series - simply replace the entire array
+            if 'series' in data:
+                projects[user_email]['series'] = data['series']
+            
+            # Update projects - simply replace the entire array  
+            if 'projects' in data:
+                projects[user_email]['projects'] = data['projects']
+            
+            # Save to database
+            save_json_db(PROJECTS_FILE, projects)
+            
+            return jsonify({
+                'status': 'success',
+                'message': 'Data saved successfully'
+            })
+        except Exception as e:
+            print(f"[ERROR] Failed to save series/projects: {e}")
+            return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/debug/ip-status')
 def debug_ip_status():

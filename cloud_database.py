@@ -259,6 +259,58 @@ class CloudDatabase:
             print(f"[DATABASE] Error getting user files: {e}")
             return []
     
+    def load_projects(self):
+        """Load all projects from database"""
+        if not self.connected:
+            return {}
+        
+        try:
+            projects = {}
+            for proj in self.db.projects.find():
+                user_email = proj.get('user_email')
+                if user_email:
+                    proj.pop('_id', None)
+                    proj.pop('user_email', None)
+                    if user_email not in projects:
+                        projects[user_email] = {'projects': [], 'series': [], 'order': []}
+                    # Reconstruct the data structure
+                    if 'projects' in proj:
+                        projects[user_email]['projects'] = proj['projects']
+                    if 'series' in proj:
+                        projects[user_email]['series'] = proj['series']
+                    if 'order' in proj:
+                        projects[user_email]['order'] = proj['order']
+            return projects
+        except Exception as e:
+            print(f"[DATABASE] Error loading projects: {e}")
+            return {}
+    
+    def save_projects(self, user_email, project_data):
+        """Save or update projects for a user"""
+        if not self.connected:
+            print(f"[DATABASE] Not connected - cannot save projects for {user_email}")
+            return False
+        
+        try:
+            # Add user_email to the document
+            doc = {
+                'user_email': user_email,
+                'projects': project_data.get('projects', []),
+                'series': project_data.get('series', []),
+                'order': project_data.get('order', []),
+                'updated_at': datetime.now().isoformat()
+            }
+            
+            self.db.projects.update_one(
+                {'user_email': user_email},
+                {'$set': doc},
+                upsert=True
+            )
+            return True
+        except Exception as e:
+            print(f"[DATABASE] Error saving projects: {e}")
+            return False
+    
     def get_database_stats(self):
         """Get MongoDB database statistics including storage usage"""
         if not self.connected:
@@ -417,3 +469,11 @@ def load_admin_actions():
 def add_admin_action(action):
     """Add admin action"""
     return cloud_db.add_admin_action(action)
+
+def load_projects():
+    """Load all projects"""
+    return cloud_db.load_projects()
+
+def save_project_data(user_email, project_data):
+    """Save project data for a user"""
+    return cloud_db.save_projects(user_email, project_data)
