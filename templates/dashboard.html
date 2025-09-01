@@ -717,47 +717,47 @@
     <!-- Navigation Bar -->
     <div id="navBar" style="position: fixed; top: 115px; left: 0; right: 0; background: linear-gradient(135deg, #0a0e27, #020617); border-bottom: 1px solid rgba(96, 165, 250, 0.3); z-index: 998; padding: 10px 0; transition: top 0.3s ease, opacity 0.3s ease; opacity: 1;">
         <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <button class="nav-btn" data-section="dashboard" onclick="showSection('dashboard')" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="dashboard" onclick="showSection('dashboard')" style="background: linear-gradient(135deg, #1e3a8a, #1e40af); color: white; border: 1px solid #3b82f6; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-home"></i> Dashboard
             </button>
             {% if account_type == 'external' %}
             <!-- External accounts have streamlined project management tools -->
-            <button class="nav-btn" data-section="projects" onclick="showSection('projects')" style="background: transparent; color: #ffffff; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="projects" onclick="showSection('projects')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-folder"></i> Projects
             </button>
-            <button class="nav-btn" data-section="documents" onclick="showSection('documents')" style="background: transparent; color: #ffffff; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="documents" onclick="showSection('documents')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-file-contract"></i> Documents
             </button>
-            <button class="nav-btn" data-section="timeline" onclick="showSection('timeline')" style="background: transparent; color: #ffffff; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="timeline" onclick="showSection('timeline')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-calendar-alt"></i> Timeline
             </button>
-            <button class="nav-btn" data-section="reports" onclick="showSection('reports')" style="background: transparent; color: #ffffff; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="reports" onclick="showSection('reports')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-file-pdf"></i> Reports
             </button>
-            <button class="nav-btn" data-section="support" onclick="showSection('support')" style="background: transparent; color: #ffffff; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="support" onclick="showSection('support')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-headset"></i> Support
             </button>
             {% else %}
             <!-- Admin and Internal accounts see all options -->
-            <button class="nav-btn" data-section="projects" onclick="showSection('projects')" style="background: transparent; color: #ffffff; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="projects" onclick="showSection('projects')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-folder"></i> Projects
             </button>
-            <button class="nav-btn" data-section="market" onclick="showSection('market')" style="background: transparent; color: #ffffff; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="market" onclick="showSection('market')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-chart-line"></i> Market
             </button>
-            <button class="nav-btn" data-section="analytics" onclick="showSection('analytics')" style="background: transparent; color: #ffffff; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="analytics" onclick="showSection('analytics')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-chart-bar"></i> Analytics
             </button>
-            <button class="nav-btn" data-section="risk" onclick="showSection('risk')" style="background: transparent; color: #ffffff; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="risk" onclick="showSection('risk')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-shield-alt"></i> Risk
             </button>
-            <button class="nav-btn" data-section="portfolio" onclick="showSection('portfolio')" style="background: transparent; color: #ffffff; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="portfolio" onclick="showSection('portfolio')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-briefcase"></i> Portfolio
             </button>
-            <button class="nav-btn" data-section="compliance" onclick="showSection('compliance')" style="background: transparent; color: #ffffff; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="compliance" onclick="showSection('compliance')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-gavel"></i> Compliance
             </button>
-            <button class="nav-btn" data-section="permutation" onclick="showSection('permutation')" style="background: transparent; color: #ffffff; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+            <button class="nav-btn" data-section="permutation" onclick="showSection('permutation')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-cogs"></i> Engine
             </button>
             {% endif %}
@@ -798,7 +798,7 @@
                 if(mainDashboard) mainDashboard.style.marginTop = '135px'; // Same as other sections now
             }, 50);
         }
-    })()" style="position: fixed; top: 115px; right: 20px; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; z-index: 999;">
+    })()" style="position: fixed; top: 115px; right: 20px; background: linear-gradient(135deg, #0a0e27, #020617); color: white; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; z-index: 999;">
         <i class="fas fa-chevron-up" id="navToggleIcon"></i> Tools
     </button>
 
@@ -3832,8 +3832,8 @@
         // Reset all navigation buttons to inactive state
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.style.background = 'transparent';
-            btn.style.color = '#60a5fa';
-            btn.style.border = '1px solid #60a5fa';
+            btn.style.color = '#ffffff';
+            btn.style.border = '1px solid rgba(96, 165, 250, 0.3)';
         });
         
         // Show selected section
@@ -3855,9 +3855,9 @@
         // Highlight the active button
         const activeButton = document.querySelector(`.nav-btn[data-section="${section}"]`);
         if (activeButton) {
-            activeButton.style.background = 'linear-gradient(90deg, #60a5fa, #3b82f6)';
+            activeButton.style.background = 'linear-gradient(135deg, #1e3a8a, #1e40af)';
             activeButton.style.color = 'white';
-            activeButton.style.border = '1px solid #60a5fa';
+            activeButton.style.border = '1px solid #3b82f6';
         }
     }
     
@@ -4966,8 +4966,8 @@
         document.querySelectorAll('[data-perm-mode]').forEach(btn => {
             if (btn.dataset.permMode === mode) {
                 btn.classList.add('active');
-                btn.style.background = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
-                btn.style.color = '#0a0e27';
+                btn.style.background = 'linear-gradient(135deg, #1e3a8a, #1e40af)';
+                btn.style.color = 'white';
             } else {
                 btn.classList.remove('active');
                 btn.style.background = 'rgba(255, 255, 255, 0.1)';
