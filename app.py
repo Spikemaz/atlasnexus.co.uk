@@ -1211,6 +1211,35 @@ def site_auth():
             'message': f'Invalid code. {attempts_left} attempts remaining'
         }), 401
 
+@app.route('/api/test-db')
+def test_db():
+    """Test database connection endpoint"""
+    try:
+        db_status = {
+            'cloud_db_available': CLOUD_DB_AVAILABLE,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        if CLOUD_DB_AVAILABLE:
+            # Try to count users to verify connection works
+            users = db_load_users() if CLOUD_DB_AVAILABLE else {}
+            registrations = db_load_registrations() if CLOUD_DB_AVAILABLE else {}
+            db_status['status'] = 'connected'
+            db_status['users_count'] = len(users)
+            db_status['registrations_count'] = len(registrations)
+            db_status['message'] = 'MongoDB Atlas connected and operational'
+        else:
+            db_status['status'] = 'disconnected'
+            db_status['message'] = 'Using local file storage'
+            
+        return jsonify(db_status)
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e),
+            'cloud_db_available': CLOUD_DB_AVAILABLE
+        }), 500
+
 @app.route('/blocked')
 def blocked():
     """Handle blocked page with hidden unlock"""
