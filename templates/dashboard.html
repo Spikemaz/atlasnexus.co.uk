@@ -5680,6 +5680,23 @@
     function initializeProjects() {
         loadProjects();
         setupProjectsDragAndDrop();
+        
+        // Setup the main grid as a drop zone for standalone projects
+        const gridElement = document.getElementById('projects-grid');
+        if (gridElement) {
+            gridElement.addEventListener('dragover', function(e) {
+                // Check if we're not over a series or project
+                if (e.target === gridElement) {
+                    handleStandaloneAreaDragOver.call(this, e);
+                }
+            });
+            gridElement.addEventListener('drop', function(e) {
+                // Check if we're not over a series or project
+                if (e.target === gridElement) {
+                    handleStandaloneAreaDrop.call(this, e);
+                }
+            });
+        }
     }
 
     // Load and display deleted items
@@ -6333,6 +6350,14 @@
     function renderProjects() {
         const gridElement = document.getElementById('projects-grid');
         gridElement.innerHTML = '';
+        
+        // Set grid layout for proper card arrangement
+        gridElement.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 20px 0;
+        `;
 
         // Ensure arrays are valid
         if (!Array.isArray(seriesData)) {
@@ -6348,48 +6373,30 @@
             gridElement.appendChild(seriesCard);
         });
 
-        // Create standalone projects drop zone (always visible)
-        const standaloneZone = document.createElement('div');
-        standaloneZone.className = 'standalone-drop-zone';
-        standaloneZone.dataset.dropZone = 'standalone';
-        standaloneZone.style.cssText = `
-            min-height: 150px;
-            border: 2px dashed rgba(96, 165, 250, 0.2);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-            background: rgba(96, 165, 250, 0.02);
-            transition: all 0.3s ease;
-            position: relative;
-        `;
-        
-        // Add label to standalone zone
-        const zoneLabel = document.createElement('div');
-        zoneLabel.style.cssText = `
-            position: absolute;
-            top: 10px;
-            left: 20px;
-            font-size: 12px;
-            color: rgba(96, 165, 250, 0.6);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            pointer-events: none;
-        `;
-        zoneLabel.textContent = 'Standalone Projects (Drop here to remove from series)';
-        standaloneZone.appendChild(zoneLabel);
-        
-        // Add drop zone event handlers
-        standaloneZone.addEventListener('dragover', handleStandaloneDropZoneDragOver);
-        standaloneZone.addEventListener('drop', handleStandaloneDropZoneDrop);
-        standaloneZone.addEventListener('dragleave', handleStandaloneDropZoneLeave);
-        
-        // Then render standalone projects inside the zone
+        // Then render standalone projects directly in the grid (no wrapper)
         projectsData.forEach((project, index) => {
             const projectCard = createProjectCard(project, index);
-            standaloneZone.appendChild(projectCard);
+            // Make standalone projects droppable targets
+            projectCard.addEventListener('dragover', handleStandaloneAreaDragOver);
+            projectCard.addEventListener('drop', handleStandaloneAreaDrop);
+            gridElement.appendChild(projectCard);
         });
         
-        gridElement.appendChild(standaloneZone);
+        // If there are no standalone projects, create an invisible drop zone
+        if (projectsData.length === 0 && seriesData.length > 0) {
+            const dropHelper = document.createElement('div');
+            dropHelper.className = 'standalone-drop-helper';
+            dropHelper.style.cssText = `
+                min-height: 200px;
+                border: 2px dashed transparent;
+                border-radius: 12px;
+                transition: all 0.3s ease;
+            `;
+            dropHelper.addEventListener('dragover', handleStandaloneAreaDragOver);
+            dropHelper.addEventListener('drop', handleStandaloneAreaDrop);
+            dropHelper.addEventListener('dragleave', handleStandaloneAreaLeave);
+            gridElement.appendChild(dropHelper);
+        }
     }
     
     // Create series card with projects
@@ -6874,24 +6881,29 @@
         this.style.background = '';
     }
     
-    // Handle standalone drop zone drag over
-    function handleStandaloneDropZoneDragOver(e) {
+    // Handle dragging over standalone area
+    function handleStandaloneAreaDragOver(e) {
         e.preventDefault();
-        e.stopPropagation();
         
         // Only accept project cards from series
         if (draggedElement && draggedElement.classList.contains('project-card')) {
-            e.dataTransfer.dropEffect = 'move';
+            const sourceSeriesId = draggedElement.dataset.seriesId || draggedElement.dataset.sourceSeriesId;
             
-            // Visual feedback - highlight the zone
-            this.style.border = '2px dashed rgba(34, 197, 94, 0.6)';
-            this.style.background = 'rgba(34, 197, 94, 0.05)';
-            this.style.transform = 'scale(1.02)';
+            // Only show feedback if dragging from a series
+            if (sourceSeriesId && sourceSeriesId !== 'null' && sourceSeriesId !== 'undefined') {
+                e.dataTransfer.dropEffect = 'move';
+                
+                // Subtle visual feedback
+                if (this.classList.contains('standalone-drop-helper')) {
+                    this.style.border = '2px dashed rgba(34, 197, 94, 0.6)';
+                    this.style.background = 'rgba(34, 197, 94, 0.05)';
+                }
+            }
         }
     }
     
-    // Handle standalone drop zone drop
-    function handleStandaloneDropZoneDrop(e) {
+    // Handle drop in standalone area
+    function handleStandaloneAreaDrop(e) {
         e.preventDefault();
         e.stopPropagation();
         
@@ -6900,22 +6912,25 @@
         const projectId = draggedElement.dataset.projectId;
         const sourceSeriesId = draggedElement.dataset.seriesId || draggedElement.dataset.sourceSeriesId;
         
-        console.log('Dropping project to standalone zone', projectId, 'from series:', sourceSeriesId);
-        
-        // Move project to standalone
-        moveProjectToSeries(projectId, sourceSeriesId, 'standalone');
+        // Only move if coming from a series
+        if (sourceSeriesId && sourceSeriesId !== 'null' && sourceSeriesId !== 'undefined') {
+            console.log('Moving project to standalone:', projectId, 'from series:', sourceSeriesId);
+            moveProjectToSeries(projectId, sourceSeriesId, null);
+        }
         
         // Reset visual feedback
-        this.style.border = '2px dashed rgba(96, 165, 250, 0.2)';
-        this.style.background = 'rgba(96, 165, 250, 0.02)';
-        this.style.transform = 'scale(1)';
+        if (this.classList.contains('standalone-drop-helper')) {
+            this.style.border = '2px dashed transparent';
+            this.style.background = 'transparent';
+        }
     }
     
-    // Handle standalone drop zone leave
-    function handleStandaloneDropZoneLeave(e) {
-        this.style.border = '2px dashed rgba(96, 165, 250, 0.2)';
-        this.style.background = 'rgba(96, 165, 250, 0.02)';
-        this.style.transform = 'scale(1)';
+    // Handle leave from standalone area
+    function handleStandaloneAreaLeave(e) {
+        if (this.classList.contains('standalone-drop-helper')) {
+            this.style.border = '2px dashed transparent';
+            this.style.background = 'transparent';
+        }
     }
     
     // Move project between series or to/from standalone
@@ -6924,7 +6939,7 @@
         let project = null;
         
         // Find and remove project from source
-        if (sourceSeriesId && sourceSeriesId !== 'null' && sourceSeriesId !== 'standalone') {
+        if (sourceSeriesId && sourceSeriesId !== 'null' && sourceSeriesId !== 'undefined') {
             // Moving from a series
             const sourceSeries = seriesData.find(s => s.id === sourceSeriesId);
             if (sourceSeries && sourceSeries.projects) {
@@ -6939,12 +6954,13 @@
             const projectIndex = projectsData.findIndex(p => p.id === projectId);
             if (projectIndex !== -1) {
                 project = projectsData.splice(projectIndex, 1)[0];
+                console.log('Removed project from standalone');
             }
         }
         
         // Add project to target
         if (project) {
-            if (targetSeriesId && targetSeriesId !== 'null' && targetSeriesId !== 'standalone') {
+            if (targetSeriesId && targetSeriesId !== 'null' && targetSeriesId !== 'undefined') {
                 // Moving to a series
                 const targetSeries = seriesData.find(s => s.id === targetSeriesId);
                 if (targetSeries) {
@@ -6952,15 +6968,11 @@
                         targetSeries.projects = [];
                     }
                     targetSeries.projects.push(project);
-                    // Remove seriesId from project since it's now in a series
-                    delete project.seriesId;
                     console.log('Added project to series:', targetSeries.title);
                 }
             } else {
                 // Moving to standalone projects
                 projectsData.push(project);
-                // Clear any series association
-                delete project.seriesId;
                 console.log('Added project to standalone');
             }
             
