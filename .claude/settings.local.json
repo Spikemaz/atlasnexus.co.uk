@@ -55,7 +55,8 @@
       "Bash(git pull:*)",
       "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\test_registration.py\")",
       "Bash(git reset:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(git revert:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"

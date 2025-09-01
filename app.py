@@ -4265,6 +4265,66 @@ def admin_get_ip_tracking():
     
     return jsonify({'status': 'success', 'ip_data': list(ip_data.values())})
 
+@app.route('/account')
+def account():
+    """Account settings page"""
+    ip_address = get_real_ip()
+    
+    # Verify both authentications
+    if not session.get(f'site_authenticated_{ip_address}'):
+        return redirect(url_for('index'))
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return redirect(url_for('secure_login'))
+    
+    # Get user information
+    username = session.get(f'username_{ip_address}', 'User')
+    email = session.get(f'user_email_{ip_address}', '')
+    account_type = session.get(f'account_type_{ip_address}', 'standard')
+    
+    # Get user creation date if available
+    users = load_json_db(USERS_FILE)
+    member_since = 'January 2024'
+    if email in users:
+        created_date = users[email].get('created_at', '')
+        if created_date:
+            try:
+                dt = datetime.fromisoformat(created_date)
+                member_since = dt.strftime('%B %Y')
+            except:
+                pass
+    
+    return render_template('account.html',
+                         username=username,
+                         email=email,
+                         account_type=account_type,
+                         member_since=member_since,
+                         last_login='Today')
+
+@app.route('/api/save-theme', methods=['POST'])
+def save_theme():
+    """Save user's theme preference"""
+    ip_address = get_real_ip()
+    
+    # Verify authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    data = request.get_json()
+    theme = data.get('theme', 'dark-blue')
+    
+    # Save theme preference to user's data
+    email = session.get(f'user_email_{ip_address}')
+    if email:
+        users = load_json_db(USERS_FILE)
+        if email in users:
+            users[email]['theme_preference'] = theme
+            save_json_db(USERS_FILE, users)
+    
+    # Also store in session
+    session[f'theme_{ip_address}'] = theme
+    
+    return jsonify({'status': 'success', 'theme': theme})
+
 @app.route('/admin-panel')
 def admin_panel():
     """New comprehensive admin panel"""

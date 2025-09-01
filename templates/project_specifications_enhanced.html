@@ -86,7 +86,7 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: 1fr;
             gap: 2rem;
             margin-bottom: 2rem;
         }
@@ -533,61 +533,13 @@
             <div class="logo">AtlasNexus - Project Management Portal</div>
             <div class="user-info">
                 <span style="color: #B8C0C8;">{{ username }} ({{ account_type }})</span>
-                <a href="/dashboard" class="btn" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 0.75rem 1.5rem; border-radius: 5px; text-decoration: none; margin-right: 0.5rem;">
-                    <i class="fas fa-arrow-left"></i> Back to Dashboard
-                </a>
                 <button onclick="saveDraft()" class="btn btn-warning">Save Draft</button>
-                {% if is_admin %}
-                <a href="/admin-panel" class="btn btn-primary">Admin Panel</a>
-                {% endif %}
-                <button onclick="logout()" class="btn" style="background: linear-gradient(90deg, #ef4444, #dc2626); color: white;">Logout</button>
             </div>
         </div>
     </div>
 
     <div class="container">
         <div class="dashboard-grid">
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <div class="industry-selector">
-                    <h3 style="margin-bottom: 1rem;">Select Industry</h3>
-                    <button class="industry-btn active" onclick="selectIndustry('DC')">
-                        🖥️ Data Centre
-                    </button>
-                    <button class="industry-btn" onclick="selectIndustry('RE')">
-                        ⚡ Renewable Energy
-                    </button>
-                    <button class="industry-btn" onclick="selectIndustry('INF')">
-                        🏗️ Infrastructure
-                    </button>
-                    <button class="industry-btn" onclick="selectIndustry('LOG')">
-                        📦 Logistics
-                    </button>
-                    <button class="industry-btn" onclick="selectIndustry('COMM')">
-                        🏢 Commercial
-                    </button>
-                </div>
-
-                <div class="project-list">
-                    <h3 style="margin-bottom: 1rem;">Your Projects</h3>
-                    <div id="projectList">
-                        <!-- Projects will be loaded here -->
-                    </div>
-                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="createNewProject()">
-                        + New Project
-                    </button>
-                </div>
-
-                <div style="margin-top: 2rem; padding: 1rem; background: #f0f9ff; border-radius: 8px;">
-                    <h4 style="margin-bottom: 0.5rem;">Quick Actions</h4>
-                    <button class="btn btn-success" style="width: 100%; margin-bottom: 0.5rem;" onclick="showUploadModal()">
-                        📤 Upload Excel
-                    </button>
-                    <button class="btn btn-primary" style="width: 100%;" onclick="downloadTemplates()">
-                        📥 Download Templates
-                    </button>
-                </div>
-            </div>
 
             <!-- Main Content -->
             <div class="main-content">
