@@ -1658,127 +1658,60 @@
     <div id="projects-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div style="max-width: 1400px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
-                <h2 style="color: #60a5fa; font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">
-                    <i class="fas fa-folder"></i> Project Management
-                </h2>
-                
-                <!-- Project Creation Button -->
-                <div style="margin-bottom: 2rem;">
-                    <button onclick="openProjectModal()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                <!-- Header with Create Button on the right -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="color: #60a5fa; font-size: 2rem; font-weight: 700; margin: 0;">
+                        <i class="fas fa-folder"></i> Project Management
+                    </h2>
+                    <button onclick="createNewProject()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
                         <i class="fas fa-plus"></i> Create New Project
                     </button>
                 </div>
                 
-                <!-- Active Projects Grid -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                    <!-- Project Card Example -->
-                    <div class="project-card" style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(96, 165, 250, 0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                            <h3 style="color: #93c5fd; font-size: 1.25rem; font-weight: 600;">Infrastructure Bond 2024</h3>
-                            <span style="background: #22c55e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">Active</span>
-                        </div>
-                        <p style="color: #94a3b8; margin-bottom: 1rem; font-size: 0.9rem;">€500M infrastructure financing project for renewable energy development</p>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                            <div>
-                                <p style="color: #64748b; font-size: 0.8rem;">Value</p>
-                                <p style="color: #60a5fa; font-weight: 600;">€500M</p>
-                            </div>
-                            <div>
-                                <p style="color: #64748b; font-size: 0.8rem;">Progress</p>
-                                <p style="color: #60a5fa; font-weight: 600;">65%</p>
-                            </div>
-                        </div>
-                        <div style="background: rgba(96, 165, 250, 0.1); border-radius: 4px; height: 8px; margin-bottom: 1rem;">
-                            <div style="background: linear-gradient(90deg, #60a5fa, #3b82f6); border-radius: 4px; height: 100%; width: 65%;"></div>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="viewProjectDetails('infrastructure-2024')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
-                                <i class="fas fa-eye"></i> View
-                            </button>
-                            <button onclick="editProject('infrastructure-2024')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Additional Project Cards -->
-                    <div class="project-card" style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(96, 165, 250, 0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                            <h3 style="color: #93c5fd; font-size: 1.25rem; font-weight: 600;">Real Estate CLO</h3>
-                            <span style="background: #60a5fa; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">In Progress</span>
-                        </div>
-                        <p style="color: #94a3b8; margin-bottom: 1rem; font-size: 0.9rem;">Commercial real estate collateralized loan obligation structure</p>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                            <div>
-                                <p style="color: #64748b; font-size: 0.8rem;">Value</p>
-                                <p style="color: #60a5fa; font-weight: 600;">€750M</p>
-                            </div>
-                            <div>
-                                <p style="color: #64748b; font-size: 0.8rem;">Progress</p>
-                                <p style="color: #60a5fa; font-weight: 600;">40%</p>
-                            </div>
-                        </div>
-                        <div style="background: rgba(96, 165, 250, 0.1); border-radius: 4px; height: 8px; margin-bottom: 1rem;">
-                            <div style="background: linear-gradient(90deg, #60a5fa, #3b82f6); border-radius: 4px; height: 100%; width: 40%;"></div>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="viewProjectDetails('realestate-clo')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
-                                <i class="fas fa-eye"></i> View
-                            </button>
-                            <button onclick="editProject('realestate-clo')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Draft Project Card -->
-                    <div class="project-card" style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(96, 165, 250, 0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                            <h3 style="color: #93c5fd; font-size: 1.25rem; font-weight: 600;">Auto Loan ABS</h3>
-                            <span style="background: #6b7280; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">Draft</span>
-                        </div>
-                        <p style="color: #94a3b8; margin-bottom: 1rem; font-size: 0.9rem;">Asset-backed securities for automotive loan portfolio</p>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                            <div>
-                                <p style="color: #64748b; font-size: 0.8rem;">Value</p>
-                                <p style="color: #60a5fa; font-weight: 600;">€300M</p>
-                            </div>
-                            <div>
-                                <p style="color: #64748b; font-size: 0.8rem;">Progress</p>
-                                <p style="color: #60a5fa; font-weight: 600;">15%</p>
-                            </div>
-                        </div>
-                        <div style="background: rgba(96, 165, 250, 0.1); border-radius: 4px; height: 8px; margin-bottom: 1rem;">
-                            <div style="background: linear-gradient(90deg, #6b7280, #4b5563); border-radius: 4px; height: 100%; width: 15%;"></div>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="viewProjectDetails('auto-abs')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
-                                <i class="fas fa-eye"></i> View
-                            </button>
-                            <button onclick="editProject('auto-abs')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                        </div>
-                    </div>
+                <!-- Loading indicator -->
+                <div id="projects-loading" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>Loading projects...</p>
+                </div>
+                
+                <!-- Dynamic Projects Grid with Drag & Drop -->
+                <div id="projects-grid" style="display: none; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; min-height: 200px;">
+                    <!-- Projects will be loaded dynamically here -->
+                </div>
+                
+                <!-- Empty State -->
+                <div id="projects-empty" style="display: none; text-align: center; padding: 3rem; color: #64748b; border: 2px dashed rgba(96, 165, 250, 0.3); border-radius: 12px; margin-bottom: 2rem;">
+                    <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 1rem; color: #475569;"></i>
+                    <h3 style="color: #94a3b8; margin-bottom: 1rem;">No projects yet</h3>
+                    <p style="margin-bottom: 1.5rem;">Create your first project to get started with the project management system.</p>
+                    <button onclick="createNewProject()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-plus"></i> Create Your First Project
+                    </button>
+                </div>
+                
+                <!-- Drop Zone Indicator -->
+                <div id="drop-zone-indicator" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(96, 165, 250, 0.9); color: white; padding: 2rem; border-radius: 12px; z-index: 1000; text-align: center; pointer-events: none;">
+                    <i class="fas fa-hand-paper" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p style="font-size: 1.2rem; font-weight: 600;">Drop to reorder projects</p>
                 </div>
                 
                 <!-- Project Statistics -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem;">
+                <div id="project-stats" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem;">
                     <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
                         <p style="color: #86efac; font-size: 0.9rem; margin-bottom: 0.5rem;">Active Projects</p>
-                        <p style="color: #22c55e; font-size: 2rem; font-weight: 700;">12</p>
+                        <p id="active-count" style="color: #22c55e; font-size: 2rem; font-weight: 700;">0</p>
                     </div>
                     <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
                         <p style="color: #93c5fd; font-size: 0.9rem; margin-bottom: 0.5rem;">In Progress</p>
-                        <p style="color: #60a5fa; font-size: 2rem; font-weight: 700;">5</p>
+                        <p id="progress-count" style="color: #60a5fa; font-size: 2rem; font-weight: 700;">0</p>
                     </div>
                     <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
                         <p style="color: #93c5fd; font-size: 0.9rem; margin-bottom: 0.5rem;">Total Value</p>
-                        <p style="color: #60a5fa; font-size: 2rem; font-weight: 700;">€2.5B</p>
+                        <p id="total-value" style="color: #60a5fa; font-size: 2rem; font-weight: 700;">€0</p>
                     </div>
                     <div style="background: rgba(107, 114, 128, 0.1); border: 1px solid rgba(107, 114, 128, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
                         <p style="color: #9ca3af; font-size: 0.9rem; margin-bottom: 0.5rem;">Drafts</p>
-                        <p style="color: #6b7280; font-size: 2rem; font-weight: 700;">3</p>
+                        <p id="draft-count" style="color: #6b7280; font-size: 2rem; font-weight: 700;">0</p>
                     </div>
                 </div>
             </div>
@@ -5076,23 +5009,454 @@
         console.log('Switching to timeline view:', view);
     }
     
-    // Project Management Functions
-    function openProjectModal() {
-        // Open project specifications in an iframe within the dashboard
-        showProjectSpecifications();
+    // Project Management Functions with Drag & Drop
+    let projectsData = [];
+    let draggedElement = null;
+    let draggedIndex = null;
+
+    // Initialize projects when section becomes visible
+    function initializeProjects() {
+        loadProjects();
+        setupProjectsDragAndDrop();
     }
-    
+
+    // Load projects from API
+    async function loadProjects() {
+        const loadingElement = document.getElementById('projects-loading');
+        const gridElement = document.getElementById('projects-grid');
+        const emptyElement = document.getElementById('projects-empty');
+        const statsElement = document.getElementById('project-stats');
+
+        try {
+            loadingElement.style.display = 'block';
+            gridElement.style.display = 'none';
+            emptyElement.style.display = 'none';
+            statsElement.style.display = 'none';
+
+            const response = await fetch('/api/projects');
+            if (!response.ok) {
+                throw new Error('Failed to load projects');
+            }
+
+            projectsData = await response.json();
+            
+            loadingElement.style.display = 'none';
+            
+            if (projectsData.length === 0) {
+                emptyElement.style.display = 'block';
+            } else {
+                gridElement.style.display = 'grid';
+                statsElement.style.display = 'grid';
+                renderProjects();
+                updateProjectStats();
+            }
+        } catch (error) {
+            console.error('Error loading projects:', error);
+            loadingElement.style.display = 'none';
+            
+            // Show sample projects for demo
+            projectsData = getSampleProjects();
+            gridElement.style.display = 'grid';
+            statsElement.style.display = 'grid';
+            renderProjects();
+            updateProjectStats();
+        }
+    }
+
+    // Create new project
+    async function createNewProject() {
+        try {
+            const response = await fetch('/api/projects', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: 'New Project',
+                    description: 'Project description',
+                    status: 'draft',
+                    value: 0,
+                    progress: 0
+                })
+            });
+
+            if (response.ok) {
+                const newProject = await response.json();
+                projectsData.push(newProject);
+                renderProjects();
+                updateProjectStats();
+                
+                // Open in edit mode
+                editProject(newProject.id);
+            } else {
+                // For demo purposes, create a sample project
+                const newProject = {
+                    id: 'project-' + Date.now(),
+                    title: 'New Project',
+                    description: 'Click edit to configure this project',
+                    status: 'draft',
+                    value: 0,
+                    progress: 0,
+                    order: projectsData.length
+                };
+                projectsData.push(newProject);
+                
+                // Hide empty state if this is the first project
+                document.getElementById('projects-empty').style.display = 'none';
+                document.getElementById('projects-grid').style.display = 'grid';
+                document.getElementById('project-stats').style.display = 'grid';
+                
+                renderProjects();
+                updateProjectStats();
+                
+                // Open in edit mode
+                editProject(newProject.id);
+            }
+        } catch (error) {
+            console.error('Error creating project:', error);
+            alert('Failed to create project. Please try again.');
+        }
+    }
+
+    // Legacy function for compatibility
+    function openProjectModal() {
+        createNewProject();
+    }
+
+    // View project details
     function viewProjectDetails(projectId) {
-        // Open project details in iframe within dashboard
         console.log('Viewing project:', projectId);
         showProjectSpecifications(projectId, 'view');
     }
     
+    // Edit project
     function editProject(projectId) {
-        // Open project in edit mode within dashboard
         console.log('Editing project:', projectId);
         showProjectSpecifications(projectId, 'edit');
     }
+
+    // Render projects in the grid
+    function renderProjects() {
+        const gridElement = document.getElementById('projects-grid');
+        gridElement.innerHTML = '';
+
+        projectsData.forEach((project, index) => {
+            const projectCard = createProjectCard(project, index);
+            gridElement.appendChild(projectCard);
+        });
+    }
+
+    // Create a project card element
+    function createProjectCard(project, index) {
+        const card = document.createElement('div');
+        card.className = 'project-card';
+        card.draggable = true;
+        card.dataset.index = index;
+        card.dataset.projectId = project.id;
+        
+        const statusColors = {
+            'active': { bg: '#22c55e', text: 'Active' },
+            'in-progress': { bg: '#60a5fa', text: 'In Progress' },
+            'draft': { bg: '#6b7280', text: 'Draft' },
+            'completed': { bg: '#10b981', text: 'Completed' },
+            'paused': { bg: '#f59e0b', text: 'Paused' }
+        };
+
+        const status = statusColors[project.status] || statusColors.draft;
+        const progressColor = project.status === 'draft' ? '#6b7280' : '#60a5fa';
+        const progressGradient = project.status === 'draft' ? 
+            'linear-gradient(90deg, #6b7280, #4b5563)' : 
+            'linear-gradient(90deg, #60a5fa, #3b82f6)';
+
+        card.innerHTML = `
+            <div style="cursor: grab;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <h3 style="color: #93c5fd; font-size: 1.25rem; font-weight: 600;">${project.title}</h3>
+                    <span style="background: ${status.bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">${status.text}</span>
+                </div>
+                <p style="color: #94a3b8; margin-bottom: 1rem; font-size: 0.9rem;">${project.description}</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <p style="color: #64748b; font-size: 0.8rem;">Value</p>
+                        <p style="color: #60a5fa; font-weight: 600;">${formatCurrency(project.value)}</p>
+                    </div>
+                    <div>
+                        <p style="color: #64748b; font-size: 0.8rem;">Progress</p>
+                        <p style="color: #60a5fa; font-weight: 600;">${project.progress}%</p>
+                    </div>
+                </div>
+                <div style="background: rgba(96, 165, 250, 0.1); border-radius: 4px; height: 8px; margin-bottom: 1rem;">
+                    <div style="background: ${progressGradient}; border-radius: 4px; height: 100%; width: ${project.progress}%;"></div>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button onclick="viewProjectDetails('${project.id}')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button onclick="editProject('${project.id}')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Add drag and drop event listeners
+        setupCardDragEvents(card);
+        
+        // Add hover effects
+        card.style.cssText = `
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: grab;
+            transition: all 0.3s ease;
+            position: relative;
+        `;
+        
+        card.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('dragging')) {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 10px 30px rgba(96, 165, 250, 0.3)';
+            }
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            if (!this.classList.contains('dragging')) {
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            }
+        });
+
+        return card;
+    }
+
+    // Setup drag and drop events for project cards
+    function setupCardDragEvents(card) {
+        card.addEventListener('dragstart', handleDragStart);
+        card.addEventListener('dragend', handleDragEnd);
+        card.addEventListener('dragover', handleDragOver);
+        card.addEventListener('drop', handleDrop);
+        card.addEventListener('dragenter', handleDragEnter);
+        card.addEventListener('dragleave', handleDragLeave);
+    }
+
+    // Setup drag and drop for the projects grid
+    function setupProjectsDragAndDrop() {
+        const grid = document.getElementById('projects-grid');
+        grid.addEventListener('dragover', handleGridDragOver);
+        grid.addEventListener('drop', handleGridDrop);
+    }
+
+    // Drag event handlers
+    function handleDragStart(e) {
+        draggedElement = this;
+        draggedIndex = parseInt(this.dataset.index);
+        this.classList.add('dragging');
+        this.style.opacity = '0.5';
+        this.style.cursor = 'grabbing';
+        
+        // Show drop zone indicator
+        document.getElementById('drop-zone-indicator').style.display = 'block';
+        
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.outerHTML);
+    }
+
+    function handleDragEnd(e) {
+        this.classList.remove('dragging');
+        this.style.opacity = '';
+        this.style.cursor = 'grab';
+        this.style.transform = '';
+        this.style.boxShadow = '';
+        
+        // Hide drop zone indicator
+        document.getElementById('drop-zone-indicator').style.display = 'none';
+        
+        // Clean up drag over effects
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.classList.remove('drag-over');
+            card.style.borderColor = 'rgba(96, 165, 250, 0.3)';
+        });
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    }
+
+    function handleDragEnter(e) {
+        if (this !== draggedElement) {
+            this.classList.add('drag-over');
+            this.style.borderColor = '#60a5fa';
+        }
+    }
+
+    function handleDragLeave(e) {
+        this.classList.remove('drag-over');
+        this.style.borderColor = 'rgba(96, 165, 250, 0.3)';
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        
+        if (this !== draggedElement) {
+            const dropIndex = parseInt(this.dataset.index);
+            reorderProjects(draggedIndex, dropIndex);
+        }
+        
+        this.classList.remove('drag-over');
+        this.style.borderColor = 'rgba(96, 165, 250, 0.3)';
+    }
+
+    function handleGridDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    }
+
+    function handleGridDrop(e) {
+        e.preventDefault();
+        // Handle drop on grid (append to end)
+        if (draggedElement) {
+            const dropIndex = projectsData.length - 1;
+            if (draggedIndex !== dropIndex) {
+                reorderProjects(draggedIndex, dropIndex);
+            }
+        }
+    }
+
+    // Reorder projects and save to backend
+    async function reorderProjects(fromIndex, toIndex) {
+        if (fromIndex === toIndex) return;
+
+        // Move project in array
+        const [movedProject] = projectsData.splice(fromIndex, 1);
+        projectsData.splice(toIndex, 0, movedProject);
+
+        // Update order values
+        projectsData.forEach((project, index) => {
+            project.order = index;
+        });
+
+        // Re-render projects
+        renderProjects();
+
+        // Save new order to backend
+        await saveProjectOrder();
+    }
+
+    // Save project order to backend
+    async function saveProjectOrder() {
+        try {
+            const orderData = projectsData.map((project, index) => ({
+                id: project.id,
+                order: index
+            }));
+
+            const response = await fetch('/api/projects/order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ projects: orderData })
+            });
+
+            if (!response.ok) {
+                console.warn('Failed to save project order to backend');
+            }
+        } catch (error) {
+            console.error('Error saving project order:', error);
+        }
+    }
+
+    // Update project statistics
+    function updateProjectStats() {
+        const stats = {
+            active: 0,
+            inProgress: 0,
+            drafts: 0,
+            totalValue: 0
+        };
+
+        projectsData.forEach(project => {
+            switch (project.status) {
+                case 'active':
+                    stats.active++;
+                    break;
+                case 'in-progress':
+                    stats.inProgress++;
+                    break;
+                case 'draft':
+                    stats.drafts++;
+                    break;
+            }
+            stats.totalValue += project.value || 0;
+        });
+
+        document.getElementById('active-count').textContent = stats.active;
+        document.getElementById('progress-count').textContent = stats.inProgress;
+        document.getElementById('draft-count').textContent = stats.drafts;
+        document.getElementById('total-value').textContent = formatCurrency(stats.totalValue);
+    }
+
+    // Format currency
+    function formatCurrency(value) {
+        if (value === 0) return '€0';
+        if (value >= 1000000000) {
+            return '€' + (value / 1000000000).toFixed(1) + 'B';
+        }
+        if (value >= 1000000) {
+            return '€' + (value / 1000000).toFixed(0) + 'M';
+        }
+        if (value >= 1000) {
+            return '€' + (value / 1000).toFixed(0) + 'K';
+        }
+        return '€' + value.toLocaleString();
+    }
+
+    // Sample projects for demo
+    function getSampleProjects() {
+        return [
+            {
+                id: 'infrastructure-2024',
+                title: 'Infrastructure Bond 2024',
+                description: '€500M infrastructure financing project for renewable energy development',
+                status: 'active',
+                value: 500000000,
+                progress: 65,
+                order: 0
+            },
+            {
+                id: 'realestate-clo',
+                title: 'Real Estate CLO',
+                description: 'Commercial real estate collateralized loan obligation structure',
+                status: 'in-progress',
+                value: 750000000,
+                progress: 40,
+                order: 1
+            },
+            {
+                id: 'auto-abs',
+                title: 'Auto Loan ABS',
+                description: 'Asset-backed securities for automotive loan portfolio',
+                status: 'draft',
+                value: 300000000,
+                progress: 15,
+                order: 2
+            }
+        ];
+    }
+
+    // Initialize projects when projects section is shown
+    document.addEventListener('DOMContentLoaded', function() {
+        // Override the showSection function to initialize projects
+        const originalShowSection = window.showSection;
+        window.showSection = function(sectionId) {
+            originalShowSection(sectionId);
+            if (sectionId === 'projects') {
+                setTimeout(initializeProjects, 100);
+            }
+        };
+    });
     
     function showProjectSpecifications(projectId = null, mode = 'new') {
         // Create or update iframe container

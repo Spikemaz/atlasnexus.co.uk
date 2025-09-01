@@ -3635,6 +3635,132 @@ def admin_resend_credentials():
     else:
         return jsonify({'status': 'error', 'message': 'Failed to send email'}), 500
 
+@app.route('/api/projects', methods=['GET', 'POST'])
+def manage_projects():
+    """Get or create projects for the current user"""
+    ip_address = get_real_ip()
+    user_email = session.get(f'user_email_{ip_address}')
+    
+    if not user_email:
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    # Load projects database
+    PROJECTS_FILE = 'data/projects.json'
+    projects = load_json_db(PROJECTS_FILE)
+    
+    # Initialize user's projects if not exists
+    if user_email not in projects:
+        projects[user_email] = {
+            'projects': [],
+            'order': []
+        }
+    
+    if request.method == 'GET':
+        # Return user's projects in saved order
+        user_projects = projects[user_email]['projects']
+        order = projects[user_email].get('order', [])
+        
+        # Sort projects by saved order
+        ordered_projects = []
+        for project_id in order:
+            for project in user_projects:
+                if project['id'] == project_id:
+                    ordered_projects.append(project)
+                    break
+        
+        # Add any new projects not in order
+        for project in user_projects:
+            if project['id'] not in order:
+                ordered_projects.append(project)
+        
+        return jsonify({'status': 'success', 'projects': ordered_projects})
+    
+    elif request.method == 'POST':
+        # Create new project
+        data = request.json
+        new_project = {
+            'id': f"project_{datetime.now().timestamp()}",
+            'name': data.get('name', 'New Project'),
+            'description': data.get('description', ''),
+            'value': data.get('value', '€0'),
+            'progress': data.get('progress', 0),
+            'status': data.get('status', 'Draft'),
+            'created_at': datetime.now().isoformat(),
+            'updated_at': datetime.now().isoformat()
+        }
+        
+        projects[user_email]['projects'].append(new_project)
+        projects[user_email]['order'].append(new_project['id'])
+        save_json_db(PROJECTS_FILE, projects)
+        
+        return jsonify({'status': 'success', 'project': new_project})
+
+@app.route('/api/projects/order', methods=['POST'])
+def save_project_order():
+    """Save the order of projects for the current user"""
+    ip_address = get_real_ip()
+    user_email = session.get(f'user_email_{ip_address}')
+    
+    if not user_email:
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    data = request.json
+    order = data.get('order', [])
+    
+    # Load projects database
+    PROJECTS_FILE = 'data/projects.json'
+    projects = load_json_db(PROJECTS_FILE)
+    
+    if user_email in projects:
+        projects[user_email]['order'] = order
+        save_json_db(PROJECTS_FILE, projects)
+        return jsonify({'status': 'success', 'message': 'Order saved'})
+    
+    return jsonify({'status': 'error', 'message': 'User not found'}), 404
+
+@app.route('/api/projects/<project_id>', methods=['PUT', 'DELETE'])
+def update_project(project_id):
+    """Update or delete a specific project"""
+    ip_address = get_real_ip()
+    user_email = session.get(f'user_email_{ip_address}')
+    
+    if not user_email:
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+    
+    # Load projects database
+    PROJECTS_FILE = 'data/projects.json'
+    projects = load_json_db(PROJECTS_FILE)
+    
+    if user_email not in projects:
+        return jsonify({'status': 'error', 'message': 'User not found'}), 404
+    
+    user_projects = projects[user_email]['projects']
+    
+    if request.method == 'PUT':
+        # Update project
+        data = request.json
+        for i, project in enumerate(user_projects):
+            if project['id'] == project_id:
+                user_projects[i].update(data)
+                user_projects[i]['updated_at'] = datetime.now().isoformat()
+                save_json_db(PROJECTS_FILE, projects)
+                return jsonify({'status': 'success', 'project': user_projects[i]})
+        
+        return jsonify({'status': 'error', 'message': 'Project not found'}), 404
+    
+    elif request.method == 'DELETE':
+        # Delete project
+        for i, project in enumerate(user_projects):
+            if project['id'] == project_id:
+                del user_projects[i]
+                # Remove from order list
+                if project_id in projects[user_email]['order']:
+                    projects[user_email]['order'].remove(project_id)
+                save_json_db(PROJECTS_FILE, projects)
+                return jsonify({'status': 'success', 'message': 'Project deleted'})
+        
+        return jsonify({'status': 'error', 'message': 'Project not found'}), 404
+
 @app.route('/debug/ip-status')
 def debug_ip_status():
     """Debug endpoint to check current IP status"""

@@ -53,7 +53,9 @@
       "Bash(git diff-tree:*)",
       "Bash(git checkout:*)",
       "Bash(git pull:*)",
-      "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\test_registration.py\")"
+      "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\test_registration.py\")",
+      "Bash(git reset:*)",
+      "Bash(git log:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"
