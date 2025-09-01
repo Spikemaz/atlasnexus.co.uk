@@ -5817,7 +5817,9 @@
             statsElement.style.display = 'none';
 
             // Fetch both series and projects from the backend
-            const response = await fetch('/api/series');
+            const response = await fetch('/api/series', {
+                credentials: 'include'  // Include cookies for session
+            });
             if (!response.ok) {
                 throw new Error('Failed to load data');
             }
@@ -6099,7 +6101,8 @@
             try {
                 const response = await fetch(`/api/projects/${pendingDeleteItem.id}`, {
                     method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'  // Include cookies for session
                 });
                 
                 if (response.ok) {
@@ -6130,7 +6133,8 @@
                     try {
                         await fetch(`/api/projects/${project.id}`, {
                             method: 'DELETE',
-                            headers: { 'Content-Type': 'application/json' }
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include'  // Include cookies for session
                         });
                     } catch (error) {
                         console.error('Error deleting project in series:', error);
@@ -6157,6 +6161,7 @@
             const response = await fetch('/api/series', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',  // Include cookies for session
                 body: JSON.stringify({ series: seriesData, projects: projectsData })
             });
             
@@ -6198,6 +6203,7 @@
             const response = await fetch('/api/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',  // Include cookies for session
                 body: JSON.stringify({ ...newProject, seriesId: seriesId })
             });
             
@@ -6487,7 +6493,8 @@
             try {
                 const response = await fetch(`/api/projects/${pendingDeleteItem.id}`, {
                     method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'  // Include cookies for session
                 });
                 
                 if (response.ok) {
@@ -6518,7 +6525,8 @@
                     try {
                         await fetch(`/api/projects/${project.id}`, {
                             method: 'DELETE',
-                            headers: { 'Content-Type': 'application/json' }
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include'  // Include cookies for session
                         });
                     } catch (error) {
                         console.error('Error deleting project in series:', error);
@@ -6545,6 +6553,7 @@
             const response = await fetch('/api/series', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',  // Include cookies for session
                 body: JSON.stringify({ series: seriesData, projects: projectsData })
             });
             
