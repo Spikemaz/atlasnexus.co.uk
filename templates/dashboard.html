@@ -113,7 +113,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%);
+            background: linear-gradient(135deg, #0a0e27, #020617);
             z-index: -2;
         }
 
@@ -145,7 +145,7 @@
             top: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(135deg, var(--steel-blue) 0%, var(--slate-grey) 100%);
+            background: linear-gradient(135deg, #0a0e27, #020617);
             border-bottom: 2px solid var(--platinum-gold);
             z-index: 1000;
             backdrop-filter: blur(20px);
@@ -177,7 +177,7 @@
             right: 0;
             width: 100%;
             overflow: hidden;
-            background: linear-gradient(90deg, #1a1d23 0%, #0f1419 100%);
+            background: linear-gradient(135deg, #0a0e27, #020617);
             border-top: 1px solid rgba(96, 165, 250, 0.3);
             border-bottom: 1px solid rgba(96, 165, 250, 0.3);
             padding: 12px 0;
@@ -693,7 +693,7 @@
                     Dashboard Active
                 </span>
                 {% if is_admin %}
-                <a href="/admin-panel" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-right: 8px; text-decoration: none; display: inline-block;">
+                <a href="/admin-panel" style="background: linear-gradient(135deg, #0a0e27, #020617); color: white; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-right: 8px; text-decoration: none; display: inline-block;">
                     <i class="fas fa-cog"></i> Control Panel
                 </a>
                 {% endif %}
@@ -712,7 +712,7 @@
     </div>
 
     <!-- Navigation Bar -->
-    <div id="navBar" style="position: fixed; top: 115px; left: 0; right: 0; background: linear-gradient(90deg, #1e293b 0%, #334155 100%); border-bottom: 1px solid rgba(96, 165, 250, 0.3); z-index: 998; padding: 10px 0; transition: top 0.3s ease, opacity 0.3s ease; opacity: 1;">
+    <div id="navBar" style="position: fixed; top: 115px; left: 0; right: 0; background: linear-gradient(135deg, #0a0e27, #020617); border-bottom: 1px solid rgba(96, 165, 250, 0.3); z-index: 998; padding: 10px 0; transition: top 0.3s ease, opacity 0.3s ease; opacity: 1;">
         <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap;">
             <button class="nav-btn" data-section="dashboard" onclick="showSection('dashboard')" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: 1px solid #60a5fa; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-home"></i> Dashboard
