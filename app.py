@@ -699,8 +699,8 @@ def save_json_db(file_path, data):
     if isinstance(file_path, str):
         file_path = Path(file_path)
     
-    # Debug logging for registrations
-    if 'registrations.json' in str(file_path):
+    # Debug logging for registrations (only in local)
+    if IS_LOCAL and 'registrations.json' in str(file_path):
         print(f"[SAVE] Saving {len(data)} registrations to {file_path}")
         if len(data) == 0:
             print(f"[WARNING] Saving empty registrations file!")
@@ -3313,8 +3313,9 @@ def admin_comprehensive_data():
         login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE) or {}
         admin_actions = load_json_db(ADMIN_ACTIONS_FILE) or []
         
-        # Ensure admin user is always included (in case it was missing)
-        if 'spikemaz8@aol.com' not in users:
+        # Only ensure admin user for LOCAL environment, not production
+        # On Vercel/production, /tmp is ephemeral and this causes data loss
+        if IS_LOCAL and 'spikemaz8@aol.com' not in users:
             users['spikemaz8@aol.com'] = {
                 'email': 'spikemaz8@aol.com',
                 'username': 'Admin',
@@ -3329,8 +3330,7 @@ def admin_comprehensive_data():
                 'login_count': 0,
                 'last_login': datetime.now().isoformat()
             }
-            # IMPORTANT: Save users file ONLY if we modified it
-            # This preserves all existing users
+            # Only save locally, never on production
             save_json_db(USERS_FILE, users)
         
         # Ensure admin_actions is a list
