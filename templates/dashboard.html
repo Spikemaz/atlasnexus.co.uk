@@ -6619,8 +6619,8 @@ if (window.showSection) {
         currentEditingProject.title = document.getElementById('edit-project-title').value;
         currentEditingProject.status = document.getElementById('edit-project-status').value;
         currentEditingProject.description = document.getElementById('edit-project-description').value;
-        currentEditingProject.value = parseInt(document.getElementById('edit-project-value').value) || 0;
-        currentEditingProject.progress = parseInt(document.getElementById('edit-project-progress').value) || 0;
+        currentEditingProject.value = parseInt(document.getElementById('edit-project-value').value || 0);
+        currentEditingProject.progress = parseInt(document.getElementById('edit-project-progress').value || 0);
         currentEditingProject.details = document.getElementById('edit-project-details').value;
         
         // Update Permutation Engine Fields
@@ -6645,7 +6645,7 @@ if (window.showSection) {
         let project = projectsData.find(p => p.id === projectId);
         if (project) return project;
         
-        
+        // Project not found
         return null;
     }
     
@@ -6665,6 +6665,8 @@ if (window.showSection) {
         modal.style.display = 'flex';
     }
     
+    // Delete series with confirmation
+    function deleteSeries(seriesId) {
         const series = seriesData.find(s => s.id === seriesId);
         if (!series) return;
         
