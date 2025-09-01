@@ -723,7 +723,7 @@
             // Hide all sections
             const allSections = ['main-dashboard', 'market-section', 'data-section', 'analytics-section', 
                                'risk-section', 'portfolio-section', 'compliance-section', 'permutation-section',
-                               'documents-section', 'timeline-section', 'reports-section', 'support-section', 'projects-section'];
+                               'securitization-section', 'documents-section', 'timeline-section', 'reports-section', 'support-section', 'projects-section'];
             
             allSections.forEach(sectionId => {
                 const element = document.getElementById(sectionId);
@@ -840,7 +840,10 @@
                 <i class="fas fa-gavel"></i> Compliance
             </button>
             <button class="nav-btn" data-section="permutation" onclick="showSection('permutation')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-                <i class="fas fa-cogs"></i> Engine
+                <i class="fas fa-cogs"></i> Permutation
+            </button>
+            <button class="nav-btn" data-section="securitization" onclick="showSection('securitization')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                <i class="fas fa-layer-group"></i> Securitization
             </button>
             {% endif %}
         </div>
@@ -851,7 +854,7 @@
         var nav = document.getElementById('navBar');
         var icon = document.getElementById('navToggleIcon');
         var mainDashboard = document.getElementById('main-dashboard');
-        var sections = document.querySelectorAll('#market-section, #data-section, #analytics-section, #risk-section, #portfolio-section, #compliance-section, #permutation-section');
+        var sections = document.querySelectorAll('#market-section, #data-section, #analytics-section, #risk-section, #portfolio-section, #compliance-section, #permutation-section, #securitization-section');
         
         if (nav.getAttribute('data-hidden') === 'true') {
             // Show toolbar - slide down smoothly
@@ -3974,7 +3977,7 @@
         // Set initial padding for sections based on toolbar state
         var nav = document.getElementById('navBar');
         var mainDashboard = document.getElementById('main-dashboard');
-        var sections = document.querySelectorAll('#market-section, #data-section, #analytics-section, #risk-section, #portfolio-section, #compliance-section, #permutation-section');
+        var sections = document.querySelectorAll('#market-section, #data-section, #analytics-section, #risk-section, #portfolio-section, #compliance-section, #permutation-section, #securitization-section');
         
         // Check if toolbar is visible and set appropriate padding
         if (nav && nav.getAttribute('data-hidden') !== 'true') {
@@ -4083,7 +4086,7 @@
         // Hide all sections without re-triggering animations
         const allSections = ['main-dashboard', 'market-section', 'data-section', 'analytics-section', 
                            'risk-section', 'portfolio-section', 'compliance-section', 'permutation-section',
-                           'documents-section', 'timeline-section', 'reports-section', 'support-section', 'projects-section'];
+                           'securitization-section', 'documents-section', 'timeline-section', 'reports-section', 'support-section', 'projects-section'];
         
         allSections.forEach(sectionId => {
             const element = document.getElementById(sectionId);
@@ -5370,6 +5373,8 @@
     let ghostPlaceholder = null;
     let originalNextSibling = null;
     let lastValidDropTarget = null;
+    let pendingDeleteItem = null;  // For delete confirmation modal
+    let pendingDeleteType = null;  // For delete confirmation modal
     let currentDropPosition = null;
 
     // Initialize projects when section becomes visible
@@ -5701,8 +5706,8 @@
     }
     
     // Variables for delete confirmation
-    let pendingDeleteItem = null;
-    let pendingDeleteType = null;
+    // let pendingDeleteItem = null;  // Temporarily commented
+    // let pendingDeleteType = null;   // Temporarily commented
     
     // Delete project with confirmation modal
     function deleteProject(projectId, seriesId = null) {
@@ -6082,8 +6087,8 @@
     }
     
     // Variables for delete confirmation
-    let pendingDeleteItem = null;
-    let pendingDeleteType = null;
+    // let pendingDeleteItem = null;  // Temporarily commented
+    // let pendingDeleteType = null;   // Temporarily commented
     
     // Delete project with confirmation modal
     function deleteProject(projectId, seriesId = null) {
