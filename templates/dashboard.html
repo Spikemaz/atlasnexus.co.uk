@@ -2478,28 +2478,50 @@
                 </h2>
                 <p style="color: #94a3b8; text-align: center; margin-bottom: 2rem;">80+ Financial Parameters • Manual/Range/Boundary Modes • Real-time Generation</p>
 
-                <!-- Control Bar -->
-                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <button class="btn btn-secondary active" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="setPermInputMode('manual')" data-perm-mode="manual">
-                            <i class="fas fa-edit"></i> Manual
-                        </button>
-                        <button class="btn btn-secondary" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="setPermInputMode('range')" data-perm-mode="range">
-                            <i class="fas fa-sliders-h"></i> Range
-                        </button>
-                        <button class="btn btn-secondary" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="setPermInputMode('boundary')" data-perm-mode="boundary">
-                            <i class="fas fa-compress-arrows-alt"></i> Boundary
-                        </button>
+                <!-- Control Bar with Project Import -->
+                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <!-- Project Data Import Section -->
+                    <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                        <h4 style="color: #60a5fa; margin-bottom: 1rem;">
+                            <i class="fas fa-database"></i> Import Project Data
+                        </h4>
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem; align-items: end;">
+                            <select id="perm-project-selector" onchange="loadPermProjectData()" style="padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                                <option value="">Select a Project to Import...</option>
+                            </select>
+                            <button onclick="fetchPermProjects()" style="background: linear-gradient(135deg, #60a5fa, #3b82f6); color: white; border: none; padding: 0.75rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                                <i class="fas fa-sync"></i> Refresh
+                            </button>
+                            <button onclick="applyProjectDataToPermutation()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; padding: 0.75rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                                <i class="fas fa-download"></i> Apply Data
+                            </button>
+                        </div>
+                        <div id="perm-project-preview" style="display: none; margin-top: 1rem; padding: 0.75rem; background: rgba(0, 0, 0, 0.3); border-radius: 6px; font-size: 0.9rem; color: #94a3b8;"></div>
                     </div>
-                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                        <span style="color: #64748b;">Max Permutations:</span>
-                        <input type="number" id="maxPermutations" value="1000" min="1" max="100000" style="width: 120px; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
-                        <button class="btn btn-secondary" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="selectAllPermParameters()">
-                            <i class="fas fa-check-square"></i> All
-                        </button>
-                        <button class="btn btn-secondary" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="deselectAllPermParameters()">
-                            <i class="fas fa-square"></i> None
-                        </button>
+                    
+                    <!-- Mode Selection and Controls -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button class="btn btn-secondary active" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="setPermInputMode('manual')" data-perm-mode="manual">
+                                <i class="fas fa-edit"></i> Manual
+                            </button>
+                            <button class="btn btn-secondary" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="setPermInputMode('range')" data-perm-mode="range">
+                                <i class="fas fa-sliders-h"></i> Range
+                            </button>
+                            <button class="btn btn-secondary" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="setPermInputMode('boundary')" data-perm-mode="boundary">
+                                <i class="fas fa-compress-arrows-alt"></i> Boundary
+                            </button>
+                        </div>
+                        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                            <span style="color: #64748b;">Max Permutations:</span>
+                            <input type="number" id="maxPermutations" value="1000" min="1" max="100000" style="width: 120px; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                            <button class="btn btn-secondary" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="selectAllPermParameters()">
+                                <i class="fas fa-check-square"></i> All
+                            </button>
+                            <button class="btn btn-secondary" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="deselectAllPermParameters()">
+                                <i class="fas fa-square"></i> None
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -2576,6 +2598,159 @@
                         <button onclick="showSection('permutation')" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">
                             <i class="fas fa-rocket"></i> Run in Securitization
                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Securitization Engine Section -->
+    <div id="securitization-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
+        <div style="max-width: 1800px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #ffd700; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
+                <h2 style="color: #ffd700; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">
+                    <i class="fas fa-layer-group"></i> Securitization Engine
+                </h2>
+                <p style="color: #94a3b8; text-align: center; margin-bottom: 2rem;">Structured Finance • Capital Stack Optimization • Real-time Analysis</p>
+
+                <!-- Control Panel -->
+                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <!-- Left Panel - Input Configuration -->
+                        <div>
+                            <h3 style="color: #ffd700; margin-bottom: 1rem;">
+                                <i class="fas fa-sliders-h"></i> Configuration
+                            </h3>
+                            
+                            <!-- Asset Type Selection -->
+                            <div style="margin-bottom: 1.5rem;">
+                                <label style="color: #94a3b8; display: block; margin-bottom: 0.5rem;">Asset Type</label>
+                                <select id="sec-asset-type" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; color: white;">
+                                    <option value="datacenter">Data Center REIT</option>
+                                    <option value="mbs">Mortgage-Backed Securities</option>
+                                    <option value="abs">Asset-Backed Securities</option>
+                                    <option value="cdo">Collateralized Debt Obligations</option>
+                                    <option value="clo">Collateralized Loan Obligations</option>
+                                    <option value="cmbs">Commercial MBS</option>
+                                </select>
+                            </div>
+
+                            <!-- Pool Size -->
+                            <div style="margin-bottom: 1.5rem;">
+                                <label style="color: #94a3b8; display: block; margin-bottom: 0.5rem;">Total Pool Size (£)</label>
+                                <input type="number" id="sec-pool-size" placeholder="e.g., 100000000" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; color: white;">
+                            </div>
+
+                            <!-- Number of Tranches -->
+                            <div style="margin-bottom: 1.5rem;">
+                                <label style="color: #94a3b8; display: block; margin-bottom: 0.5rem;">Number of Tranches</label>
+                                <input type="number" id="sec-tranches" value="3" min="2" max="10" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; color: white;">
+                            </div>
+
+                            <!-- Structuring Method -->
+                            <div style="margin-bottom: 1.5rem;">
+                                <label style="color: #94a3b8; display: block; margin-bottom: 0.5rem;">Structuring Method</label>
+                                <select id="sec-method" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; color: white;">
+                                    <option value="waterfall">Waterfall</option>
+                                    <option value="pro-rata">Pro-Rata</option>
+                                    <option value="sequential">Sequential</option>
+                                    <option value="hybrid">Hybrid</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel - Project Data Import -->
+                        <div>
+                            <h3 style="color: #ffd700; margin-bottom: 1rem;">
+                                <i class="fas fa-database"></i> Project Data Import
+                            </h3>
+                            
+                            <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                                <p style="color: #94a3b8; margin-bottom: 1rem;">Import data from your project specifications:</p>
+                                
+                                <!-- Project Selection -->
+                                <select id="project-selector" onchange="loadProjectData()" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; color: white; margin-bottom: 1rem;">
+                                    <option value="">Select a Project...</option>
+                                </select>
+                                
+                                <button onclick="fetchProjects()" style="background: linear-gradient(135deg, #ffd700, #ffed4e); color: #0a0e27; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; margin-bottom: 1rem;">
+                                    <i class="fas fa-sync"></i> Refresh Projects
+                                </button>
+                                
+                                <div id="project-data-preview" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(0, 0, 0, 0.3); border-radius: 6px;">
+                                    <p style="color: #ffd700; margin-bottom: 0.5rem;">Imported Data:</p>
+                                    <div id="imported-data-display" style="color: #94a3b8; font-size: 0.9rem;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                                <button onclick="loadFromPermutation()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 0.75rem; border-radius: 6px; font-weight: 600; cursor: pointer; flex: 1;">
+                                    <i class="fas fa-exchange-alt"></i> From Permutation
+                                </button>
+                                <button onclick="loadTemplate()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); padding: 0.75rem; border-radius: 6px; font-weight: 600; cursor: pointer; flex: 1;">
+                                    <i class="fas fa-file-alt"></i> Template
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="runSecuritization()" style="background: linear-gradient(135deg, #ffd700, #ffed4e); color: #0a0e27; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-play"></i> Run Securitization
+                    </button>
+                    <button onclick="runStressTest()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-chart-line"></i> Stress Test
+                    </button>
+                    <button onclick="generateReport()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-file-pdf"></i> Generate Report
+                    </button>
+                    <button onclick="resetSecuritization()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                </div>
+
+                <!-- Results Panel -->
+                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 12px; padding: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 215, 0, 0.2);">
+                        <div style="font-size: 1.5rem; color: #ffd700;">
+                            <i class="fas fa-chart-pie"></i> Securitization Results
+                        </div>
+                        <div style="display: flex; gap: 2rem; color: #64748b; font-size: 0.9rem;">
+                            <span>Status: <strong id="sec-status" style="color: #ffd700;">Ready</strong></span>
+                            <span>Runtime: <strong id="sec-runtime">--:--</strong></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Capital Stack Visualization -->
+                    <div id="capital-stack-viz" style="margin-bottom: 2rem; min-height: 300px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; padding: 1.5rem;">
+                        <div style="text-align: center; color: #64748b; padding: 3rem;">
+                            <i class="fas fa-layer-group" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <p>No securitization results yet</p>
+                            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Configure parameters and run securitization</p>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="metric-irr">--%</div>
+                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Expected IRR</div>
+                        </div>
+                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="metric-rating">--</div>
+                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Weighted Rating</div>
+                        </div>
+                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="metric-leverage">--x</div>
+                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Leverage Ratio</div>
+                        </div>
+                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="metric-coverage">--x</div>
+                            <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Coverage Ratio</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -6076,8 +6251,10 @@
         return colors[status] || colors['draft'];
     }
     
+    /* START COMMENTING OUT DUPLICATE FUNCTIONS (lines 6255-6388)
+       These are all already defined earlier in the file (lines 5874-6007)
     // Toggle series expand/collapse
-    function toggleSeriesExpand(seriesId) {
+    function toggleSeriesExpand_DUPLICATE(seriesId) {
         const series = seriesData.find(s => s.id === seriesId);
         if (series) {
             series.expanded = !series.expanded;
@@ -6213,6 +6390,7 @@
             console.error('Error saving series data:', error);
         }
     }
+    END OF DUPLICATE FUNCTIONS */
 
     // Create a project card element
     function createProjectCard(project, index) {
@@ -7058,6 +7236,357 @@
             });
         });
     });
+    
+    // Securitization Engine Functions
+    let currentProjectData = null;
+    let currentPermProjectData = null;
+    let permutationResults = [];
+    
+    // Fetch projects from API
+    function fetchProjects() {
+        fetch('/api/project-specifications/list')
+            .then(response => response.json())
+            .then(data => {
+                const selector = document.getElementById('project-selector');
+                selector.innerHTML = '<option value="">Select a Project...</option>';
+                
+                if (data.specifications && data.specifications.length > 0) {
+                    data.specifications.forEach(spec => {
+                        const option = document.createElement('option');
+                        option.value = spec.id;
+                        option.textContent = `${spec.project_code} - ${spec.project_name}`;
+                        option.dataset.spec = JSON.stringify(spec);
+                        selector.appendChild(option);
+                    });
+                } else {
+                    selector.innerHTML = '<option value="">No projects available</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching projects:', error);
+                alert('Failed to fetch projects');
+            });
+    }
+    
+    // Load project data when selected
+    function loadProjectData() {
+        const selector = document.getElementById('project-selector');
+        const selectedOption = selector.options[selector.selectedIndex];
+        
+        if (selectedOption.value) {
+            try {
+                currentProjectData = JSON.parse(selectedOption.dataset.spec);
+                
+                // Display imported data
+                const preview = document.getElementById('project-data-preview');
+                const display = document.getElementById('imported-data-display');
+                
+                display.innerHTML = `
+                    <div><strong>Project:</strong> ${currentProjectData.project_name}</div>
+                    <div><strong>Location:</strong> ${currentProjectData.project_location}</div>
+                    <div><strong>Total CapEx:</strong> £${(currentProjectData.capex_total || 0).toLocaleString()}</div>
+                    <div><strong>Land Cost:</strong> £${(currentProjectData.capex_land_purchase || 0).toLocaleString()}</div>
+                    <div><strong>Building Cost:</strong> £${(currentProjectData.capex_building || 0).toLocaleString()}</div>
+                    <div><strong>Infrastructure:</strong> £${(currentProjectData.capex_infrastructure || 0).toLocaleString()}</div>
+                    <div><strong>IT Equipment:</strong> £${(currentProjectData.capex_it_equipment || 0).toLocaleString()}</div>
+                    <div><strong>Offtaker:</strong> ${currentProjectData.offtaker_name || 'N/A'}</div>
+                    <div><strong>Rent per kWh:</strong> £${currentProjectData.offtaker_rent_per_kwh || 0}</div>
+                `;
+                
+                preview.style.display = 'block';
+                
+                // Auto-populate pool size with total CapEx
+                document.getElementById('sec-pool-size').value = currentProjectData.capex_total || 0;
+                
+                // Set asset type to datacenter since we're dealing with data center projects
+                document.getElementById('sec-asset-type').value = 'datacenter';
+                
+            } catch (error) {
+                console.error('Error loading project data:', error);
+            }
+        } else {
+            document.getElementById('project-data-preview').style.display = 'none';
+            currentProjectData = null;
+        }
+    }
+    
+    // Run securitization engine
+    function runSecuritization() {
+        const assetType = document.getElementById('sec-asset-type').value;
+        const poolSize = document.getElementById('sec-pool-size').value;
+        const numTranches = document.getElementById('sec-tranches').value;
+        const method = document.getElementById('sec-method').value;
+        
+        if (!poolSize) {
+            alert('Please enter a pool size or load project data');
+            return;
+        }
+        
+        // Update status
+        document.getElementById('sec-status').textContent = 'Running...';
+        document.getElementById('sec-status').style.color = '#60a5fa';
+        
+        const startTime = Date.now();
+        
+        // Prepare parameters
+        const params = {
+            assetType: assetType,
+            poolData: currentProjectData || { principal: poolSize },
+            numTranches: numTranches,
+            structMethod: method,
+            stressTest: false,
+            regulatory: true
+        };
+        
+        // Call securitization API
+        fetch('/api/securitization/calculate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(params)
+        })
+        .then(response => response.json())
+        .then(data => {
+            const runtime = ((Date.now() - startTime) / 1000).toFixed(2);
+            document.getElementById('sec-runtime').textContent = `${runtime}s`;
+            document.getElementById('sec-status').textContent = 'Complete';
+            document.getElementById('sec-status').style.color = '#22c55e';
+            
+            // Display results
+            displaySecuritizationResults(data);
+        })
+        .catch(error => {
+            console.error('Error running securitization:', error);
+            document.getElementById('sec-status').textContent = 'Error';
+            document.getElementById('sec-status').style.color = '#ef4444';
+            alert('Failed to run securitization');
+        });
+    }
+    
+    // Display securitization results
+    function displaySecuritizationResults(data) {
+        if (data.results) {
+            // Update metrics
+            const metrics = data.results.performance || {};
+            document.getElementById('metric-irr').textContent = metrics.expected_return || '--%';
+            document.getElementById('metric-rating').textContent = data.results.tranches ? 
+                data.results.tranches[0].rating || '--' : '--';
+            document.getElementById('metric-leverage').textContent = metrics.leverage_ratio || '--x';
+            document.getElementById('metric-coverage').textContent = metrics.coverage_ratio || '--x';
+            
+            // Display capital stack
+            const vizContainer = document.getElementById('capital-stack-viz');
+            let stackHtml = '<div style="max-width: 600px; margin: 0 auto;">';
+            
+            if (data.results.tranches && data.results.tranches.length > 0) {
+                stackHtml += '<h4 style="color: #ffd700; margin-bottom: 1rem;">Capital Stack Structure</h4>';
+                
+                data.results.tranches.forEach((tranche, index) => {
+                    const color = index === 0 ? '#22c55e' : index === 1 ? '#60a5fa' : '#ffd700';
+                    stackHtml += `
+                        <div style="background: linear-gradient(135deg, ${color}22, ${color}11); 
+                                    border: 1px solid ${color}; border-radius: 8px; 
+                                    padding: 1rem; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="color: ${color}; font-weight: bold; font-size: 1.1rem;">
+                                        ${tranche.name}
+                                    </div>
+                                    <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.25rem;">
+                                        Rating: ${tranche.rating} | Subordination: ${tranche.subordination}
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: ${color}; font-size: 1.5rem; font-weight: bold;">
+                                        ${tranche.size}
+                                    </div>
+                                    <div style="color: #94a3b8; font-size: 0.9rem;">
+                                        Coupon: ${tranche.coupon}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            stackHtml += '</div>';
+            vizContainer.innerHTML = stackHtml;
+        }
+    }
+    
+    // Run stress test
+    function runStressTest() {
+        if (!currentProjectData && !document.getElementById('sec-pool-size').value) {
+            alert('Please load project data or enter parameters first');
+            return;
+        }
+        alert('Stress testing functionality coming soon');
+    }
+    
+    // Generate report
+    function generateReport() {
+        alert('Report generation functionality coming soon');
+    }
+    
+    // Reset securitization
+    function resetSecuritization() {
+        document.getElementById('sec-asset-type').value = 'datacenter';
+        document.getElementById('sec-pool-size').value = '';
+        document.getElementById('sec-tranches').value = '3';
+        document.getElementById('sec-method').value = 'waterfall';
+        document.getElementById('project-selector').value = '';
+        document.getElementById('project-data-preview').style.display = 'none';
+        document.getElementById('sec-status').textContent = 'Ready';
+        document.getElementById('sec-status').style.color = '#ffd700';
+        document.getElementById('sec-runtime').textContent = '--:--';
+        
+        // Reset metrics
+        document.getElementById('metric-irr').textContent = '--%';
+        document.getElementById('metric-rating').textContent = '--';
+        document.getElementById('metric-leverage').textContent = '--x';
+        document.getElementById('metric-coverage').textContent = '--x';
+        
+        // Reset visualization
+        document.getElementById('capital-stack-viz').innerHTML = `
+            <div style="text-align: center; color: #64748b; padding: 3rem;">
+                <i class="fas fa-layer-group" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <p>No securitization results yet</p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Configure parameters and run securitization</p>
+            </div>
+        `;
+        
+        currentProjectData = null;
+    }
+    
+    // Load from permutation engine
+    function loadFromPermutation() {
+        if (permutationResults && permutationResults.length > 0) {
+            alert('Loading best permutation result...');
+            // Implementation to load best permutation
+        } else {
+            alert('No permutation results available. Run permutation engine first.');
+        }
+    }
+    
+    // Load template
+    function loadTemplate() {
+        document.getElementById('sec-pool-size').value = '100000000';
+        document.getElementById('sec-tranches').value = '3';
+        document.getElementById('sec-method').value = 'waterfall';
+        alert('Template loaded with default values');
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-fetch projects if on securitization section
+        if (window.location.hash === '#securitization') {
+            fetchProjects();
+        }
+    });
+    
+    // Permutation Engine Project Data Functions
+    function fetchPermProjects() {
+        fetch('/api/project-specifications/list')
+            .then(response => response.json())
+            .then(data => {
+                const selector = document.getElementById('perm-project-selector');
+                selector.innerHTML = '<option value="">Select a Project to Import...</option>';
+                
+                if (data.specifications && data.specifications.length > 0) {
+                    data.specifications.forEach(spec => {
+                        const option = document.createElement('option');
+                        option.value = spec.id;
+                        option.textContent = `${spec.project_code} - ${spec.project_name}`;
+                        option.dataset.spec = JSON.stringify(spec);
+                        selector.appendChild(option);
+                    });
+                } else {
+                    selector.innerHTML = '<option value="">No projects available</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching projects:', error);
+                alert('Failed to fetch projects');
+            });
+    }
+    
+    function loadPermProjectData() {
+        const selector = document.getElementById('perm-project-selector');
+        const selectedOption = selector.options[selector.selectedIndex];
+        
+        if (selectedOption.value) {
+            try {
+                currentPermProjectData = JSON.parse(selectedOption.dataset.spec);
+                
+                // Display preview
+                const preview = document.getElementById('perm-project-preview');
+                preview.innerHTML = `
+                    <strong style="color: #60a5fa;">Selected Project:</strong> ${currentPermProjectData.project_name}<br>
+                    <strong>CapEx Total:</strong> £${(currentPermProjectData.capex_total || 0).toLocaleString()} | 
+                    <strong>Land:</strong> £${(currentPermProjectData.capex_land_purchase || 0).toLocaleString()} | 
+                    <strong>Building:</strong> £${(currentPermProjectData.capex_building || 0).toLocaleString()}<br>
+                    <strong>Infrastructure:</strong> £${(currentPermProjectData.capex_infrastructure || 0).toLocaleString()} | 
+                    <strong>IT Equipment:</strong> £${(currentPermProjectData.capex_it_equipment || 0).toLocaleString()}<br>
+                    <strong>Offtaker:</strong> ${currentPermProjectData.offtaker_name || 'N/A'} | 
+                    <strong>Rent:</strong> £${currentPermProjectData.offtaker_rent_per_kwh || 0}/kWh
+                `;
+                preview.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading project data:', error);
+            }
+        } else {
+            document.getElementById('perm-project-preview').style.display = 'none';
+            currentPermProjectData = null;
+        }
+    }
+    
+    function applyProjectDataToPermutation() {
+        if (!currentPermProjectData) {
+            alert('Please select a project first');
+            return;
+        }
+        
+        // Map project data to permutation parameters
+        const mappings = {
+            'capex-total': currentPermProjectData.capex_total,
+            'capex-land': currentPermProjectData.capex_land_purchase,
+            'capex-building': currentPermProjectData.capex_building,
+            'capex-infrastructure': currentPermProjectData.capex_infrastructure,
+            'capex-it-equipment': currentPermProjectData.capex_it_equipment,
+            'capex-professional-fees': currentPermProjectData.capex_professional_fees,
+            'capex-contingency': currentPermProjectData.capex_contingency,
+            'market-capex': currentPermProjectData.market_capex_estimate,
+            'offtaker-rent': currentPermProjectData.offtaker_rent_per_kwh,
+            'offtaker-escalation': currentPermProjectData.offtaker_annual_escalation,
+            'power-capacity': currentPermProjectData.power_capacity_mw,
+            'it-load': currentPermProjectData.it_load_mw,
+            'pue': currentPermProjectData.expected_pue,
+            'construction-period': currentPermProjectData.construction_period_months,
+            'lease-term': currentPermProjectData.lease_term_years
+        };
+        
+        // Apply values to permutation inputs
+        Object.keys(mappings).forEach(paramId => {
+            const input = document.getElementById(`perm-${paramId}`);
+            if (input && mappings[paramId] !== undefined && mappings[paramId] !== null) {
+                input.value = mappings[paramId];
+                // Trigger change event to update any dependent fields
+                input.dispatchEvent(new Event('change'));
+            }
+        });
+        
+        // Show success message
+        const message = document.createElement('div');
+        message.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 1rem 2rem; border-radius: 8px; z-index: 10000; font-weight: 600;';
+        message.textContent = 'Project data applied successfully!';
+        document.body.appendChild(message);
+        
+        setTimeout(() => {
+            message.remove();
+        }, 2000);
+    }
     </script>
     
     <!-- Market News Script -->
