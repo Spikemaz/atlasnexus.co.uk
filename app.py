@@ -1228,6 +1228,7 @@ def ensure_db_initialized():
 @app.route('/api/test-db')
 def test_db():
     """Test database connection endpoint"""
+    global CLOUD_DB_AVAILABLE
     try:
         # Try to initialize DB if not already done
         ensure_db_initialized()
@@ -1257,8 +1258,6 @@ def test_db():
                 test_client.close()
                 
                 # Now try to reinitialize the global connection
-                global CLOUD_DB_AVAILABLE
-                from cloud_database import reinitialize_db
                 CLOUD_DB_AVAILABLE = reinitialize_db()
                 db_status['reinit_success'] = CLOUD_DB_AVAILABLE
                 
