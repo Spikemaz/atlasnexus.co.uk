@@ -449,58 +449,28 @@ def modify_ip_ban(ip_address, action, duration_days=None):
 
 # ==================== HELPER FUNCTIONS ====================
 def save_registration_data(email, data):
-    """Save registration data to cloud or local storage"""
-    if should_use_mongodb():
-        return cloud_db.save_registration(email, data)
-    else:
-        registrations = load_registrations_data()
-        registrations[email] = data
-        return save_json_db(REGISTRATIONS_FILE, registrations)
+    """Save registration data to MongoDB cloud database"""
+    return cloud_db.save_registration(email, data)
 
 def load_registrations_data():
-    """Load registrations from cloud or local storage"""
-    if should_use_mongodb():
-        return cloud_db.load_registrations()
-    else:
-        return load_registrations_data()
+    """Load registrations from MongoDB cloud database"""
+    return cloud_db.load_registrations()
 
 def delete_registration_data(email):
-    """Delete registration from cloud or local storage"""
-    if should_use_mongodb():
-        return cloud_db.delete_registration(email)
-    else:
-        registrations = load_registrations_data()
-        if email in registrations:
-            del registrations[email]
-            return save_json_db(REGISTRATIONS_FILE, registrations)
-        return False
+    """Delete registration from MongoDB cloud database"""
+    return cloud_db.delete_registration(email)
 
 def save_user_data(email, data):
-    """Save user data to cloud or local storage"""
-    if should_use_mongodb():
-        return cloud_db.save_user(email, data)
-    else:
-        users = load_users_data()
-        users[email] = data
-        return save_json_db(USERS_FILE, users)
+    """Save user data to MongoDB cloud database"""
+    return cloud_db.save_user(email, data)
 
 def load_users_data():
-    """Load users from cloud or local storage"""
-    if should_use_mongodb():
-        return cloud_db.load_users()
-    else:
-        return load_users_data()
+    """Load users from MongoDB cloud database"""
+    return cloud_db.load_users()
 
 def delete_user_data(email):
-    """Delete user from cloud or local storage"""
-    if should_use_mongodb():
-        return cloud_db.delete_user(email)
-    else:
-        users = load_users_data()
-        if email in users:
-            del users[email]
-            return save_json_db(USERS_FILE, users)
-        return False
+    """Delete user from MongoDB cloud database"""
+    return cloud_db.delete_user(email)
 
 def get_real_ip():
     """Get the real IP address, handling proxies and CDNs"""
@@ -693,13 +663,8 @@ else:
     DATA_DIR = Path('data')
     DATA_DIR.mkdir(exist_ok=True)
     
-REGISTRATIONS_FILE = DATA_DIR / 'registrations.json'
-USERS_FILE = DATA_DIR / 'users.json'
-ADMIN_ACTIONS_FILE = DATA_DIR / 'admin_actions.json'
+# These will be migrated to MongoDB soon
 LOGIN_ATTEMPTS_FILE = DATA_DIR / 'login_attempts.json'
-PROJECT_SPECS_FILE = DATA_DIR / 'project_specifications.json'
-PROJECT_DRAFTS_FILE = DATA_DIR / 'project_drafts.json'
-PROJECT_TIMELINES_FILE = DATA_DIR / 'project_timelines.json'
 
 # Email configuration - Try to import from email_config.py first
 try:
@@ -727,12 +692,18 @@ except ImportError:
     print("[EMAIL] Using default email configuration - edit email_config.py to enable emails")
 
 def log_admin_action(user_or_ip, action, details=None):
-    """Log admin actions for audit trail"""
+    """Log admin actions for audit trail to MongoDB"""
     try:
-        # Simple logging to console for now
+        action_data = {
+            'user_or_ip': user_or_ip,
+            'action': action,
+            'details': details,
+            'timestamp': datetime.now().isoformat()
+        }
+        cloud_db.add_admin_action(action_data)
         print(f"[ADMIN ACTION] {user_or_ip} - {action}: {details}")
-    except Exception:
-        pass  # Fail silently to avoid breaking the app
+    except Exception as e:
+        print(f"[ERROR] Failed to log admin action: {e}")
 
 def load_json_db(file_path):
     """Load JSON database file - uses cloud DB when available"""
@@ -3138,13 +3109,13 @@ def admin_manage_ip():
         success = modify_ip_ban(target_ip, 'unban')
         if success:
             # Log admin action
-            admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
+            admin_actions = cloud_db.load_admin_actions()
             admin_actions[str(len(admin_actions))] = {
                 'admin': session.get(f'username_{ip_address}'),
                 'action': f'Unbanned IP: {target_ip}',
                 'timestamp': datetime.now().isoformat()
             }
-            save_json_db(ADMIN_ACTIONS_FILE, admin_actions)
+            # Admin actions now saved to MongoDB via cloud_db
             return jsonify({'status': 'success', 'message': f'IP {target_ip} unbanned'})
     
     elif action == 'extend':
@@ -3152,26 +3123,26 @@ def admin_manage_ip():
             success = modify_ip_ban(target_ip, 'extend', int(duration_days))
             if success:
                 # Log admin action
-                admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
+                admin_actions = cloud_db.load_admin_actions()
                 admin_actions[str(len(admin_actions))] = {
                     'admin': session.get(f'username_{ip_address}'),
                     'action': f'Extended ban for IP {target_ip} by {duration_days} days',
                     'timestamp': datetime.now().isoformat()
                 }
-                save_json_db(ADMIN_ACTIONS_FILE, admin_actions)
+                # Admin actions now saved to MongoDB via cloud_db
                 return jsonify({'status': 'success', 'message': f'Ban extended for {duration_days} days'})
     
     elif action == 'permanent':
         success = modify_ip_ban(target_ip, 'permanent')
         if success:
             # Log admin action
-            admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
+            admin_actions = cloud_db.load_admin_actions()
             admin_actions[str(len(admin_actions))] = {
                 'admin': session.get(f'username_{ip_address}'),
                 'action': f'Permanently banned IP: {target_ip}',
                 'timestamp': datetime.now().isoformat()
             }
-            save_json_db(ADMIN_ACTIONS_FILE, admin_actions)
+            # Admin actions now saved to MongoDB via cloud_db
             return jsonify({'status': 'success', 'message': f'IP {target_ip} permanently banned'})
     
     return jsonify({'status': 'error', 'message': 'Invalid action'}), 400
@@ -3491,7 +3462,7 @@ def admin_comprehensive_data():
         registrations = load_registrations_data() or {}
         users = load_users_data() or {}
         login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE) or {}
-        admin_actions = load_json_db(ADMIN_ACTIONS_FILE) or []
+        admin_actions = cloud_db.load_admin_actions() or []
         
         # For DEMO: Always include sample data on production
         if IS_VERCEL or IS_PRODUCTION:
@@ -3815,7 +3786,7 @@ def admin_approve_user_advanced():
         save_user_data(email, users[email])
     
     # Log admin action
-    admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
+    admin_actions = cloud_db.load_admin_actions()
     if not isinstance(admin_actions, list):
         admin_actions = []
     admin_actions.append({
@@ -6046,7 +6017,7 @@ def admin_audit_log():
             })
     
     # Add admin actions
-    admin_actions = load_json_db(ADMIN_ACTIONS_FILE)
+    admin_actions = cloud_db.load_admin_actions()
     for action in admin_actions:
         audit_entries.append({
             'timestamp': action.get('timestamp'),
