@@ -1234,6 +1234,23 @@ def test_db():
             'env_var_length': len(mongo_uri)
         }
         
+        # Try direct connection test if env var exists
+        if mongo_uri and not CLOUD_DB_AVAILABLE:
+            try:
+                from pymongo import MongoClient
+                from pymongo.server_api import ServerApi
+                test_client = MongoClient(mongo_uri, server_api=ServerApi('1'), serverSelectionTimeoutMS=5000)
+                test_client.admin.command('ping')
+                db_status['direct_test'] = 'success'
+                test_client.close()
+                
+                # Try reinitializing our global connection
+                global CLOUD_DB_AVAILABLE
+                CLOUD_DB_AVAILABLE = reinitialize_db()
+                db_status['reinitialized'] = CLOUD_DB_AVAILABLE
+            except Exception as e:
+                db_status['direct_test'] = f'failed: {str(e)}'
+        
         if CLOUD_DB_AVAILABLE:
             # Try to count users to verify connection works
             users = db_load_users() if CLOUD_DB_AVAILABLE else {}
