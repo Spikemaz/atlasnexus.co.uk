@@ -33,7 +33,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            background: linear-gradient(135deg, #0a0e27, #020617);
             color: #e0e0e0;
             min-height: 100vh;
             display: flex;
@@ -41,8 +41,8 @@
 
         .sidebar {
             width: 280px;
-            background: linear-gradient(180deg, #1a1f3a 0%, #0f1428 100%);
-            border-right: 1px solid rgba(255, 215, 0, 0.1);
+            background: linear-gradient(135deg, #0a0e27, #020617);
+            border-right: 1px solid rgba(96, 165, 250, 0.2);
             padding: 2rem 0;
             position: fixed;
             height: 100vh;
@@ -53,15 +53,15 @@
         .logo {
             text-align: center;
             padding: 0 2rem 2rem;
-            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            border-bottom: 1px solid rgba(96, 165, 250, 0.2);
             margin-bottom: 2rem;
         }
 
         .logo h1 {
             font-size: 1.5rem;
-            color: #ffd700;
+            color: #ffffff;
             margin-bottom: 0.5rem;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            text-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
         }
 
         .logo p {
@@ -96,14 +96,14 @@
         }
 
         .nav-item:hover {
-            background: rgba(255, 215, 0, 0.05);
-            color: #ffd700;
+            background: rgba(96, 165, 250, 0.05);
+            color: #ffffff;
         }
 
         .nav-item.active {
-            background: rgba(255, 215, 0, 0.1);
-            color: #ffd700;
-            border-left: 3px solid #ffd700;
+            background: rgba(30, 58, 138, 0.3);
+            color: #ffffff;
+            border-left: 3px solid #3b82f6;
         }
 
         .nav-item i {
@@ -130,8 +130,8 @@
         }
 
         .header {
-            background: linear-gradient(135deg, rgba(26, 31, 58, 0.9) 0%, rgba(15, 20, 40, 0.9) 100%);
-            border: 1px solid rgba(255, 215, 0, 0.1);
+            background: linear-gradient(135deg, #0a0e27, #020617);
+            border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 12px;
             padding: 2rem;
             margin-bottom: 2rem;
@@ -147,8 +147,8 @@
 
         .page-title {
             font-size: 2rem;
-            color: #ffd700;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
         }
 
         .header-actions {
@@ -157,8 +157,8 @@
         }
 
         .toolbar {
-            background: linear-gradient(135deg, rgba(20, 25, 45, 0.8) 0%, rgba(10, 15, 30, 0.8) 100%);
-            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            background: linear-gradient(135deg, #0a0e27, #020617);
+            border-bottom: 1px solid rgba(96, 165, 250, 0.2);
             padding: 1rem 2rem;
             display: flex;
             align-items: center;
@@ -175,15 +175,15 @@
         .toolbar-divider {
             width: 1px;
             height: 24px;
-            background: rgba(255, 215, 0, 0.2);
+            background: rgba(96, 165, 250, 0.2);
             margin: 0 0.5rem;
         }
 
         .toolbar-btn {
             padding: 0.5rem 1rem;
-            background: rgba(255, 215, 0, 0.1);
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            color: #ffd700;
+            background: rgba(30, 58, 138, 0.3);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            color: #ffffff;
             border-radius: 6px;
             font-size: 0.9rem;
             cursor: pointer;
@@ -195,15 +195,15 @@
         }
 
         .toolbar-btn:hover {
-            background: rgba(255, 215, 0, 0.2);
-            border-color: #ffd700;
+            background: rgba(30, 58, 138, 0.4);
+            border-color: #3b82f6;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
         }
 
         .toolbar-btn.active {
-            background: rgba(255, 215, 0, 0.25);
-            border-color: #ffd700;
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            border-color: #3b82f6;
         }
 
         .toolbar-label {
@@ -226,13 +226,13 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-            color: #0a0e27;
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 10px 20px rgba(96, 165, 250, 0.3);
         }
         
         .btn-secondary {
@@ -263,12 +263,12 @@
 
         .btn-secondary {
             background: rgba(255, 255, 255, 0.1);
-            color: #ffd700;
-            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: #ffffff;
+            border: 1px solid rgba(96, 165, 250, 0.3);
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 215, 0, 0.1);
+            background: rgba(30, 58, 138, 0.3);
         }
 
         .stats-grid {
@@ -280,7 +280,7 @@
 
         .stat-card {
             background: linear-gradient(135deg, rgba(26, 31, 58, 0.6) 0%, rgba(15, 20, 40, 0.6) 100%);
-            border: 1px solid rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 12px;
             padding: 1.5rem;
             backdrop-filter: blur(10px);
@@ -290,7 +290,7 @@
         .stat-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border-color: rgba(255, 215, 0, 0.3);
+            border-color: rgba(96, 165, 250, 0.3);
         }
 
         .stat-icon {
@@ -312,7 +312,7 @@
         .stat-value {
             font-size: 2rem;
             font-weight: bold;
-            color: #ffd700;
+            color: #ffffff;
             margin-bottom: 0.5rem;
         }
 
@@ -343,7 +343,7 @@
 
         .content-section {
             background: linear-gradient(135deg, rgba(26, 31, 58, 0.6) 0%, rgba(15, 20, 40, 0.6) 100%);
-            border: 1px solid rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 12px;
             padding: 1.5rem;
             margin-bottom: 2rem;
@@ -356,12 +356,12 @@
             align-items: center;
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            border-bottom: 1px solid rgba(96, 165, 250, 0.2);
         }
 
         .section-title {
             font-size: 1.3rem;
-            color: #ffd700;
+            color: #ffffff;
         }
 
         .table-container {
@@ -374,14 +374,14 @@
         }
 
         th {
-            background: rgba(255, 215, 0, 0.05);
+            background: rgba(96, 165, 250, 0.05);
             padding: 1rem;
             text-align: left;
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #ffd700;
-            border-bottom: 2px solid rgba(255, 215, 0, 0.2);
+            color: #ffffff;
+            border-bottom: 2px solid rgba(96, 165, 250, 0.2);
         }
 
         td {
@@ -391,7 +391,7 @@
         }
 
         tr:hover {
-            background: rgba(255, 215, 0, 0.02);
+            background: rgba(96, 165, 250, 0.02);
         }
 
         .status-badge {
@@ -460,7 +460,7 @@
             flex: 1;
             padding: 0.8rem 1.2rem;
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.3);
             border-radius: 8px;
             color: white;
             font-size: 0.9rem;
@@ -468,14 +468,14 @@
 
         .search-input:focus {
             outline: none;
-            border-color: #ffd700;
+            border-color: #3b82f6;
             background: rgba(255, 255, 255, 0.08);
         }
 
         .filter-select {
             padding: 0.8rem 1.2rem;
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.3);
             border-radius: 8px;
             color: white;
             font-size: 0.9rem;
@@ -513,8 +513,8 @@
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255, 215, 0, 0.2);
-            border-top-color: #ffd700;
+            border: 3px solid rgba(96, 165, 250, 0.2);
+            border-top-color: #3b82f6;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -1343,7 +1343,7 @@
                 '<span class="status-badge" style="background: #64748b;">● Offline</span>';
             
             const accountBadge = accountType === 'admin' ? 
-                '<span class="status-badge" style="background: #ffd700; color: #000;">Admin</span>' :
+                '<span class="status-badge" style="background: #1e40af; color: #fff;">Admin</span>' :
                 accountType === 'internal' ?
                 '<span class="status-badge" style="background: #3b82f6;">Internal</span>' :
                 '<span class="status-badge" style="background: #64748b;">External</span>';
@@ -1465,7 +1465,7 @@
                         <td>${new Date(reg.created_at || reg.timestamp).toLocaleString()}</td>
                         <td>${statusBadge}</td>
                         <td>
-                            <select class="form-select-sm" id="accountType_${email}" style="padding: 0.25rem; border-radius: 4px; background: rgba(255,255,255,0.05); color: #ffd700; border: 1px solid rgba(255,215,0,0.3);">
+                            <select class="form-select-sm" id="accountType_${email}" style="padding: 0.25rem; border-radius: 4px; background: rgba(255,255,255,0.05); color: #ffffff; border: 1px solid rgba(96,165,250,0.3);">
                                 <option value="external" ${accountType === 'external' ? 'selected' : ''}>External</option>
                                 <option value="internal" ${accountType === 'internal' ? 'selected' : ''}>Internal</option>
                                 <option value="admin" ${accountType === 'admin' ? 'selected' : ''}>Admin</option>
@@ -1662,12 +1662,12 @@
             `;
             
             modal.innerHTML = `
-                <div style="background: #1a1f3a; border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%;">
-                    <h3 style="color: #ffd700; margin-bottom: 1.5rem;">Approve User: ${email}</h3>
+                <div style="background: #1a1f3a; border: 1px solid rgba(96,165,250,0.3); border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%;">
+                    <h3 style="color: #ffffff; margin-bottom: 1.5rem;">Approve User: ${email}</h3>
                     
                     <div style="margin-bottom: 1rem;">
                         <label style="color: #888; display: block; margin-bottom: 0.5rem;">Account Type:</label>
-                        <select id="modalAccountType" style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); color: #ffd700; border: 1px solid rgba(255,215,0,0.3); border-radius: 4px;">
+                        <select id="modalAccountType" style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); color: #ffffff; border: 1px solid rgba(96,165,250,0.3); border-radius: 4px;">
                             <option value="external" ${accountType === 'external' ? 'selected' : ''}>External</option>
                             <option value="internal" ${accountType === 'internal' ? 'selected' : ''}>Internal</option>
                             <option value="admin" ${accountType === 'admin' ? 'selected' : ''}>Admin</option>
@@ -1686,7 +1686,7 @@
                         </div>
                         <input type="text" id="manualPassword" placeholder="Enter password (if manual)" 
                                style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); 
-                                      color: white; border: 1px solid rgba(255,215,0,0.3); 
+                                      color: white; border: 1px solid rgba(96,165,250,0.3); 
                                       border-radius: 4px; display: none;">
                         <div id="generatedPassword" style="margin-top: 0.5rem; padding: 0.5rem; 
                                 background: rgba(46,204,113,0.1); border-radius: 4px; 
@@ -1796,10 +1796,10 @@
             `;
             
             modal.innerHTML = `
-                <div style="background: #1a1f3a; border: 1px solid rgba(255,215,0,0.3); 
+                <div style="background: #1a1f3a; border: 1px solid rgba(96,165,250,0.3); 
                             border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; 
                             max-height: 80vh; overflow-y: auto;">
-                    <h3 style="color: #ffd700; margin-bottom: 1.5rem;">User Details: ${email}</h3>
+                    <h3 style="color: #ffffff; margin-bottom: 1.5rem;">User Details: ${email}</h3>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div>
@@ -2028,15 +2028,15 @@
             `;
             
             modal.innerHTML = `
-                <div style="background: #1a1f3a; border: 1px solid rgba(255,215,0,0.3); 
+                <div style="background: #1a1f3a; border: 1px solid rgba(96,165,250,0.3); 
                             border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%;">
-                    <h3 style="color: #ffd700; margin-bottom: 1.5rem;">Edit User Account Type</h3>
+                    <h3 style="color: #ffffff; margin-bottom: 1.5rem;">Edit User Account Type</h3>
                     <p style="color: #888; margin-bottom: 1rem;">User: ${email}</p>
                     
                     <div style="margin-bottom: 1.5rem;">
                         <label style="color: #888; display: block; margin-bottom: 0.5rem;">Account Type:</label>
                         <select id="newAccountType" style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); 
-                                color: #ffd700; border: 1px solid rgba(255,215,0,0.3); border-radius: 4px;">
+                                color: #ffffff; border: 1px solid rgba(96,165,250,0.3); border-radius: 4px;">
                             <option value="external" ${currentType === 'external' ? 'selected' : ''}>External</option>
                             <option value="internal" ${currentType === 'internal' ? 'selected' : ''}>Internal</option>
                             <option value="admin" ${currentType === 'admin' ? 'selected' : ''}>Admin</option>
@@ -2100,13 +2100,13 @@
             `;
             
             modal.innerHTML = `
-                <div style="background: #1a1f3a; border: 1px solid rgba(255,215,0,0.3); 
+                <div style="background: #1a1f3a; border: 1px solid rgba(96,165,250,0.3); 
                             border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%;">
-                    <h3 style="color: #ffd700; margin-bottom: 1.5rem;">Edit User: ${email}</h3>
+                    <h3 style="color: #ffffff; margin-bottom: 1.5rem;">Edit User: ${email}</h3>
                     
                     <div style="margin-bottom: 1rem;">
                         <label style="color: #888; display: block; margin-bottom: 0.5rem;">Account Type:</label>
-                        <select id="editAccountType" style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); color: #ffd700; border: 1px solid rgba(255,215,0,0.3); border-radius: 4px;">
+                        <select id="editAccountType" style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); color: #ffffff; border: 1px solid rgba(96,165,250,0.3); border-radius: 4px;">
                             <option value="external">External</option>
                             <option value="internal">Internal</option>
                             <option value="admin">Admin</option>
@@ -2120,8 +2120,8 @@
                             Cancel
                         </button>
                         <button onclick="saveUserEdit('${email}')" 
-                                style="padding: 0.5rem 1rem; background: #ffd700; 
-                                       color: #1a1f3a; border: none; border-radius: 4px; cursor: pointer;">
+                                style="padding: 0.5rem 1rem; background: linear-gradient(135deg, #1e3a8a, #1e40af); 
+                                       color: white; border: none; border-radius: 4px; cursor: pointer;">
                             Save Changes
                         </button>
                         <button onclick="toggleFreeze('${email}')" 
@@ -2255,9 +2255,9 @@
             
             modal.innerHTML = `
                 <div style="background: linear-gradient(135deg, #1a1f3a 0%, #0f1428 100%); 
-                            border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 12px; 
+                            border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; 
                             padding: 2rem; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
-                    <h2 style="color: #ffd700; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                    <h2 style="color: #ffffff; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
                         <span><i class="fas fa-key"></i> Password Management</span>
                         <button onclick="closePasswordModal()" style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">×</button>
                     </h2>
@@ -2290,7 +2290,7 @@
                         <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem;">
                             <input type="text" id="newPasswordInput" placeholder="Enter new password or generate"
                                    style="flex: 1; padding: 0.5rem; background: rgba(255,255,255,0.1); 
-                                          color: #e0e0e0; border: 1px solid rgba(255,215,0,0.3); 
+                                          color: #e0e0e0; border: 1px solid rgba(96,165,250,0.3); 
                                           border-radius: 4px;">
                             <button onclick="generatePasswordForModal()" 
                                     style="padding: 0.5rem 1rem; background: #9b59b6; color: white; 
@@ -2416,13 +2416,13 @@
                     
                     <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
                         <p style="color: #888; margin: 0;">IP Address</p>
-                        <p style="color: #ffd700; font-family: monospace; font-size: 1.2rem; margin: 0.5rem 0 0 0;">${ip}</p>
+                        <p style="color: #ffffff; font-family: monospace; font-size: 1.2rem; margin: 0.5rem 0 0 0;">${ip}</p>
                     </div>
                     
                     <div style="margin-bottom: 1rem;">
                         <label style="color: #888; display: block; margin-bottom: 0.5rem;">Ban Duration</label>
                         <select id="banDuration" style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.1); 
-                                                       color: #e0e0e0; border: 1px solid rgba(255,215,0,0.3); 
+                                                       color: #e0e0e0; border: 1px solid rgba(96,165,250,0.3); 
                                                        border-radius: 4px;">
                             <option value="30min">30 Minutes</option>
                             <option value="24h">24 Hours</option>
@@ -2436,7 +2436,7 @@
                         <label style="color: #888; display: block; margin-bottom: 0.5rem;">Reason (optional)</label>
                         <input type="text" id="banReason" placeholder="Enter reason for ban" 
                                style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.1); 
-                                      color: #e0e0e0; border: 1px solid rgba(255,215,0,0.3); 
+                                      color: #e0e0e0; border: 1px solid rgba(96,165,250,0.3); 
                                       border-radius: 4px;">
                     </div>
                     
@@ -2612,7 +2612,7 @@
                         
                         // Flash the live indicator
                         const indicator = document.getElementById('liveIndicator');
-                        indicator.style.color = '#ffd700';
+                        indicator.style.color = '#3b82f6';
                         setTimeout(() => {
                             indicator.querySelector('i').style.color = '#22c55e';
                         }, 500);
