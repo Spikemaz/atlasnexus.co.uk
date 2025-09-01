@@ -1234,19 +1234,39 @@ def test_db():
             'env_var_length': len(mongo_uri)
         }
         
-        # Try direct connection test if env var exists
-        if mongo_uri and not CLOUD_DB_AVAILABLE:
-            # Simple connection test
-            db_status['attempting_connection'] = True
+        # Try a fresh connection test if env var exists
+        if mongo_uri:
+            try:
+                from pymongo import MongoClient
+                from pymongo.server_api import ServerApi
+                
+                # Create a new test client
+                test_client = MongoClient(mongo_uri, server_api=ServerApi('1'), serverSelectionTimeoutMS=5000)
+                
+                # Try to ping
+                test_client.admin.command('ping')
+                db_status['direct_connection'] = 'SUCCESS - MongoDB is reachable!'
+                test_client.close()
+                
+                # Now try to reinitialize the global connection
+                global CLOUD_DB_AVAILABLE
+                from cloud_database import reinitialize_db
+                CLOUD_DB_AVAILABLE = reinitialize_db()
+                db_status['reinit_success'] = CLOUD_DB_AVAILABLE
+                
+            except Exception as e:
+                db_status['direct_connection'] = f'FAILED: {str(e)[:100]}'
         
         if CLOUD_DB_AVAILABLE:
-            # Try to count users to verify connection works
-            users = db_load_users() if CLOUD_DB_AVAILABLE else {}
-            registrations = db_load_registrations() if CLOUD_DB_AVAILABLE else {}
             db_status['status'] = 'connected'
-            db_status['users_count'] = len(users)
-            db_status['registrations_count'] = len(registrations)
             db_status['message'] = 'MongoDB Atlas connected and operational'
+            try:
+                users = db_load_users() if CLOUD_DB_AVAILABLE else {}
+                registrations = db_load_registrations() if CLOUD_DB_AVAILABLE else {}
+                db_status['users_count'] = len(users)
+                db_status['registrations_count'] = len(registrations)
+            except:
+                pass
         else:
             db_status['status'] = 'disconnected'
             db_status['message'] = 'Using local file storage'
@@ -1255,7 +1275,7 @@ def test_db():
     except Exception as e:
         return jsonify({
             'status': 'error',
-            'message': str(e),
+            'message': str(e)[:200],
             'cloud_db_available': CLOUD_DB_AVAILABLE,
             'env_var_present': bool(os.environ.get('MONGODB_URI', ''))
         }), 500
