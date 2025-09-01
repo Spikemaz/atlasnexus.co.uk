@@ -2856,12 +2856,13 @@ def admin_process_approval():
 
 @app.route('/admin/quick-reject')
 def admin_quick_reject():
-    """Quick reject from email link"""
+    """Quick reject from email link - completely removes from system"""
     token = request.args.get('token')
     email = request.args.get('email')
     
     if not token or not email:
         return "Invalid rejection link", 400
+    
     
     # Load registrations
     registrations = load_json_db(REGISTRATIONS_FILE)
@@ -2878,27 +2879,44 @@ def admin_quick_reject():
         </html>
         """, 400
     
-    # Mark as rejected instead of deleting
-    registrations[email]['rejected'] = True
-    registrations[email]['rejected_at'] = datetime.now().isoformat()
-    registrations[email]['rejected_reason'] = 'Admin rejected via link'
-    save_json_db(REGISTRATIONS_FILE, registrations)
+    # Delete completely from system
+    if should_use_mongodb():
+        cloud_db.delete_registration(email)
+        cloud_db.delete_user(email)
+    else:
+        del registrations[email]
+        save_json_db(REGISTRATIONS_FILE, registrations)
+        
+        # Also delete from users if exists
+        users = load_json_db(USERS_FILE)
+        if email in users:
+            del users[email]
+            save_json_db(USERS_FILE, users)
     
-    # Send rejection email
+    # Send detailed rejection email
     rejection_email_html = f"""
     <html>
         <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
-            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
-                <h2 style="color: #333;">Registration Update</h2>
-                <p>Thank you for your interest in AtlasNexus.</p>
-                <p>Unfortunately, your registration application has not been approved at this time.</p>
-                <p>If you have questions or would like to discuss your application, please contact us at support@atlasnexus.co.uk</p>
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; border: 2px solid #ef4444;">
+                <h2 style="color: #ef4444;">Registration Not Approved - AtlasNexus</h2>
+                <p>Dear Applicant,</p>
+                <p>We regret to inform you that your registration application for AtlasNexus has not been approved.</p>
+                <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0;"><strong>Reason for rejection:</strong></p>
+                    <p style="margin: 5px 0; color: #991b1b;">Application did not meet approval criteria (Quick rejection via admin link)</p>
+                </div>
+                <p>Your application data has been removed from our system in accordance with data protection regulations.</p>
+                <p>If you believe this decision was made in error or would like to discuss your application, please contact our support team at <a href="mailto:support@atlasnexus.co.uk">support@atlasnexus.co.uk</a></p>
+                <br>
+                <p>Best regards,<br>The AtlasNexus Team</p>
             </div>
         </body>
     </html>
     """
     
-    send_email(email, 'AtlasNexus - Registration Update', rejection_email_html)
+    send_email(email, 'Registration Application Decision - AtlasNexus', rejection_email_html)
+    
+    print(f"[ADMIN] User {email} rejected and deleted via quick link")
     
     # Return success page
     return f"""
@@ -2906,9 +2924,9 @@ def admin_quick_reject():
     <body style="background: linear-gradient(135deg, #0F1419 0%, #1A2332 100%); color: white; font-family: Arial; padding: 50px; text-align: center; min-height: 100vh;">
         <div style="max-width: 600px; margin: 0 auto; background: rgba(44, 49, 55, 0.95); padding: 40px; border-radius: 20px; border: 2px solid #ef4444;">
             <h1 style="color: #ef4444; font-size: 3rem;">✗</h1>
-            <h2 style="color: #ef4444;">Application Rejected</h2>
-            <p style="font-size: 18px; margin: 20px 0;">User <strong>{email}</strong> has been rejected.</p>
-            <p style="color: #94a3b8;">A notification email has been sent to the applicant.</p>
+            <h2 style="color: #ef4444;">Application Rejected & Deleted</h2>
+            <p style="font-size: 18px; margin: 20px 0;">User <strong>{email}</strong> has been rejected and removed from the system.</p>
+            <p style="color: #94a3b8;">A detailed rejection email has been sent to the applicant.</p>
             <a href="/dashboard" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; margin-top: 20px;">Go to Dashboard</a>
         </div>
     </body>
@@ -2917,7 +2935,7 @@ def admin_quick_reject():
 
 @app.route('/admin/reject-user', methods=['POST'])
 def admin_reject_user():
-    """Admin reject user"""
+    """Admin reject user - completely removes from system"""
     ip_address = get_real_ip()
     
     # Verify admin access
@@ -2927,31 +2945,52 @@ def admin_reject_user():
     email = request.json.get('email')
     reason = request.json.get('reason', 'Application not approved')
     
-    # Mark as rejected instead of deleting
-    registrations = load_json_db(REGISTRATIONS_FILE)
-    if email in registrations:
-        registrations[email]['rejected'] = True
-        registrations[email]['rejected_at'] = datetime.now().isoformat()
-        registrations[email]['rejected_by'] = session.get(f'user_email_{ip_address}', 'spikemaz8@aol.com')
-        save_json_db(REGISTRATIONS_FILE, registrations)
     
-    # Send rejection email
+    # Check if using cloud database
+    if should_use_mongodb():
+        # Delete from cloud database
+        cloud_db.delete_registration(email)
+        cloud_db.delete_user(email)  # Also delete if user exists
+    else:
+        # Delete from local files
+        registrations = load_json_db(REGISTRATIONS_FILE)
+        if email in registrations:
+            del registrations[email]
+            save_json_db(REGISTRATIONS_FILE, registrations)
+        
+        # Also delete from users if exists
+        users = load_json_db(USERS_FILE)
+        if email in users:
+            del users[email]
+            save_json_db(USERS_FILE, users)
+    
+    # Send detailed rejection email with reason
     email_html = f"""
     <html>
         <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
-            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
-                <h2 style="color: #333;">Registration Update - AtlasNexus</h2>
-                <p>Unfortunately, your registration application has not been approved at this time.</p>
-                <p><strong>Reason:</strong> {reason}</p>
-                <p>If you have questions, please contact support@atlasnexus.co.uk</p>
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; border: 2px solid #ef4444;">
+                <h2 style="color: #ef4444;">Registration Not Approved - AtlasNexus</h2>
+                <p>Dear Applicant,</p>
+                <p>We regret to inform you that your registration application for AtlasNexus has not been approved.</p>
+                <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0;"><strong>Reason for rejection:</strong></p>
+                    <p style="margin: 5px 0; color: #991b1b;">{reason}</p>
+                </div>
+                <p>Your application data has been removed from our system in accordance with data protection regulations.</p>
+                <p>If you believe this decision was made in error or would like to discuss your application, please contact our support team at <a href="mailto:support@atlasnexus.co.uk">support@atlasnexus.co.uk</a></p>
+                <br>
+                <p>Best regards,<br>The AtlasNexus Team</p>
             </div>
         </body>
     </html>
     """
     
-    send_email(email, 'Registration Update - AtlasNexus', email_html)
+    send_email(email, 'Registration Application Decision - AtlasNexus', email_html)
     
-    return jsonify({'status': 'success', 'message': 'User rejected'})
+    # Log the rejection
+    print(f"[ADMIN] User {email} rejected and deleted by {session.get(f'user_email_{ip_address}', 'Admin')}. Reason: {reason}")
+    
+    return jsonify({'status': 'success', 'message': 'User rejected and removed from system'})
 
 @app.route('/test-email')
 def test_email():
