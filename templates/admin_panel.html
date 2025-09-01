@@ -2568,7 +2568,9 @@
         let sessionHeartbeatInterval = null;
         let lastUpdateTime = new Date();
         let currentDataHash = null;
-        const CHECK_INTERVAL = 1000; // Check for changes every 1 second
+        // Disable smart refresh on production - use simple refresh instead
+        const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        const CHECK_INTERVAL = isProduction ? 15000 : 2000; // 15s production, 2s local
         const HEARTBEAT_INTERVAL = 60000; // 1 minute
         
         function startAutoRefresh() {
@@ -2598,16 +2600,20 @@
         }
         
         async function checkForUpdates() {
+            // On production, just do simple refresh
+            if (isProduction) {
+                await silentRefresh();
+                return;
+            }
+            
+            // Smart refresh only for local development
             try {
-                // First check if data has changed using lightweight endpoint
                 const checkResponse = await fetch('/admin/check-updates');
                 const checkData = await checkResponse.json();
                 
                 if (checkData.status === 'success' && checkData.has_changes) {
-                    // Data has changed, fetch the full update
                     await silentRefresh();
                     
-                    // Store the new hash
                     currentDataHash = checkData.state_hash;
                     await fetch('/admin/set-data-hash', {
                         method: 'POST',
@@ -2615,10 +2621,8 @@
                         body: JSON.stringify({ state_hash: currentDataHash })
                     });
                     
-                    // Show subtle notification
                     console.log('Data updated:', checkData.stats);
                 }
-                // If no changes, do nothing - saves bandwidth and processing
             } catch (error) {
                 console.error('Failed to check for updates:', error);
             }
@@ -2744,7 +2748,8 @@
             toggle.addEventListener('change', (e) => {
                 if (e.target.checked) {
                     startAutoRefresh();
-                    showAlert('Live updates enabled', 'success');
+                    const msg = isProduction ? 'Live updates enabled (15 second refresh)' : 'Smart updates enabled';
+                    showAlert(msg, 'success');
                 } else {
                     stopAutoRefresh();
                     showAlert('Live updates disabled', 'info');

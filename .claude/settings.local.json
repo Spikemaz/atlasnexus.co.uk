@@ -56,7 +56,13 @@
       "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\test_registration.py\")",
       "Bash(git reset:*)",
       "Bash(git log:*)",
-      "Bash(git revert:*)"
+      "Bash(git revert:*)",
+      "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\data\\test_users.json\")",
+      "Bash(tasklist)",
+      "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\clean_all_data.py\")",
+      "Bash(for file in registrations.json users.json expired_registrations.json)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(git rm:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"

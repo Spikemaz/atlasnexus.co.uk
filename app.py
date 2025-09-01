@@ -3313,25 +3313,9 @@ def admin_comprehensive_data():
         login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE) or {}
         admin_actions = load_json_db(ADMIN_ACTIONS_FILE) or []
         
-        # Only ensure admin user for LOCAL environment, not production
-        # On Vercel/production, /tmp is ephemeral and this causes data loss
-        if IS_LOCAL and 'spikemaz8@aol.com' not in users:
-            users['spikemaz8@aol.com'] = {
-                'email': 'spikemaz8@aol.com',
-                'username': 'Admin',
-                'full_name': 'Administrator',
-                'account_type': 'admin',
-                'created_at': '2025-08-20T01:39:46.674704',
-                'is_admin': True,
-                'admin_approved': True,
-                'password': 'SpikeMaz',
-                'password_expiry': (datetime.now() + timedelta(days=365)).isoformat(),
-                'email_verified': True,
-                'login_count': 0,
-                'last_login': datetime.now().isoformat()
-            }
-            # Only save locally, never on production
-            save_json_db(USERS_FILE, users)
+        # NEVER modify data on production - Vercel's /tmp is ephemeral
+        # This was causing the data to appear/disappear constantly
+        # Admin user should be created through normal registration process
         
         # Ensure admin_actions is a list
         if isinstance(admin_actions, dict):
@@ -3459,7 +3443,16 @@ def admin_check_updates():
     if not session.get(f'is_admin_{ip_address}'):
         return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
     
-    # Get last check timestamp from request
+    # DISABLE on production - causes data consistency issues
+    if IS_VERCEL or IS_PRODUCTION:
+        return jsonify({
+            'status': 'success',
+            'has_changes': False,
+            'state_hash': 'production-disabled',
+            'stats': {}
+        })
+    
+    # Only run on local
     last_check = request.args.get('last_check', '')
     
     # Calculate current data hash
