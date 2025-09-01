@@ -735,7 +735,7 @@
                 <div class="header-actions">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-right: 1rem;">
                         <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                            <input type="checkbox" id="autoRefreshToggle" checked style="cursor: pointer;">
+                            <input type="checkbox" id="autoRefreshToggle" style="cursor: pointer;">
                             <span style="color: #22c55e; font-size: 0.9rem;">Live</span>
                         </label>
                         <span id="liveIndicator" style="display: flex; align-items: center; gap: 0.3rem;">
@@ -2756,8 +2756,10 @@
                 }
             });
             
-            // Start auto-refresh by default
-            startAutoRefresh();
+            // DISABLE auto-refresh on production - causing data loss
+            if (!isProduction) {
+                startAutoRefresh();
+            }
             
             // Update time display every second
             setInterval(updateLastUpdateTime, 1000);
