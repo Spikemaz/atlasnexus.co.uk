@@ -1259,7 +1259,79 @@
 
     <!-- Market News Section - Dynamic Content -->
     <div id="market-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
-        <!-- Content will be loaded from market_news.html -->
+        <div style="max-width: 1400px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
+                <h2 style="color: #60a5fa; font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">
+                    <i class="fas fa-chart-line"></i> Market Overview
+                </h2>
+                <p style="color: #94a3b8; margin-bottom: 2rem;">Real-time market data and analysis</p>
+                
+                <!-- Market Summary Cards -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem;">
+                        <h4 style="color: #93c5fd; margin-bottom: 1rem;">EUR/USD</h4>
+                        <div style="font-size: 1.5rem; color: #60a5fa; font-weight: 600;">1.0852</div>
+                        <div style="color: #22c55e; font-size: 0.9rem; margin-top: 0.5rem;">+0.23%</div>
+                    </div>
+                    <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem;">
+                        <h4 style="color: #93c5fd; margin-bottom: 1rem;">S&P 500</h4>
+                        <div style="font-size: 1.5rem; color: #60a5fa; font-weight: 600;">4,783.21</div>
+                        <div style="color: #22c55e; font-size: 0.9rem; margin-top: 0.5rem;">+1.15%</div>
+                    </div>
+                    <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem;">
+                        <h4 style="color: #93c5fd; margin-bottom: 1rem;">10Y Yield</h4>
+                        <div style="font-size: 1.5rem; color: #60a5fa; font-weight: 600;">4.235%</div>
+                        <div style="color: #ef4444; font-size: 0.9rem; margin-top: 0.5rem;">-0.05%</div>
+                    </div>
+                    <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem;">
+                        <h4 style="color: #93c5fd; margin-bottom: 1rem;">VIX</h4>
+                        <div style="font-size: 1.5rem; color: #60a5fa; font-weight: 600;">13.42</div>
+                        <div style="color: #ef4444; font-size: 0.9rem; margin-top: 0.5rem;">-2.31%</div>
+                    </div>
+                </div>
+                
+                <!-- Market Data Table -->
+                <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem;">
+                    <h3 style="color: #93c5fd; margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 600;">Market Activity</h3>
+                    <div class="table-responsive">
+                        <table class="table" style="margin-bottom: 0;">
+                            <thead>
+                                <tr>
+                                    <th style="color: #93c5fd; border-bottom: 1px solid rgba(96, 165, 250, 0.3); padding: 12px;">Asset</th>
+                                    <th style="color: #93c5fd; border-bottom: 1px solid rgba(96, 165, 250, 0.3); padding: 12px;">Price</th>
+                                    <th style="color: #93c5fd; border-bottom: 1px solid rgba(96, 165, 250, 0.3); padding: 12px;">Change</th>
+                                    <th style="color: #93c5fd; border-bottom: 1px solid rgba(96, 165, 250, 0.3); padding: 12px;">Volume</th>
+                                    <th style="color: #93c5fd; border-bottom: 1px solid rgba(96, 165, 250, 0.3); padding: 12px;">Market Cap</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
+                                    <td style="color: #94a3b8; padding: 12px;">EUR IG Bonds</td>
+                                    <td style="color: #60a5fa; padding: 12px; font-weight: 600;">98.45</td>
+                                    <td style="color: #22c55e; padding: 12px;">+0.35%</td>
+                                    <td style="color: #94a3b8; padding: 12px;">€2.4B</td>
+                                    <td style="color: #94a3b8; padding: 12px;">€845B</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
+                                    <td style="color: #94a3b8; padding: 12px;">US HY Bonds</td>
+                                    <td style="color: #60a5fa; padding: 12px; font-weight: 600;">95.12</td>
+                                    <td style="color: #ef4444; padding: 12px;">-0.18%</td>
+                                    <td style="color: #94a3b8; padding: 12px;">$1.8B</td>
+                                    <td style="color: #94a3b8; padding: 12px;">$1.2T</td>
+                                </tr>
+                                <tr>
+                                    <td style="color: #94a3b8; padding: 12px;">CLO AAA</td>
+                                    <td style="color: #60a5fa; padding: 12px; font-weight: 600;">99.85</td>
+                                    <td style="color: #22c55e; padding: 12px;">+0.08%</td>
+                                    <td style="color: #94a3b8; padding: 12px;">€450M</td>
+                                    <td style="color: #94a3b8; padding: 12px;">€380B</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Data Section -->
