@@ -5284,8 +5284,178 @@
         }
     }
 
-    // Create new project
-    async function createNewProject() {
+    // Series Modal Functions
+    function showSeriesModal() {
+        const modal = document.getElementById('series-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            const nameInput = document.getElementById('series-name');
+            if (nameInput) nameInput.focus();
+            
+            // Add color selection listeners
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.onclick = function() {
+                    document.querySelectorAll('.color-option').forEach(opt => {
+                        opt.style.border = '3px solid transparent';
+                    });
+                    this.style.border = '3px solid white';
+                    const radio = this.previousElementSibling;
+                    if (radio) radio.checked = true;
+                };
+            });
+            
+            // Set default selection
+            const defaultColor = document.querySelector('.color-option[data-color="purple"]');
+            if (defaultColor) defaultColor.style.border = '3px solid white';
+        }
+    }
+    
+    function closeSeriesModal() {
+        const modal = document.getElementById('series-modal');
+        if (modal) modal.style.display = 'none';
+        const form = document.getElementById('series-form');
+        if (form) form.reset();
+    }
+    
+    function createSeries(event) {
+        event.preventDefault();
+        
+        const name = document.getElementById('series-name').value;
+        const description = document.getElementById('series-description').value;
+        const colorInput = document.querySelector('input[name="series-color"]:checked');
+        const color = colorInput ? colorInput.value : 'purple';
+        
+        const newSeries = {
+            id: 'series-' + Date.now(),
+            name: name,
+            description: description,
+            color: color,
+            projects: [],
+            order: seriesData.length,
+            expanded: true
+        };
+        
+        seriesData.push(newSeries);
+        closeSeriesModal();
+        renderProjects();
+        saveSeriesData();
+    }
+    
+    // Project Edit Modal Functions
+    function showProjectEditModal(projectId) {
+        const project = findProjectById(projectId);
+        if (!project) return;
+        
+        currentEditingProject = project;
+        const modal = document.getElementById('project-edit-modal');
+        if (!modal) return;
+        
+        // Populate form with project data
+        const titleInput = document.getElementById('edit-project-title');
+        const statusInput = document.getElementById('edit-project-status');
+        const descInput = document.getElementById('edit-project-description');
+        const valueInput = document.getElementById('edit-project-value');
+        const progressInput = document.getElementById('edit-project-progress');
+        const detailsInput = document.getElementById('edit-project-details');
+        
+        if (titleInput) titleInput.value = project.title || '';
+        if (statusInput) statusInput.value = project.status || 'draft';
+        if (descInput) descInput.value = project.description || '';
+        if (valueInput) valueInput.value = project.value || 0;
+        if (progressInput) progressInput.value = project.progress || 0;
+        if (detailsInput) detailsInput.value = project.details || '';
+        
+        modal.style.display = 'flex';
+    }
+    
+    function closeProjectEditModal() {
+        const modal = document.getElementById('project-edit-modal');
+        if (modal) modal.style.display = 'none';
+        currentEditingProject = null;
+    }
+    
+    function saveProjectEdit(event) {
+        event.preventDefault();
+        
+        if (!currentEditingProject) return;
+        
+        // Update project data
+        currentEditingProject.title = document.getElementById('edit-project-title').value;
+        currentEditingProject.status = document.getElementById('edit-project-status').value;
+        currentEditingProject.description = document.getElementById('edit-project-description').value;
+        currentEditingProject.value = parseInt(document.getElementById('edit-project-value').value) || 0;
+        currentEditingProject.progress = parseInt(document.getElementById('edit-project-progress').value) || 0;
+        currentEditingProject.details = document.getElementById('edit-project-details').value;
+        
+        closeProjectEditModal();
+        renderProjects();
+        updateProjectStats();
+        saveSeriesData();
+    }
+    
+    // Helper function to find project by ID
+    function findProjectById(projectId) {
+        // Search in standalone projects
+        let project = projectsData.find(p => p.id === projectId);
+        if (project) return project;
+        
+        // Search in series
+        for (const series of seriesData) {
+            project = series.projects.find(p => p.id === projectId);
+            if (project) return project;
+        }
+        
+        return null;
+    }
+    
+    // Toggle series expand/collapse
+    function toggleSeriesExpand(seriesId) {
+        const series = seriesData.find(s => s.id === seriesId);
+        if (series) {
+            series.expanded = !series.expanded;
+            renderProjects();
+            saveSeriesData();
+        }
+    }
+    
+    // Delete project
+    function deleteProject(projectId, seriesId = null) {
+        if (!confirm('Are you sure you want to delete this project?')) return;
+        
+        if (seriesId) {
+            const series = seriesData.find(s => s.id === seriesId);
+            if (series) {
+                series.projects = series.projects.filter(p => p.id !== projectId);
+            }
+        } else {
+            projectsData = projectsData.filter(p => p.id !== projectId);
+        }
+        
+        renderProjects();
+        updateProjectStats();
+        saveSeriesData();
+    }
+    
+    // Save series data
+    async function saveSeriesData() {
+        try {
+            // Save to localStorage for persistence
+            localStorage.setItem('seriesData', JSON.stringify(seriesData));
+            localStorage.setItem('projectsData', JSON.stringify(projectsData));
+            
+            // Optionally save to backend
+            await fetch('/api/series', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ series: seriesData, projects: projectsData })
+            });
+        } catch (error) {
+            console.error('Error saving series data:', error);
+        }
+    }
+    
+    // Create new project (with series support)
+    async function createNewProject(seriesId = null) {
         try {
             const response = await fetch('/api/projects', {
                 method: 'POST',
@@ -5294,10 +5464,11 @@
                 },
                 body: JSON.stringify({
                     title: 'New Project',
-                    description: 'Project description',
+                    description: 'Click edit to configure this project',
                     status: 'draft',
                     value: 0,
-                    progress: 0
+                    progress: 0,
+                    seriesId: seriesId
                 })
             });
 
@@ -5315,9 +5486,20 @@
                     status: 'draft',
                     value: 0,
                     progress: 0,
-                    order: projectsData.length
+                    order: seriesId ? 0 : projectsData.length
                 };
-                projectsData.push(newProject);
+                
+                if (seriesId) {
+                    // Add to series
+                    const series = seriesData.find(s => s.id === seriesId);
+                    if (series) {
+                        newProject.order = series.projects.length;
+                        series.projects.push(newProject);
+                    }
+                } else {
+                    // Add as standalone project
+                    projectsData.push(newProject);
+                }
                 
                 // Hide empty state if this is the first project
                 document.getElementById('projects-empty').style.display = 'none';
@@ -6076,6 +6258,28 @@
 
     // Initialize projects when projects section is shown
     document.addEventListener('DOMContentLoaded', function() {
+        // Load saved series data from localStorage
+        const savedSeries = localStorage.getItem('seriesData');
+        const savedProjects = localStorage.getItem('projectsData');
+        
+        if (savedSeries) {
+            try {
+                seriesData = JSON.parse(savedSeries);
+            } catch (e) {
+                console.error('Error loading series data:', e);
+                seriesData = [];
+            }
+        }
+        
+        if (savedProjects) {
+            try {
+                projectsData = JSON.parse(savedProjects);
+            } catch (e) {
+                console.error('Error loading projects data:', e);
+                projectsData = [];
+            }
+        }
+        
         // Override the showSection function to initialize projects
         const originalShowSection = window.showSection;
         window.showSection = function(sectionId) {
