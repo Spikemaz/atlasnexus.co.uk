@@ -65,7 +65,8 @@
       "Bash(git rm:*)",
       "WebFetch(domain:vercel.com)",
       "WebSearch",
-      "Bash(start https://vercel.com/account/billing)"
+      "Bash(start https://vercel.com/account/billing)",
+      "Bash(start https://vercel.com/marcus-moores-projects/atlasnexus-securitization/stores)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"

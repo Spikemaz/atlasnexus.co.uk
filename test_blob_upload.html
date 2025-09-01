@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Blob Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #fff;
+        }
+        .upload-container {
+            background: #0f0f23;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #16213e;
+        }
+        h1 {
+            color: #00ff88;
+            margin-bottom: 30px;
+        }
+        .upload-form {
+            margin-bottom: 30px;
+        }
+        input[type="file"] {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 10px;
+            border: 1px solid #16213e;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        button {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);
+            color: #0f0f23;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .status.success {
+            background: #00ff8820;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+        .status.error {
+            background: #ff445520;
+            border: 1px solid #ff4455;
+            color: #ff4455;
+        }
+        .document-list {
+            margin-top: 30px;
+        }
+        .document-item {
+            background: #1a1a2e;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .document-info a {
+            color: #00ff88;
+            text-decoration: none;
+        }
+        .document-info a:hover {
+            text-decoration: underline;
+        }
+        .delete-btn {
+            background: #ff4455;
+            padding: 5px 15px;
+            font-size: 14px;
+        }
+        .delete-btn:hover {
+            background: #ff6677;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h1>Vercel Blob Storage Test</h1>
+        
+        <div class="upload-form">
+            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg">
+            <button onclick="uploadFile()" id="uploadBtn">Upload Document</button>
+        </div>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="document-list">
+            <h2>Your Documents</h2>
+            <div id="documentsList"></div>
+        </div>
+    </div>
+
+    <script>
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const statusDiv = document.getElementById('status');
+            const uploadBtn = document.getElementById('uploadBtn');
+            
+            if (!file) {
+                showStatus('Please select a file', 'error');
+                return;
+            }
+            
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/api/documents/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.status === 'success') {
+                    showStatus(`Success! Document uploaded: ${result.document.filename}`, 'success');
+                    fileInput.value = '';
+                    loadDocuments();
+                } else {
+                    showStatus(`Error: ${result.message || 'Upload failed'}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload Document';
+            }
+        }
+        
+        async function loadDocuments() {
+            try {
+                const response = await fetch('/api/documents/list');
+                const result = await response.json();
+                
+                const listDiv = document.getElementById('documentsList');
+                
+                if (result.status === 'success' && result.documents) {
+                    if (result.documents.length === 0) {
+                        listDiv.innerHTML = '<p>No documents uploaded yet</p>';
+                    } else {
+                        listDiv.innerHTML = result.documents.map(doc => `
+                            <div class="document-item">
+                                <div class="document-info">
+                                    <a href="${doc.url}" target="_blank">${doc.original_name || doc.pathname}</a>
+                                    <br>
+                                    <small>Size: ${formatSize(doc.size)} | Uploaded: ${new Date(doc.uploaded_at).toLocaleString()}</small>
+                                </div>
+                                <button class="delete-btn" onclick="deleteDocument('${doc.url}')">Delete</button>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    listDiv.innerHTML = '<p>Unable to load documents</p>';
+                }
+            } catch (error) {
+                console.error('Error loading documents:', error);
+            }
+        }
+        
+        async function deleteDocument(url) {
+            if (!confirm('Are you sure you want to delete this document?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/documents/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.status === 'success') {
+                    showStatus('Document deleted successfully', 'success');
+                    loadDocuments();
+                } else {
+                    showStatus(`Error: ${result.message || 'Delete failed'}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        
+        // Load documents on page load
+        loadDocuments();
+    </script>
+</body>
+</html>

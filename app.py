@@ -41,6 +41,15 @@ except ImportError:
     CLOUD_DB_AVAILABLE = False
     print("[DATABASE] Cloud database module not available - using local files")
 
+# Import Blob storage for file uploads
+try:
+    from blob_storage import blob_storage, upload_document, get_user_documents, delete_document
+    BLOB_STORAGE_AVAILABLE = True
+    print("[BLOB] Blob storage module loaded")
+except ImportError:
+    BLOB_STORAGE_AVAILABLE = False
+    print("[BLOB] Blob storage module not available")
+
 # Try to import securitization_engine if available
 try:
     from securitization_engine import run_securitization_calculation
@@ -4623,6 +4632,143 @@ def save_theme():
     session[f'theme_{ip_address}'] = theme
     
     return jsonify({'status': 'success', 'theme': theme})
+
+# ==================== DOCUMENT UPLOAD WITH BLOB STORAGE ====================
+@app.route('/api/documents/upload', methods=['POST'])
+def upload_document_endpoint():
+    """Upload a document to Vercel Blob Storage"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+    
+    # Check if Blob storage is available
+    if not BLOB_STORAGE_AVAILABLE:
+        return jsonify({'status': 'error', 'message': 'Document storage not configured'}), 503
+    
+    if 'file' not in request.files:
+        return jsonify({'status': 'error', 'message': 'No file uploaded'}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({'status': 'error', 'message': 'No file selected'}), 400
+    
+    # Get user info
+    user_email = session.get(f'user_email_{ip_address}')
+    username = session.get(f'username_{ip_address}')
+    
+    try:
+        # Read file data
+        file_data = file.read()
+        filename = secure_filename(file.filename)
+        content_type = file.content_type or 'application/octet-stream'
+        
+        # Upload to Blob storage
+        result = upload_document(file_data, filename, user_email, content_type)
+        
+        if result:
+            # Log the upload
+            print(f"[DOCUMENT] User {user_email} uploaded {filename}")
+            
+            # Add to admin actions if available
+            if CLOUD_DB_AVAILABLE:
+                try:
+                    db_add_admin_action({
+                        'action': 'document_upload',
+                        'user': user_email,
+                        'filename': filename,
+                        'size': len(file_data),
+                        'timestamp': datetime.now().isoformat()
+                    })
+                except:
+                    pass
+            
+            return jsonify({
+                'status': 'success',
+                'message': 'Document uploaded successfully',
+                'document': {
+                    'url': result['url'],
+                    'filename': filename,
+                    'size': result['size'],
+                    'uploaded_at': result['uploaded_at']
+                }
+            })
+        else:
+            return jsonify({'status': 'error', 'message': 'Failed to upload document'}), 500
+            
+    except Exception as e:
+        print(f"[ERROR] Document upload failed: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/documents/list', methods=['GET'])
+def list_user_documents():
+    """List all documents for the current user"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+    
+    # Check if Blob storage is available
+    if not BLOB_STORAGE_AVAILABLE:
+        return jsonify({'status': 'error', 'message': 'Document storage not configured'}), 503
+    
+    user_email = session.get(f'user_email_{ip_address}')
+    
+    try:
+        # Get user documents from Blob storage
+        documents = get_user_documents(user_email)
+        
+        return jsonify({
+            'status': 'success',
+            'documents': documents
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Failed to list documents: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/documents/delete', methods=['POST'])
+def delete_document_endpoint():
+    """Delete a document from Blob Storage"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+    
+    # Check if Blob storage is available
+    if not BLOB_STORAGE_AVAILABLE:
+        return jsonify({'status': 'error', 'message': 'Document storage not configured'}), 503
+    
+    data = request.json
+    document_url = data.get('url')
+    
+    if not document_url:
+        return jsonify({'status': 'error', 'message': 'Document URL required'}), 400
+    
+    user_email = session.get(f'user_email_{ip_address}')
+    
+    try:
+        # Delete from Blob storage
+        success = delete_document(document_url)
+        
+        if success:
+            # Log the deletion
+            print(f"[DOCUMENT] User {user_email} deleted document")
+            
+            return jsonify({
+                'status': 'success',
+                'message': 'Document deleted successfully'
+            })
+        else:
+            return jsonify({'status': 'error', 'message': 'Failed to delete document'}), 500
+            
+    except Exception as e:
+        print(f"[ERROR] Document deletion failed: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/admin-panel')
 def admin_panel():
