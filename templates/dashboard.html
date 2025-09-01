@@ -6170,10 +6170,62 @@
             }
             
             console.log('Data saved to cloud successfully');
+            
+            // Show a subtle success indicator
+            showSaveIndicator('success');
         } catch (error) {
             console.error('Error saving data:', error);
+            showSaveIndicator('error');
             alert('Failed to save changes. Please check your connection and try again.');
         }
+    }
+    
+    // Show save status indicator
+    function showSaveIndicator(status) {
+        // Create or get save indicator
+        let indicator = document.getElementById('save-indicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'save-indicator';
+            indicator.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                z-index: 10000;
+                transition: all 0.3s ease;
+                opacity: 0;
+                transform: translateY(-20px);
+            `;
+            document.body.appendChild(indicator);
+        }
+        
+        // Set status styles
+        if (status === 'success') {
+            indicator.style.background = 'rgba(34, 197, 94, 0.9)';
+            indicator.style.border = '1px solid rgba(34, 197, 94, 0.5)';
+            indicator.textContent = '✓ Saved to cloud';
+        } else if (status === 'error') {
+            indicator.style.background = 'rgba(239, 68, 68, 0.9)';
+            indicator.style.border = '1px solid rgba(239, 68, 68, 0.5)';
+            indicator.textContent = '✗ Save failed';
+        } else if (status === 'saving') {
+            indicator.style.background = 'rgba(96, 165, 250, 0.9)';
+            indicator.style.border = '1px solid rgba(96, 165, 250, 0.5)';
+            indicator.textContent = '↻ Saving...';
+        }
+        
+        // Show indicator
+        indicator.style.opacity = '1';
+        indicator.style.transform = 'translateY(0)';
+        
+        // Hide after 2 seconds
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            indicator.style.transform = 'translateY(-20px)';
+        }, 2000);
     }
     
     // Create new project (with series support)
@@ -7274,9 +7326,35 @@
         window.showSection = function(sectionId) {
             originalShowSection(sectionId);
             if (sectionId === 'projects') {
+                // Always reload from cloud when switching to projects tab
                 setTimeout(initializeProjects, 100);
             }
         };
+        
+        // Auto-reload data when page becomes visible (user returns to tab)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // Page is now visible - reload if on projects section
+                const projectsSection = document.getElementById('projects-section');
+                if (projectsSection && projectsSection.style.display !== 'none') {
+                    console.log('Page became visible, reloading projects from cloud...');
+                    loadProjects();
+                }
+            }
+        });
+        
+        // Also reload on window focus (when user switches back to this window)
+        window.addEventListener('focus', function() {
+            const projectsSection = document.getElementById('projects-section');
+            if (projectsSection && projectsSection.style.display !== 'none') {
+                console.log('Window focused, checking for updates...');
+                // Debounce to avoid multiple reloads
+                clearTimeout(window.reloadTimeout);
+                window.reloadTimeout = setTimeout(() => {
+                    loadProjects();
+                }, 500);
+            }
+        });
     });
     
     function showProjectSpecifications(projectId = null, mode = 'new') {
