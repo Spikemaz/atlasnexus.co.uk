@@ -1735,7 +1735,7 @@
     <div id="projects-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div style="max-width: 1400px; margin: 0 auto;">
             <!-- Collapsible Project Editor Section -->
-            <div id="project-editor-section" style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem; display: none;">
+            <div id="project-editor-section" style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #60a5fa; border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; display: none; position: relative; z-index: 10;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="color: #60a5fa; font-size: 1.5rem; font-weight: 700; margin: 0;">
                         <i class="fas fa-edit"></i> <span id="project-editor-title">Edit Project</span>
@@ -1744,7 +1744,7 @@
                         <i class="fas fa-times"></i> Close
                     </button>
                 </div>
-                <div id="project-editor-content" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 0; min-height: 800px;">
+                <div id="project-editor-content" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 0; min-height: calc(100vh - 300px); height: calc(100vh - 300px); overflow: hidden;">
                     <!-- Project editor iframe will be inserted here -->
                 </div>
             </div>
@@ -5676,13 +5676,22 @@
         if (mode) params.push('mode=' + mode);
         if (params.length > 0) url += '?' + params.join('&');
         
+        // Calculate optimal height based on viewport
+        const viewportHeight = window.innerHeight;
+        const headerHeight = 250; // Approximate header and padding
+        const optimalHeight = Math.max(600, viewportHeight - headerHeight);
+        
+        // Update container height
+        projectEditorContent.style.height = `${optimalHeight}px`;
+        projectEditorContent.style.minHeight = `${optimalHeight}px`;
+        
         // Create or update iframe in the content area
         let iframe = projectEditorContent.querySelector('iframe');
         if (!iframe) {
             iframe = document.createElement('iframe');
             iframe.style.cssText = `
                 width: 100%;
-                height: 800px;
+                height: 100%;
                 border: none;
                 border-radius: 8px;
                 background: white;
@@ -5697,6 +5706,18 @@
         
         // Scroll to the editor section
         projectEditorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Add resize listener to adjust on window resize
+        const resizeHandler = () => {
+            const newHeight = Math.max(600, window.innerHeight - headerHeight);
+            projectEditorContent.style.height = `${newHeight}px`;
+            projectEditorContent.style.minHeight = `${newHeight}px`;
+        };
+        
+        // Remove any existing resize listener and add new one
+        window.removeEventListener('resize', window.projectEditorResizeHandler);
+        window.projectEditorResizeHandler = resizeHandler;
+        window.addEventListener('resize', resizeHandler);
     }
     
     function closeProjectEditor() {
@@ -5710,6 +5731,12 @@
         const iframe = projectEditorContent.querySelector('iframe');
         if (iframe) {
             iframe.src = 'about:blank';
+        }
+        
+        // Remove resize listener
+        if (window.projectEditorResizeHandler) {
+            window.removeEventListener('resize', window.projectEditorResizeHandler);
+            window.projectEditorResizeHandler = null;
         }
     }
     
