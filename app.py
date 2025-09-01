@@ -5386,10 +5386,8 @@ def permutation_engine():
     if not is_internal:
         return redirect(url_for('dashboard'))
     
-    # Use V2 if available, otherwise fall back to original
-    template_name = 'permutation_engine_v2.html' if os.path.exists(os.path.join(app.template_folder, 'permutation_engine_v2.html')) else 'permutation_engine.html'
-    
-    return render_template(template_name, 
+    # Always use V2 as the main permutation engine
+    return render_template('permutation_engine_v2.html', 
                          is_admin=is_admin,
                          is_internal=is_internal,
                          account_type=account_type,

@@ -13,14 +13,14 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-            color: #E2E8F0;
+            background: #1A1D23;
+            color: #E5E9F0;
             min-height: 100vh;
         }
 
         .header {
-            background: rgba(15, 23, 42, 0.95);
-            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            background: linear-gradient(135deg, rgba(20, 25, 45, 0.95) 0%, rgba(10, 15, 30, 0.95) 100%);
+            border-bottom: 1px solid rgba(96, 165, 250, 0.2);
             padding: 1.5rem 2rem;
             backdrop-filter: blur(10px);
         }
@@ -34,10 +34,9 @@
         }
 
         .logo h1 {
-            font-size: 1.5rem;
-            background: linear-gradient(90deg, #6366f1, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 1.8rem;
+            color: #60a5fa;
+            text-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
         }
 
         .container {
@@ -54,14 +53,14 @@
             padding: 1rem;
             background: rgba(30, 41, 59, 0.5);
             border-radius: 12px;
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.2);
         }
 
         .step-btn {
             flex: 1;
             padding: 1rem;
             background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 8px;
             color: #94a3b8;
             cursor: pointer;
@@ -73,9 +72,9 @@
         }
 
         .step-btn.active {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
             color: white;
-            border-color: #6366f1;
+            border-color: #60a5fa;
         }
 
         .step-btn.completed {
@@ -87,7 +86,7 @@
             width: 30px;
             height: 30px;
             border-radius: 50%;
-            background: rgba(99, 102, 241, 0.2);
+            background: rgba(96, 165, 250, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -96,7 +95,7 @@
 
         .step-btn.active .step-number {
             background: white;
-            color: #6366f1;
+            color: #60a5fa;
         }
 
         .step-btn.completed .step-number {
@@ -133,7 +132,7 @@
         /* Cards */
         .card {
             background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 12px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
@@ -152,7 +151,7 @@
         .card-header .icon {
             width: 24px;
             height: 24px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -170,7 +169,7 @@
         .project-dropdown {
             padding: 0.75rem 1rem;
             background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(99, 102, 241, 0.3);
+            border: 1px solid rgba(96, 165, 250, 0.3);
             border-radius: 8px;
             color: #e2e8f0;
             font-size: 1rem;
@@ -178,7 +177,7 @@
 
         .import-btn {
             padding: 0.75rem 2rem;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
             color: white;
             border: none;
             border-radius: 8px;
@@ -189,7 +188,7 @@
 
         .import-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 10px 20px rgba(96, 165, 250, 0.3);
         }
 
         /* Fixed Inputs Display */
@@ -203,7 +202,7 @@
             padding: 1rem;
             background: rgba(15, 23, 42, 0.5);
             border-radius: 8px;
-            border: 1px solid rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.1);
         }
 
         .fixed-input-label {
@@ -268,15 +267,15 @@
             background: rgba(30, 41, 59, 0.3);
             border-radius: 12px;
             padding: 1.5rem;
-            border: 1px solid rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(96, 165, 250, 0.15);
         }
 
         .category-title {
             font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 1.25rem;
-            color: #6366f1;
-            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            color: #60a5fa;
+            border-bottom: 1px solid rgba(96, 165, 250, 0.2);
             padding-bottom: 0.5rem;
         }
 
@@ -296,7 +295,7 @@
         .range-input {
             padding: 0.5rem 0.75rem;
             background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 6px;
             color: #e2e8f0;
             font-size: 0.9rem;
@@ -304,13 +303,13 @@
 
         .range-input:focus {
             outline: none;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
         }
 
         .steps-display {
             padding: 0.5rem 0.75rem;
-            background: rgba(99, 102, 241, 0.1);
+            background: rgba(96, 165, 250, 0.1);
             border-radius: 6px;
             text-align: center;
             color: #94a3b8;
@@ -379,24 +378,24 @@
         }
 
         .results-table th {
-            background: rgba(99, 102, 241, 0.1);
+            background: rgba(96, 165, 250, 0.1);
             padding: 0.75rem;
             text-align: left;
             font-size: 0.85rem;
-            color: #6366f1;
-            border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+            color: #60a5fa;
+            border-bottom: 2px solid rgba(96, 165, 250, 0.2);
             position: sticky;
             top: 0;
         }
 
         .results-table td {
             padding: 0.75rem;
-            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+            border-bottom: 1px solid rgba(96, 165, 250, 0.1);
             font-size: 0.9rem;
         }
 
         .results-table tr:hover {
-            background: rgba(99, 102, 241, 0.05);
+            background: rgba(96, 165, 250, 0.05);
         }
 
         .viable {
@@ -414,26 +413,26 @@
             justify-content: space-between;
             margin-top: 2rem;
             padding-top: 2rem;
-            border-top: 1px solid rgba(99, 102, 241, 0.2);
+            border-top: 1px solid rgba(96, 165, 250, 0.2);
         }
 
         .nav-btn {
             padding: 0.75rem 1.5rem;
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.3);
+            background: rgba(96, 165, 250, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.3);
             border-radius: 8px;
-            color: #6366f1;
+            color: #60a5fa;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s ease;
         }
 
         .nav-btn:hover {
-            background: rgba(99, 102, 241, 0.2);
+            background: rgba(96, 165, 250, 0.2);
         }
 
         .nav-btn.primary {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
             color: white;
             border: none;
         }
@@ -453,7 +452,7 @@
             background: rgba(15, 23, 42, 0.95);
             padding: 2rem;
             border-radius: 12px;
-            border: 1px solid rgba(99, 102, 241, 0.3);
+            border: 1px solid rgba(96, 165, 250, 0.3);
             z-index: 1000;
         }
 
@@ -464,8 +463,8 @@
         .spinner {
             width: 50px;
             height: 50px;
-            border: 3px solid rgba(99, 102, 241, 0.2);
-            border-top-color: #6366f1;
+            border: 3px solid rgba(96, 165, 250, 0.2);
+            border-top-color: #60a5fa;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 1rem;
@@ -481,10 +480,11 @@
         <div class="header-content">
             <div class="logo">
                 <h1>PERMUTATION ENGINE V2</h1>
+                <!-- Updated: Deploy trigger -->
             </div>
             <div id="user-info" style="display: flex; align-items: center; gap: 1rem;">
                 <span id="username" style="color: #94a3b8;"></span>
-                <button onclick="window.location.href='/dashboard'" style="padding: 0.5rem 1rem; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 6px; color: #6366f1; cursor: pointer;">
+                <button onclick="window.location.href='/dashboard'" style="padding: 0.5rem 1rem; background: rgba(96, 165, 250, 0.2); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #60a5fa; cursor: pointer;">
                     Back to Dashboard
                 </button>
             </div>
@@ -530,7 +530,7 @@
                     <button class="import-btn" onclick="importProject()">Import Fixed Inputs</button>
                 </div>
                 <div id="project-info" style="display: none;">
-                    <h3 style="margin: 1.5rem 0 1rem; color: #6366f1;">Fixed Inputs from Project</h3>
+                    <h3 style="margin: 1.5rem 0 1rem; color: #60a5fa;">Fixed Inputs from Project</h3>
                     <div class="fixed-inputs-grid" id="fixed-inputs-display"></div>
                 </div>
             </div>
