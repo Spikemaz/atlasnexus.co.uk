@@ -576,6 +576,73 @@
                 display: none !important;
             }
         }
+
+        /* Smooth Drag and Drop Styles */
+        .project-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .project-card.dragging {
+            opacity: 0.4 !important;
+            transform: rotate(5deg) scale(1.05) !important;
+            z-index: 1000 !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+            cursor: grabbing !important;
+        }
+
+        .project-card.drag-over-top {
+            transform: translateY(-10px) !important;
+            border-top: 3px solid rgba(96, 165, 250, 0.8) !important;
+            box-shadow: 0 -5px 15px rgba(96, 165, 250, 0.4) !important;
+        }
+
+        .project-card.drag-over-bottom {
+            transform: translateY(10px) !important;
+            border-bottom: 3px solid rgba(96, 165, 250, 0.8) !important;
+            box-shadow: 0 5px 15px rgba(96, 165, 250, 0.4) !important;
+        }
+
+        /* Global styles when dragging is active */
+        .projects-grid.dragging-active .project-card:not(.dragging) {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .projects-grid.dragging-active .project-card:not(.dragging):hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(96, 165, 250, 0.2);
+        }
+
+        /* Drag placeholder styles */
+        .drag-placeholder {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            border: 2px dashed rgba(96, 165, 250, 0.6) !important;
+            border-radius: 12px !important;
+            background: rgba(96, 165, 250, 0.1) !important;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(96, 165, 250, 0.3);
+                border-color: rgba(96, 165, 250, 0.6);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(96, 165, 250, 0.5);
+                border-color: rgba(96, 165, 250, 0.8);
+            }
+        }
+
+        /* Smooth scrolling for better UX during drag */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Enhanced feedback on card hover when not dragging */
+        .project-card:not(.dragging):hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 10px 30px rgba(96, 165, 250, 0.3) !important;
+        }
     </style>
 </head>
 <body>
@@ -1657,6 +1724,21 @@
     <!-- Projects Section -->
     <div id="projects-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div style="max-width: 1400px; margin: 0 auto;">
+            <!-- Collapsible Project Editor Section -->
+            <div id="project-editor-section" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem; display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="color: #60a5fa; font-size: 1.5rem; font-weight: 700; margin: 0;">
+                        <i class="fas fa-edit"></i> <span id="project-editor-title">Edit Project</span>
+                    </h2>
+                    <button onclick="closeProjectEditor()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 0.9rem; cursor: pointer;">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+                <div id="project-editor-content" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; min-height: 400px;">
+                    <!-- Project editor iframe will be inserted here -->
+                </div>
+            </div>
+
             <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
                 <!-- Header with Create Button on the right -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
@@ -1689,11 +1771,7 @@
                     </button>
                 </div>
                 
-                <!-- Drop Zone Indicator -->
-                <div id="drop-zone-indicator" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(96, 165, 250, 0.9); color: white; padding: 2rem; border-radius: 12px; z-index: 1000; text-align: center; pointer-events: none;">
-                    <i class="fas fa-hand-paper" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                    <p style="font-size: 1.2rem; font-weight: 600;">Drop to reorder projects</p>
-                </div>
+                <!-- Old drop zone indicator removed - now using inline placeholders -->
                 
                 <!-- Project Statistics -->
                 <div id="project-stats" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem;">
@@ -1709,9 +1787,9 @@
                         <p style="color: #93c5fd; font-size: 0.9rem; margin-bottom: 0.5rem;">Total Value</p>
                         <p id="total-value" style="color: #60a5fa; font-size: 2rem; font-weight: 700;">€0</p>
                     </div>
-                    <div style="background: rgba(107, 114, 128, 0.1); border: 1px solid rgba(107, 114, 128, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                    <div style="background: rgba(100, 116, 139, 0.1); border: 1px solid rgba(100, 116, 139, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
                         <p style="color: #9ca3af; font-size: 0.9rem; margin-bottom: 0.5rem;">Drafts</p>
-                        <p id="draft-count" style="color: #6b7280; font-size: 2rem; font-weight: 700;">0</p>
+                        <p id="draft-count" style="color: #64748b; font-size: 2rem; font-weight: 700;">0</p>
                     </div>
                 </div>
             </div>
@@ -1730,8 +1808,8 @@
                 <!-- Document Categories -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
                     <!-- Legal Documents -->
-                    <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
-                        <h3 style="color: #ffd700; font-size: 1.25rem; margin-bottom: 1rem;">
+                    <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
+                        <h3 style="color: #60a5fa; font-size: 1.25rem; margin-bottom: 1rem;">
                             <i class="fas fa-gavel"></i> Legal Documents
                         </h3>
                         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -1748,8 +1826,8 @@
                     </div>
                     
                     <!-- Technical Documents -->
-                    <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
-                        <h3 style="color: #ffd700; font-size: 1.25rem; margin-bottom: 1rem;">
+                    <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
+                        <h3 style="color: #60a5fa; font-size: 1.25rem; margin-bottom: 1rem;">
                             <i class="fas fa-cogs"></i> Technical Specifications
                         </h3>
                         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -1766,8 +1844,8 @@
                     </div>
                     
                     <!-- Financial Documents -->
-                    <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
-                        <h3 style="color: #ffd700; font-size: 1.25rem; margin-bottom: 1rem;">
+                    <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
+                        <h3 style="color: #60a5fa; font-size: 1.25rem; margin-bottom: 1rem;">
                             <i class="fas fa-chart-line"></i> Financial Reports
                         </h3>
                         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -1785,7 +1863,7 @@
                 </div>
                 
                 <!-- Upload Section -->
-                <div style="background: rgba(26, 31, 58, 0.6); border: 2px dashed rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 2rem; text-align: center;">
+                <div style="background: rgba(30, 41, 59, 0.6); border: 2px dashed rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 2rem; text-align: center;">
                     <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #60a5fa; margin-bottom: 1rem;"></i>
                     <p style="color: #94a3b8; margin-bottom: 1rem;">Drag and drop files here or click to browse</p>
                     <button class="btn btn-primary" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.75rem 2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
@@ -1819,10 +1897,10 @@
                 </div>
                 
                 <!-- Timeline Content -->
-                <div id="timeline-content" style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; min-height: 400px;">
+                <div id="timeline-content" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; min-height: 400px;">
                     <!-- Phase Progress -->
                     <div style="margin-bottom: 2rem;">
-                        <h3 style="color: #ffd700; font-size: 1.25rem; margin-bottom: 1rem;">Current Phase: Development</h3>
+                        <h3 style="color: #60a5fa; font-size: 1.25rem; margin-bottom: 1rem;">Current Phase: Development</h3>
                         <div style="background: rgba(0, 0, 0, 0.3); border-radius: 10px; height: 30px; position: relative; overflow: hidden;">
                             <div style="background: linear-gradient(90deg, #60a5fa, #3b82f6); height: 100%; width: 65%; border-radius: 10px; position: relative;">
                                 <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: white; font-weight: 600;">65%</span>
@@ -1898,44 +1976,44 @@
                 
                 <!-- Report Types -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                    <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s;" 
+                    <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s;" 
                          onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='#60a5fa';" 
                          onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(96, 165, 250, 0.2)';">
                         <i class="fas fa-chart-bar" style="font-size: 2.5rem; color: #60a5fa; margin-bottom: 1rem;"></i>
-                        <h3 style="color: #ffd700; font-size: 1.125rem; margin-bottom: 0.5rem;">Progress Report</h3>
+                        <h3 style="color: #60a5fa; font-size: 1.125rem; margin-bottom: 0.5rem;">Progress Report</h3>
                         <p style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 1rem;">Weekly project progress summary</p>
                         <button class="btn btn-primary" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; font-size: 0.875rem;">
                             Generate Report
                         </button>
                     </div>
                     
-                    <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s;" 
+                    <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s;" 
                          onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='#60a5fa';" 
                          onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(96, 165, 250, 0.2)';">
                         <i class="fas fa-coins" style="font-size: 2.5rem; color: #60a5fa; margin-bottom: 1rem;"></i>
-                        <h3 style="color: #ffd700; font-size: 1.125rem; margin-bottom: 0.5rem;">Financial Report</h3>
+                        <h3 style="color: #60a5fa; font-size: 1.125rem; margin-bottom: 0.5rem;">Financial Report</h3>
                         <p style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 1rem;">Budget and expense analysis</p>
                         <button class="btn btn-primary" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; font-size: 0.875rem;">
                             Generate Report
                         </button>
                     </div>
                     
-                    <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s;" 
+                    <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s;" 
                          onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='#60a5fa';" 
                          onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(96, 165, 250, 0.2)';">
                         <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; color: #60a5fa; margin-bottom: 1rem;"></i>
-                        <h3 style="color: #ffd700; font-size: 1.125rem; margin-bottom: 0.5rem;">Risk Assessment</h3>
+                        <h3 style="color: #60a5fa; font-size: 1.125rem; margin-bottom: 0.5rem;">Risk Assessment</h3>
                         <p style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 1rem;">Identify and mitigate risks</p>
                         <button class="btn btn-primary" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; font-size: 0.875rem;">
                             Generate Report
                         </button>
                     </div>
                     
-                    <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s;" 
+                    <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s;" 
                          onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='#60a5fa';" 
                          onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(96, 165, 250, 0.2)';">
                         <i class="fas fa-file-alt" style="font-size: 2.5rem; color: #60a5fa; margin-bottom: 1rem;"></i>
-                        <h3 style="color: #ffd700; font-size: 1.125rem; margin-bottom: 0.5rem;">Executive Summary</h3>
+                        <h3 style="color: #60a5fa; font-size: 1.125rem; margin-bottom: 0.5rem;">Executive Summary</h3>
                         <p style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 1rem;">High-level project overview</p>
                         <button class="btn btn-primary" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; font-size: 0.875rem;">
                             Generate Report
@@ -1944,8 +2022,8 @@
                 </div>
                 
                 <!-- Recent Reports -->
-                <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
-                    <h3 style="color: #ffd700; font-size: 1.25rem; margin-bottom: 1rem;">
+                <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
+                    <h3 style="color: #60a5fa; font-size: 1.25rem; margin-bottom: 1rem;">
                         <i class="fas fa-history"></i> Recent Reports
                     </h3>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -2026,9 +2104,9 @@
                 </div>
                 
                 <!-- Support Tickets -->
-                <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h3 style="color: #ffd700; font-size: 1.25rem;">
+                        <h3 style="color: #60a5fa; font-size: 1.25rem;">
                             <i class="fas fa-ticket-alt"></i> Support Tickets
                         </h3>
                         <button class="btn btn-primary" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; font-size: 0.875rem;">
@@ -2064,8 +2142,8 @@
                 </div>
                 
                 <!-- FAQ Section -->
-                <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
-                    <h3 style="color: #ffd700; font-size: 1.25rem; margin-bottom: 1rem;">
+                <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
+                    <h3 style="color: #60a5fa; font-size: 1.25rem; margin-bottom: 1rem;">
                         <i class="fas fa-question-circle"></i> Frequently Asked Questions
                     </h3>
                     <div style="display: flex; flex-direction: column; gap: 1rem;">
@@ -2102,8 +2180,8 @@
                 </div>
                 
                 <!-- Contact Information -->
-                <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; margin-top: 2rem; text-align: center;">
-                    <h3 style="color: #ffd700; font-size: 1.25rem; margin-bottom: 1rem;">Need Immediate Assistance?</h3>
+                <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem; margin-top: 2rem; text-align: center;">
+                    <h3 style="color: #60a5fa; font-size: 1.25rem; margin-bottom: 1rem;">Need Immediate Assistance?</h3>
                     <p style="color: #94a3b8; margin-bottom: 1rem;">Our support team is available Monday-Friday, 9 AM - 6 PM GMT</p>
                     <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
                         <div>
@@ -2143,7 +2221,7 @@
                         </button>
                     </div>
                     <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                        <span style="color: #888;">Max Permutations:</span>
+                        <span style="color: #64748b;">Max Permutations:</span>
                         <input type="number" id="maxPermutations" value="1000" min="1" max="100000" style="width: 120px; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                         <button class="btn btn-secondary" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px 16px; border-radius: 6px;" onclick="selectAllPermParameters()">
                             <i class="fas fa-check-square"></i> All
@@ -2181,7 +2259,7 @@
                         <div style="font-size: 1.5rem; color: #60a5fa;">
                             <i class="fas fa-chart-bar"></i> Permutation Results
                         </div>
-                        <div style="display: flex; gap: 2rem; color: #888; font-size: 0.9rem;">
+                        <div style="display: flex; gap: 2rem; color: #64748b; font-size: 0.9rem;">
                             <span>Total: <strong id="totalPermutations">0</strong></span>
                             <span>Generated: <strong id="generatedTime">--:--</strong></span>
                         </div>
@@ -2209,7 +2287,7 @@
 
                     <!-- Results Content -->
                     <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; padding: 1.5rem; min-height: 300px; overflow: auto; max-height: 600px;" id="permResultsContent">
-                        <div style="text-align: center; color: #666; padding: 3rem;">
+                        <div style="text-align: center; color: #64748b; padding: 3rem;">
                             <i class="fas fa-cube" style="font-size: 3rem; margin-bottom: 1rem;"></i>
                             <p>No permutations generated yet</p>
                             <p style="margin-top: 0.5rem; font-size: 0.9rem;">Configure parameters and click Generate</p>
@@ -4802,10 +4880,10 @@
         Object.keys(permParameters).forEach(category => {
             html += `
                 <div style="margin-bottom: 2rem;">
-                    <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1rem; cursor: pointer;" onclick="togglePermCategory('${category}')">
+                    <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1rem; cursor: pointer;" onclick="togglePermCategory('${category}')">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 1.1rem; color: #ffd700; text-transform: uppercase;">${category} Parameters</span>
-                            <span style="background: rgba(255, 215, 0, 0.2); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; color: #ffd700;" id="${category}Count">0 active</span>
+                            <span style="font-size: 1.1rem; color: #60a5fa; text-transform: uppercase;">${category} Parameters</span>
+                            <span style="background: rgba(96, 165, 250, 0.2); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; color: #60a5fa;" id="${category}Count">0 active</span>
                         </div>
                     </div>
                     <div id="${category}Params" style="display: ${category === 'project' ? 'grid' : 'none'}; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1rem;">
@@ -4819,9 +4897,9 @@
 
     function createPermParameterCard(param, category) {
         return `
-            <div style="background: rgba(26, 31, 58, 0.6); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 12px; padding: 1rem;">
+            <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(96, 165, 250, 0.1); border-radius: 12px; padding: 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <span style="color: #ffd700; font-weight: 600;">${param.name}</span>
+                    <span style="color: #60a5fa; font-weight: 600;">${param.name}</span>
                     <input type="checkbox" data-param="${param.id}" data-category="${category}" onchange="togglePermParameter('${param.id}', '${category}')">
                 </div>
                 <div id="param-input-${param.id}">
@@ -4833,11 +4911,11 @@
 
     function createPermParameterInput(param) {
         if (param.type === 'select') {
-            return `<select style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 6px; color: white;">
+            return `<select style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: white;">
                 ${param.options.map(opt => `<option value="${opt}" ${opt === param.default ? 'selected' : ''}>${opt}</option>`).join('')}
             </select>`;
         } else {
-            return `<input type="${param.type}" value="${param.default}" style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 6px; color: white;">`;
+            return `<input type="${param.type}" value="${param.default}" style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: white;">`;
         }
     }
 
@@ -4878,12 +4956,12 @@
         document.querySelectorAll('[data-perm-mode]').forEach(btn => {
             if (btn.dataset.permMode === mode) {
                 btn.classList.add('active');
-                btn.style.background = 'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)';
+                btn.style.background = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
                 btn.style.color = '#0a0e27';
             } else {
                 btn.classList.remove('active');
                 btn.style.background = 'rgba(255, 255, 255, 0.1)';
-                btn.style.color = '#ffd700';
+                btn.style.color = '#60a5fa';
             }
         });
     }
@@ -4923,17 +5001,17 @@
         let html = '';
         generatedPermutations.forEach((perm, i) => {
             html += `
-                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
-                    <div style="color: #ffd700; margin-bottom: 0.5rem;">Permutation ${i + 1}</div>
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(96, 165, 250, 0.1); border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="color: #60a5fa; margin-bottom: 0.5rem;">Permutation ${i + 1}</div>
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem;">
                         ${Object.entries(perm).map(([key, val]) => 
-                            `<div style="font-size: 0.85rem;"><span style="color: #888;">${key}:</span> <span style="color: #2ecc71;">${val.toFixed(2)}</span></div>`
+                            `<div style="font-size: 0.85rem;"><span style="color: #64748b;">${key}:</span> <span style="color: #2ecc71;">${val.toFixed(2)}</span></div>`
                         ).join('')}
                     </div>
                 </div>
             `;
         });
-        resultsEl.innerHTML = html || '<div style="text-align: center; padding: 2rem; color: #666;">No permutations generated</div>';
+        resultsEl.innerHTML = html || '<div style="text-align: center; padding: 2rem; color: #64748b;">No permutations generated</div>';
         
         // Update stats
         const endTime = Date.now();
@@ -4978,7 +5056,7 @@
     function resetPermAll() {
         deselectAllPermParameters();
         generatedPermutations = [];
-        document.getElementById('permResultsContent').innerHTML = '<div style="text-align: center; color: #666; padding: 3rem;"><i class="fas fa-cube" style="font-size: 3rem; margin-bottom: 1rem;"></i><p>No permutations generated yet</p></div>';
+        document.getElementById('permResultsContent').innerHTML = '<div style="text-align: center; color: #64748b; padding: 3rem;"><i class="fas fa-cube" style="font-size: 3rem; margin-bottom: 1rem;"></i><p>No permutations generated yet</p></div>';
         document.getElementById('totalPermutations').textContent = '0';
         document.getElementById('generatedTime').textContent = '--:--';
     }
@@ -5085,9 +5163,6 @@
                 projectsData.push(newProject);
                 renderProjects();
                 updateProjectStats();
-                
-                // Open in edit mode
-                editProject(newProject.id);
             } else {
                 // For demo purposes, create a sample project
                 const newProject = {
@@ -5108,9 +5183,6 @@
                 
                 renderProjects();
                 updateProjectStats();
-                
-                // Open in edit mode
-                editProject(newProject.id);
             }
         } catch (error) {
             console.error('Error creating project:', error);
@@ -5157,15 +5229,15 @@
         const statusColors = {
             'active': { bg: '#22c55e', text: 'Active' },
             'in-progress': { bg: '#60a5fa', text: 'In Progress' },
-            'draft': { bg: '#6b7280', text: 'Draft' },
+            'draft': { bg: '#64748b', text: 'Draft' },
             'completed': { bg: '#10b981', text: 'Completed' },
             'paused': { bg: '#f59e0b', text: 'Paused' }
         };
 
         const status = statusColors[project.status] || statusColors.draft;
-        const progressColor = project.status === 'draft' ? '#6b7280' : '#60a5fa';
+        const progressColor = project.status === 'draft' ? '#64748b' : '#60a5fa';
         const progressGradient = project.status === 'draft' ? 
-            'linear-gradient(90deg, #6b7280, #4b5563)' : 
+            'linear-gradient(90deg, #64748b, #475569)' : 
             'linear-gradient(90deg, #60a5fa, #3b82f6)';
 
         card.innerHTML = `
@@ -5202,15 +5274,16 @@
         // Add drag and drop event listeners
         setupCardDragEvents(card);
         
-        // Add hover effects
+        // Add hover effects with smooth transitions
         card.style.cssText = `
             background: rgba(30, 41, 59, 0.5);
             border: 1px solid rgba(96, 165, 250, 0.3);
             border-radius: 12px;
             padding: 1.5rem;
             cursor: grab;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
+            transform: translateZ(0);
         `;
         
         card.addEventListener('mouseenter', function() {
@@ -5234,10 +5307,8 @@
     function setupCardDragEvents(card) {
         card.addEventListener('dragstart', handleDragStart);
         card.addEventListener('dragend', handleDragEnd);
-        card.addEventListener('dragover', handleDragOver);
-        card.addEventListener('drop', handleDrop);
-        card.addEventListener('dragenter', handleDragEnter);
-        card.addEventListener('dragleave', handleDragLeave);
+        
+        // No longer need individual card drag events as we handle at grid level
     }
 
     // Setup drag and drop for the projects grid
@@ -5247,81 +5318,199 @@
         grid.addEventListener('drop', handleGridDrop);
     }
 
-    // Drag event handlers
+    // Global variables for smooth drag and drop
+    let ghostPlaceholder = null;
+    let originalNextSibling = null;
+    let lastValidDropTarget = null;
+
+    // Create ghost placeholder element
+    function createGhostPlaceholder() {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'drag-placeholder';
+        placeholder.style.cssText = `
+            height: 200px;
+            margin: 0.75rem;
+            border: 2px dashed rgba(96, 165, 250, 0.6);
+            border-radius: 12px;
+            background: rgba(96, 165, 250, 0.1);
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.9);
+        `;
+        
+        // Add placeholder content
+        const content = document.createElement('div');
+        content.style.cssText = `
+            color: rgba(96, 165, 250, 0.8);
+            font-size: 14px;
+            text-align: center;
+            pointer-events: none;
+        `;
+        content.innerHTML = `
+            <div style="font-size: 24px; margin-bottom: 8px;">↓</div>
+            <div>Drop here</div>
+        `;
+        placeholder.appendChild(content);
+        
+        return placeholder;
+    }
+
+    // Drag event handlers with smooth animations
     function handleDragStart(e) {
         draggedElement = this;
         draggedIndex = parseInt(this.dataset.index);
-        this.classList.add('dragging');
-        this.style.opacity = '0.5';
-        this.style.cursor = 'grabbing';
         
-        // Show drop zone indicator
-        document.getElementById('drop-zone-indicator').style.display = 'block';
+        // Store original position for restoration
+        originalNextSibling = this.nextSibling;
+        
+        // Create and insert ghost placeholder
+        ghostPlaceholder = createGhostPlaceholder();
+        this.parentNode.insertBefore(ghostPlaceholder, this.nextSibling);
+        
+        // Animate placeholder in
+        setTimeout(() => {
+            if (ghostPlaceholder) {
+                ghostPlaceholder.style.opacity = '1';
+                ghostPlaceholder.style.transform = 'scale(1)';
+            }
+        }, 50);
+        
+        // Style the dragged element
+        this.classList.add('dragging');
+        this.style.opacity = '0.4';
+        this.style.cursor = 'grabbing';
+        this.style.transform = 'rotate(5deg) scale(1.05)';
+        this.style.zIndex = '1000';
+        this.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.3)';
+        
+        // Add dragging class to grid for global styles
+        document.getElementById('projects-grid').classList.add('dragging-active');
         
         e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/html', this.outerHTML);
+        e.dataTransfer.setData('text/html', '');
     }
 
     function handleDragEnd(e) {
+        // Clean up dragged element
         this.classList.remove('dragging');
         this.style.opacity = '';
         this.style.cursor = 'grab';
         this.style.transform = '';
+        this.style.zIndex = '';
         this.style.boxShadow = '';
         
-        // Hide drop zone indicator
-        document.getElementById('drop-zone-indicator').style.display = 'none';
+        // Remove dragging state from grid
+        document.getElementById('projects-grid').classList.remove('dragging-active');
         
-        // Clean up drag over effects
+        // Remove placeholder with animation
+        if (ghostPlaceholder) {
+            ghostPlaceholder.style.opacity = '0';
+            ghostPlaceholder.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                if (ghostPlaceholder && ghostPlaceholder.parentNode) {
+                    ghostPlaceholder.parentNode.removeChild(ghostPlaceholder);
+                }
+                ghostPlaceholder = null;
+            }, 300);
+        }
+        
+        // Clean up all card effects
         document.querySelectorAll('.project-card').forEach(card => {
-            card.classList.remove('drag-over');
-            card.style.borderColor = 'rgba(96, 165, 250, 0.3)';
+            card.classList.remove('drag-over', 'drag-over-top', 'drag-over-bottom');
+            card.style.transform = '';
         });
-    }
-
-    function handleDragOver(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-    }
-
-    function handleDragEnter(e) {
-        if (this !== draggedElement) {
-            this.classList.add('drag-over');
-            this.style.borderColor = '#60a5fa';
-        }
-    }
-
-    function handleDragLeave(e) {
-        this.classList.remove('drag-over');
-        this.style.borderColor = 'rgba(96, 165, 250, 0.3)';
-    }
-
-    function handleDrop(e) {
-        e.preventDefault();
         
-        if (this !== draggedElement) {
-            const dropIndex = parseInt(this.dataset.index);
-            reorderProjects(draggedIndex, dropIndex);
-        }
-        
-        this.classList.remove('drag-over');
-        this.style.borderColor = 'rgba(96, 165, 250, 0.3)';
+        // Reset variables
+        lastValidDropTarget = null;
+        originalNextSibling = null;
     }
 
     function handleGridDragOver(e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
+        
+        if (!draggedElement || !ghostPlaceholder) return;
+        
+        const grid = document.getElementById('projects-grid');
+        const afterElement = getDragAfterElement(grid, e.clientY);
+        const cards = [...grid.querySelectorAll('.project-card:not(.dragging)')];
+        
+        // Find the card we're hovering over
+        const hoveredCard = e.target.closest('.project-card');
+        
+        if (hoveredCard && hoveredCard !== draggedElement) {
+            const hoveredRect = hoveredCard.getBoundingClientRect();
+            const mouseY = e.clientY;
+            const cardCenterY = hoveredRect.top + hoveredRect.height / 2;
+            
+            // Determine if we're in the top or bottom half
+            const isTopHalf = mouseY < cardCenterY;
+            
+            // Remove previous hover effects
+            cards.forEach(card => {
+                card.classList.remove('drag-over-top', 'drag-over-bottom');
+            });
+            
+            // Add hover effect to current card
+            hoveredCard.classList.add(isTopHalf ? 'drag-over-top' : 'drag-over-bottom');
+            
+            // Move placeholder to appropriate position
+            if (isTopHalf) {
+                hoveredCard.parentNode.insertBefore(ghostPlaceholder, hoveredCard);
+            } else {
+                hoveredCard.parentNode.insertBefore(ghostPlaceholder, hoveredCard.nextSibling);
+            }
+            
+            lastValidDropTarget = hoveredCard;
+        } else if (afterElement === null) {
+            // Dragging to the end
+            grid.appendChild(ghostPlaceholder);
+            cards.forEach(card => {
+                card.classList.remove('drag-over-top', 'drag-over-bottom');
+            });
+        }
     }
 
     function handleGridDrop(e) {
         e.preventDefault();
-        // Handle drop on grid (append to end)
-        if (draggedElement) {
-            const dropIndex = projectsData.length - 1;
-            if (draggedIndex !== dropIndex) {
-                reorderProjects(draggedIndex, dropIndex);
-            }
+        
+        if (!draggedElement || !ghostPlaceholder) return;
+        
+        // Get all cards and find the new index
+        const grid = document.getElementById('projects-grid');
+        const allElements = [...grid.children];
+        const placeholderIndex = allElements.indexOf(ghostPlaceholder);
+        
+        // Calculate the new index accounting for the dragged element
+        let newIndex = placeholderIndex;
+        if (draggedIndex < placeholderIndex) {
+            newIndex--; // Account for the dragged element being removed
         }
+        
+        // Only reorder if the position actually changed
+        if (newIndex !== draggedIndex && newIndex >= 0) {
+            reorderProjects(draggedIndex, newIndex);
+        }
+    }
+
+    // Helper function to find the element after which we should insert
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.project-card:not(.dragging)')];
+        
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
     // Reorder projects and save to backend
@@ -5459,58 +5648,15 @@
     });
     
     function showProjectSpecifications(projectId = null, mode = 'new') {
-        // Create or update iframe container
-        let projectContainer = document.getElementById('project-specifications-container');
+        const projectEditorSection = document.getElementById('project-editor-section');
+        const projectEditorTitle = document.getElementById('project-editor-title');
+        const projectEditorContent = document.getElementById('project-editor-content');
         
-        if (!projectContainer) {
-            // Create container if it doesn't exist
-            projectContainer = document.createElement('div');
-            projectContainer.id = 'project-specifications-container';
-            projectContainer.style.cssText = `
-                position: fixed;
-                top: 165px;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: #0F1419;
-                z-index: 1000;
-                display: none;
-                padding: 20px;
-            `;
-            
-            // Add close button
-            const closeBtn = document.createElement('button');
-            closeBtn.innerHTML = '<i class="fas fa-times"></i> Close Project View';
-            closeBtn.style.cssText = `
-                position: absolute;
-                top: 10px;
-                right: 20px;
-                background: #ef4444;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 8px;
-                cursor: pointer;
-                z-index: 1001;
-                font-size: 14px;
-                font-weight: 600;
-            `;
-            closeBtn.onclick = closeProjectSpecifications;
-            
-            // Add iframe
-            const iframe = document.createElement('iframe');
-            iframe.id = 'project-specifications-iframe';
-            iframe.style.cssText = `
-                width: 100%;
-                height: calc(100% - 40px);
-                border: 2px solid #60a5fa;
-                border-radius: 12px;
-                margin-top: 40px;
-            `;
-            
-            projectContainer.appendChild(closeBtn);
-            projectContainer.appendChild(iframe);
-            document.body.appendChild(projectContainer);
+        // Set the title based on mode
+        if (mode === 'edit') {
+            projectEditorTitle.textContent = 'Edit Project';
+        } else {
+            projectEditorTitle.textContent = 'View Project';
         }
         
         // Build URL with parameters
@@ -5520,24 +5666,46 @@
         if (mode) params.push('mode=' + mode);
         if (params.length > 0) url += '?' + params.join('&');
         
-        // Update iframe source and show container
-        const iframe = document.getElementById('project-specifications-iframe');
-        iframe.src = url;
-        projectContainer.style.display = 'block';
+        // Create or update iframe in the content area
+        let iframe = projectEditorContent.querySelector('iframe');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.style.cssText = `
+                width: 100%;
+                height: 400px;
+                border: none;
+                border-radius: 8px;
+                background: white;
+            `;
+            projectEditorContent.innerHTML = '';
+            projectEditorContent.appendChild(iframe);
+        }
         
-        // Hide the projects section to avoid overlap
-        document.getElementById('projects-section').style.display = 'none';
+        // Update iframe source and show the editor section
+        iframe.src = url;
+        projectEditorSection.style.display = 'block';
+        
+        // Scroll to the editor section
+        projectEditorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     
-    function closeProjectSpecifications() {
-        const projectContainer = document.getElementById('project-specifications-container');
-        if (projectContainer) {
-            projectContainer.style.display = 'none';
-            // Clear iframe source to stop any running scripts
-            document.getElementById('project-specifications-iframe').src = 'about:blank';
+    function closeProjectEditor() {
+        const projectEditorSection = document.getElementById('project-editor-section');
+        const projectEditorContent = document.getElementById('project-editor-content');
+        
+        // Hide the editor section
+        projectEditorSection.style.display = 'none';
+        
+        // Clear iframe source to stop any running scripts
+        const iframe = projectEditorContent.querySelector('iframe');
+        if (iframe) {
+            iframe.src = 'about:blank';
         }
-        // Show the projects section again
-        document.getElementById('projects-section').style.display = 'block';
+    }
+    
+    // Legacy function for compatibility
+    function closeProjectSpecifications() {
+        closeProjectEditor();
     }
     
     // Document link hover effects
