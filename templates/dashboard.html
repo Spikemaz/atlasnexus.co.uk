@@ -339,25 +339,32 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        /* Cards - PROPER DARK BLUE */
-        .card {
+        /* Cards - FORCE DARK BLUE - DO NOT OVERRIDE */
+        .card, 
+        div.card,
+        .card.shadow-lg,
+        .card.fade-in-up {
             background: linear-gradient(135deg, #1e3a8a, #172554) !important;
+            background-image: linear-gradient(135deg, #1e3a8a, #172554) !important;
             border: 1px solid rgba(96, 165, 250, 0.2);
             backdrop-filter: blur(10px);
-            color: #ffffff !important; /* Ensure white text color */
+            color: #ffffff !important;
         }
         
         .card-body {
             color: #E5E9F0 !important; /* Light text for card bodies */
         }
 
-        .stat-card {
+        .stat-card,
+        div.stat-card,
+        .stat-card.hover-lift {
             background: linear-gradient(135deg, #1e3a8a, #172554) !important;
+            background-image: linear-gradient(135deg, #1e3a8a, #172554) !important;
             border: 1px solid rgba(96, 165, 250, 0.3);
             border-radius: 16px;
             padding: 1.5rem;
             transition: all 0.3s ease;
-            color: #ffffff !important; /* Ensure white text color */
+            color: #ffffff !important;
         }
 
         .stat-card:hover {
