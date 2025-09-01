@@ -904,6 +904,22 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = SESSION_COOKIE_SECURE
 app.config['DEBUG'] = DEBUG
 
+# Ensure database connection on first request
+@app.before_request
+def ensure_db_connection():
+    """Ensure MongoDB is connected before processing requests"""
+    global CLOUD_DB_AVAILABLE, cloud_db
+    if not CLOUD_DB_AVAILABLE:
+        try:
+            # Try to reinitialize database connection
+            from cloud_database import reinitialize_db
+            connected = reinitialize_db()
+            if connected:
+                CLOUD_DB_AVAILABLE = True
+                print("[DATABASE] MongoDB connection established on request")
+        except Exception as e:
+            print(f"[DATABASE] Failed to connect to MongoDB: {e}")
+
 def track_ip_access(ip_address, page, user_email=None):
     """Track IP access to different pages"""
     tracking_file = os.path.join(DATA_DIR, 'ip_tracking.json')
@@ -2969,6 +2985,16 @@ def admin_reject_user():
     try:
         print(f"[ADMIN-REJECT] Starting deletion for {email}")
         
+        # Check if database is connected first
+        if not cloud_db.connected:
+            # Try to reinitialize connection
+            from cloud_database import reinitialize_db
+            connected = reinitialize_db()
+            print(f"[ADMIN-REJECT] Reinitialize database result: {connected}")
+            if not connected:
+                print(f"[ERROR] MongoDB not connected - cannot delete {email}")
+                return jsonify({'status': 'error', 'message': 'Database not connected. Please check MongoDB connection.'}), 500
+        
         # Delete registration
         reg_deleted = delete_registration_data(email)
         print(f"[ADMIN-REJECT] Registration deletion result for {email}: {reg_deleted}")
@@ -2977,7 +3003,12 @@ def admin_reject_user():
         user_deleted = delete_user_data(email)
         print(f"[ADMIN-REJECT] User deletion result for {email}: {user_deleted}")
         
-        print(f"[ADMIN-REJECT] Completed deletion for {email}")
+        # Check if deletions actually succeeded
+        if not reg_deleted and not user_deleted:
+            print(f"[ERROR] Both deletions failed for {email}")
+            return jsonify({'status': 'error', 'message': 'Failed to delete user from database. Check server logs.'}), 500
+        
+        print(f"[ADMIN-REJECT] Completed deletion for {email} - Reg: {reg_deleted}, User: {user_deleted}")
     except Exception as e:
         print(f"[ERROR] Failed to delete user {email}: {e}")
         return jsonify({'status': 'error', 'message': f'Failed to delete: {str(e)}'}), 500
@@ -4188,11 +4219,22 @@ def admin_delete_user():
     if not email:
         return jsonify({'status': 'error', 'message': 'Email required'}), 400
     
+    # Check if database is connected first
+    if not cloud_db.connected:
+        from cloud_database import reinitialize_db
+        connected = reinitialize_db()
+        if not connected:
+            return jsonify({'status': 'error', 'message': 'Database not connected. Please check MongoDB connection.'}), 500
+    
     # Delete from users (cloud database)
-    delete_user_data(email)
+    user_deleted = delete_user_data(email)
     
     # Also delete from registrations if exists
-    delete_registration_data(email)
+    reg_deleted = delete_registration_data(email)
+    
+    # Check if at least one deletion succeeded
+    if not user_deleted and not reg_deleted:
+        return jsonify({'status': 'error', 'message': 'Failed to delete user. Check MongoDB connection.'}), 500
     
     # Log the action
     log_admin_action(ip_address, 'user_delete', {

@@ -1735,6 +1735,131 @@
     <div id="projects-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div style="max-width: 1400px; margin: 0 auto;">
             <!-- Collapsible Project Editor Section -->
+            <!-- Series Creation Modal -->
+            <div id="series-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10000; align-items: center; justify-content: center;">
+                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #a855f7; border-radius: 16px; padding: 2rem; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h2 style="color: #a855f7; font-size: 1.5rem; font-weight: 700; margin: 0;">
+                            <i class="fas fa-layer-group"></i> Create New Series
+                        </h2>
+                        <button onclick="closeSeriesModal()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="series-form" onsubmit="createSeries(event)">
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Series Name</label>
+                            <input type="text" id="series-name" required placeholder="e.g., Series 1" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; color: white; font-size: 1rem;">
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Description</label>
+                            <textarea id="series-description" rows="3" placeholder="Brief description of this series" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; color: white; font-size: 1rem; resize: vertical;"></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Series Color</label>
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <label style="cursor: pointer;">
+                                    <input type="radio" name="series-color" value="purple" checked style="display: none;">
+                                    <div class="color-option" style="width: 40px; height: 40px; background: linear-gradient(135deg, #a855f7, #9333ea); border-radius: 8px; border: 3px solid transparent;" data-color="purple"></div>
+                                </label>
+                                <label style="cursor: pointer;">
+                                    <input type="radio" name="series-color" value="blue" style="display: none;">
+                                    <div class="color-option" style="width: 40px; height: 40px; background: linear-gradient(135deg, #60a5fa, #3b82f6); border-radius: 8px; border: 3px solid transparent;" data-color="blue"></div>
+                                </label>
+                                <label style="cursor: pointer;">
+                                    <input type="radio" name="series-color" value="green" style="display: none;">
+                                    <div class="color-option" style="width: 40px; height: 40px; background: linear-gradient(135deg, #34d399, #10b981); border-radius: 8px; border: 3px solid transparent;" data-color="green"></div>
+                                </label>
+                                <label style="cursor: pointer;">
+                                    <input type="radio" name="series-color" value="orange" style="display: none;">
+                                    <div class="color-option" style="width: 40px; height: 40px; background: linear-gradient(135deg, #fb923c, #f97316); border-radius: 8px; border: 3px solid transparent;" data-color="orange"></div>
+                                </label>
+                                <label style="cursor: pointer;">
+                                    <input type="radio" name="series-color" value="pink" style="display: none;">
+                                    <div class="color-option" style="width: 40px; height: 40px; background: linear-gradient(135deg, #f472b6, #ec4899); border-radius: 8px; border: 3px solid transparent;" data-color="pink"></div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                            <button type="button" onclick="closeSeriesModal()" style="background: rgba(75, 85, 99, 0.3); color: #94a3b8; border: 1px solid rgba(75, 85, 99, 0.5); padding: 12px 24px; border-radius: 8px; cursor: pointer;">
+                                Cancel
+                            </button>
+                            <button type="submit" style="background: linear-gradient(90deg, #a855f7, #9333ea); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                                <i class="fas fa-plus"></i> Create Series
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Project Edit Modal -->
+            <div id="project-edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10000; align-items: center; justify-content: center;">
+                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h2 style="color: #60a5fa; font-size: 1.5rem; font-weight: 700; margin: 0;">
+                            <i class="fas fa-edit"></i> Edit Project
+                        </h2>
+                        <button onclick="closeProjectEditModal()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="project-edit-form" onsubmit="saveProjectEdit(event)">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <div>
+                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Project Title</label>
+                                <input type="text" id="edit-project-title" required placeholder="Project name" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                            </div>
+                            
+                            <div>
+                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Status</label>
+                                <select id="edit-project-status" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <option value="draft">Draft</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="active">Active</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Description</label>
+                            <textarea id="edit-project-description" rows="4" placeholder="Project description" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; resize: vertical;"></textarea>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                            <div>
+                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Value (€)</label>
+                                <input type="number" id="edit-project-value" min="0" placeholder="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                            </div>
+                            
+                            <div>
+                                <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Progress (%)</label>
+                                <input type="number" id="edit-project-progress" min="0" max="100" placeholder="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Additional Details</label>
+                            <textarea id="edit-project-details" rows="6" placeholder="Enter any additional project information, notes, or requirements" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; resize: vertical;"></textarea>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                            <button type="button" onclick="closeProjectEditModal()" style="background: rgba(75, 85, 99, 0.3); color: #94a3b8; border: 1px solid rgba(75, 85, 99, 0.5); padding: 12px 24px; border-radius: 8px; cursor: pointer;">
+                                Cancel
+                            </button>
+                            <button type="submit" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div id="project-editor-section" style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #60a5fa; border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; display: none; position: relative; z-index: 10;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="color: #60a5fa; font-size: 1.5rem; font-weight: 700; margin: 0;">
@@ -1755,9 +1880,14 @@
                     <h2 style="color: #60a5fa; font-size: 2rem; font-weight: 700; margin: 0;">
                         <i class="fas fa-folder"></i> Project Management
                     </h2>
-                    <button onclick="createNewProject()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
-                        <i class="fas fa-plus"></i> Create New Project
-                    </button>
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="showSeriesModal()" style="background: linear-gradient(90deg, #a855f7, #9333ea); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
+                            <i class="fas fa-layer-group"></i> Create Series
+                        </button>
+                        <button onclick="createNewProject()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
+                            <i class="fas fa-plus"></i> Add Project
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Loading indicator -->
@@ -1768,7 +1898,7 @@
                 
                 <!-- Dynamic Projects Grid with Drag & Drop -->
                 <div id="projects-grid" style="display: none; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; min-height: 200px;">
-                    <!-- Projects will be loaded dynamically here -->
+                    <!-- Series and Projects will be loaded dynamically here -->
                 </div>
                 
                 <!-- Empty State -->
@@ -5099,6 +5229,9 @@
     
     // Project Management Functions with Drag & Drop
     let projectsData = [];
+    let seriesData = [];
+    let currentEditingProject = null;
+    let currentEditingSeries = null;
     let draggedElement = null;
     let draggedIndex = null;
 
