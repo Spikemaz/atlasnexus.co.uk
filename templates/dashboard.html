@@ -6503,7 +6503,8 @@
                 </div>
             </div>
             
-            <div class="series-projects drop-zone" data-series-id="${series.id}" style="display: ${series.expanded ? 'grid' : 'none'}; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem; min-height: 120px; border: 2px dashed rgba(96, 165, 250, 0.3); border-radius: 8px; transition: all 0.3s ease; padding: 10px; background: rgba(96, 165, 250, 0.02); position: relative;">
+            <div class="series-projects drop-zone" data-series-id="${series.id}" style="display: ${series.expanded ? 'grid' : 'none'}; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem; min-height: 150px; border: 2px dashed rgba(96, 165, 250, 0.4); border-radius: 8px; transition: all 0.3s ease; padding: 15px; background: rgba(96, 165, 250, 0.03); position: relative;">
+                ${series.projects.length === 0 ? '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(96, 165, 250, 0.5); font-size: 14px; text-align: center; pointer-events: none;">Drag projects here to add to this series</div>' : ''}
                 ${series.projects.length > 0 ? series.projects.map((project, idx) => `
                     <div class="project-in-series project-card" draggable="true" data-project-id="${project.id}" data-series-id="${series.id}" data-index="${idx}" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1rem; cursor: move;">
                         <div style="margin-bottom: 1rem;">
@@ -6562,6 +6563,13 @@
             dropZone.addEventListener('dragover', handleSeriesDropZoneDragOver);
             dropZone.addEventListener('drop', handleSeriesDropZoneDrop);
             dropZone.addEventListener('dragleave', handleSeriesDropZoneLeave);
+            
+            // Also add drag events to projects within series
+            const projectsInSeries = dropZone.querySelectorAll('.project-in-series');
+            projectsInSeries.forEach(projectCard => {
+                projectCard.addEventListener('dragstart', handleDragStart);
+                projectCard.addEventListener('dragend', handleDragEnd);
+            });
         }
         
         return card;
@@ -6901,24 +6909,29 @@
         e.preventDefault();
         e.stopPropagation();
         
-        if (!draggedElement || !draggedElement.classList.contains('project-card')) return;
+        if (!draggedElement || !draggedElement.classList.contains('project-card')) {
+            console.log('Drop rejected: not a project card');
+            return;
+        }
         
         const targetSeriesId = this.dataset.seriesId;
         const projectId = draggedElement.dataset.projectId;
-        const sourceSeriesId = draggedElement.dataset.seriesId;
+        const sourceSeriesId = draggedElement.dataset.seriesId || draggedElement.dataset.sourceSeriesId;
+        
+        console.log('Series drop:', {projectId, sourceSeriesId, targetSeriesId});
         
         // Move project to this series
         moveProjectToSeries(projectId, sourceSeriesId, targetSeriesId);
         
         // Reset visual feedback
-        this.style.border = '2px dashed transparent';
-        this.style.background = '';
+        this.style.border = '2px dashed rgba(96, 165, 250, 0.4)';
+        this.style.background = 'rgba(96, 165, 250, 0.03)';
     }
     
     // Handle drop zone leave for series
     function handleSeriesDropZoneLeave(e) {
-        this.style.border = '2px dashed transparent';
-        this.style.background = '';
+        this.style.border = '2px dashed rgba(96, 165, 250, 0.4)';
+        this.style.background = 'rgba(96, 165, 250, 0.03)';
     }
     
     // Handle dragging over standalone area
