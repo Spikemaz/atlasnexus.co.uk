@@ -9,6 +9,12 @@ import sys
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 
+# Fix Unicode output on Windows
+if sys.platform == 'win32':
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
 def test_mongodb_connection():
     """Test MongoDB connection"""
     
@@ -24,12 +30,12 @@ def test_mongodb_connection():
         try:
             with open('mongodb_uri.txt', 'r') as f:
                 mongodb_uri = f.read().strip()
-                print("✓ MongoDB URI loaded from local file")
+                print("[OK] MongoDB URI loaded from local file")
         except Exception as e:
-            print(f"✗ Error reading mongodb_uri.txt: {e}")
+            print(f"[ERROR] Error reading mongodb_uri.txt: {e}")
     
     if not mongodb_uri:
-        print("\n✗ MongoDB URI not found!")
+        print("\n[ERROR] MongoDB URI not found!")
         print("\nTo fix this:")
         print("1. For Vercel deployment:")
         print("   - Go to your Vercel project settings")
@@ -52,7 +58,7 @@ def test_mongodb_connection():
     else:
         masked_uri = "***configured***"
     
-    print(f"✓ MongoDB URI found: {masked_uri}")
+    print(f"[OK] MongoDB URI found: {masked_uri}")
     
     # Try to connect
     print("\nAttempting to connect to MongoDB...")
@@ -61,11 +67,11 @@ def test_mongodb_connection():
         
         # Test connection with ping
         client.admin.command('ping')
-        print("✓ Successfully connected to MongoDB Atlas!")
+        print("[OK] Successfully connected to MongoDB Atlas!")
         
         # Get database
         db = client.atlasnexus
-        print(f"✓ Using database: {db.name}")
+        print(f"[OK] Using database: {db.name}")
         
         # List collections
         collections = db.list_collection_names()
@@ -84,20 +90,20 @@ def test_mongodb_connection():
         print("\nTesting write operation...")
         test_doc = {'test': True, 'message': 'Connection test successful'}
         result = db.test_collection.insert_one(test_doc)
-        print(f"✓ Write test successful (ID: {result.inserted_id})")
+        print(f"[OK] Write test successful (ID: {result.inserted_id})")
         
         # Clean up test document
         db.test_collection.delete_one({'_id': result.inserted_id})
-        print("✓ Cleanup successful")
+        print("[OK] Cleanup successful")
         
         print("\n" + "=" * 60)
-        print("✅ All tests passed! MongoDB is properly configured.")
+        print("SUCCESS: All tests passed! MongoDB is properly configured.")
         print("=" * 60)
         
         return True
         
     except Exception as e:
-        print(f"\n✗ Failed to connect to MongoDB: {e}")
+        print(f"\n[ERROR] Failed to connect to MongoDB: {e}")
         print("\nPossible issues:")
         print("1. Check your MongoDB URI is correct")
         print("2. Ensure your IP address is whitelisted in MongoDB Atlas")

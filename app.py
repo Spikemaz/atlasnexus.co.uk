@@ -31,15 +31,17 @@ try:
     from cloud_database import load_registrations as db_load_registrations, save_registrations as db_save_registrations
     from cloud_database import load_admin_actions as db_load_admin_actions, add_admin_action as db_add_admin_action
     from cloud_database import load_projects as db_load_projects, save_project_data as db_save_project_data
-    from cloud_database import reinitialize_db, cloud_db
+    from cloud_database import reinitialize_db, cloud_db, get_mongodb_uri
     
-    # Don't check connection at import time - Vercel loads env vars after imports
+    # Check if MongoDB is actually connected
     CLOUD_DB_AVAILABLE = False
     
     # We'll initialize the connection on first request instead
     print("[DATABASE] Cloud database module loaded - will connect on first request")
 except ImportError:
     CLOUD_DB_AVAILABLE = False
+    db_load_projects = None
+    db_save_project_data = None
     print("[DATABASE] Cloud database module not available - using local files")
 
 # Import Blob storage for file uploads
@@ -481,6 +483,26 @@ def load_users_data():
 def delete_user_data(email):
     """Delete user from MongoDB cloud database"""
     return cloud_db.delete_user(email)
+
+def load_projects_data():
+    """Load projects from MongoDB cloud database or local file"""
+    if cloud_db and cloud_db.connected:
+        return cloud_db.load_projects()
+    else:
+        # Fallback to local file
+        PROJECTS_FILE = 'data/projects.json'
+        return load_json_db(PROJECTS_FILE)
+
+def save_projects_data(user_email, project_data):
+    """Save projects to MongoDB cloud database or local file"""
+    if cloud_db and cloud_db.connected:
+        return cloud_db.save_projects(user_email, project_data)
+    else:
+        # Fallback to local file
+        PROJECTS_FILE = 'data/projects.json'
+        projects = load_json_db(PROJECTS_FILE)
+        projects[user_email] = project_data
+        return save_json_db(PROJECTS_FILE, projects)
 
 def get_real_ip():
     """Get the real IP address, handling proxies and CDNs"""
@@ -4001,9 +4023,8 @@ def manage_projects():
     if not user_email:
         return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
     
-    # Load projects database
-    PROJECTS_FILE = 'data/projects.json'
-    projects = load_json_db(PROJECTS_FILE)
+    # Load projects using the same pattern as users
+    projects = load_projects_data()
     
     # Initialize user's projects if not exists
     if user_email not in projects:
@@ -4091,13 +4112,12 @@ def save_project_order():
     data = request.json
     order = data.get('order', [])
     
-    # Load projects database
-    PROJECTS_FILE = 'data/projects.json'
-    projects = load_json_db(PROJECTS_FILE)
+    # Load projects using the same pattern as users
+    projects = load_projects_data()
     
     if user_email in projects:
         projects[user_email]['order'] = order
-        save_json_db(PROJECTS_FILE, projects)
+        save_projects_data(user_email, projects[user_email])
         return jsonify({'status': 'success', 'message': 'Order saved'})
     
     return jsonify({'status': 'error', 'message': 'User not found'}), 404
@@ -4111,9 +4131,8 @@ def update_project(project_id):
     if not user_email:
         return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
     
-    # Load projects database
-    PROJECTS_FILE = 'data/projects.json'
-    projects = load_json_db(PROJECTS_FILE)
+    # Load projects using the same pattern as users
+    projects = load_projects_data()
     DELETED_FILE = 'data/deleted_items.json'
     deleted_items = load_json_db(DELETED_FILE)
     
@@ -4129,7 +4148,7 @@ def update_project(project_id):
             if project['id'] == project_id:
                 user_projects[i].update(data)
                 user_projects[i]['updated_at'] = datetime.now().isoformat()
-                save_json_db(PROJECTS_FILE, projects)
+                save_projects_data(user_email, projects[user_email])
                 return jsonify({'status': 'success', 'project': user_projects[i]})
         
         return jsonify({'status': 'error', 'message': 'Project not found'}), 404
@@ -4159,7 +4178,7 @@ def update_project(project_id):
                     projects[user_email]['order'].remove(project_id)
                 
                 # Save both databases
-                save_json_db(PROJECTS_FILE, projects)
+                save_projects_data(user_email, projects[user_email])
                 save_json_db(DELETED_FILE, deleted_items)
                 
                 return jsonify({'status': 'success', 'message': 'Project moved to trash'})
@@ -4256,7 +4275,7 @@ def restore_deleted_item():
         projects[user_email]['projects'].append(restored_item)
         projects[user_email]['order'].append(restored_item['id'])
         
-        save_json_db(PROJECTS_FILE, projects)
+        save_projects_data(user_email, projects[user_email])
     elif item_type == 'series':
         # Handle series restoration (to be implemented)
         pass
@@ -4307,19 +4326,8 @@ def manage_series():
     if not user_email:
         return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
     
-    # Try to use cloud database first
-    if CLOUD_DB_AVAILABLE:
-        try:
-            projects = db_load_projects()
-        except Exception as e:
-            print(f"[ERROR] Failed to load projects from cloud DB: {e}")
-            # Fall back to local storage
-            PROJECTS_FILE = 'data/projects.json'
-            projects = load_json_db(PROJECTS_FILE)
-    else:
-        # Use local storage as fallback
-        PROJECTS_FILE = 'data/projects.json'
-        projects = load_json_db(PROJECTS_FILE)
+    # Load projects using the same pattern as users
+    projects = load_projects_data()
     
     # Initialize user's data if not exists
     if user_email not in projects:
@@ -4354,66 +4362,63 @@ def manage_series():
             if 'projects' in data:
                 projects[user_email]['projects'] = data['projects']
             
-            # Save to database
-            if CLOUD_DB_AVAILABLE:
-                try:
-                    # Save to cloud database
-                    success = db_save_project_data(user_email, projects[user_email])
-                    if not success:
-                        raise Exception("Failed to save to cloud database")
-                    print(f"[DATABASE] Saved projects/series for {user_email} to cloud DB")
-                except Exception as e:
-                    print(f"[ERROR] Failed to save to cloud DB, using local: {e}")
-                    # Fall back to local storage
-                    save_json_db('data/projects.json', projects)
-            else:
-                # Save to local storage
-                save_json_db('data/projects.json', projects)
+            # Save using the same pattern as users
+            save_projects_data(user_email, projects[user_email])
             
             return jsonify({
                 'status': 'success',
                 'message': 'Data saved successfully'
             })
         except Exception as e:
-            print(f"[ERROR] Failed to save series/projects: {e}")
+            print(f"[ERROR] Failed to save series/projects: {str(e)}")
             return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/debug/db-status')
 def debug_db_status():
     """Debug endpoint to check database connection status"""
-    from cloud_database import get_mongodb_uri, cloud_db
-    
-    mongodb_uri = get_mongodb_uri()
-    uri_configured = bool(mongodb_uri)
-    
-    # Mask the URI for security
-    if mongodb_uri:
-        parts = mongodb_uri.split('@')
-        if len(parts) > 1:
-            masked_uri = "mongodb+srv://***:***@" + parts[1]
+    try:
+        from cloud_database import get_mongodb_uri, cloud_db
+        
+        mongodb_uri = get_mongodb_uri()
+        uri_configured = bool(mongodb_uri)
+        
+        # Mask the URI for security
+        if mongodb_uri:
+            parts = mongodb_uri.split('@')
+            if len(parts) > 1:
+                masked_uri = "mongodb+srv://***:***@" + parts[1]
+            else:
+                masked_uri = "***configured***"
         else:
-            masked_uri = "***configured***"
-    else:
-        masked_uri = "Not configured"
-    
-    status = {
-        'mongodb_uri_configured': uri_configured,
-        'mongodb_uri_masked': masked_uri,
-        'cloud_db_available': CLOUD_DB_AVAILABLE,
-        'cloud_db_connected': cloud_db.connected if cloud_db else False,
-        'environment': os.environ.get('VERCEL', 'local'),
-        'env_vars': list(os.environ.keys()) if DEBUG else "Hidden in production"
-    }
-    
-    # Try to get database stats if connected
-    if CLOUD_DB_AVAILABLE and cloud_db and cloud_db.connected:
-        try:
-            stats = cloud_db.get_database_stats()
-            status['database_stats'] = stats
-        except Exception as e:
-            status['database_stats'] = f"Error: {str(e)}"
-    
-    return jsonify(status)
+            masked_uri = "Not configured"
+        
+        status = {
+            'mongodb_uri_configured': uri_configured,
+            'mongodb_uri_masked': masked_uri,
+            'cloud_db_available': CLOUD_DB_AVAILABLE,
+            'cloud_db_connected': cloud_db.connected if cloud_db else False,
+            'environment': os.environ.get('VERCEL', 'local'),
+            'has_mongodb_env': 'MONGODB_URI' in os.environ,
+            'env_vars': list(os.environ.keys()) if DEBUG else "Hidden in production"
+        }
+        
+        # Try to get database stats if connected
+        if CLOUD_DB_AVAILABLE and cloud_db and cloud_db.connected:
+            try:
+                stats = cloud_db.get_database_stats()
+                status['database_stats'] = stats
+            except Exception as e:
+                status['database_stats'] = f"Error: {str(e)}"
+        
+        return jsonify(status)
+    except Exception as e:
+        import traceback
+        return jsonify({
+            'error': str(e),
+            'traceback': traceback.format_exc() if DEBUG else 'Hidden in production',
+            'cloud_db_available': CLOUD_DB_AVAILABLE,
+            'has_mongodb_env': 'MONGODB_URI' in os.environ
+        }), 500
 
 @app.route('/debug/ip-status')
 def debug_ip_status():
@@ -6129,6 +6134,11 @@ def run_securitization():
     
     data = request.get_json()
     
+    # Add currency parameters if not provided
+    data['inputCurrency'] = data.get('inputCurrency', 'USD')
+    data['outputCurrency'] = data.get('outputCurrency', 'USD')
+    data['fundingCurrency'] = data.get('fundingCurrency', data.get('outputCurrency', 'USD'))
+    
     # Check if securitization engine is available
     if not SECURITIZATION_AVAILABLE:
         return jsonify({
@@ -6236,6 +6246,44 @@ def view_securitization_result(result_id):
     }
     
     return jsonify({'status': 'success', 'result': result})
+
+@app.route('/api/fx-rates')
+def get_fx_rates():
+    """Get current FX rates"""
+    try:
+        from fx_rates_service import fx_service
+        rates = fx_service.get_rates_summary()
+        return jsonify({
+            'status': 'success',
+            'data': rates
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/api/fx-convert', methods=['POST'])
+def convert_currency():
+    """Convert between currencies"""
+    data = request.get_json()
+    amount = float(data.get('amount', 0))
+    from_currency = data.get('from', 'USD')
+    to_currency = data.get('to', 'USD')
+    
+    try:
+        from fx_rates_service import fx_service
+        converted, metadata = fx_service.convert(amount, from_currency, to_currency)
+        return jsonify({
+            'status': 'success',
+            'converted': converted,
+            'metadata': metadata
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 400
 
 @app.route('/api/securitization/check-access')
 def check_securitization_access():

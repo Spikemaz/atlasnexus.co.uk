@@ -8,8 +8,9 @@ import json
 import hashlib
 import random
 from datetime import datetime, timedelta
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional, Tuple
 import math
+from fx_rates_service import fx_service
 
 class SecuritizationEngine:
     """
@@ -17,6 +18,9 @@ class SecuritizationEngine:
     """
     
     def __init__(self):
+        # FX service for currency handling
+        self.fx_service = fx_service
+        
         # Proprietary constants (hidden from output)
         self._risk_multipliers = {
             'AAA': 0.001,
@@ -43,6 +47,7 @@ class SecuritizationEngine:
     def calculate_securitization(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """
         Main calculation function - runs all securitization calculations
+        Now supports multi-currency with automatic FX conversion
         """
         
         # Extract parameters
@@ -51,21 +56,37 @@ class SecuritizationEngine:
         struct_method = params.get('structMethod', 'waterfall')
         num_tranches = int(params.get('numTranches', 3))
         
+        # Currency parameters
+        input_currency = params.get('inputCurrency', 'USD').upper()
+        output_currency = params.get('outputCurrency', 'USD').upper()
+        funding_currency = params.get('fundingCurrency', output_currency).upper()
+        
         # Core calculations (proprietary - hidden from output)
-        pool_metrics = self._analyze_pool(pool_data, asset_type)
-        tranches = self._structure_tranches(pool_metrics, num_tranches, struct_method)
+        pool_metrics = self._analyze_pool(pool_data, asset_type, input_currency, funding_currency)
+        tranches = self._structure_tranches(pool_metrics, num_tranches, struct_method, funding_currency)
         risk_metrics = self._calculate_risk_metrics(tranches, asset_type)
         cash_flows = self._project_cash_flows(pool_metrics, tranches)
         stress_results = self._run_stress_tests(pool_metrics, tranches) if params.get('stressTest') else None
+        
+        # Get FX rates for display
+        fx_rates = self.fx_service.get_rates_summary()
         
         # Generate sanitized output (no formulas exposed)
         output = {
             'id': self._generate_id(),
             'timestamp': datetime.now().isoformat(),
             'calculations': 'ENCRYPTED - Proprietary Algorithm',
+            'fx_rates': {
+                'status': fx_rates['status'],
+                'base_rates': fx_rates['base_rates'],
+                'input_currency': input_currency,
+                'funding_currency': funding_currency,
+                'output_currency': output_currency,
+                'conversion_used': pool_metrics.get('fx_conversion', {})
+            },
             'results': {
                 'pool_summary': {
-                    'total_principal': f"${pool_metrics['principal']:,.0f}",
+                    'total_principal': self._format_multi_currency(pool_metrics['principal'], funding_currency, pool_metrics.get('original_principal'), input_currency),
                     'weighted_average_coupon': f"{pool_metrics['wac']:.2%}",
                     'weighted_average_maturity': f"{pool_metrics['wam']:.1f} years",
                     'weighted_average_life': f"{pool_metrics['wal']:.1f} years",
@@ -87,20 +108,34 @@ class SecuritizationEngine:
         
         return output
     
-    def _analyze_pool(self, pool_data: Any, asset_type: str) -> Dict[str, float]:
+    def _analyze_pool(self, pool_data: Any, asset_type: str, input_currency: str, funding_currency: str) -> Dict[str, float]:
         """
-        Analyze underlying asset pool (PROPRIETARY)
+        Analyze underlying asset pool with currency conversion (PROPRIETARY)
         """
         # Parse pool data or use defaults
         if isinstance(pool_data, str) and pool_data:
             # Attempt to parse as JSON or use as raw value
             try:
                 data = json.loads(pool_data)
-                principal = float(data.get('principal', 100000000))
+                original_principal = float(data.get('principal', 100000000))
             except:
-                principal = 100000000  # Default $100M pool
+                original_principal = 100000000  # Default $100M pool
         else:
-            principal = 100000000
+            original_principal = 100000000
+        
+        # Convert to funding currency if needed
+        fx_conversion = {}
+        if input_currency != funding_currency:
+            principal, fx_meta = self.fx_service.convert(original_principal, input_currency, funding_currency)
+            fx_conversion = {
+                'rate': fx_meta['rate'],
+                'from': input_currency,
+                'to': funding_currency,
+                'original_amount': original_principal,
+                'converted_amount': principal
+            }
+        else:
+            principal = original_principal
         
         # Complex calculations (hidden)
         wac = 0.045 + random.uniform(0.01, 0.03)  # Weighted Average Coupon
@@ -113,6 +148,8 @@ class SecuritizationEngine:
         
         return {
             'principal': principal,
+            'original_principal': original_principal,
+            'fx_conversion': fx_conversion,
             'wac': wac,
             'wam': wam,
             'wal': wal,
@@ -123,7 +160,7 @@ class SecuritizationEngine:
             'recovery_rate': self._calculate_recovery_rate(asset_type)
         }
     
-    def _structure_tranches(self, pool_metrics: Dict, num_tranches: int, method: str) -> List[Dict]:
+    def _structure_tranches(self, pool_metrics: Dict, num_tranches: int, method: str, currency: str = 'USD') -> List[Dict]:
         """
         Structure tranches based on method (PROPRIETARY WATERFALL LOGIC)
         """
@@ -155,7 +192,7 @@ class SecuritizationEngine:
             
             tranches.append({
                 'name': names[i],
-                'size': f"${size:,.0f}",
+                'size': self.fx_service.format_currency(size, currency),
                 'percentage': f"{splits[i]:.1%}",
                 'rating': ratings[i],
                 'coupon': f"{coupon:.2%}",
@@ -326,6 +363,16 @@ class SecuritizationEngine:
     def _calculate_lgd(self, tranches: List[Dict]) -> float:
         """Loss given default model (proprietary)"""
         return 0.40  # 40% LGD assumption
+    
+    def _format_multi_currency(self, amount: float, currency: str, original_amount: Optional[float] = None, original_currency: Optional[str] = None) -> str:
+        """
+        Format amount with currency, optionally showing conversion
+        """
+        formatted = self.fx_service.format_currency(amount, currency)
+        if original_amount and original_currency and original_currency != currency:
+            original_formatted = self.fx_service.format_currency(original_amount, original_currency)
+            return f"{formatted} (from {original_formatted})"
+        return formatted
     
     def _generate_id(self) -> str:
         """Generate unique calculation ID"""
