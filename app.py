@@ -699,6 +699,14 @@ def save_json_db(file_path, data):
     if isinstance(file_path, str):
         file_path = Path(file_path)
     
+    # Debug logging for registrations
+    if 'registrations.json' in str(file_path):
+        print(f"[SAVE] Saving {len(data)} registrations to {file_path}")
+        if len(data) == 0:
+            print(f"[WARNING] Saving empty registrations file!")
+            import traceback
+            traceback.print_stack(limit=5)
+    
     # CRITICAL: Prevent accidental deletion of all users
     if 'users.json' in str(file_path) and isinstance(data, dict):
         # If we're about to save a users file with only 1 or 0 users
@@ -1561,6 +1569,7 @@ def register():
         # Save registration
         registrations[data['email']] = data
         save_json_db(REGISTRATIONS_FILE, registrations)
+        print(f"[REGISTRATION SAVED] {data['email']} - Total registrations: {len(registrations)}")
         
         # Trigger update notification for admin panel
         session['data_changed'] = True
@@ -3490,6 +3499,20 @@ def admin_set_data_hash():
     session[f'last_data_hash_{ip_address}'] = state_hash
     
     return jsonify({'status': 'success'})
+
+@app.route('/clear-all-sessions')
+def clear_all_sessions():
+    """Emergency session clear - removes all session data"""
+    session.clear()
+    return """
+    <html>
+    <body style="background: #1a1a1a; color: white; font-family: Arial; padding: 50px; text-align: center;">
+        <h1>All Sessions Cleared!</h1>
+        <p>All session data has been cleared. You can now start fresh.</p>
+        <p><a href="/" style="color: #3b82f6;">Go to Home</a></p>
+    </body>
+    </html>
+    """
 
 @app.route('/terms')
 def terms():
