@@ -1836,66 +1836,6 @@
     <div id="projects-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div style="max-width: 1400px; margin: 0 auto;">
             <!-- Collapsible Project Editor Section -->
-            <!-- Series Creation Modal -->
-            <div id="series-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10000; align-items: center; justify-content: center;">
-                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #a855f7; border-radius: 16px; padding: 2rem; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                        <h2 style="color: #a855f7; font-size: 1.5rem; font-weight: 700; margin: 0;">
-                            <i class="fas fa-layer-group"></i> Create New Series
-                        </h2>
-                        <button onclick="closeSeriesModal()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    
-                    <form id="series-form" onsubmit="createSeries(event)">
-                        <div style="margin-bottom: 1.5rem;">
-                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Series Name</label>
-                            <input type="text" id="series-name" required placeholder="e.g., Series 1" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; color: white; font-size: 1rem;">
-                        </div>
-                        
-                        <div style="margin-bottom: 1.5rem;">
-                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Description</label>
-                            <textarea id="series-description" rows="3" placeholder="Brief description of this series" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; color: white; font-size: 1rem; resize: vertical;"></textarea>
-                        </div>
-                        
-                        <div style="margin-bottom: 1.5rem;">
-                            <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Series Color</label>
-                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                                <label style="cursor: pointer;">
-                                    <input type="radio" name="series-color" value="purple" checked style="display: none;">
-                                    <div class="color-option" style="width: 40px; height: 40px; background: linear-gradient(135deg, #a855f7, #9333ea); border-radius: 8px; border: 3px solid transparent;" data-color="purple"></div>
-                                </label>
-                                <label style="cursor: pointer;">
-                                    <input type="radio" name="series-color" value="blue" style="display: none;">
-                                    <div class="color-option" style="width: 40px; height: 40px; background: linear-gradient(135deg, #60a5fa, #3b82f6); border-radius: 8px; border: 3px solid transparent;" data-color="blue"></div>
-                                </label>
-                                <label style="cursor: pointer;">
-                                    <input type="radio" name="series-color" value="green" style="display: none;">
-                                    <div class="color-option" style="width: 40px; height: 40px; background: linear-gradient(135deg, #34d399, #10b981); border-radius: 8px; border: 3px solid transparent;" data-color="green"></div>
-                                </label>
-                                <label style="cursor: pointer;">
-                                    <input type="radio" name="series-color" value="orange" style="display: none;">
-                                    <div class="color-option" style="width: 40px; height: 40px; background: linear-gradient(135deg, #fb923c, #f97316); border-radius: 8px; border: 3px solid transparent;" data-color="orange"></div>
-                                </label>
-                                <label style="cursor: pointer;">
-                                    <input type="radio" name="series-color" value="pink" style="display: none;">
-                                    <div class="color-option" style="width: 40px; height: 40px; background: linear-gradient(135deg, #f472b6, #ec4899); border-radius: 8px; border: 3px solid transparent;" data-color="pink"></div>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                            <button type="button" onclick="closeSeriesModal()" style="background: rgba(75, 85, 99, 0.3); color: #94a3b8; border: 1px solid rgba(75, 85, 99, 0.5); padding: 12px 24px; border-radius: 8px; cursor: pointer;">
-                                Cancel
-                            </button>
-                            <button type="submit" style="background: linear-gradient(90deg, #a855f7, #9333ea); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                                <i class="fas fa-plus"></i> Create Series
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
 
             <!-- Delete Confirmation Modal -->
             <div id="delete-confirm-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10001; align-items: center; justify-content: center;">
@@ -2084,9 +2024,6 @@
                         <i class="fas fa-folder"></i> Project Management
                     </h2>
                     <div style="display: flex; gap: 1rem;">
-                        <button onclick="showSeriesModal()" style="background: linear-gradient(90deg, #a855f7, #9333ea); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
-                            <i class="fas fa-layer-group"></i> Create Series
-                        </button>
                         <button onclick="createNewProject()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
                             <i class="fas fa-plus"></i> Add Project
                         </button>
@@ -2537,291 +2474,327 @@
         </div>
     </div>
 
-<!-- CLEAN Permutation Engine Section - Simple 4-Step Process -->
+<!-- Permutation Engine - All Steps Visible -->
 <div id="permutation-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
-    <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="max-width: 1400px; margin: 0 auto;">
         
         <!-- Title -->
         <div style="text-align: center; margin-bottom: 2rem;">
             <h2 style="color: #60a5fa; font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">
                 <i class="fas fa-cogs"></i> Permutation Engine
             </h2>
-            <p style="color: #94a3b8;">Simple 4-Step Process to Explore Funding Scenarios</p>
+            <p style="color: #94a3b8;">Explore All Funding Scenarios - Adjust Any Parameter</p>
         </div>
 
-        <!-- Step Progress Bar -->
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 3rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border-radius: 12px; border: 1px solid rgba(96, 165, 250, 0.2);">
-            <div id="step-1-indicator" class="perm-step active" onclick="goToStep(1)" style="flex: 1; text-align: center; padding: 1rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); border-radius: 8px; cursor: pointer; color: white;">
-                <div style="font-size: 1.5rem; font-weight: bold;">1</div>
-                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Import Project</div>
-            </div>
-            <div id="step-2-indicator" class="perm-step" onclick="goToStep(2)" style="flex: 1; text-align: center; padding: 1rem; background: rgba(26, 32, 46, 0.6); border-radius: 8px; cursor: pointer; color: #94a3b8;">
-                <div style="font-size: 1.5rem; font-weight: bold;">2</div>
-                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Review Calculations</div>
-            </div>
-            <div id="step-3-indicator" class="perm-step" onclick="goToStep(3)" style="flex: 1; text-align: center; padding: 1rem; background: rgba(26, 32, 46, 0.6); border-radius: 8px; cursor: pointer; color: #94a3b8;">
-                <div style="font-size: 1.5rem; font-weight: bold;">3</div>
-                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Set Variables</div>
-            </div>
-            <div id="step-4-indicator" class="perm-step" onclick="goToStep(4)" style="flex: 1; text-align: center; padding: 1rem; background: rgba(26, 32, 46, 0.6); border-radius: 8px; cursor: pointer; color: #94a3b8;">
-                <div style="font-size: 1.5rem; font-weight: bold;">4</div>
-                <div style="font-size: 0.9rem; margin-top: 0.5rem;">View Results</div>
-            </div>
-        </div>
-
-        <!-- Content Area -->
-        <div style="background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 16px; padding: 2rem;">
+        <!-- All Steps Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
             
-            <!-- Step 1: Import Project -->
-            <div id="step-1-content" class="step-content" style="display: block;">
-                <h3 style="color: #60a5fa; margin-bottom: 2rem;">
-                    <i class="fas fa-download"></i> Step 1: Select and Import Project Data
+            <!-- Step 1: Import Project (Optional) -->
+            <div style="background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
+                <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
+                    <span style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.25rem 0.75rem; border-radius: 6px; margin-right: 0.5rem;">1</span>
+                    Import Project (Optional)
                 </h3>
                 
-                <div style="max-width: 600px; margin: 0 auto;">
-                    <select id="project-selector" style="width: 100%; padding: 1rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: #e2e8f0; font-size: 1rem; margin-bottom: 1.5rem;">
-                        <option value="">-- Select a Project --</option>
-                    </select>
-                    
-                    <button onclick="importProject()" style="width: 100%; padding: 1rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer;">
-                        Import Project Data
-                    </button>
-                    
-                    <div id="import-success" style="display: none; margin-top: 2rem; padding: 1rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #10b981;">
-                        <i class="fas fa-check-circle"></i> Project data imported successfully!
+                <select id="project-selector" onchange="loadProjectData()" style="width: 100%; padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0; margin-bottom: 1rem;">
+                    <option value="">-- No Project Selected --</option>
+                </select>
+                
+                <div id="project-info" style="display: none; padding: 1rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px;">
+                    <div style="color: #10b981; font-size: 0.9rem;">Project Loaded</div>
+                    <div id="project-name" style="color: #e2e8f0; font-weight: 600; margin-top: 0.25rem;"></div>
+                </div>
+                
+                <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(96, 165, 250, 0.05); border-radius: 6px;">
+                    <p style="color: #94a3b8; font-size: 0.85rem; margin: 0;">
+                        <i class="fas fa-info-circle"></i> Loading a project auto-fills values below
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 2: Calculated Fields -->
+            <div style="background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
+                <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
+                    <span style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.25rem 0.75rem; border-radius: 6px; margin-right: 0.5rem;">2</span>
+                    Auto-Calculated Values
+                </h3>
+                
+                <div style="display: grid; gap: 1rem;">
+                    <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+                        <div style="color: #10b981; font-size: 0.8rem;">Total CapEx</div>
+                        <input type="number" id="calc-capex" value="100000000" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
+                    </div>
+                    <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+                        <div style="color: #10b981; font-size: 0.8rem;">IT Load (MW)</div>
+                        <input type="number" id="calc-it-load" value="100" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
+                    </div>
+                    <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+                        <div style="color: #10b981; font-size: 0.8rem;">PUE Factor</div>
+                        <input type="number" id="calc-pue" value="1.2" step="0.1" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
+                    </div>
+                    <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+                        <div style="color: #10b981; font-size: 0.8rem;">Net IT Load (Calculated)</div>
+                        <div id="calc-net-load" style="font-size: 1.1rem; font-weight: 600; color: #e2e8f0; margin-top: 0.25rem;">83.3 MW</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 2: Review Calculations -->
-            <div id="step-2-content" class="step-content" style="display: none;">
-                <h3 style="color: #60a5fa; margin-bottom: 2rem;">
-                    <i class="fas fa-calculator"></i> Step 2: Review Auto-Calculated Values
+            <!-- Step 3: Variable Ranges -->
+            <div style="background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
+                <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
+                    <span style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.25rem 0.75rem; border-radius: 6px; margin-right: 0.5rem;">3</span>
+                    Set Variable Ranges
                 </h3>
                 
-                <div id="calculated-values" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    <!-- Calculated values will be inserted here -->
-                </div>
-                
-                <button onclick="goToStep(3)" style="margin-top: 2rem; padding: 1rem 2rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    Continue to Variable Settings
-                </button>
-            </div>
-
-            <!-- Step 3: Set Variables -->
-            <div id="step-3-content" class="step-content" style="display: none;">
-                <h3 style="color: #60a5fa; margin-bottom: 2rem;">
-                    <i class="fas fa-sliders-h"></i> Step 3: Set Variable Ranges
-                </h3>
-                
-                <div style="max-width: 700px; margin: 0 auto;">
-                    <!-- Key Variables Only -->
-                    <div style="margin-bottom: 2rem;">
-                        <label style="display: block; color: #e2e8f0; margin-bottom: 1rem;">Monthly Rent (£/kW)</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <input type="number" id="rent-min" placeholder="Minimum" value="120" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
-                            <input type="number" id="rent-max" placeholder="Maximum" value="220" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
+                <div style="display: grid; gap: 1rem;">
+                    <!-- Rent Range -->
+                    <div>
+                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Monthly Rent (£/kW)</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <input type="number" id="rent-min" placeholder="Min" value="120" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                            <input type="number" id="rent-max" placeholder="Max" value="220" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
                         </div>
                     </div>
                     
-                    <div style="margin-bottom: 2rem;">
-                        <label style="display: block; color: #e2e8f0; margin-bottom: 1rem;">Operating Expenses (%)</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <input type="number" id="opex-min" placeholder="Minimum" value="15" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
-                            <input type="number" id="opex-max" placeholder="Maximum" value="30" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
+                    <!-- OPEX Range -->
+                    <div>
+                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">OPEX (%)</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <input type="number" id="opex-min" placeholder="Min" value="15" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                            <input type="number" id="opex-max" placeholder="Max" value="30" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
                         </div>
                     </div>
                     
-                    <div style="margin-bottom: 2rem;">
-                        <label style="display: block; color: #e2e8f0; margin-bottom: 1rem;">Interest Rate (%)</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <input type="number" id="rate-min" placeholder="Minimum" value="3.0" step="0.25" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
-                            <input type="number" id="rate-max" placeholder="Maximum" value="5.0" step="0.25" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
+                    <!-- Interest Rate Range -->
+                    <div>
+                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Interest Rate (%)</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <input type="number" id="rate-min" placeholder="Min" value="3.0" step="0.25" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                            <input type="number" id="rate-max" placeholder="Max" value="5.0" step="0.25" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
                         </div>
                     </div>
                     
-                    <div style="margin-bottom: 2rem;">
-                        <label style="display: block; color: #e2e8f0; margin-bottom: 1rem;">Target IRR (%)</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <input type="number" id="irr-min" placeholder="Minimum" value="14" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
-                            <input type="number" id="irr-max" placeholder="Maximum" value="19" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0;">
+                    <!-- Target IRR Range -->
+                    <div>
+                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Target IRR (%)</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <input type="number" id="irr-min" placeholder="Min" value="14" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                            <input type="number" id="irr-max" placeholder="Max" value="19" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
                         </div>
                     </div>
                     
-                    <button onclick="generateScenarios()" style="width: 100%; padding: 1rem; background: linear-gradient(90deg, #10b981, #059669); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer;">
-                        Generate Scenarios
-                    </button>
+                    <!-- DSCR Range -->
+                    <div>
+                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">DSCR Target</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <input type="number" id="dscr-min" placeholder="Min" value="1.5" step="0.05" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                            <input type="number" id="dscr-max" placeholder="Max" value="1.8" step="0.05" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Step 4: View Results -->
-            <div id="step-4-content" class="step-content" style="display: none;">
-                <h3 style="color: #60a5fa; margin-bottom: 2rem;">
-                    <i class="fas fa-chart-bar"></i> Step 4: Scenario Results
+            <!-- Step 4: Results & Actions -->
+            <div style="background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
+                <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
+                    <span style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.25rem 0.75rem; border-radius: 6px; margin-right: 0.5rem;">4</span>
+                    Generate Results
                 </h3>
                 
-                <!-- Summary Stats -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                    <div style="padding: 1rem; background: rgba(96, 165, 250, 0.1); border-radius: 8px; text-align: center;">
-                        <div id="total-scenarios" style="font-size: 2rem; font-weight: bold; color: #60a5fa;">0</div>
-                        <div style="color: #94a3b8; font-size: 0.9rem;">Total Scenarios</div>
-                    </div>
-                    <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; text-align: center;">
-                        <div id="viable-scenarios" style="font-size: 2rem; font-weight: bold; color: #10b981;">0</div>
-                        <div style="color: #94a3b8; font-size: 0.9rem;">Viable Options</div>
-                    </div>
-                    <div style="padding: 1rem; background: rgba(251, 191, 36, 0.1); border-radius: 8px; text-align: center;">
-                        <div id="best-irr" style="font-size: 2rem; font-weight: bold; color: #fbbf24;">0%</div>
-                        <div style="color: #94a3b8; font-size: 0.9rem;">Best IRR</div>
+                <!-- Estimation Display -->
+                <div style="padding: 1rem; background: rgba(96, 165, 250, 0.1); border-radius: 8px; margin-bottom: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
+                        <div>
+                            <div style="color: #94a3b8; font-size: 0.85rem;">Estimated Scenarios</div>
+                            <div id="est-scenarios" style="color: #60a5fa; font-size: 1.8rem; font-weight: bold;">1,000</div>
+                        </div>
+                        <div>
+                            <div style="color: #94a3b8; font-size: 0.85rem;">Processing Time</div>
+                            <div id="est-time" style="color: #60a5fa; font-size: 1.8rem; font-weight: bold;">~2s</div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Results Table -->
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: rgba(96, 165, 250, 0.1);">
-                                <th style="padding: 1rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Scenario</th>
-                                <th style="padding: 1rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Rent</th>
-                                <th style="padding: 1rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">OPEX</th>
-                                <th style="padding: 1rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Rate</th>
-                                <th style="padding: 1rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">IRR</th>
-                                <th style="padding: 1rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="results-table">
-                            <!-- Results will be inserted here -->
-                        </tbody>
-                    </table>
+                <!-- Action Buttons -->
+                <div style="display: grid; gap: 1rem;">
+                    <button onclick="generateScenarios()" style="padding: 1rem; background: linear-gradient(90deg, #10b981, #059669); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-rocket"></i> Generate All Scenarios
+                    </button>
+                    <button onclick="generateViableOnly()" style="padding: 1rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-filter"></i> Generate Viable Only
+                    </button>
+                    <button onclick="quickPreview()" style="padding: 1rem; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: #60a5fa; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-eye"></i> Quick Preview (10 samples)
+                    </button>
                 </div>
                 
-                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
-                    <button onclick="exportResults()" style="padding: 1rem 2rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                        <i class="fas fa-download"></i> Export Results
+                <!-- Quick Stats -->
+                <div id="quick-stats" style="display: none; margin-top: 1.5rem; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+                        <div>
+                            <div style="color: #10b981; font-size: 0.8rem;">Total</div>
+                            <div id="stat-total" style="font-weight: bold; color: #e2e8f0;">0</div>
+                        </div>
+                        <div>
+                            <div style="color: #10b981; font-size: 0.8rem;">Viable</div>
+                            <div id="stat-viable" style="font-weight: bold; color: #e2e8f0;">0</div>
+                        </div>
+                        <div>
+                            <div style="color: #10b981; font-size: 0.8rem;">Best IRR</div>
+                            <div id="stat-irr" style="font-weight: bold; color: #e2e8f0;">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Table (Initially Hidden) -->
+        <div id="results-container" style="display: none; margin-top: 2rem; background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
+            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="color: #60a5fa; flex: 1;">
+                    <i class="fas fa-table"></i> Scenario Results
+                </h3>
+                <div style="display: flex; gap: 1rem;">
+                    <button onclick="exportCSV()" style="padding: 0.5rem 1rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-download"></i> Export CSV
                     </button>
-                    <button onclick="startOver()" style="padding: 1rem 2rem; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: #60a5fa; font-weight: 600; cursor: pointer;">
-                        <i class="fas fa-redo"></i> Start Over
+                    <button onclick="clearResults()" style="padding: 0.5rem 1rem; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-times"></i> Clear
                     </button>
                 </div>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: rgba(96, 165, 250, 0.1);">
+                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">#</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Rent</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">OPEX</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Rate</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">DSCR</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">IRR</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Stack</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-tbody">
+                        <!-- Results will be inserted here -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// Simple Permutation Engine JavaScript
-let currentStep = 1;
-let projectData = null;
+// Permutation Engine - All Steps Visible
 let scenarios = [];
 
-function goToStep(step) {
-    if (step > 1 && !projectData) {
-        alert('Please import a project first');
-        return;
-    }
-    
-    currentStep = step;
-    
-    // Hide all content
-    document.querySelectorAll('.step-content').forEach(content => {
-        content.style.display = 'none';
-    });
-    
-    // Show current step
-    document.getElementById(`step-${step}-content`).style.display = 'block';
-    
-    // Update indicators
-    document.querySelectorAll('.perm-step').forEach((indicator, index) => {
-        if (index + 1 === step) {
-            indicator.style.background = 'linear-gradient(90deg, #60a5fa, #3b82f6)';
-            indicator.style.color = 'white';
-        } else if (index + 1 < step) {
-            indicator.style.background = 'rgba(16, 185, 129, 0.2)';
-            indicator.style.color = '#10b981';
-        } else {
-            indicator.style.background = 'rgba(26, 32, 46, 0.6)';
-            indicator.style.color = '#94a3b8';
-        }
-    });
-}
-
-function importProject() {
-    const selector = document.getElementById('project-selector');
-    if (!selector.value) {
-        alert('Please select a project');
-        return;
-    }
-    
-    // Get project data from your existing projects
-    projectData = {
-        code: selector.value,
-        name: selector.options[selector.selectedIndex].text,
-        capex: 100000000,
-        itLoad: 100,
-        pue: 1.2
+// Update calculations when inputs change
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-calculate net load
+    const updateNetLoad = () => {
+        const itLoad = parseFloat(document.getElementById('calc-it-load').value) || 100;
+        const pue = parseFloat(document.getElementById('calc-pue').value) || 1.2;
+        const netLoad = itLoad / pue;
+        document.getElementById('calc-net-load').textContent = netLoad.toFixed(1) + ' MW';
     };
     
-    // Show success message
-    document.getElementById('import-success').style.display = 'block';
+    document.getElementById('calc-it-load').addEventListener('input', updateNetLoad);
+    document.getElementById('calc-pue').addEventListener('input', updateNetLoad);
     
-    // Auto-advance to step 2 after delay
-    setTimeout(() => {
-        goToStep(2);
-        showCalculatedValues();
-    }, 1000);
+    // Estimate scenarios when ranges change
+    const estimateScenarios = () => {
+        // Simple estimation based on range steps
+        const rentSteps = 6;
+        const opexSteps = 4;
+        const rateSteps = 9;
+        const irrSteps = 6;
+        const dscrSteps = 7;
+        
+        const total = rentSteps * opexSteps * rateSteps * irrSteps * dscrSteps;
+        document.getElementById('est-scenarios').textContent = total.toLocaleString();
+        document.getElementById('est-time').textContent = '~' + Math.ceil(total / 500) + 's';
+    };
+    
+    // Add listeners to all range inputs
+    ['rent-min', 'rent-max', 'opex-min', 'opex-max', 'rate-min', 'rate-max', 'irr-min', 'irr-max', 'dscr-min', 'dscr-max'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('input', estimateScenarios);
+        }
+    });
+    
+    // Initial calculations
+    updateNetLoad();
+    estimateScenarios();
+});
+
+// Load project data if selected
+function loadProjectData() {
+    const selector = document.getElementById('project-selector');
+    if (selector.value) {
+        // Show project info
+        document.getElementById('project-info').style.display = 'block';
+        document.getElementById('project-name').textContent = selector.options[selector.selectedIndex].text;
+        
+        // Auto-fill some values (example)
+        document.getElementById('calc-capex').value = 100000000;
+        document.getElementById('calc-it-load').value = 100;
+        document.getElementById('calc-pue').value = 1.2;
+        
+        // Trigger recalculation
+        document.getElementById('calc-it-load').dispatchEvent(new Event('input'));
+    } else {
+        document.getElementById('project-info').style.display = 'none';
+    }
 }
 
-function showCalculatedValues() {
-    const container = document.getElementById('calculated-values');
-    
-    const netLoad = projectData.itLoad / projectData.pue;
-    const annualCapex = projectData.capex / 15; // 15 year default
-    
-    container.innerHTML = `
-        <div style="padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px;">
-            <div style="color: #10b981; font-size: 0.9rem; margin-bottom: 0.5rem;">Project</div>
-            <div style="color: #e2e8f0; font-size: 1.3rem; font-weight: bold;">${projectData.name}</div>
-        </div>
-        <div style="padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px;">
-            <div style="color: #10b981; font-size: 0.9rem; margin-bottom: 0.5rem;">Total CapEx</div>
-            <div style="color: #e2e8f0; font-size: 1.3rem; font-weight: bold;">£${(projectData.capex/1000000).toFixed(0)}M</div>
-        </div>
-        <div style="padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px;">
-            <div style="color: #10b981; font-size: 0.9rem; margin-bottom: 0.5rem;">Net IT Load</div>
-            <div style="color: #e2e8f0; font-size: 1.3rem; font-weight: bold;">${netLoad.toFixed(1)} MW</div>
-        </div>
-        <div style="padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px;">
-            <div style="color: #10b981; font-size: 0.9rem; margin-bottom: 0.5rem;">Annual CapEx</div>
-            <div style="color: #e2e8f0; font-size: 1.3rem; font-weight: bold;">£${(annualCapex/1000000).toFixed(1)}M</div>
-        </div>
-    `;
-}
-
+// Generate scenarios functions
 function generateScenarios() {
-    // Get ranges
-    const rentMin = parseFloat(document.getElementById('rent-min').value);
-    const rentMax = parseFloat(document.getElementById('rent-max').value);
-    const opexMin = parseFloat(document.getElementById('opex-min').value);
-    const opexMax = parseFloat(document.getElementById('opex-max').value);
-    const rateMin = parseFloat(document.getElementById('rate-min').value);
-    const rateMax = parseFloat(document.getElementById('rate-max').value);
-    const irrMin = parseFloat(document.getElementById('irr-min').value);
-    const irrMax = parseFloat(document.getElementById('irr-max').value);
+    runGeneration('all');
+}
+
+function generateViableOnly() {
+    runGeneration('viable');
+}
+
+function quickPreview() {
+    runGeneration('preview');
+}
+
+function runGeneration(mode) {
+    // Get all ranges
+    const ranges = {
+        rent: [parseFloat(document.getElementById('rent-min').value), parseFloat(document.getElementById('rent-max').value)],
+        opex: [parseFloat(document.getElementById('opex-min').value), parseFloat(document.getElementById('opex-max').value)],
+        rate: [parseFloat(document.getElementById('rate-min').value), parseFloat(document.getElementById('rate-max').value)],
+        irr: [parseFloat(document.getElementById('irr-min').value), parseFloat(document.getElementById('irr-max').value)],
+        dscr: [parseFloat(document.getElementById('dscr-min').value), parseFloat(document.getElementById('dscr-max').value)]
+    };
     
-    // Generate simple scenarios (just 10 for simplicity)
+    const capex = parseFloat(document.getElementById('calc-capex').value) || 100000000;
+    
+    // Generate sample scenarios
     scenarios = [];
+    const count = mode === 'preview' ? 10 : 100;
     let viableCount = 0;
     let bestIRR = 0;
     
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < count; i++) {
         const scenario = {
             id: i + 1,
-            rent: rentMin + Math.random() * (rentMax - rentMin),
-            opex: opexMin + Math.random() * (opexMax - opexMin),
-            rate: rateMin + Math.random() * (rateMax - rateMin),
-            irr: irrMin + Math.random() * (irrMax - irrMin),
-            viable: Math.random() > 0.4
+            rent: ranges.rent[0] + Math.random() * (ranges.rent[1] - ranges.rent[0]),
+            opex: ranges.opex[0] + Math.random() * (ranges.opex[1] - ranges.opex[0]),
+            rate: ranges.rate[0] + Math.random() * (ranges.rate[1] - ranges.rate[0]),
+            dscr: ranges.dscr[0] + Math.random() * (ranges.dscr[1] - ranges.dscr[0]),
+            irr: ranges.irr[0] + Math.random() * (ranges.irr[1] - ranges.irr[0]),
+            stack: capex,
+            viable: Math.random() > 0.3
         };
+        
+        if (mode === 'viable' && !scenario.viable) continue;
         
         scenarios.push(scenario);
         if (scenario.viable) {
@@ -2831,35 +2804,41 @@ function generateScenarios() {
     }
     
     // Update stats
-    document.getElementById('total-scenarios').textContent = scenarios.length;
-    document.getElementById('viable-scenarios').textContent = viableCount;
-    document.getElementById('best-irr').textContent = bestIRR.toFixed(1) + '%';
+    document.getElementById('stat-total').textContent = scenarios.length;
+    document.getElementById('stat-viable').textContent = viableCount;
+    document.getElementById('stat-irr').textContent = bestIRR.toFixed(1) + '%';
+    document.getElementById('quick-stats').style.display = 'block';
     
-    // Show results
-    const tbody = document.getElementById('results-table');
+    // Show results table
+    displayResults();
+}
+
+function displayResults() {
+    const tbody = document.getElementById('results-tbody');
     tbody.innerHTML = scenarios.map(s => `
         <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
-            <td style="padding: 1rem; color: #e2e8f0;">#${s.id}</td>
-            <td style="padding: 1rem; color: #e2e8f0;">£${s.rent.toFixed(0)}/kW</td>
-            <td style="padding: 1rem; color: #e2e8f0;">${s.opex.toFixed(1)}%</td>
-            <td style="padding: 1rem; color: #e2e8f0;">${s.rate.toFixed(2)}%</td>
-            <td style="padding: 1rem; color: #e2e8f0; font-weight: bold;">${s.irr.toFixed(1)}%</td>
-            <td style="padding: 1rem;">
-                <span style="padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.9rem; ${s.viable ? 'background: rgba(16, 185, 129, 0.2); color: #10b981;' : 'background: rgba(239, 68, 68, 0.2); color: #ef4444;'}">
+            <td style="padding: 0.75rem; color: #94a3b8;">${s.id}</td>
+            <td style="padding: 0.75rem; color: #e2e8f0;">£${s.rent.toFixed(0)}</td>
+            <td style="padding: 0.75rem; color: #e2e8f0;">${s.opex.toFixed(1)}%</td>
+            <td style="padding: 0.75rem; color: #e2e8f0;">${s.rate.toFixed(2)}%</td>
+            <td style="padding: 0.75rem; color: #e2e8f0;">${s.dscr.toFixed(2)}x</td>
+            <td style="padding: 0.75rem; color: ${s.viable ? '#10b981' : '#ef4444'}; font-weight: 600;">${s.irr.toFixed(1)}%</td>
+            <td style="padding: 0.75rem; color: #e2e8f0;">£${(s.stack/1000000).toFixed(0)}M</td>
+            <td style="padding: 0.75rem;">
+                <span style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; ${s.viable ? 'background: rgba(16, 185, 129, 0.2); color: #10b981;' : 'background: rgba(239, 68, 68, 0.2); color: #ef4444;'}">
                     ${s.viable ? 'Viable' : 'Non-viable'}
                 </span>
             </td>
         </tr>
     `).join('');
     
-    // Go to results
-    goToStep(4);
+    document.getElementById('results-container').style.display = 'block';
 }
 
-function exportResults() {
-    let csv = 'Scenario,Rent,OPEX,Rate,IRR,Status\n';
+function exportCSV() {
+    let csv = 'ID,Rent,OPEX,Rate,DSCR,IRR,Stack,Status\n';
     scenarios.forEach(s => {
-        csv += `${s.id},${s.rent.toFixed(2)},${s.opex.toFixed(2)},${s.rate.toFixed(2)},${s.irr.toFixed(2)},${s.viable ? 'Viable' : 'Non-viable'}\n`;
+        csv += `${s.id},${s.rent.toFixed(2)},${s.opex.toFixed(2)},${s.rate.toFixed(2)},${s.dscr.toFixed(2)},${s.irr.toFixed(2)},${s.stack},${s.viable ? 'Viable' : 'Non-viable'}\n`;
     });
     
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -2870,35 +2849,28 @@ function exportResults() {
     a.click();
 }
 
-function startOver() {
-    projectData = null;
+function clearResults() {
     scenarios = [];
-    document.getElementById('project-selector').value = '';
-    document.getElementById('import-success').style.display = 'none';
-    goToStep(1);
+    document.getElementById('results-container').style.display = 'none';
+    document.getElementById('quick-stats').style.display = 'none';
 }
 
 // Load projects when section is shown
-function loadProjectsIntoSelector() {
-    const selector = document.getElementById('project-selector');
-    if (selector && window.projectsData && window.projectsData.length > 0) {
-        selector.innerHTML = '<option value="">-- Select a Project --</option>';
-        window.projectsData.forEach(project => {
-            const option = document.createElement('option');
-            option.value = project.code;
-            option.textContent = project.name;
-            selector.appendChild(option);
-        });
-    }
-}
-
-// Hook into existing showSection function
 if (window.showSection) {
     const originalShowSection = window.showSection;
     window.showSection = function(section) {
         originalShowSection(section);
         if (section === 'permutation') {
-            loadProjectsIntoSelector();
+            const selector = document.getElementById('project-selector');
+            if (selector && window.projectsData && window.projectsData.length > 0) {
+                selector.innerHTML = '<option value="">-- No Project Selected --</option>';
+                window.projectsData.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.code;
+                    option.textContent = project.name;
+                    selector.appendChild(option);
+                });
+            }
         }
     };
 }
@@ -5843,7 +5815,6 @@ if (window.showSection) {
     
     // Project Management Functions with Drag & Drop
     let projectsData = [];
-    let seriesData = [];
     let currentEditingProject = null;
     let currentEditingSeries = null;
     let draggedElement = null;
@@ -6067,8 +6038,8 @@ if (window.showSection) {
                 }, 100);
             }
             
-            // Show empty state only if both projects and series are empty
-            if (projectsData.length === 0 && seriesData.length === 0) {
+            // Show empty state only if projects are empty
+            if (projectsData.length === 0) {
                 emptyElement.style.display = 'block';
             } else {
                 gridElement.style.display = 'grid';
@@ -6098,68 +6069,6 @@ if (window.showSection) {
     }
 
     // Series Modal Functions
-    function showSeriesModal() {
-        const modal = document.getElementById('series-modal');
-        if (modal) {
-            modal.style.display = 'flex';
-            const nameInput = document.getElementById('series-name');
-            if (nameInput) nameInput.focus();
-            
-            // Add color selection listeners
-            document.querySelectorAll('.color-option').forEach(option => {
-                option.onclick = function() {
-                    document.querySelectorAll('.color-option').forEach(opt => {
-                        opt.style.border = '3px solid transparent';
-                    });
-                    this.style.border = '3px solid white';
-                    const radio = this.previousElementSibling;
-                    if (radio) radio.checked = true;
-                };
-            });
-            
-            // Set default selection
-            const defaultColor = document.querySelector('.color-option[data-color="purple"]');
-            if (defaultColor) defaultColor.style.border = '3px solid white';
-        }
-    }
-    
-    function closeSeriesModal() {
-        const modal = document.getElementById('series-modal');
-        if (modal) modal.style.display = 'none';
-        const form = document.getElementById('series-form');
-        if (form) form.reset();
-    }
-    
-    function createSeries(event) {
-        event.preventDefault();
-        
-        const name = document.getElementById('series-name').value;
-        const description = document.getElementById('series-description').value;
-        const colorInput = document.querySelector('input[name="series-color"]:checked');
-        const color = colorInput ? colorInput.value : 'purple';
-        
-        const newSeries = {
-            id: 'series-' + Date.now(),
-            name: name,
-            description: description,
-            color: color,
-            projects: [],
-            order: seriesData.length,
-            expanded: true
-        };
-        
-        seriesData.push(newSeries);
-        
-        // Hide empty state and show grid
-        document.getElementById('projects-empty').style.display = 'none';
-        document.getElementById('projects-grid').style.display = 'grid';
-        document.getElementById('project-stats').style.display = 'grid';
-        
-        closeSeriesModal();
-        renderProjects();
-        updateProjectStats();
-        saveSeriesData();
-    }
     
     // Project Edit Modal Functions
     function showProjectEditModal(projectId) {
@@ -6249,32 +6158,18 @@ if (window.showSection) {
         let project = projectsData.find(p => p.id === projectId);
         if (project) return project;
         
-        // Search in series
-        for (const series of seriesData) {
-            project = series.projects.find(p => p.id === projectId);
-            if (project) return project;
-        }
         
         return null;
     }
     
-    // Toggle series expand/collapse
-    function toggleSeriesExpand(seriesId) {
-        const series = seriesData.find(s => s.id === seriesId);
-        if (series) {
-            series.expanded = !series.expanded;
-            renderProjects();
-            saveSeriesData();
-        }
-    }
     
     // Variables for delete confirmation
     // let pendingDeleteItem = null;  // Temporarily commented
     // let pendingDeleteType = null;   // Temporarily commented
     
     // Delete project with confirmation modal
-    function deleteProject(projectId, seriesId = null) {
-        pendingDeleteItem = { id: projectId, seriesId: seriesId };
+    function deleteProject(projectId) {
+        pendingDeleteItem = { id: projectId };
         pendingDeleteType = 'project';
         
         const modal = document.getElementById('delete-confirm-modal');
@@ -6283,8 +6178,6 @@ if (window.showSection) {
         modal.style.display = 'flex';
     }
     
-    // Delete series with confirmation modal
-    function deleteSeries(seriesId) {
         const series = seriesData.find(s => s.id === seriesId);
         if (!series) return;
         
@@ -6387,29 +6280,34 @@ if (window.showSection) {
     }
     
     // Save series data
-    async function saveSeriesData() {
+    async function saveProjects() {
         try {
             // Save to backend database (cloud storage)
-            const response = await fetch('/api/series', {
+            const response = await fetch('/api/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',  // Include cookies for session
-                body: JSON.stringify({ series: seriesData, projects: projectsData })
+                body: JSON.stringify({ projects: projectsData })
             });
             
             if (!response.ok) {
                 throw new Error('Failed to save data to server');
             }
             
-            console.log('Data saved to cloud successfully');
+            console.log('Projects saved to cloud successfully');
             
             // Show a subtle success indicator
             showSaveIndicator('success');
         } catch (error) {
-            console.error('Error saving data:', error);
+            console.error('Error saving projects:', error);
             showSaveIndicator('error');
             alert('Failed to save changes. Please check your connection and try again.');
         }
+    }
+    
+    // Alias for backward compatibility
+    async function saveSeriesData() {
+        return saveProjects();
     }
     
     // Show save status indicator
@@ -6461,7 +6359,7 @@ if (window.showSection) {
     }
     
     // Create new project (with series support)
-    async function createNewProject(seriesId = null) {
+    async function createNewProject() {
         // Create project locally (works without backend)
         const newProject = {
             id: 'project-' + Date.now(),
@@ -6470,7 +6368,7 @@ if (window.showSection) {
             status: 'draft',
             value: 0,
             progress: 0,
-            order: seriesId ? 0 : projectsData.length,
+            order: projectsData.length,
             // Permutation Engine Fields (defaults)
             currency: '',
             grossITLoad: null,
@@ -6488,7 +6386,7 @@ if (window.showSection) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',  // Include cookies for session
-                body: JSON.stringify({ ...newProject, seriesId: seriesId })
+                body: JSON.stringify(newProject)
             });
             
             if (response.ok) {
@@ -6501,18 +6399,8 @@ if (window.showSection) {
             console.log('Using local storage only - API not available');
         }
         
-        // Add project to appropriate location
-        if (seriesId) {
-            // Add to series
-            const series = seriesData.find(s => s.id === seriesId);
-            if (series) {
-                newProject.order = series.projects.length;
-                series.projects.push(newProject);
-            }
-        } else {
-            // Add as standalone project
-            projectsData.push(newProject);
-        }
+        // Add project to list
+        projectsData.push(newProject);
         
         // Hide empty state and show grid
         document.getElementById('projects-empty').style.display = 'none';
@@ -6522,7 +6410,7 @@ if (window.showSection) {
         // Update UI and save
         renderProjects();
         updateProjectStats();
-        saveSeriesData();
+        saveProjects();
     }
 
     // Legacy function for compatibility
@@ -6540,6 +6428,81 @@ if (window.showSection) {
     function editProject(projectId) {
         showProjectEditModal(projectId);
     }
+    
+    // Launch permutation tool with project data
+    function launchPermutationWithProject(projectId) {
+        const project = findProjectById(projectId);
+        if (!project) {
+            alert('Project not found');
+            return;
+        }
+        
+        // Switch to permutation section
+        showSection('permutation');
+        
+        // Populate permutation fields with project data
+        setTimeout(() => {
+            // Set project selector if exists
+            const projectSelector = document.getElementById('project-selector');
+            if (projectSelector) {
+                projectSelector.value = projectId;
+            }
+            
+            // Populate the permutation form fields with project data
+            if (project.currency) {
+                const currencyField = document.getElementById('perm-currency');
+                if (currencyField) currencyField.value = project.currency;
+            }
+            
+            if (project.grossITLoad) {
+                const grossITField = document.getElementById('perm-gross-it-load');
+                if (grossITField) grossITField.value = project.grossITLoad;
+            }
+            
+            if (project.pue) {
+                const pueField = document.getElementById('perm-pue');
+                if (pueField) pueField.value = project.pue;
+            }
+            
+            if (project.capexCost) {
+                const capexCostField = document.getElementById('perm-capex-cost');
+                if (capexCostField) capexCostField.value = project.capexCost;
+            }
+            
+            if (project.capexRate) {
+                const capexRateField = document.getElementById('perm-capex-rate');
+                if (capexRateField) capexRateField.value = project.capexRate;
+            }
+            
+            if (project.landPurchaseFees) {
+                const landFeesField = document.getElementById('perm-land-fees');
+                if (landFeesField) landFeesField.value = project.landPurchaseFees;
+            }
+            
+            if (project.grossMonthlyRent) {
+                const monthlyRentField = document.getElementById('perm-monthly-rent');
+                if (monthlyRentField) monthlyRentField.value = project.grossMonthlyRent;
+            }
+            
+            if (project.opex) {
+                const opexField = document.getElementById('perm-opex');
+                if (opexField) opexField.value = project.opex;
+            }
+            
+            // Store project reference for later use
+            window.currentPermutationProject = project;
+            
+            // Show success message
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = 'position: fixed; top: 200px; right: 20px; background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 1rem 1.5rem; border-radius: 8px; z-index: 10000; animation: slideIn 0.3s ease;';
+            messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> Project "${project.title}" loaded into Permutation Engine`;
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }, 500);
+    }
 
     // Render projects in the grid
     function renderProjects() {
@@ -6554,180 +6517,16 @@ if (window.showSection) {
             padding: 20px 0;
         `;
 
-        // Ensure arrays are valid
-        if (!Array.isArray(seriesData)) {
-            seriesData = [];
-        }
+        // Ensure array is valid
         if (!Array.isArray(projectsData)) {
             projectsData = [];
         }
 
-        // Render series first
-        seriesData.forEach((series, seriesIndex) => {
-            const seriesCard = createSeriesCard(series, seriesIndex);
-            gridElement.appendChild(seriesCard);
-        });
-
-        // Then render standalone projects directly in the grid (no wrapper)
+        // Render projects directly in the grid
         projectsData.forEach((project, index) => {
             const projectCard = createProjectCard(project, index);
-            // Make standalone projects droppable targets
-            projectCard.addEventListener('dragover', handleStandaloneAreaDragOver);
-            projectCard.addEventListener('drop', handleStandaloneAreaDrop);
             gridElement.appendChild(projectCard);
         });
-        
-        // If there are no standalone projects, create an invisible drop zone
-        if (projectsData.length === 0 && seriesData.length > 0) {
-            const dropHelper = document.createElement('div');
-            dropHelper.className = 'standalone-drop-helper';
-            dropHelper.style.cssText = `
-                min-height: 200px;
-                border: 2px dashed transparent;
-                border-radius: 12px;
-                transition: all 0.3s ease;
-            `;
-            dropHelper.addEventListener('dragover', handleStandaloneAreaDragOver);
-            dropHelper.addEventListener('drop', handleStandaloneAreaDrop);
-            dropHelper.addEventListener('dragleave', handleStandaloneAreaLeave);
-            gridElement.appendChild(dropHelper);
-        }
-    }
-    
-    // Create series card with projects
-    function createSeriesCard(series, seriesIndex) {
-        const card = document.createElement('div');
-        card.className = 'series-card';
-        card.dataset.seriesId = series.id;
-        card.dataset.index = seriesIndex;
-        card.dataset.type = 'series';
-        card.draggable = true; // Make series draggable
-        
-        const colorGradients = {
-            purple: 'linear-gradient(135deg, #a855f7, #9333ea)',
-            blue: 'linear-gradient(135deg, #60a5fa, #3b82f6)',
-            green: 'linear-gradient(135deg, #34d399, #10b981)',
-            orange: 'linear-gradient(135deg, #fb923c, #f97316)',
-            pink: 'linear-gradient(135deg, #f472b6, #ec4899)'
-        };
-        
-        const gradient = colorGradients[series.color] || colorGradients.purple;
-        
-        // Dynamic grid span based on project count
-        let gridSpan = 1; // Default for 0-1 projects
-        if (series.projects.length >= 2 && series.projects.length <= 3) {
-            gridSpan = 2; // Half row for 2-3 projects
-        } else if (series.projects.length >= 4) {
-            gridSpan = 3; // Full row for 4+ projects
-        }
-        
-        card.style.cssText = `
-            background: linear-gradient(135deg, #0a0e27, #020617);
-            border: 2px solid transparent;
-            background-clip: padding-box;
-            border-image: ${gradient} 1;
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin: 0.75rem;
-            position: relative;
-            grid-column: span ${gridSpan};
-            min-height: 250px;
-            cursor: grab;
-            transition: all 0.3s ease;
-        `;
-        
-        card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="width: 8px; height: 40px; background: ${gradient}; border-radius: 4px;"></div>
-                    <div>
-                        <h3 style="color: white; font-size: 1.25rem; font-weight: 700; margin: 0;">${series.name}</h3>
-                        <p style="color: #94a3b8; font-size: 0.875rem; margin: 0.25rem 0 0 0;">${series.description || 'No description'}</p>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button onclick="createNewProject('${series.id}')" style="background: ${gradient}; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
-                        <i class="fas fa-plus"></i> Add Project
-                    </button>
-                    <button onclick="toggleSeriesExpand('${series.id}')" style="background: rgba(255, 255, 255, 0.1); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
-                        <i class="fas fa-chevron-${series.expanded ? 'up' : 'down'}"></i>
-                    </button>
-                    <button onclick="deleteSeries('${series.id}')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="series-projects drop-zone" data-series-id="${series.id}" style="display: ${series.expanded ? 'grid' : 'none'}; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem; min-height: 150px; border: 2px dashed rgba(96, 165, 250, 0.4); border-radius: 8px; transition: all 0.3s ease; padding: 15px; background: rgba(96, 165, 250, 0.03); position: relative;">
-                ${series.projects.length === 0 ? '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(96, 165, 250, 0.5); font-size: 14px; text-align: center; pointer-events: none;">Drag projects here to add to this series</div>' : ''}
-                ${series.projects.length > 0 ? series.projects.map((project, idx) => `
-                    <div class="project-in-series project-card" draggable="true" data-project-id="${project.id}" data-series-id="${series.id}" data-index="${idx}" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1rem; cursor: move;">
-                        <div style="margin-bottom: 1rem;">
-                            <h4 style="color: #60a5fa; font-size: 1rem; margin: 0 0 0.5rem 0;">${project.title}</h4>
-                            <p style="color: #94a3b8; font-size: 0.875rem; margin: 0;">${project.description}</p>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                            <span class="status-badge" style="background: ${getStatusColor(project.status)}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem;">
-                                ${project.status}
-                            </span>
-                            <span style="color: #60a5fa; font-weight: 600;">${formatCurrency(project.value)}</span>
-                        </div>
-                        
-                        <div style="margin-bottom: 0.75rem;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                                <span style="color: #94a3b8; font-size: 0.75rem;">Progress</span>
-                                <span style="color: #60a5fa; font-size: 0.75rem;">${project.progress}%</span>
-                            </div>
-                            <div style="background: rgba(96, 165, 250, 0.1); border-radius: 4px; height: 6px; overflow: hidden;">
-                                <div style="background: linear-gradient(90deg, #60a5fa, #3b82f6); height: 100%; width: ${project.progress}%; transition: width 0.3s ease;"></div>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="showProjectEditModal('${project.id}')" style="flex: 1; background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button onclick="deleteProject('${project.id}', '${series.id}')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                `).join('') : `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; border: 2px dashed rgba(96, 165, 250, 0.2); border-radius: 12px;">
-                        <p style="color: #64748b;">No projects in this series yet</p>
-                        <button onclick="createNewProject('${series.id}')" style="margin-top: 1rem; background: ${gradient}; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
-                            <i class="fas fa-plus"></i> Add First Project
-                        </button>
-                    </div>
-                `}
-            </div>
-        `;
-        
-        // Add drag event listeners for the series card
-        setupSeriesDragEvents(card);
-        
-        // Add drag event listeners for projects within the series
-        card.querySelectorAll('.project-in-series').forEach(projectCard => {
-            setupCardDragEvents(projectCard);
-        });
-        
-        // Make the series projects area a drop zone
-        const dropZone = card.querySelector('.series-projects');
-        if (dropZone) {
-            dropZone.addEventListener('dragover', handleSeriesDropZoneDragOver);
-            dropZone.addEventListener('drop', handleSeriesDropZoneDrop);
-            dropZone.addEventListener('dragleave', handleSeriesDropZoneLeave);
-            
-            // Also add drag events to projects within series
-            const projectsInSeries = dropZone.querySelectorAll('.project-in-series');
-            projectsInSeries.forEach(projectCard => {
-                projectCard.addEventListener('dragstart', handleDragStart);
-                projectCard.addEventListener('dragend', handleDragEnd);
-            });
-        }
-        
-        return card;
     }
     
     // Get status color helper
@@ -6758,8 +6557,8 @@ if (window.showSection) {
     // let pendingDeleteType = null;   // Temporarily commented
     
     // Delete project with confirmation modal
-    function deleteProject(projectId, seriesId = null) {
-        pendingDeleteItem = { id: projectId, seriesId: seriesId };
+    function deleteProject(projectId) {
+        pendingDeleteItem = { id: projectId };
         pendingDeleteType = 'project';
         
         const modal = document.getElementById('delete-confirm-modal');
@@ -6768,8 +6567,6 @@ if (window.showSection) {
         modal.style.display = 'flex';
     }
     
-    // Delete series with confirmation modal
-    function deleteSeries(seriesId) {
         const series = seriesData.find(s => s.id === seriesId);
         if (!series) return;
         
@@ -6947,6 +6744,9 @@ if (window.showSection) {
                     </button>
                     <button onclick="editProject('${project.id}')" style="flex: 1; background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
                         <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button onclick="launchPermutationWithProject('${project.id}')" style="flex: 1; background: linear-gradient(135deg, #0a0e27, #020617); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                        <i class="fas fa-cogs"></i> Permutation
                     </button>
                     <button onclick="deleteProject('${project.id}')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
                         <i class="fas fa-trash"></i>
