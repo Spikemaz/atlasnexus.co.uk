@@ -17,7 +17,16 @@ import time
 # Format: mongodb+srv://username:password@cluster.mongodb.net/database
 def get_mongodb_uri():
     """Get MongoDB URI dynamically"""
-    return os.environ.get('MONGODB_URI', '')
+    # Check environment variable first, then use hardcoded for testing
+    uri = os.environ.get('MONGODB_URI', '')
+    if not uri and os.path.exists('mongodb_uri.txt'):
+        # For local testing, read from file if exists
+        try:
+            with open('mongodb_uri.txt', 'r') as f:
+                uri = f.read().strip()
+        except:
+            pass
+    return uri
 
 def should_use_mongodb():
     """Check if MongoDB should be used"""

@@ -448,6 +448,60 @@ def modify_ip_ban(ip_address, action, duration_days=None):
     return False
 
 # ==================== HELPER FUNCTIONS ====================
+def save_registration_data(email, data):
+    """Save registration data to cloud or local storage"""
+    if should_use_mongodb():
+        return cloud_db.save_registration(email, data)
+    else:
+        registrations = load_json_db(REGISTRATIONS_FILE)
+        registrations[email] = data
+        return save_json_db(REGISTRATIONS_FILE, registrations)
+
+def load_registrations_data():
+    """Load registrations from cloud or local storage"""
+    if should_use_mongodb():
+        return cloud_db.load_registrations()
+    else:
+        return load_json_db(REGISTRATIONS_FILE)
+
+def delete_registration_data(email):
+    """Delete registration from cloud or local storage"""
+    if should_use_mongodb():
+        return cloud_db.delete_registration(email)
+    else:
+        registrations = load_json_db(REGISTRATIONS_FILE)
+        if email in registrations:
+            del registrations[email]
+            return save_json_db(REGISTRATIONS_FILE, registrations)
+        return False
+
+def save_user_data(email, data):
+    """Save user data to cloud or local storage"""
+    if should_use_mongodb():
+        return cloud_db.save_user(email, data)
+    else:
+        users = load_json_db(USERS_FILE)
+        users[email] = data
+        return save_json_db(USERS_FILE, users)
+
+def load_users_data():
+    """Load users from cloud or local storage"""
+    if should_use_mongodb():
+        return cloud_db.load_users()
+    else:
+        return load_json_db(USERS_FILE)
+
+def delete_user_data(email):
+    """Delete user from cloud or local storage"""
+    if should_use_mongodb():
+        return cloud_db.delete_user(email)
+    else:
+        users = load_json_db(USERS_FILE)
+        if email in users:
+            del users[email]
+            return save_json_db(USERS_FILE, users)
+        return False
+
 def get_real_ip():
     """Get the real IP address, handling proxies and CDNs"""
     # Check various headers that proxies/CDNs use
@@ -1643,8 +1697,8 @@ def register():
         }
         
         # Load existing registrations and users
-        registrations = load_json_db(REGISTRATIONS_FILE)
-        users = load_json_db(USERS_FILE)
+        registrations = load_registrations_data()
+        users = load_users_data()
         
         # Check if email already exists in either database
         if data['email'] in registrations:
@@ -1657,8 +1711,7 @@ def register():
                 created_at = datetime.fromisoformat(registration.get('created_at'))
                 if datetime.now() - created_at > timedelta(hours=24):
                     # Remove expired registration to allow re-registration
-                    del registrations[data['email']]
-                    save_json_db(REGISTRATIONS_FILE, registrations)
+                    delete_registration_data(data['email'])
                 else:
                     return jsonify({'status': 'error', 'message': 'Registration pending. Please check your email for verification link or wait for the current registration to expire.'}), 400
         
@@ -1667,9 +1720,8 @@ def register():
             return jsonify({'status': 'error', 'message': 'This email is already registered. Please login with your credentials.'}), 400
         
         # Save registration
-        registrations[data['email']] = data
-        save_json_db(REGISTRATIONS_FILE, registrations)
-        print(f"[REGISTRATION SAVED] {data['email']} - Total registrations: {len(registrations)}")
+        save_registration_data(data['email'], data)
+        print(f"[REGISTRATION SAVED] {data['email']} - Cloud: {should_use_mongodb()}")
         
         # Trigger update notification for admin panel
         session['data_changed'] = True
@@ -1711,8 +1763,7 @@ def register():
         data['approval_token'] = approval_token
         
         # Re-save with approval token
-        registrations[data['email']] = data
-        save_json_db(REGISTRATIONS_FILE, registrations)
+        save_registration_data(data['email'], data)
         
         # Notify admin of new registration with approval/reject buttons
         approve_link = f"{base_url}admin/quick-approve?token={approval_token}&email={data['email']}"

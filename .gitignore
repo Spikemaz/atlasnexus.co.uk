@@ -20,3 +20,5 @@ cookies*.txt
 # IP lockout tracking files
 ip_lockouts.json
 ip_attempts_log.json
+
+.env*.local
