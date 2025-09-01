@@ -743,6 +743,22 @@
             const targetElement = document.getElementById(targetSection);
             if (targetElement) {
                 targetElement.style.display = 'block';
+                
+                // Instantly jump to top first for immediate feedback
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0; // For Safari
+                
+                // Also ensure the section itself is scrolled to top if it has its own scroll
+                targetElement.scrollTop = 0;
+                
+                // Then do a smooth scroll for visual polish (optional - already at top)
+                // This creates a nice "refresh" feeling
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }, 10);
             }
             
             // Update navigation buttons
