@@ -714,6 +714,88 @@
         </div>
     </div>
 
+    <!-- Define showSection immediately before navigation bar -->
+    <script>
+        // Define showSection immediately so it's available for navigation buttons
+        function showSection(section) {
+            console.log('Switching to section:', section);
+            
+            // Hide all sections
+            const allSections = ['main-dashboard', 'market-section', 'data-section', 'analytics-section', 
+                               'risk-section', 'portfolio-section', 'compliance-section', 'permutation-section',
+                               'documents-section', 'timeline-section', 'reports-section', 'support-section', 'projects-section'];
+            
+            allSections.forEach(sectionId => {
+                const element = document.getElementById(sectionId);
+                if (element) {
+                    element.style.display = 'none';
+                }
+            });
+            
+            // Show the selected section
+            let targetSection = section;
+            if (section === 'dashboard') {
+                targetSection = 'main-dashboard';
+            } else if (!section.includes('-section')) {
+                targetSection = section + '-section';
+            }
+            
+            const targetElement = document.getElementById(targetSection);
+            if (targetElement) {
+                targetElement.style.display = 'block';
+            }
+            
+            // Update navigation buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.style.background = 'transparent';
+                btn.style.color = '#ffffff';
+            });
+            
+            const activeBtn = document.querySelector(`.nav-btn[data-section="${section}"]`);
+            if (activeBtn) {
+                activeBtn.style.background = 'linear-gradient(135deg, #1e3a8a, #1e40af)';
+                activeBtn.style.color = 'white';
+            }
+            
+            // Special handling for projects section
+            if (section === 'projects' && typeof initializeProjects === 'function') {
+                setTimeout(initializeProjects, 100);
+            }
+        }
+        
+        // Toolbar auto-hide on scroll
+        let lastScrollTop = 0;
+        let scrollTimeout;
+        
+        window.addEventListener('scroll', function() {
+            const navBar = document.getElementById('navBar');
+            if (!navBar) return;
+            
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Clear any existing timeout
+            clearTimeout(scrollTimeout);
+            
+            if (scrollTop > lastScrollTop && scrollTop > 150) {
+                // Scrolling down - hide navbar
+                navBar.style.top = '-60px';
+                navBar.style.opacity = '0';
+            } else {
+                // Scrolling up - show navbar
+                navBar.style.top = '115px';
+                navBar.style.opacity = '1';
+            }
+            
+            lastScrollTop = scrollTop;
+            
+            // Always show navbar when scroll stops
+            scrollTimeout = setTimeout(() => {
+                navBar.style.top = '115px';
+                navBar.style.opacity = '1';
+            }, 1000);
+        });
+    </script>
+
     <!-- Navigation Bar -->
     <div id="navBar" style="position: fixed; top: 115px; left: 0; right: 0; background: linear-gradient(135deg, #0a0e27, #020617); border-bottom: 1px solid rgba(96, 165, 250, 0.3); z-index: 998; padding: 10px 0; transition: top 0.3s ease, opacity 0.3s ease; opacity: 1;">
         <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap;">
@@ -2602,15 +2684,7 @@
         let currentTab = 'overview';
         let currentSection = 'dashboard';
         
-        // Define showSection early so it's available for HTML onclick handlers
-        window.showSection = function(section) {
-            // This will be overridden with full implementation later
-            console.log('ShowSection called for:', section);
-            // Basic implementation to prevent errors
-            if (typeof window.fullShowSection === 'function') {
-                window.fullShowSection(section);
-            }
-        };
+        // ShowSection is already defined earlier in the HTML for onclick handlers
         
         function showPlaceholderContent(title, description) {
             let placeholderDiv = document.getElementById('placeholder-content');
@@ -3953,8 +4027,10 @@
     }
     
     
-    // Full implementation of showSection - overwrites the placeholder
-    window.fullShowSection = window.showSection = function(section) {
+    // Extended showSection functionality (the main definition is earlier in HTML)
+    // This adds additional features to the already-defined showSection
+    const originalShowSection = window.showSection;
+    window.showSection = function(section) {
         // Hide all sections without re-triggering animations
         const allSections = ['main-dashboard', 'market-section', 'data-section', 'analytics-section', 
                            'risk-section', 'portfolio-section', 'compliance-section', 'permutation-section',
