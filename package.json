@@ -1,8 +1,0 @@
-{
-  "name": "atlasnexus",
-  "version": "1.0.0",
-  "description": "AtlasNexus Platform",
-  "dependencies": {
-    "@vercel/kv": "^1.0.0"
-  }
-}

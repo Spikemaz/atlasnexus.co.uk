@@ -1,24 +1,45 @@
 # Python
 __pycache__/
 venv/
-*.txt
-nul
-*_live.py
+*.pyc
+*.pyo
+*.pyd
 
-# SENSITIVE FILES - NEVER COMMIT
+# Environment files
+.env
+.env.local
+.env*.local
+mongodb_uri.txt
+
+# Sensitive configuration
 email_config.py
-data/
 
-# Temporary test files
-templates/temp/*
-!templates/temp/README.txt
+# Data folders (using MongoDB now)
+data/
+*.json
+
+# Temporary and test files
+test_*.py
+*_test.py
 *.test.html
 *_test.html
-test_*
+verify_result*.html
 cookies*.txt
+*.txt
 
-# IP lockout tracking files
-ip_lockouts.json
-ip_attempts_log.json
+# IDE and system files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+nul
 
-.env*.local
+# Vercel
+.vercel
+
+# Node (if used)
+node_modules/
+package-lock.json
