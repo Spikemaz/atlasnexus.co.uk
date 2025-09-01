@@ -23,7 +23,7 @@
             --slate-grey: #2C3137;
             --steel-blue: #364049;
             --silver-mist: #92969C;
-            --silver-light: #B8C0C8;
+            --silver-light: #94a3b8;
             --pearl-grey: #E5E9F0;
             --pure-white: #FFFFFF;
             
@@ -60,7 +60,7 @@
         
         /* Global text color fixes for dark theme */
         .text-muted {
-            color: #B8C0C8 !important; /* Light silver for muted text */
+            color: #94a3b8 !important; /* Light silver for muted text */
         }
         
         .text-secondary {
@@ -68,11 +68,11 @@
         }
         
         .small {
-            color: #B8C0C8 !important; /* Ensure small text is visible */
+            color: #94a3b8 !important; /* Ensure small text is visible */
         }
         
         label {
-            color: #B8C0C8 !important; /* Ensure labels are visible */
+            color: #94a3b8 !important; /* Ensure labels are visible */
         }
         
         /* Override Bootstrap dark text colors */
@@ -97,7 +97,7 @@
         
         /* Ensure all paragraph text is visible */
         p {
-            color: #B8C0C8 !important;
+            color: #94a3b8 !important;
         }
         
         /* Fix any remaining dark text */
@@ -352,7 +352,7 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, rgba(44, 49, 55, 0.9) 0%, rgba(54, 64, 73, 0.9) 100%);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
             border: 1px solid rgba(96, 165, 250, 0.3);
             border-radius: 16px;
             padding: 1.5rem;
@@ -619,7 +619,7 @@
                     Dashboard Active
                 </span>
                 {% if is_admin %}
-                <a href="/admin-panel" style="background: linear-gradient(90deg, #fbbf24, #f59e0b); color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-right: 8px; text-decoration: none; display: inline-block;">
+                <a href="/admin-panel" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-right: 8px; text-decoration: none; display: inline-block;">
                     <i class="fas fa-cog"></i> Control Panel
                 </a>
                 {% endif %}
@@ -793,7 +793,7 @@
                 <div class="stat-card hover-lift">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="small fw-semibold mb-1" style="color: #B8C0C8;">TOTAL AUM</div>
+                            <div class="small fw-semibold mb-1" style="color: #94a3b8;">TOTAL AUM</div>
                             <div class="h3 fw-bold text-primary mb-0">€2.4B</div>
                             <div class="text-success small">
                                 <i class="fas fa-arrow-up me-1"></i>+12.3% YoY
@@ -810,7 +810,7 @@
                 <div class="stat-card hover-lift">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="small fw-semibold mb-1" style="color: #B8C0C8;">ACTIVE DEALS</div>
+                            <div class="small fw-semibold mb-1" style="color: #94a3b8;">ACTIVE DEALS</div>
                             <div class="h3 fw-bold text-success mb-0">127</div>
                             <div class="text-info small">
                                 <i class="fas fa-plus me-1"></i>8 new this week
@@ -827,7 +827,7 @@
                 <div class="stat-card hover-lift">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="small fw-semibold mb-1" style="color: #B8C0C8;">AVG DSCR</div>
+                            <div class="small fw-semibold mb-1" style="color: #94a3b8;">AVG DSCR</div>
                             <div class="h3 fw-bold text-warning mb-0">1.47x</div>
                             <div class="text-success small">
                                 <i class="fas fa-arrow-up me-1"></i>+0.08 vs target
@@ -844,9 +844,9 @@
                 <div class="stat-card hover-lift">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="small fw-semibold mb-1" style="color: #B8C0C8;">RISK RATING</div>
+                            <div class="small fw-semibold mb-1" style="color: #94a3b8;">RISK RATING</div>
                             <div class="h3 fw-bold text-info mb-0">AA-</div>
-                            <div class="small" style="color: #B8C0C8;">
+                            <div class="small" style="color: #94a3b8;">
                                 <i class="fas fa-shield-alt me-1"></i>Stable outlook
                             </div>
                         </div>
@@ -880,9 +880,9 @@
                     <div class="card-body p-4">
                         <div class="row g-4">
                             <div class="col-md-4">
-                                <div class="text-center p-3 rounded-3 bg-dark bg-opacity-25">
+                                <div class="text-center p-3 rounded-3" style="background: rgba(30, 41, 59, 0.5)">
                                     <div class="h4 fw-bold text-primary mb-1">€847M</div>
-                                    <div class="small mb-2" style="color: #B8C0C8;">Week Issuance</div>
+                                    <div class="small mb-2" style="color: #94a3b8;">Week Issuance</div>
                                     <div class="progress" style="height: 4px;">
                                         <div class="progress-bar bg-primary" style="width: 78%"></div>
                                     </div>
@@ -890,18 +890,18 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="text-center p-3 rounded-3 bg-dark bg-opacity-25">
+                                <div class="text-center p-3 rounded-3" style="background: rgba(30, 41, 59, 0.5)">
                                     <div class="h4 fw-bold text-success mb-1">1.85%</div>
-                                    <div class="small mb-2" style="color: #B8C0C8;">AAA Spread</div>
+                                    <div class="small mb-2" style="color: #94a3b8;">AAA Spread</div>
                                     <div class="text-success small">
                                         <i class="fas fa-arrow-down me-1"></i>-12 bps
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="text-center p-3 rounded-3 bg-dark bg-opacity-25">
+                                <div class="text-center p-3 rounded-3" style="background: rgba(30, 41, 59, 0.5)">
                                     <div class="h4 fw-bold text-warning mb-1">€2.1B</div>
-                                    <div class="small mb-2" style="color: #B8C0C8;">Pipeline</div>
+                                    <div class="small mb-2" style="color: #94a3b8;">Pipeline</div>
                                     <div class="text-info small">
                                         <i class="fas fa-clock me-1"></i>Next 30 days
                                     </div>
@@ -910,7 +910,7 @@
                         </div>
                         
                         <!-- Chart Area -->
-                        <div class="mt-4 p-4 bg-dark bg-opacity-25 rounded-3">
+                        <div class="mt-4 p-4 rounded-3" style="background: rgba(30, 41, 59, 0.5)">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="fw-bold text-white mb-0">Spread Evolution (Last 30 Days)</h6>
                                 <div class="btn-group btn-group-sm">
@@ -951,7 +951,7 @@
                                     <tr>
                                         <td class="py-3">
                                             <div class="fw-semibold">European Data Centers 2024-1</div>
-                                            <small style="color: #B8C0C8;">Lead: Digital Realty</small>
+                                            <small style="color: #94a3b8;">Lead: Digital Realty</small>
                                         </td>
                                         <td class="py-3">
                                             <span class="badge bg-primary bg-opacity-25 text-primary">Data Center</span>
@@ -972,7 +972,7 @@
                                     <tr>
                                         <td class="py-3">
                                             <div class="fw-semibold">UK Logistics Portfolio 2024-A</div>
-                                            <small style="color: #B8C0C8;">Lead: Prologis UK</small>
+                                            <small style="color: #94a3b8;">Lead: Prologis UK</small>
                                         </td>
                                         <td class="py-3">
                                             <span class="badge bg-success bg-opacity-25 text-success">Logistics</span>
@@ -993,7 +993,7 @@
                                     <tr>
                                         <td class="py-3">
                                             <div class="fw-semibold">German Renewable Energy 2024-3</div>
-                                            <small style="color: #B8C0C8;">Lead: RWE Renewables</small>
+                                            <small style="color: #94a3b8;">Lead: RWE Renewables</small>
                                         </td>
                                         <td class="py-3">
                                             <span class="badge bg-warning bg-opacity-25 text-warning">Renewable</span>
@@ -1031,7 +1031,7 @@
                     <div class="card-body p-4">
                         <div class="text-center mb-4">
                             <div class="h2 fw-bold text-success mb-1">+14.2%</div>
-                            <div class="small" style="color: #B8C0C8;">Total Return YTD</div>
+                            <div class="small" style="color: #94a3b8;">Total Return YTD</div>
                             <div class="progress mt-2" style="height: 6px;">
                                 <div class="progress-bar bg-success" style="width: 85%"></div>
                             </div>
@@ -1040,27 +1040,27 @@
                         
                         <div class="row g-3">
                             <div class="col-6">
-                                <div class="text-center p-2 bg-dark bg-opacity-25 rounded">
+                                <div class="text-center p-2 rounded" style="background: rgba(30, 41, 59, 0.5)">
                                     <div class="fw-bold text-white">€1.8B</div>
-                                    <small style="color: #B8C0C8;">Net Assets</small>
+                                    <small style="color: #94a3b8;">Net Assets</small>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <div class="text-center p-2 bg-dark bg-opacity-25 rounded">
+                                <div class="text-center p-2 rounded" style="background: rgba(30, 41, 59, 0.5)">
                                     <div class="fw-bold text-white">0.12%</div>
-                                    <small style="color: #B8C0C8;">Mgmt Fee</small>
+                                    <small style="color: #94a3b8;">Mgmt Fee</small>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <div class="text-center p-2 bg-dark bg-opacity-25 rounded">
+                                <div class="text-center p-2 rounded" style="background: rgba(30, 41, 59, 0.5)">
                                     <div class="fw-bold text-white">4.2%</div>
-                                    <small style="color: #B8C0C8;">Yield</small>
+                                    <small style="color: #94a3b8;">Yield</small>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <div class="text-center p-2 bg-dark bg-opacity-25 rounded">
+                                <div class="text-center p-2 rounded" style="background: rgba(30, 41, 59, 0.5)">
                                     <div class="fw-bold text-white">AA-</div>
-                                    <small style="color: #B8C0C8;">Rating</small>
+                                    <small style="color: #94a3b8;">Rating</small>
                                 </div>
                             </div>
                         </div>
@@ -1069,7 +1069,7 @@
 
                 <!-- Risk Dashboard -->
                 <div class="card shadow-lg mb-4 fade-in-up" style="border-radius: 16px; animation-delay: 0.8s">
-                    <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 16px 16px 0 0;">
+                    <div class="card-header border-0 text-white" style="background: linear-gradient(135deg, #60a5fa, #3b82f6); border-radius: 16px 16px 0 0;">
                         <h6 class="mb-0 fw-bold">
                             <i class="fas fa-shield-alt me-2"></i>Risk Monitor
                         </h6>
@@ -1109,7 +1109,7 @@
                         <div class="border-top pt-3 mt-3">
                             <div class="text-center">
                                 <div class="h5 fw-bold text-warning mb-1">7.2%</div>
-                                <small style="color: #B8C0C8;">VaR (95%, 1D)</small>
+                                <small style="color: #94a3b8;">VaR (95%, 1D)</small>
                             </div>
                         </div>
                     </div>
@@ -1151,7 +1151,7 @@
                     <div class="card-body p-4">
                         <div class="text-center mb-3">
                             <div class="h3 fw-bold text-primary mb-1" id="dashboard-perm-count">0</div>
-                            <div class="small" style="color: #B8C0C8;">Total Permutations</div>
+                            <div class="small" style="color: #94a3b8;">Total Permutations</div>
                         </div>
                         
                         <div class="row g-2 mb-3">
@@ -1218,33 +1218,33 @@
                         <div class="row g-4">
                             <!-- Performance Attribution -->
                             <div class="col-lg-12">
-                                <div class="p-4 bg-dark bg-opacity-25 rounded-3">
+                                <div class="p-4 rounded-3" style="background: rgba(30, 41, 59, 0.5)">
                                     <h6 class="fw-bold mb-3 text-white">
                                         <i class="fas fa-chart-bar text-warning me-2"></i>Performance Attribution Analysis
                                     </h6>
                                     <div class="row g-3">
                                         <div class="col-md-3">
-                                            <div class="text-center p-3 bg-dark bg-opacity-50 rounded">
+                                            <div class="text-center p-3 rounded" style="background: rgba(30, 41, 59, 0.6)">
                                                 <div class="h5 fw-bold text-primary mb-1">+2.8%</div>
-                                                <small style="color: #B8C0C8;">Credit Selection</small>
+                                                <small style="color: #94a3b8;">Credit Selection</small>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="text-center p-3 bg-dark bg-opacity-50 rounded">
+                                            <div class="text-center p-3 rounded" style="background: rgba(30, 41, 59, 0.6)">
                                                 <div class="h5 fw-bold text-success mb-1">+1.2%</div>
-                                                <small style="color: #B8C0C8;">Duration Management</small>
+                                                <small style="color: #94a3b8;">Duration Management</small>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="text-center p-3 bg-dark bg-opacity-50 rounded">
+                                            <div class="text-center p-3 rounded" style="background: rgba(30, 41, 59, 0.6)">
                                                 <div class="h5 fw-bold text-info mb-1">+0.6%</div>
-                                                <small style="color: #B8C0C8;">Sector Allocation</small>
+                                                <small style="color: #94a3b8;">Sector Allocation</small>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="text-center p-3 bg-dark bg-opacity-50 rounded">
+                                            <div class="text-center p-3 rounded" style="background: rgba(30, 41, 59, 0.6)">
                                                 <div class="h5 fw-bold text-danger mb-1">-0.4%</div>
-                                                <small style="color: #B8C0C8;">Currency Impact</small>
+                                                <small style="color: #94a3b8;">Currency Impact</small>
                                             </div>
                                         </div>
                                     </div>
@@ -1451,10 +1451,10 @@
                         <div style="margin-bottom: 1.5rem;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                                 <span style="color: #94a3b8;">Market Risk</span>
-                                <span style="color: #fbbf24;">Medium</span>
+                                <span style="color: #60a5fa;">Medium</span>
                             </div>
                             <div style="background: rgba(96, 165, 250, 0.1); border-radius: 4px; height: 8px; overflow: hidden;">
-                                <div style="background: #fbbf24; height: 100%; width: 60%;"></div>
+                                <div style="background: #60a5fa; height: 100%; width: 60%;"></div>
                             </div>
                         </div>
                         
@@ -1495,7 +1495,7 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
                             <div style="margin-bottom: 1rem;">
                                 <label style="color: #64748b; font-size: 0.875rem;">1-Day VaR (95%)</label>
-                                <div style="color: #fbbf24; font-size: 1.5rem; font-weight: 600;">€2.4M</div>
+                                <div style="color: #60a5fa; font-size: 1.5rem; font-weight: 600;">€2.4M</div>
                             </div>
                             <div style="margin-bottom: 1rem;">
                                 <label style="color: #64748b; font-size: 0.875rem;">1-Day VaR (99%)</label>
@@ -1503,7 +1503,7 @@
                             </div>
                             <div style="margin-bottom: 1rem;">
                                 <label style="color: #64748b; font-size: 0.875rem;">10-Day VaR (95%)</label>
-                                <div style="color: #fbbf24; font-size: 1.5rem; font-weight: 600;">€7.6M</div>
+                                <div style="color: #60a5fa; font-size: 1.5rem; font-weight: 600;">€7.6M</div>
                             </div>
                             <div>
                                 <label style="color: #64748b; font-size: 0.875rem;">10-Day VaR (99%)</label>
@@ -1619,8 +1619,8 @@
                         
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                <span style="color: #94a3b8;"><i class="fas fa-exclamation-triangle" style="color: #fbbf24; margin-right: 8px;"></i>SFDR</span>
-                                <span style="background: #fbbf24; color: #1e293b; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">Review Needed</span>
+                                <span style="color: #94a3b8;"><i class="fas fa-exclamation-triangle" style="color: #60a5fa; margin-right: 8px;"></i>SFDR</span>
+                                <span style="background: #60a5fa; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">Review Needed</span>
                             </div>
                         </div>
                     </div>
@@ -1628,7 +1628,7 @@
                     <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem;">
                         <h3 style="color: #93c5fd; margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 600;">Upcoming Deadlines</h3>
                         
-                        <div style="margin-bottom: 1rem; padding: 12px; border-left: 4px solid #fbbf24; background: rgba(251, 191, 36, 0.1);">
+                        <div style="margin-bottom: 1rem; padding: 12px; border-left: 4px solid #60a5fa; background: rgba(96, 165, 250, 0.1);">
                             <div style="color: #64748b; font-size: 0.875rem;">15 Jan 2025</div>
                             <div style="color: #94a3b8; font-weight: 600;">ESMA Quarterly Report</div>
                         </div>
@@ -1705,7 +1705,7 @@
                     <div class="project-card" style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(96, 165, 250, 0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
                             <h3 style="color: #93c5fd; font-size: 1.25rem; font-weight: 600;">Real Estate CLO</h3>
-                            <span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">In Progress</span>
+                            <span style="background: #60a5fa; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">In Progress</span>
                         </div>
                         <p style="color: #94a3b8; margin-bottom: 1rem; font-size: 0.9rem;">Commercial real estate collateralized loan obligation structure</p>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
@@ -1719,7 +1719,7 @@
                             </div>
                         </div>
                         <div style="background: rgba(96, 165, 250, 0.1); border-radius: 4px; height: 8px; margin-bottom: 1rem;">
-                            <div style="background: linear-gradient(90deg, #f59e0b, #d97706); border-radius: 4px; height: 100%; width: 40%;"></div>
+                            <div style="background: linear-gradient(90deg, #60a5fa, #3b82f6); border-radius: 4px; height: 100%; width: 40%;"></div>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
                             <button onclick="viewProjectDetails('realestate-clo')" style="flex: 1; background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
@@ -1768,9 +1768,9 @@
                         <p style="color: #86efac; font-size: 0.9rem; margin-bottom: 0.5rem;">Active Projects</p>
                         <p style="color: #22c55e; font-size: 2rem; font-weight: 700;">12</p>
                     </div>
-                    <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
-                        <p style="color: #fcd34d; font-size: 0.9rem; margin-bottom: 0.5rem;">In Progress</p>
-                        <p style="color: #f59e0b; font-size: 2rem; font-weight: 700;">5</p>
+                    <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                        <p style="color: #93c5fd; font-size: 0.9rem; margin-bottom: 0.5rem;">In Progress</p>
+                        <p style="color: #60a5fa; font-size: 2rem; font-weight: 700;">5</p>
                     </div>
                     <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
                         <p style="color: #93c5fd; font-size: 0.9rem; margin-bottom: 0.5rem;">Total Value</p>
@@ -2120,12 +2120,12 @@
                             <span style="background: #60a5fa; color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.75rem;">IN PROGRESS</span>
                         </div>
                         
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: rgba(0, 0, 0, 0.3); border-radius: 6px; border-left: 4px solid #fbbf24;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: rgba(0, 0, 0, 0.3); border-radius: 6px; border-left: 4px solid #60a5fa;">
                             <div>
                                 <div style="color: #e2e8f0; font-weight: 600;">#1236 - Feature Request</div>
                                 <div style="color: #64748b; font-size: 0.875rem;">Status: Pending • Updated: 1 day ago</div>
                             </div>
-                            <span style="background: #fbbf24; color: #1e293b; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.75rem;">PENDING</span>
+                            <span style="background: #60a5fa; color: #1e293b; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.75rem;">PENDING</span>
                         </div>
                     </div>
                 </div>
@@ -2344,7 +2344,7 @@
                             </div>
                             <div>
                                 <p style="color: #94a3b8; font-size: 0.9rem;">Generated Password</p>
-                                <p style="color: #fbbf24; font-weight: 600; font-family: monospace;">{{ reg.generated_password }}</p>
+                                <p style="color: #60a5fa; font-weight: 600; font-family: monospace;">{{ reg.generated_password }}</p>
                             </div>
                         </div>
                         <div style="margin-top: 1rem;">
@@ -2411,9 +2411,9 @@
                                             Never
                                         {% endif %}
                                     </td>
-                                    <td style="padding: 10px; color: #fbbf24; font-family: monospace; font-size: 0.85rem;">{{ user.password }}</td>
+                                    <td style="padding: 10px; color: #60a5fa; font-family: monospace; font-size: 0.85rem;">{{ user.password }}</td>
                                     <td style="padding: 10px;">
-                                        <button onclick="resetPassword({{ user.email|tojson|safe }})" style="background: #fbbf24; color: black; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                                        <button onclick="resetPassword({{ user.email|tojson|safe }})" style="background: #60a5fa; color: black; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
                                             Reset Password
                                         </button>
                                     </td>
@@ -2482,7 +2482,7 @@
                     '</h1>' +
                     '<div style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa; border-radius: 12px; padding: 3rem; max-width: 600px; margin: 0 auto;">' +
                         '<p style="color: #94a3b8; font-size: 1.1rem; margin-bottom: 2rem;">' + description + '</p>' +
-                        '<div style="color: #fbbf24;">' +
+                        '<div style="color: #60a5fa;">' +
                             '<i class="fas fa-clock fa-3x mb-3"></i>' +
                             '<p>Coming Soon</p>' +
                         '</div>' +
@@ -2558,9 +2558,9 @@
                         '<div style="color: #94a3b8; font-size: 0.9rem;">Active Registrations</div>' +
                         '<div style="color: #22c55e; font-size: 2rem; font-weight: bold;">' + (stats.active_registrations || 0) + '</div>' +
                     '</div>' +
-                    '<div style="background: rgba(251, 191, 36, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.3);">' +
+                    '<div style="background: rgba(96, 165, 250, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(96, 165, 250, 0.3);">' +
                         '<div style="color: #94a3b8; font-size: 0.9rem;">Pending Verification</div>' +
-                        '<div style="color: #fbbf24; font-size: 2rem; font-weight: bold;">' + (stats.pending_verification || 0) + '</div>' +
+                        '<div style="color: #60a5fa; font-size: 2rem; font-weight: bold;">' + (stats.pending_verification || 0) + '</div>' +
                     '</div>' +
                     '<div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">' +
                         '<div style="color: #94a3b8; font-size: 0.9rem;">Expired Registrations</div>' +
@@ -2755,11 +2755,11 @@
                 '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">' +
                     '<div>' +
                         '<strong style="color: #60a5fa;">Status:</strong> ' +
-                        '<span style="color: #f59e0b;">' + ipInfo.status + '</span>' +
+                        '<span style="color: #60a5fa;">' + ipInfo.status + '</span>' +
                     '</div>' +
                     '<div>' +
                         '<strong style="color: #60a5fa;">Lock Type:</strong> ' +
-                        '<span style="color: #f59e0b;">' + (ipInfo.lockout_type || 'Unknown') + '</span>' +
+                        '<span style="color: #60a5fa;">' + (ipInfo.lockout_type || 'Unknown') + '</span>' +
                     '</div>' +
                     '<div>' +
                         '<strong style="color: #60a5fa;">Reference Code:</strong> ' +
@@ -2866,7 +2866,7 @@
                     '<tbody>';
             
             ipData.forEach(ip => {
-                const statusColor = ip.status === 'permanent' ? '#ef4444' : '#f59e0b';
+                const statusColor = ip.status === 'permanent' ? '#ef4444' : '#60a5fa';
                 const statusText = ip.status === 'permanent' ? 'PERMANENT BAN' : 
                                    ip.lockout_type === 'blocked_30min' ? '30-MIN BLOCK' : 
                                    ip.lockout_type === 'blocked_24h' ? '24-HOUR BAN' : 'TEMPORARY BLOCK';
@@ -2910,8 +2910,8 @@
                     '</td>' +
                     '<td style="padding: 10px; color: #60a5fa; font-size: 0.85rem;">' + browserInfo + '</td>' +
                     '<td style="padding: 10px; color: #94a3b8; font-size: 0.85rem;">' + firstSeen + '</td>' +
-                    '<td style="padding: 10px; color: #f59e0b; font-weight: 600;">' + (ip.total_attempts || 0) + '</td>' +
-                    '<td style="padding: 10px; color: #f59e0b; font-size: 0.85rem;">' +
+                    '<td style="padding: 10px; color: #60a5fa; font-weight: 600;">' + (ip.total_attempts || 0) + '</td>' +
+                    '<td style="padding: 10px; color: #60a5fa; font-size: 0.85rem;">' +
                         (ip.remaining_time || (ip.status === 'permanent' ? 'PERMANENT' : 'Expired')) +
                     '</td>' +
                     '<td style="padding: 10px;">' +
@@ -2919,7 +2919,7 @@
                             'Unban' +
                         '</button>' +
                         (ip.status !== 'permanent' ? 
-                            '<button onclick="extendBan(\'' + ip.ip + '\')" style="background: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px; font-size: 0.8rem;">' +
+                            '<button onclick="extendBan(\'' + ip.ip + '\')" style="background: #60a5fa; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px; font-size: 0.8rem;">' +
                                 'Extend' +
                             '</button>' +
                             '<button onclick="permanentBan(\'' + ip.ip + '\')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">' +
@@ -3461,7 +3461,7 @@
             let singleSet = '';
             
             // Bonds Section
-            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">BONDS</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #60a5fa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">BONDS</span>';
             singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['US 10Y', 'UK 10Y', 'DE 10Y', 'US 5Y', 'US 2Y'].forEach(key => {
                 const data = marketData[key];
@@ -3469,7 +3469,7 @@
             });
             
             // Central Banks
-            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">CENTRAL BANKS</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #60a5fa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">CENTRAL BANKS</span>';
             singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['FED RATE', 'BOE RATE', 'ECB RATE'].forEach(key => {
                 const data = marketData[key];
@@ -3477,7 +3477,7 @@
             });
             
             // Reference Rates
-            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">REFERENCE RATES</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #60a5fa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">REFERENCE RATES</span>';
             singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['SOFR', 'SONIA', 'ESTR'].forEach(key => {
                 const data = marketData[key];
@@ -3485,7 +3485,7 @@
             });
             
             // Credit Spreads
-            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">SECURITISATION</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #60a5fa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">SECURITISATION</span>';
             singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['IG SPREAD', 'HY SPREAD', 'CMBS AAA', 'RMBS AAA', 'CLO AAA'].forEach(key => {
                 const data = marketData[key];
@@ -3493,7 +3493,7 @@
             });
             
             // FX
-            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">FX</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #60a5fa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">FX</span>';
             singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['GBP/USD', 'EUR/USD', 'USD/JPY', 'EUR/GBP'].forEach(key => {
                 const data = marketData[key];
@@ -3501,7 +3501,7 @@
             });
             
             // Equities
-            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">EQUITIES</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #60a5fa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">EQUITIES</span>';
             singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['S&P 500', 'FTSE 100', 'DAX'].forEach(key => {
                 const data = marketData[key];
@@ -3509,7 +3509,7 @@
             });
             
             // Commodities  
-            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">COMMODITIES</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #60a5fa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">COMMODITIES</span>';
             singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['GOLD', 'OIL WTI', 'SILVER'].forEach(key => {
                 const data = marketData[key];
@@ -3585,7 +3585,7 @@
             // Add history rates
             for (let i = 0; i < data.history.length; i++) {
                 const rate = data.history[i];
-                const color = (i === data.history.length - 1) ? '#fbbf24' : '#94a3b8';
+                const color = (i === data.history.length - 1) ? '#60a5fa' : '#94a3b8';
                 const weight = (i === data.history.length - 1) ? '600' : '400';
                 html += '<span style="color: ' + color + '; font-size: 0.75rem; font-weight: ' + weight + ';">' + rate.toFixed(2) + '%</span>';
             }
@@ -3622,7 +3622,7 @@
             let singleSet = '';
             
             // Bonds Section
-            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">BONDS</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #60a5fa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">BONDS</span>';
             singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['US 10Y', 'UK 10Y', 'DE 10Y', 'US 5Y', 'US 2Y'].forEach(key => {
                 const data = marketData[key];
@@ -3630,7 +3630,7 @@
             });
             
             // Central Banks
-            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">CENTRAL BANKS</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #60a5fa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">CENTRAL BANKS</span>';
             singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['FED RATE', 'BOE RATE', 'ECB RATE'].forEach(key => {
                 const data = marketData[key];
@@ -3638,7 +3638,7 @@
             });
             
             // Reference Rates
-            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">REFERENCE RATES</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #60a5fa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">REFERENCE RATES</span>';
             singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['SOFR', 'SONIA', 'ESTR'].forEach(key => {
                 const data = marketData[key];
@@ -3646,7 +3646,7 @@
             });
             
             // Credit Spreads
-            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">SECURITISATION</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #60a5fa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">SECURITISATION</span>';
             singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['IG SPREAD', 'HY SPREAD', 'CMBS AAA', 'RMBS AAA', 'CLO AAA'].forEach(key => {
                 const data = marketData[key];
@@ -3654,7 +3654,7 @@
             });
             
             // FX
-            singleSet += '<span class="ticker-section-header" style="color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">FX</span>';
+            singleSet += '<span class="ticker-section-header" style="color: #60a5fa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">FX</span>';
             singleSet += '<span class="ticker-separator" style="color: rgba(96, 165, 250, 0.4); margin: 0 0.5rem;">●</span>';
             ['GBP/USD', 'EUR/USD', 'USD/JPY', 'EUR/GBP'].forEach(key => {
                 const data = marketData[key];
@@ -4044,7 +4044,7 @@
         
         // Update UI
         document.getElementById('perm-status').textContent = 'Running';
-        document.getElementById('perm-status').style.color = '#f59e0b';
+        document.getElementById('perm-status').style.color = '#60a5fa';
         document.getElementById('perm-current-iterations').textContent = '0 / ' + iterations;
         
         // Start timer
@@ -4073,7 +4073,7 @@
         clearInterval(permutationEngine.timer);
         
         document.getElementById('perm-status').textContent = 'Paused';
-        document.getElementById('perm-status').style.color = '#f59e0b';
+        document.getElementById('perm-status').style.color = '#60a5fa';
     }
     
     function stopPermutationEngine() {
@@ -4344,7 +4344,7 @@
         
         // Update UI
         document.getElementById('perm-status').textContent = 'Generating';
-        document.getElementById('perm-status').style.color = '#f59e0b';
+        document.getElementById('perm-status').style.color = '#60a5fa';
         
         // Get input values based on mode
         let inputs = collectInputValues();
@@ -4548,7 +4548,7 @@
         if (securitisationEngine.status === 'running') {
             securitisationEngine.status = 'paused';
             document.getElementById('perm-status').textContent = 'Paused';
-            document.getElementById('perm-status').style.color = '#f59e0b';
+            document.getElementById('perm-status').style.color = '#60a5fa';
         }
     }
     
