@@ -2041,13 +2041,13 @@
                         <!-- User Selector for Admin -->
                         <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(96, 165, 250, 0.1); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(96, 165, 250, 0.3);">
                             <i class="fas fa-user" style="color: #60a5fa;"></i>
-                            <select id="user-selector" onchange="loadUserProjects(this.value)" style="background: transparent; color: white; border: none; outline: none; cursor: pointer; font-size: 0.9rem;">
+                            <select id="user-selector" onchange="if(typeof loadUserProjects !== 'undefined') loadUserProjects(this.value)" style="background: transparent; color: white; border: none; outline: none; cursor: pointer; font-size: 0.9rem;">
                                 <option value="">My Projects</option>
                                 <option value="all" style="color: #fbbf24;">All Users</option>
                             </select>
                         </div>
                         {% endif %}
-                        <button id="add-project-btn" onclick="createNewProject()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
+                        <button id="add-project-btn" onclick="if(typeof createNewProject !== 'undefined') createNewProject()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
                             <i class="fas fa-plus"></i> Add Project
                         </button>
                     </div>
@@ -3098,9 +3098,13 @@ function processServerResults(results) {
 }
 
 function updateStats(total, viable, bestIRR, bestDSCR) {
-    document.getElementById('stat-total').textContent = total;
-    document.getElementById('stat-viable').textContent = viable;
-    document.getElementById('stat-irr').textContent = bestIRR.toFixed(1) + '%';
+    const statTotal = document.getElementById('stat-total');
+    const statViable = document.getElementById('stat-viable');
+    const statIrr = document.getElementById('stat-irr');
+    
+    if (statTotal) statTotal.textContent = total;
+    if (statViable) statViable.textContent = viable;
+    if (statIrr) statIrr.textContent = bestIRR.toFixed(1) + '%';
     
     // Add best DSCR display if element exists
     const dscrStat = document.getElementById('stat-dscr');
@@ -3110,23 +3114,25 @@ function updateStats(total, viable, bestIRR, bestDSCR) {
     
     // Reset quick stats display
     const quickStats = document.getElementById('quick-stats');
-    quickStats.innerHTML = `
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
-            <div>
-                <div style="color: #10b981; font-size: 0.8rem;">Total</div>
-                <div id="stat-total" style="font-weight: bold; color: #e2e8f0;">${total}</div>
+    if (quickStats) {
+        quickStats.innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+                <div>
+                    <div style="color: #10b981; font-size: 0.8rem;">Total</div>
+                    <div id="stat-total" style="font-weight: bold; color: #e2e8f0;">${total}</div>
+                </div>
+                <div>
+                    <div style="color: #10b981; font-size: 0.8rem;">Viable</div>
+                    <div id="stat-viable" style="font-weight: bold; color: #e2e8f0;">${viable}</div>
+                </div>
+                <div>
+                    <div style="color: #10b981; font-size: 0.8rem;">Best IRR</div>
+                    <div id="stat-irr" style="font-weight: bold; color: #e2e8f0;">${bestIRR.toFixed(1)}%</div>
+                </div>
             </div>
-            <div>
-                <div style="color: #10b981; font-size: 0.8rem;">Viable</div>
-                <div id="stat-viable" style="font-weight: bold; color: #e2e8f0;">${viable}</div>
-            </div>
-            <div>
-                <div style="color: #10b981; font-size: 0.8rem;">Best IRR</div>
-                <div id="stat-irr" style="font-weight: bold; color: #e2e8f0;">${bestIRR.toFixed(1)}%</div>
-            </div>
-        </div>
-    `;
-    quickStats.style.display = 'block';
+        `;
+        quickStats.style.display = 'block';
+    }
 }
 
 function displayResults() {

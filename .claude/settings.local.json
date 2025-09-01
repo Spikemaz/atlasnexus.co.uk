@@ -73,7 +73,8 @@
       "Bash(del \"C:\\Users\\marcu\\Desktop\\Marcus Folder\\Project1\\test_fx_rates.py\")",
       "Bash(test:*)",
       "Bash(sed:*)",
-      "Bash(start https://vercel.com/marcus-moores-projects/atlasnexus-securitization)"
+      "Bash(start https://vercel.com/marcus-moores-projects/atlasnexus-securitization)",
+      "Bash(start http://localhost:5000/admin-panel)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"
