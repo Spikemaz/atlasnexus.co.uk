@@ -3945,8 +3945,8 @@
     }
     
     
-    // Show section based on navigation
-    function showSection(section) {
+    // Show section based on navigation - moved to global scope for HTML onclick handlers
+    window.showSection = function(section) {
         // Hide all sections without re-triggering animations
         const allSections = ['main-dashboard', 'market-section', 'data-section', 'analytics-section', 
                            'risk-section', 'portfolio-section', 'compliance-section', 'permutation-section',
@@ -5234,6 +5234,10 @@
     let currentEditingSeries = null;
     let draggedElement = null;
     let draggedIndex = null;
+    let ghostPlaceholder = null;
+    let originalNextSibling = null;
+    let lastValidDropTarget = null;
+    let currentDropPosition = null;
 
     // Initialize projects when section becomes visible
     function initializeProjects() {
@@ -5804,13 +5808,13 @@
         grid.addEventListener('drop', handleGridDrop);
     }
 
-    // Global variables for smooth drag and drop
-    let ghostPlaceholder = null;
-    let originalNextSibling = null;
-    let lastValidDropTarget = null;
-    let draggedElement = null;
-    let draggedIndex = null;
-    let currentDropPosition = null;
+    // Global variables for smooth drag and drop (removed duplicates - defined earlier)
+    // let ghostPlaceholder = null; // Already defined at line 5232
+    // let originalNextSibling = null; // Already defined at line 5232
+    // let lastValidDropTarget = null; // Already defined at line 5232
+    // let draggedElement = null; // Already defined at line 5235
+    // let draggedIndex = null; // Already defined at line 5236
+    // let currentDropPosition = null; // Already defined earlier
 
     // Create ghost placeholder element
     function createGhostPlaceholder() {
