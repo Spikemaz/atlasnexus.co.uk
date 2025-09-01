@@ -924,16 +924,28 @@ app.config['DEBUG'] = DEBUG
 def ensure_db_connection():
     """Ensure MongoDB is connected before processing requests"""
     global CLOUD_DB_AVAILABLE, cloud_db
+    
+    # Only try to connect if we haven't already
     if not CLOUD_DB_AVAILABLE:
         try:
-            # Try to reinitialize database connection
-            from cloud_database import reinitialize_db
-            connected = reinitialize_db()
-            if connected:
-                CLOUD_DB_AVAILABLE = True
-                print("[DATABASE] MongoDB connection established on request")
+            # Check if MongoDB URI is configured
+            from cloud_database import get_mongodb_uri, reinitialize_db
+            mongodb_uri = get_mongodb_uri()
+            
+            if mongodb_uri:
+                print(f"[DATABASE] MongoDB URI found, attempting connection...")
+                connected = reinitialize_db()
+                if connected:
+                    CLOUD_DB_AVAILABLE = True
+                    print("[DATABASE] MongoDB connection established successfully!")
+                else:
+                    print("[DATABASE] MongoDB connection failed - URI present but cannot connect")
+            else:
+                print("[DATABASE] MongoDB URI not configured - using local storage")
         except Exception as e:
             print(f"[DATABASE] Failed to connect to MongoDB: {e}")
+            import traceback
+            traceback.print_exc()
 
 def track_ip_access(ip_address, page, user_email=None):
     """Track IP access to different pages"""
@@ -4048,7 +4060,22 @@ def manage_projects():
         
         projects[user_email]['projects'].append(new_project)
         projects[user_email]['order'].append(new_project['id'])
-        save_json_db(PROJECTS_FILE, projects)
+        
+        # Save to database
+        if CLOUD_DB_AVAILABLE:
+            try:
+                # Save to cloud database
+                success = db_save_project_data(user_email, projects[user_email])
+                if not success:
+                    raise Exception("Failed to save to cloud database")
+                print(f"[DATABASE] Saved new project for {user_email} to cloud DB")
+            except Exception as e:
+                print(f"[ERROR] Failed to save to cloud DB, using local: {e}")
+                # Fall back to local storage
+                save_json_db('data/projects.json', projects)
+        else:
+            # Save to local storage
+            save_json_db('data/projects.json', projects)
         
         return jsonify(new_project)
 
@@ -4280,9 +4307,19 @@ def manage_series():
     if not user_email:
         return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
     
-    # Load projects database (series are stored with projects)
-    PROJECTS_FILE = 'data/projects.json'
-    projects = load_json_db(PROJECTS_FILE)
+    # Try to use cloud database first
+    if CLOUD_DB_AVAILABLE:
+        try:
+            projects = db_load_projects()
+        except Exception as e:
+            print(f"[ERROR] Failed to load projects from cloud DB: {e}")
+            # Fall back to local storage
+            PROJECTS_FILE = 'data/projects.json'
+            projects = load_json_db(PROJECTS_FILE)
+    else:
+        # Use local storage as fallback
+        PROJECTS_FILE = 'data/projects.json'
+        projects = load_json_db(PROJECTS_FILE)
     
     # Initialize user's data if not exists
     if user_email not in projects:
@@ -4318,7 +4355,20 @@ def manage_series():
                 projects[user_email]['projects'] = data['projects']
             
             # Save to database
-            save_json_db(PROJECTS_FILE, projects)
+            if CLOUD_DB_AVAILABLE:
+                try:
+                    # Save to cloud database
+                    success = db_save_project_data(user_email, projects[user_email])
+                    if not success:
+                        raise Exception("Failed to save to cloud database")
+                    print(f"[DATABASE] Saved projects/series for {user_email} to cloud DB")
+                except Exception as e:
+                    print(f"[ERROR] Failed to save to cloud DB, using local: {e}")
+                    # Fall back to local storage
+                    save_json_db('data/projects.json', projects)
+            else:
+                # Save to local storage
+                save_json_db('data/projects.json', projects)
             
             return jsonify({
                 'status': 'success',
@@ -4327,6 +4377,43 @@ def manage_series():
         except Exception as e:
             print(f"[ERROR] Failed to save series/projects: {e}")
             return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/debug/db-status')
+def debug_db_status():
+    """Debug endpoint to check database connection status"""
+    from cloud_database import get_mongodb_uri, cloud_db
+    
+    mongodb_uri = get_mongodb_uri()
+    uri_configured = bool(mongodb_uri)
+    
+    # Mask the URI for security
+    if mongodb_uri:
+        parts = mongodb_uri.split('@')
+        if len(parts) > 1:
+            masked_uri = "mongodb+srv://***:***@" + parts[1]
+        else:
+            masked_uri = "***configured***"
+    else:
+        masked_uri = "Not configured"
+    
+    status = {
+        'mongodb_uri_configured': uri_configured,
+        'mongodb_uri_masked': masked_uri,
+        'cloud_db_available': CLOUD_DB_AVAILABLE,
+        'cloud_db_connected': cloud_db.connected if cloud_db else False,
+        'environment': os.environ.get('VERCEL', 'local'),
+        'env_vars': list(os.environ.keys()) if DEBUG else "Hidden in production"
+    }
+    
+    # Try to get database stats if connected
+    if CLOUD_DB_AVAILABLE and cloud_db and cloud_db.connected:
+        try:
+            stats = cloud_db.get_database_stats()
+            status['database_stats'] = stats
+        except Exception as e:
+            status['database_stats'] = f"Error: {str(e)}"
+    
+    return jsonify(status)
 
 @app.route('/debug/ip-status')
 def debug_ip_status():
