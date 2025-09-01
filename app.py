@@ -1700,9 +1700,9 @@ def register():
         print(f"[REGISTRATION] Sending verification email to {data['email']}...")
         email_sent = send_email(data['email'], 'AtlasNexus - Verify Your Email', email_html)
         if email_sent:
-            print(f"[REGISTRATION] ✅ Verification email sent successfully to {data['email']}")
+            print(f"[REGISTRATION] Verification email sent successfully to {data['email']}")
         else:
-            print(f"[REGISTRATION] ⚠️ Failed to send verification email to {data['email']}")
+            print(f"[REGISTRATION] Failed to send verification email to {data['email']}")
             # Still save registration even if email fails
             print(f"[REGISTRATION] Registration saved. User can request email resend later.")
         
@@ -1816,7 +1816,7 @@ def register():
         print(f"[REGISTRATION] Sending admin notification for {data['email']} to {EMAIL_CONFIG['admin_email']}...")
         admin_sent = send_email(EMAIL_CONFIG['admin_email'], 'New Registration - Action Required', admin_html)
         if admin_sent:
-            print(f"[REGISTRATION] ✅ Admin notification sent successfully to {EMAIL_CONFIG['admin_email']}")
+            print(f"[REGISTRATION] Admin notification sent successfully to {EMAIL_CONFIG['admin_email']}")
         else:
             print(f"[REGISTRATION] ⚠️ Failed to send admin notification to {EMAIL_CONFIG['admin_email']}")
             print(f"[REGISTRATION] Admin can still review registration in the dashboard")
