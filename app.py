@@ -4014,11 +4014,43 @@ def admin_resend_credentials():
     else:
         return jsonify({'status': 'error', 'message': 'Failed to send email'}), 500
 
+@app.route('/api/admin/users', methods=['GET'])
+def get_users_list():
+    """Get list of all users (admin only)"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+    
+    users_data = load_users_data()
+    users_list = []
+    
+    for email, user_data in users_data.items():
+        users_list.append({
+            'email': email,
+            'full_name': user_data.get('full_name', ''),
+            'account_type': user_data.get('account_type', 'external'),
+            'is_admin': user_data.get('is_admin', False),
+            'created_at': user_data.get('created_at', ''),
+            'last_login': user_data.get('last_login', '')
+        })
+    
+    # Sort by account type (admin first, then internal, then external)
+    users_list.sort(key=lambda x: (
+        x['account_type'] != 'admin',
+        x['account_type'] != 'internal',
+        x['email']
+    ))
+    
+    return jsonify({'status': 'success', 'users': users_list})
+
 @app.route('/api/projects', methods=['GET', 'POST'])
 def manage_projects():
     """Get or create projects for the current user"""
     ip_address = get_real_ip()
     user_email = session.get(f'user_email_{ip_address}')
+    is_admin = session.get(f'is_admin_{ip_address}', False)
     
     if not user_email:
         return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
@@ -4034,7 +4066,50 @@ def manage_projects():
         }
     
     if request.method == 'GET':
-        # Return user's projects in saved order
+        # Check if admin is requesting another user's projects
+        requested_user = request.args.get('user')
+        
+        if requested_user and is_admin:
+            if requested_user == 'all':
+                # Return all users' projects
+                users_data = load_users_data()
+                all_users_projects = []
+                
+                for email, user_data in users_data.items():
+                    if email in projects and projects[email]['projects']:
+                        user_info = {
+                            'email': email,
+                            'full_name': user_data.get('full_name', email),
+                            'account_type': user_data.get('account_type', 'external'),
+                            'projects': projects[email]['projects']
+                        }
+                        all_users_projects.append(user_info)
+                
+                return jsonify({'status': 'success', 'users': all_users_projects})
+            else:
+                # Return specific user's projects
+                if requested_user in projects:
+                    user_projects = projects[requested_user]['projects']
+                    order = projects[requested_user].get('order', [])
+                    
+                    # Sort projects by saved order
+                    ordered_projects = []
+                    for project_id in order:
+                        for project in user_projects:
+                            if project['id'] == project_id:
+                                ordered_projects.append(project)
+                                break
+                    
+                    # Add any new projects not in order
+                    for project in user_projects:
+                        if project['id'] not in order:
+                            ordered_projects.append(project)
+                    
+                    return jsonify({'status': 'success', 'projects': ordered_projects})
+                else:
+                    return jsonify({'status': 'success', 'projects': []})
+        
+        # Return current user's projects in saved order
         user_projects = projects[user_email]['projects']
         order = projects[user_email].get('order', [])
         

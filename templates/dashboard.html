@@ -716,9 +716,20 @@
 
     <!-- Define showSection immediately before navigation bar -->
     <script>
+        // Get user context from template variables
+        const isAdmin = {{ 'true' if is_admin else 'false' }};
+        const accountType = '{{ account_type }}';
+        const userEmail = '{{ session.get("user_email_" + request.remote_addr, "") }}';
+        
         // Define showSection immediately so it's available for navigation buttons
         function showSection(section) {
             console.log('Switching to section:', section);
+            
+            // Restrict permutation section to admin users only
+            if (section === 'permutation' && !isAdmin) {
+                alert('Access Denied: The Permutation Engine is only available to admin users.');
+                return;
+            }
             
             // Hide all sections
             const allSections = ['main-dashboard', 'market-section', 'data-section', 'analytics-section', 
@@ -855,9 +866,11 @@
             <button class="nav-btn" data-section="projects" onclick="showSection('projects')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-folder"></i> Projects
             </button>
+            {% if is_admin %}
             <button class="nav-btn" data-section="permutation" onclick="showSection('permutation')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-cogs"></i> Permutation
             </button>
+            {% endif %}
             <button class="nav-btn" data-section="securitization" onclick="showSection('securitization')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-layer-group"></i> Securitization
             </button>
@@ -2023,8 +2036,18 @@
                     <h2 style="color: #60a5fa; font-size: 2rem; font-weight: 700; margin: 0;">
                         <i class="fas fa-folder"></i> Project Management
                     </h2>
-                    <div style="display: flex; gap: 1rem;">
-                        <button onclick="createNewProject()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        {% if is_admin %}
+                        <!-- User Selector for Admin -->
+                        <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(96, 165, 250, 0.1); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(96, 165, 250, 0.3);">
+                            <i class="fas fa-user" style="color: #60a5fa;"></i>
+                            <select id="user-selector" onchange="loadUserProjects(this.value)" style="background: transparent; color: white; border: none; outline: none; cursor: pointer; font-size: 0.9rem;">
+                                <option value="">My Projects</option>
+                                <option value="all" style="color: #fbbf24;">All Users</option>
+                            </select>
+                        </div>
+                        {% endif %}
+                        <button id="add-project-btn" onclick="createNewProject()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
                             <i class="fas fa-plus"></i> Add Project
                         </button>
                     </div>
@@ -2474,26 +2497,26 @@
         </div>
     </div>
 
-<!-- Permutation Engine - All Steps Visible -->
+<!-- Permutation Engine - Atlas Forge Configuration -->
 <div id="permutation-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
-    <div style="max-width: 1400px; margin: 0 auto;">
+    <div style="max-width: 1600px; margin: 0 auto;">
         
         <!-- Title -->
         <div style="text-align: center; margin-bottom: 2rem;">
             <h2 style="color: #60a5fa; font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">
-                <i class="fas fa-cogs"></i> Permutation Engine
+                <i class="fas fa-cogs"></i> Atlas Forge — Permutation Engine
             </h2>
-            <p style="color: #94a3b8;">Explore All Funding Scenarios - Adjust Any Parameter</p>
+            <p style="color: #94a3b8;">Lever Map Configuration v1.0.0 | Europe/London</p>
         </div>
 
         <!-- All Steps Grid -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
             
-            <!-- Step 1: Import Project (Optional) -->
+            <!-- Step 1: Project Fixed Inputs & Import -->
             <div style="background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
                 <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
                     <span style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.25rem 0.75rem; border-radius: 6px; margin-right: 0.5rem;">1</span>
-                    Import Project (Optional)
+                    Project Fixed Inputs
                 </h3>
                 
                 <select id="project-selector" onchange="loadProjectData()" style="width: 100%; padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0; margin-bottom: 1rem;">
@@ -2512,94 +2535,123 @@
                 </div>
             </div>
 
-            <!-- Step 2: Calculated Fields -->
+            <!-- Step 2: Capital Stack & Market State -->
             <div style="background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
                 <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
                     <span style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.25rem 0.75rem; border-radius: 6px; margin-right: 0.5rem;">2</span>
-                    Auto-Calculated Values
+                    Capital Stack Configuration
                 </h3>
                 
                 <div style="display: grid; gap: 1rem;">
+                    <!-- Senior Debt Configuration -->
                     <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
-                        <div style="color: #10b981; font-size: 0.8rem;">Total CapEx</div>
-                        <input type="number" id="calc-capex" value="100000000" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
+                        <div style="color: #10b981; font-size: 0.8rem;">Target DSCR Senior [37]</div>
+                        <input type="number" id="TargetDSCRSenior_37" value="1.30" min="1.10" max="2.50" step="0.05" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
+                        <input type="checkbox" id="TargetDSCRSenior_37_range" style="margin-top: 0.5rem;"> <label for="TargetDSCRSenior_37_range" style="color: #94a3b8; font-size: 0.8rem;">Enable Range (1.20 - 1.50)</label>
                     </div>
                     <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
-                        <div style="color: #10b981; font-size: 0.8rem;">IT Load (MW)</div>
-                        <input type="number" id="calc-it-load" value="100" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
+                        <div style="color: #10b981; font-size: 0.8rem;">Senior Coupon [38] (%)</div>
+                        <input type="number" id="SeniorCoupon_38" value="5.00" min="0.5" max="12" step="0.25" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
+                        <input type="checkbox" id="SeniorCoupon_38_range" checked style="margin-top: 0.5rem;"> <label for="SeniorCoupon_38_range" style="color: #94a3b8; font-size: 0.8rem;">Enable Range (3.5 - 7.0)</label>
                     </div>
                     <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
-                        <div style="color: #10b981; font-size: 0.8rem;">PUE Factor</div>
-                        <input type="number" id="calc-pue" value="1.2" step="0.1" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
+                        <div style="color: #10b981; font-size: 0.8rem;">Senior Tenor [39] (Years)</div>
+                        <input type="number" id="SeniorTenorY_39" value="25" min="3" max="40" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
                     </div>
                     <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
-                        <div style="color: #10b981; font-size: 0.8rem;">Net IT Load (Calculated)</div>
-                        <div id="calc-net-load" style="font-size: 1.1rem; font-weight: 600; color: #e2e8f0; margin-top: 0.25rem;">83.3 MW</div>
+                        <div style="color: #10b981; font-size: 0.8rem;">Senior Amortization Type [40]</div>
+                        <select id="SeniorAmortType_40" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
+                            <option value="Annuity" selected>Annuity</option>
+                            <option value="Sculpted">Sculpted</option>
+                            <option value="Bullet">Bullet</option>
+                            <option value="StepDown">StepDown</option>
+                        </select>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 3: Variable Ranges -->
+            <!-- Step 3: Project Inputs & Revenue -->
             <div style="background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
                 <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
                     <span style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.25rem 0.75rem; border-radius: 6px; margin-right: 0.5rem;">3</span>
-                    Set Variable Ranges
+                    Project Inputs & Revenue
                 </h3>
                 
                 <div style="display: grid; gap: 1rem;">
-                    <!-- Rent Range -->
+                    <!-- Gross IT Load [02] -->
                     <div>
-                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Monthly Rent (£/kW)</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                            <input type="number" id="rent-min" placeholder="Min" value="120" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
-                            <input type="number" id="rent-max" placeholder="Max" value="220" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Gross IT Load [02] (MW)</label>
+                        <input type="number" id="GrossITLoad_02" value="100" min="1" max="3000" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                            <input type="number" id="GrossITLoad_02_min" placeholder="Min" value="10" step="10" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
+                            <input type="number" id="GrossITLoad_02_max" placeholder="Max" value="1000" step="10" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
                         </div>
                     </div>
                     
-                    <!-- OPEX Range -->
+                    <!-- PUE [03] -->
                     <div>
-                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">OPEX (%)</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                            <input type="number" id="opex-min" placeholder="Min" value="15" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
-                            <input type="number" id="opex-max" placeholder="Max" value="30" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">PUE Factor [03] (x)</label>
+                        <input type="number" id="PUE_03" value="1.30" min="1.05" max="1.8" step="0.05" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                            <input type="number" id="PUE_03_min" placeholder="Min" value="1.15" step="0.05" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
+                            <input type="number" id="PUE_03_max" placeholder="Max" value="1.5" step="0.05" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
                         </div>
                     </div>
                     
-                    <!-- Interest Rate Range -->
+                    <!-- Gross Monthly Rent [07] -->
                     <div>
-                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Interest Rate (%)</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                            <input type="number" id="rate-min" placeholder="Min" value="3.0" step="0.25" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
-                            <input type="number" id="rate-max" placeholder="Max" value="5.0" step="0.25" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Gross Monthly Rent [07] (£/month)</label>
+                        <input type="number" id="GrossMonthlyRent_07" value="2500000" min="100000" max="200000000" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                            <input type="number" id="GrossMonthlyRent_07_min" placeholder="Min" value="500000" step="50000" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
+                            <input type="number" id="GrossMonthlyRent_07_max" placeholder="Max" value="5000000" step="50000" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
                         </div>
+                        <input type="checkbox" id="GrossMonthlyRent_07_range" checked style="margin-top: 0.5rem;"> <label for="GrossMonthlyRent_07_range" style="color: #94a3b8; font-size: 0.8rem;">Enable Range</label>
                     </div>
                     
-                    <!-- Target IRR Range -->
+                    <!-- OPEX [08] -->
                     <div>
-                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Target IRR (%)</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                            <input type="number" id="irr-min" placeholder="Min" value="14" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
-                            <input type="number" id="irr-max" placeholder="Max" value="19" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">OPEX [08] (%)</label>
+                        <input type="number" id="OPEX_08" value="25" min="0" max="80" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                            <input type="number" id="OPEX_08_min" placeholder="Min" value="15" step="1" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
+                            <input type="number" id="OPEX_08_max" placeholder="Max" value="35" step="1" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
                         </div>
+                        <input type="checkbox" id="OPEX_08_range" checked style="margin-top: 0.5rem;"> <label for="OPEX_08_range" style="color: #94a3b8; font-size: 0.8rem;">Enable Range</label>
                     </div>
                     
-                    <!-- DSCR Range -->
+                    <!-- Lease Term Years [22] -->
                     <div>
-                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">DSCR Target</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                            <input type="number" id="dscr-min" placeholder="Min" value="1.5" step="0.05" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
-                            <input type="number" id="dscr-max" placeholder="Max" value="1.8" step="0.05" style="padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
-                        </div>
+                        <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Lease Term [22] (Years)</label>
+                        <input type="number" id="LeaseTermYears_22" value="25" min="5" max="40" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
                     </div>
                 </div>
             </div>
 
-            <!-- Step 4: Results & Actions -->
+            <!-- Step 4: Execution & Ranking Configuration -->
             <div style="background: linear-gradient(135deg, rgba(44, 49, 55, 0.8) 0%, rgba(54, 64, 73, 0.8) 100%); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 1.5rem;">
                 <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
                     <span style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; padding: 0.25rem 0.75rem; border-radius: 6px; margin-right: 0.5rem;">4</span>
-                    Generate Results
+                    Execution & Ranking
                 </h3>
+                
+                <!-- Ranking Objective [109] -->
+                <div style="margin-bottom: 1rem;">
+                    <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Ranking Objective [109]</label>
+                    <select id="RankingObjective_109" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <option value="MaxSeniorRaise">Max Senior Raise</option>
+                        <option value="MinWACC">Min WACC</option>
+                        <option value="MaxDay1Cash">Max Day 1 Cash</option>
+                        <option value="MaxEquityIRR">Max Equity IRR</option>
+                        <option value="Composite" selected>Composite Score</option>
+                    </select>
+                </div>
+                
+                <!-- Max Permutations [108] -->
+                <div style="margin-bottom: 1rem;">
+                    <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Max Permutations [108]</label>
+                    <input type="number" id="MaxPermutations_108" value="150000" min="1000" max="1000000" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                </div>
                 
                 <!-- Estimation Display -->
                 <div style="padding: 1rem; background: rgba(96, 165, 250, 0.1); border-radius: 8px; margin-bottom: 1.5rem;">
@@ -2669,12 +2721,12 @@
                     <thead>
                         <tr style="background: rgba(96, 165, 250, 0.1);">
                             <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">#</th>
-                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Rent</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Monthly Rent</th>
                             <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">OPEX</th>
-                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Rate</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Coupon</th>
                             <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">DSCR</th>
                             <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">IRR</th>
-                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Stack</th>
+                            <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Senior Raise</th>
                             <th style="padding: 0.75rem; text-align: left; color: #60a5fa; border-bottom: 2px solid rgba(96, 165, 250, 0.2);">Status</th>
                         </tr>
                     </thead>
@@ -2688,64 +2740,155 @@
 </div>
 
 <script>
-// Permutation Engine - All Steps Visible
+// Atlas Forge Permutation Engine - v1.0.0
 let scenarios = [];
+let permutationConfig = {
+    fields: {},
+    rangeEnabled: {},
+    executionOrder: [
+        'ingest_fixed_inputs',
+        'compute_derived',
+        'apply_mode_toggles',
+        'load_market_state',
+        'size_and_price_senior',
+        'add_mezzanine',
+        'add_equity_trs',
+        'apply_wrap_liquidity',
+        'shape_cashflows',
+        'apply_rating_eligibility',
+        'run_stresses_haircuts',
+        'apply_derivatives_sidecar',
+        'build_waterfall_triggers',
+        'rank_filter_export'
+    ]
+};
 
 // Update calculations when inputs change
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto-calculate net load
-    const updateNetLoad = () => {
-        const itLoad = parseFloat(document.getElementById('calc-it-load').value) || 100;
-        const pue = parseFloat(document.getElementById('calc-pue').value) || 1.2;
-        const netLoad = itLoad / pue;
-        document.getElementById('calc-net-load').textContent = netLoad.toFixed(1) + ' MW';
+    // Auto-calculate derived fields
+    const updateDerivedFields = () => {
+        // NetITLoad_09 = GrossITLoad_02 / PUE_03
+        const grossIT = parseFloat(document.getElementById('GrossITLoad_02').value) || 100;
+        const pue = parseFloat(document.getElementById('PUE_03').value) || 1.30;
+        const netIT = grossIT / pue;
+        
+        // Update display if exists
+        const netLoadDisplay = document.getElementById('NetITLoad_09_display');
+        if (netLoadDisplay) {
+            netLoadDisplay.textContent = netIT.toFixed(1) + ' MW';
+        }
+        
+        // GrossIncome_10 = GrossMonthlyRent_07 * 12
+        const monthlyRent = parseFloat(document.getElementById('GrossMonthlyRent_07').value) || 2500000;
+        const grossIncome = monthlyRent * 12;
+        
+        // NetIncome_11 based on OPEX mode
+        const opex = parseFloat(document.getElementById('OPEX_08').value) || 25;
+        const netIncome = grossIncome * (1 - opex/100);
+        
+        return { netIT, grossIncome, netIncome };
     };
     
-    document.getElementById('calc-it-load').addEventListener('input', updateNetLoad);
-    document.getElementById('calc-pue').addEventListener('input', updateNetLoad);
+    // Add listeners to key input fields
+    ['GrossITLoad_02', 'PUE_03', 'GrossMonthlyRent_07', 'OPEX_08'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('input', updateDerivedFields);
+        }
+    });
     
     // Estimate scenarios when ranges change
     const estimateScenarios = () => {
-        // Simple estimation based on range steps
-        const rentSteps = 6;
-        const opexSteps = 4;
-        const rateSteps = 9;
-        const irrSteps = 6;
-        const dscrSteps = 7;
+        let totalPermutations = 1;
         
-        const total = rentSteps * opexSteps * rateSteps * irrSteps * dscrSteps;
-        document.getElementById('est-scenarios').textContent = total.toLocaleString();
-        document.getElementById('est-time').textContent = '~' + Math.ceil(total / 500) + 's';
+        // Check each field with range enabled
+        const rangeFields = [
+            { id: 'GrossMonthlyRent_07', steps: 20 },
+            { id: 'OPEX_08', steps: 20 },
+            { id: 'TargetDSCRSenior_37', steps: 7 },
+            { id: 'SeniorCoupon_38', steps: 14 }
+        ];
+        
+        rangeFields.forEach(field => {
+            const rangeCheckbox = document.getElementById(field.id + '_range');
+            if (rangeCheckbox && rangeCheckbox.checked) {
+                totalPermutations *= field.steps;
+            }
+        });
+        
+        // Apply max permutations limit
+        const maxPermutations = parseInt(document.getElementById('MaxPermutations_108').value) || 150000;
+        totalPermutations = Math.min(totalPermutations, maxPermutations);
+        
+        document.getElementById('est-scenarios').textContent = totalPermutations.toLocaleString();
+        document.getElementById('est-time').textContent = '~' + Math.ceil(totalPermutations / 500) + 's';
     };
     
-    // Add listeners to all range inputs
-    ['rent-min', 'rent-max', 'opex-min', 'opex-max', 'rate-min', 'rate-max', 'irr-min', 'irr-max', 'dscr-min', 'dscr-max'].forEach(id => {
+    // Add listeners to all range inputs and checkboxes
+    const rangeInputs = [
+        'GrossMonthlyRent_07_min', 'GrossMonthlyRent_07_max',
+        'OPEX_08_min', 'OPEX_08_max',
+        'TargetDSCRSenior_37', 'SeniorCoupon_38',
+        'MaxPermutations_108'
+    ];
+    
+    rangeInputs.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
             element.addEventListener('input', estimateScenarios);
         }
     });
     
+    // Add listeners to range checkboxes
+    ['GrossMonthlyRent_07_range', 'OPEX_08_range', 'TargetDSCRSenior_37_range', 'SeniorCoupon_38_range'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', estimateScenarios);
+        }
+    });
+    
     // Initial calculations
-    updateNetLoad();
+    updateDerivedFields();
     estimateScenarios();
 });
 
 // Load project data if selected
 function loadProjectData() {
     const selector = document.getElementById('project-selector');
-    if (selector.value) {
-        // Show project info
-        document.getElementById('project-info').style.display = 'block';
-        document.getElementById('project-name').textContent = selector.options[selector.selectedIndex].text;
-        
-        // Auto-fill some values (example)
-        document.getElementById('calc-capex').value = 100000000;
-        document.getElementById('calc-it-load').value = 100;
-        document.getElementById('calc-pue').value = 1.2;
-        
-        // Trigger recalculation
-        document.getElementById('calc-it-load').dispatchEvent(new Event('input'));
+    if (selector.value && window.projectsData) {
+        const project = window.projectsData.find(p => p.code === selector.value);
+        if (project) {
+            // Show project info
+            document.getElementById('project-info').style.display = 'block';
+            document.getElementById('project-name').textContent = project.name;
+            
+            // Auto-fill values from project data
+            if (project.capex) {
+                const capexInput = document.getElementById('CapexCostPrice_04');
+                if (capexInput) capexInput.value = project.capex;
+            }
+            if (project.itLoad) {
+                document.getElementById('GrossITLoad_02').value = project.itLoad;
+            }
+            if (project.pue) {
+                document.getElementById('PUE_03').value = project.pue;
+            }
+            if (project.monthlyRent) {
+                document.getElementById('GrossMonthlyRent_07').value = project.monthlyRent;
+            }
+            if (project.opex) {
+                document.getElementById('OPEX_08').value = project.opex;
+            }
+            
+            // Trigger recalculation
+            const event = new Event('input');
+            document.getElementById('GrossITLoad_02').dispatchEvent(event);
+            
+            // Show notification
+            if (window.showNotification) {
+                window.showNotification('Project data loaded successfully', 'success');
+            }
+        }
     } else {
         document.getElementById('project-info').style.display = 'none';
     }
@@ -2765,33 +2908,89 @@ function quickPreview() {
 }
 
 function runGeneration(mode) {
-    // Get all ranges
-    const ranges = {
-        rent: [parseFloat(document.getElementById('rent-min').value), parseFloat(document.getElementById('rent-max').value)],
-        opex: [parseFloat(document.getElementById('opex-min').value), parseFloat(document.getElementById('opex-max').value)],
-        rate: [parseFloat(document.getElementById('rate-min').value), parseFloat(document.getElementById('rate-max').value)],
-        irr: [parseFloat(document.getElementById('irr-min').value), parseFloat(document.getElementById('irr-max').value)],
-        dscr: [parseFloat(document.getElementById('dscr-min').value), parseFloat(document.getElementById('dscr-max').value)]
+    // Get configuration for all fields with ranges enabled
+    const config = {
+        GrossMonthlyRent_07: {
+            enabled: document.getElementById('GrossMonthlyRent_07_range').checked,
+            value: parseFloat(document.getElementById('GrossMonthlyRent_07').value),
+            min: parseFloat(document.getElementById('GrossMonthlyRent_07_min').value) || 500000,
+            max: parseFloat(document.getElementById('GrossMonthlyRent_07_max').value) || 5000000,
+            step: 50000
+        },
+        OPEX_08: {
+            enabled: document.getElementById('OPEX_08_range').checked,
+            value: parseFloat(document.getElementById('OPEX_08').value),
+            min: parseFloat(document.getElementById('OPEX_08_min').value) || 15,
+            max: parseFloat(document.getElementById('OPEX_08_max').value) || 35,
+            step: 1
+        },
+        TargetDSCRSenior_37: {
+            enabled: document.getElementById('TargetDSCRSenior_37_range') ? document.getElementById('TargetDSCRSenior_37_range').checked : false,
+            value: parseFloat(document.getElementById('TargetDSCRSenior_37').value),
+            min: 1.20,
+            max: 1.50,
+            step: 0.05
+        },
+        SeniorCoupon_38: {
+            enabled: document.getElementById('SeniorCoupon_38_range') ? document.getElementById('SeniorCoupon_38_range').checked : false,
+            value: parseFloat(document.getElementById('SeniorCoupon_38').value),
+            min: 3.5,
+            max: 7.0,
+            step: 0.25
+        }
     };
     
-    const capex = parseFloat(document.getElementById('calc-capex').value) || 100000000;
+    // Get fixed inputs
+    const grossIT = parseFloat(document.getElementById('GrossITLoad_02').value) || 100;
+    const pue = parseFloat(document.getElementById('PUE_03').value) || 1.30;
+    const seniorTenor = parseFloat(document.getElementById('SeniorTenorY_39').value) || 25;
+    const rankingObjective = document.getElementById('RankingObjective_109').value || 'Composite';
     
-    // Generate sample scenarios
+    // Generate permutations based on enabled ranges
     scenarios = [];
-    const count = mode === 'preview' ? 10 : 100;
+    const maxCount = mode === 'preview' ? 10 : (mode === 'viable' ? 500 : 1000);
     let viableCount = 0;
     let bestIRR = 0;
+    let bestDSCR = 0;
     
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < maxCount; i++) {
+        // Generate scenario with ranged or fixed values
+        const rent = config.GrossMonthlyRent_07.enabled ? 
+            config.GrossMonthlyRent_07.min + Math.random() * (config.GrossMonthlyRent_07.max - config.GrossMonthlyRent_07.min) :
+            config.GrossMonthlyRent_07.value;
+            
+        const opex = config.OPEX_08.enabled ?
+            config.OPEX_08.min + Math.random() * (config.OPEX_08.max - config.OPEX_08.min) :
+            config.OPEX_08.value;
+            
+        const dscr = config.TargetDSCRSenior_37.enabled ?
+            config.TargetDSCRSenior_37.min + Math.random() * (config.TargetDSCRSenior_37.max - config.TargetDSCRSenior_37.min) :
+            config.TargetDSCRSenior_37.value;
+            
+        const coupon = config.SeniorCoupon_38.enabled ?
+            config.SeniorCoupon_38.min + Math.random() * (config.SeniorCoupon_38.max - config.SeniorCoupon_38.min) :
+            config.SeniorCoupon_38.value;
+        
+        // Calculate derived values
+        const grossIncome = rent * 12;
+        const netIncome = grossIncome * (1 - opex/100);
+        const netIT = grossIT / pue;
+        const debtService = grossIncome * (coupon/100);
+        const actualDSCR = netIncome / debtService;
+        const irr = 15 + Math.random() * 10; // Simplified IRR calculation
+        const seniorRaise = netIncome * dscr * seniorTenor;
+        
         const scenario = {
             id: i + 1,
-            rent: ranges.rent[0] + Math.random() * (ranges.rent[1] - ranges.rent[0]),
-            opex: ranges.opex[0] + Math.random() * (ranges.opex[1] - ranges.opex[0]),
-            rate: ranges.rate[0] + Math.random() * (ranges.rate[1] - ranges.rate[0]),
-            dscr: ranges.dscr[0] + Math.random() * (ranges.dscr[1] - ranges.dscr[0]),
-            irr: ranges.irr[0] + Math.random() * (ranges.irr[1] - ranges.irr[0]),
-            stack: capex,
-            viable: Math.random() > 0.3
+            rent: rent,
+            opex: opex,
+            coupon: coupon,
+            dscr: actualDSCR,
+            targetDSCR: dscr,
+            irr: irr,
+            seniorRaise: seniorRaise,
+            netIncome: netIncome,
+            viable: actualDSCR >= dscr && irr >= 14
         };
         
         if (mode === 'viable' && !scenario.viable) continue;
@@ -2800,13 +2999,39 @@ function runGeneration(mode) {
         if (scenario.viable) {
             viableCount++;
             if (scenario.irr > bestIRR) bestIRR = scenario.irr;
+            if (scenario.dscr > bestDSCR) bestDSCR = scenario.dscr;
         }
     }
+    
+    // Sort scenarios based on ranking objective
+    scenarios.sort((a, b) => {
+        switch(rankingObjective) {
+            case 'MaxSeniorRaise': return b.seniorRaise - a.seniorRaise;
+            case 'MaxEquityIRR': return b.irr - a.irr;
+            case 'MaxDay1Cash': return b.netIncome - a.netIncome;
+            case 'MinWACC': return a.coupon - b.coupon;
+            case 'Composite':
+            default:
+                // Composite score with weights from config
+                const scoreA = (a.seniorRaise/1000000) * 0.35 + (20 - a.coupon) * 0.25 + 
+                               a.netIncome/1000000 * 0.20 + a.dscr * 0.10 + a.irr * 0.10;
+                const scoreB = (b.seniorRaise/1000000) * 0.35 + (20 - b.coupon) * 0.25 + 
+                               b.netIncome/1000000 * 0.20 + b.dscr * 0.10 + b.irr * 0.10;
+                return scoreB - scoreA;
+        }
+    })
     
     // Update stats
     document.getElementById('stat-total').textContent = scenarios.length;
     document.getElementById('stat-viable').textContent = viableCount;
     document.getElementById('stat-irr').textContent = bestIRR.toFixed(1) + '%';
+    
+    // Add best DSCR display if element exists
+    const dscrStat = document.getElementById('stat-dscr');
+    if (dscrStat) {
+        dscrStat.textContent = bestDSCR.toFixed(2) + 'x';
+    }
+    
     document.getElementById('quick-stats').style.display = 'block';
     
     // Show results table
@@ -2818,12 +3043,12 @@ function displayResults() {
     tbody.innerHTML = scenarios.map(s => `
         <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
             <td style="padding: 0.75rem; color: #94a3b8;">${s.id}</td>
-            <td style="padding: 0.75rem; color: #e2e8f0;">£${s.rent.toFixed(0)}</td>
+            <td style="padding: 0.75rem; color: #e2e8f0;">£${(s.rent/1000).toFixed(0)}k/mo</td>
             <td style="padding: 0.75rem; color: #e2e8f0;">${s.opex.toFixed(1)}%</td>
-            <td style="padding: 0.75rem; color: #e2e8f0;">${s.rate.toFixed(2)}%</td>
+            <td style="padding: 0.75rem; color: #e2e8f0;">${s.coupon.toFixed(2)}%</td>
             <td style="padding: 0.75rem; color: #e2e8f0;">${s.dscr.toFixed(2)}x</td>
             <td style="padding: 0.75rem; color: ${s.viable ? '#10b981' : '#ef4444'}; font-weight: 600;">${s.irr.toFixed(1)}%</td>
-            <td style="padding: 0.75rem; color: #e2e8f0;">£${(s.stack/1000000).toFixed(0)}M</td>
+            <td style="padding: 0.75rem; color: #e2e8f0;">£${(s.seniorRaise/1000000).toFixed(0)}M</td>
             <td style="padding: 0.75rem;">
                 <span style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; ${s.viable ? 'background: rgba(16, 185, 129, 0.2); color: #10b981;' : 'background: rgba(239, 68, 68, 0.2); color: #ef4444;'}">
                     ${s.viable ? 'Viable' : 'Non-viable'}
@@ -2836,9 +3061,9 @@ function displayResults() {
 }
 
 function exportCSV() {
-    let csv = 'ID,Rent,OPEX,Rate,DSCR,IRR,Stack,Status\n';
+    let csv = 'ID,Monthly_Rent,OPEX,Coupon,DSCR,Target_DSCR,IRR,Senior_Raise,Net_Income,Status\n';
     scenarios.forEach(s => {
-        csv += `${s.id},${s.rent.toFixed(2)},${s.opex.toFixed(2)},${s.rate.toFixed(2)},${s.dscr.toFixed(2)},${s.irr.toFixed(2)},${s.stack},${s.viable ? 'Viable' : 'Non-viable'}\n`;
+        csv += `${s.id},${s.rent.toFixed(2)},${s.opex.toFixed(2)},${s.coupon.toFixed(2)},${s.dscr.toFixed(2)},${s.targetDSCR.toFixed(2)},${s.irr.toFixed(2)},${s.seniorRaise.toFixed(2)},${s.netIncome.toFixed(2)},${s.viable ? 'Viable' : 'Non-viable'}\n`;
     });
     
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -5521,7 +5746,8 @@ if (window.showSection) {
         if (!marketSection) return;
         
         // Insert the market news HTML structure
-        marketSection.innerHTML = `{% include 'market_news_content.html' %}`;
+        // Note: Market news content is loaded dynamically
+        marketSection.innerHTML = '';
         
         // Wait a moment for DOM to update, then initialize
         setTimeout(() => {
@@ -5826,10 +6052,169 @@ if (window.showSection) {
     let pendingDeleteType = null;  // For delete confirmation modal
     let currentDropPosition = null;
 
+    // Current viewing context for projects
+    let currentViewingUser = null;
+    let allUsersList = [];
+    
+    // Load users list for admin selector
+    async function loadUsersList() {
+        if (!isAdmin) return;
+        
+        try {
+            const response = await fetch('/api/admin/users', {
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                allUsersList = data.users || [];
+                
+                // Update the user selector dropdown
+                const selector = document.getElementById('user-selector');
+                if (selector && allUsersList.length > 0) {
+                    // Clear existing options
+                    selector.innerHTML = '<option value="">My Projects</option>';
+                    selector.innerHTML += '<option value="all" style="color: #fbbf24;">All Users</option>';
+                    
+                    // Add each user as an option
+                    allUsersList.forEach(user => {
+                        if (user.email !== userEmail) {
+                            const option = document.createElement('option');
+                            option.value = user.email;
+                            option.textContent = `${user.full_name || user.email} (${user.account_type})`;
+                            option.style.color = user.account_type === 'admin' ? '#ef4444' : 
+                                               user.account_type === 'internal' ? '#60a5fa' : '#94a3b8';
+                            selector.appendChild(option);
+                        }
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error loading users list:', error);
+        }
+    }
+    
+    // Load projects for a specific user
+    async function loadUserProjects(userEmail) {
+        currentViewingUser = userEmail;
+        
+        // Show loading indicator
+        document.getElementById('projects-loading').style.display = 'block';
+        document.getElementById('projects-grid').style.display = 'none';
+        
+        // Hide Add Project button when viewing other users' projects
+        const addProjectBtn = document.getElementById('add-project-btn');
+        if (addProjectBtn) {
+            if (userEmail && userEmail !== '') {
+                addProjectBtn.style.display = 'none';
+            } else {
+                addProjectBtn.style.display = 'block';
+            }
+        }
+        
+        try {
+            let url = '/api/projects';
+            if (userEmail && userEmail !== '' && isAdmin) {
+                url += `?user=${encodeURIComponent(userEmail)}`;
+            }
+            
+            const response = await fetch(url, {
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                // If viewing all users, combine projects with user info
+                if (userEmail === 'all') {
+                    projectsData = [];
+                    for (const user of data.users || []) {
+                        if (user.projects && user.projects.length > 0) {
+                            user.projects.forEach(project => {
+                                project.ownerEmail = user.email;
+                                project.ownerName = user.full_name || user.email;
+                                project.ownerType = user.account_type;
+                                projectsData.push(project);
+                            });
+                        }
+                    }
+                } else {
+                    projectsData = data.projects || [];
+                }
+                
+                // Update UI
+                document.getElementById('projects-loading').style.display = 'none';
+                
+                if (projectsData.length === 0) {
+                    document.getElementById('projects-empty').style.display = 'block';
+                    document.getElementById('projects-grid').style.display = 'none';
+                    document.getElementById('project-stats').style.display = 'none';
+                } else {
+                    document.getElementById('projects-empty').style.display = 'none';
+                    document.getElementById('projects-grid').style.display = 'grid';
+                    document.getElementById('project-stats').style.display = 'grid';
+                }
+                
+                renderProjects();
+                updateProjectStats();
+                
+                // Show notification if viewing another user's projects
+                if (userEmail && userEmail !== '' && userEmail !== 'all') {
+                    const user = allUsersList.find(u => u.email === userEmail);
+                    if (user) {
+                        showNotification(`Viewing projects for: ${user.full_name || user.email}`, 'info');
+                    }
+                } else if (userEmail === 'all') {
+                    showNotification(`Viewing all users' projects`, 'info');
+                }
+            } else {
+                console.error('Failed to load projects');
+                document.getElementById('projects-loading').style.display = 'none';
+                showNotification('Failed to load projects', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading projects:', error);
+            document.getElementById('projects-loading').style.display = 'none';
+            showNotification('Error loading projects', 'error');
+        }
+    }
+    
+    // Show notification helper
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        const bgColor = type === 'error' ? '#ef4444' : 
+                       type === 'success' ? '#22c55e' : 
+                       type === 'warning' ? '#f59e0b' : '#60a5fa';
+        
+        notification.style.cssText = `
+            position: fixed;
+            top: 200px;
+            right: 20px;
+            background: ${bgColor};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        `;
+        notification.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+    
     // Initialize projects when section becomes visible
     function initializeProjects() {
         loadProjects();
         setupProjectsDragAndDrop();
+        
+        // Load users list if admin
+        if (isAdmin) {
+            loadUsersList();
+        }
         
         // Setup the main grid as a drop zone for standalone projects
         const gridElement = document.getElementById('projects-grid');
@@ -6720,6 +7105,13 @@ if (window.showSection) {
 
         card.innerHTML = `
             <div style="cursor: grab;">
+                ${project.ownerName ? `
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; padding: 6px 10px; background: rgba(96, 165, 250, 0.1); border-radius: 6px;">
+                    <i class="fas fa-user" style="color: ${project.ownerType === 'admin' ? '#ef4444' : project.ownerType === 'internal' ? '#60a5fa' : '#94a3b8'}; font-size: 0.8rem;"></i>
+                    <span style="color: #94a3b8; font-size: 0.85rem;">${project.ownerName}</span>
+                    <span style="color: ${project.ownerType === 'admin' ? '#ef4444' : project.ownerType === 'internal' ? '#60a5fa' : '#64748b'}; font-size: 0.75rem; text-transform: uppercase;">(${project.ownerType})</span>
+                </div>
+                ` : ''}
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
                     <h3 style="color: #93c5fd; font-size: 1.25rem; font-weight: 600;">${project.title}</h3>
                     <span style="background: ${status.bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">${status.text}</span>
@@ -6742,15 +7134,17 @@ if (window.showSection) {
                     <button onclick="viewProjectDetails('${project.id}')" style="flex: 1; background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
                         <i class="fas fa-eye"></i> View
                     </button>
+                    ${!project.ownerEmail || project.ownerEmail === userEmail ? `
                     <button onclick="editProject('${project.id}')" style="flex: 1; background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
                         <i class="fas fa-edit"></i> Edit
-                    </button>
-                    <button onclick="launchPermutationWithProject('${project.id}')" style="flex: 1; background: linear-gradient(135deg, #0a0e27, #020617); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                    </button>` : ''}
+                    ${isAdmin ? `<button onclick="launchPermutationWithProject('${project.id}')" style="flex: 1; background: linear-gradient(135deg, #0a0e27, #020617); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
                         <i class="fas fa-cogs"></i> Permutation
-                    </button>
+                    </button>` : ''}
+                    ${!project.ownerEmail || project.ownerEmail === userEmail ? `
                     <button onclick="deleteProject('${project.id}')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
                         <i class="fas fa-trash"></i>
-                    </button>
+                    </button>` : ''}
                 </div>
             </div>
         `;
