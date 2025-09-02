@@ -2538,8 +2538,15 @@ def auth():
                 
                 # Check if user is actually an admin - MUST have both is_admin flag AND admin account_type
                 # This prevents any non-admin users from getting admin access
+                # CRITICAL SECURITY: Only set is_admin if BOTH conditions are met
                 if user.get('is_admin', False) == True and user.get('account_type') == 'admin':
                     session[f'is_admin_{ip_address}'] = True
+                else:
+                    # EXPLICITLY set to False for all non-admin users to prevent any security breach
+                    session[f'is_admin_{ip_address}'] = False
+                
+                # Store account type in session for additional security checks
+                session[f'account_type_{ip_address}'] = user.get('account_type', 'external')
                 
                 return jsonify({'status': 'success', 'redirect': url_for('dashboard')})
             else:
@@ -3832,7 +3839,7 @@ def admin_approve_user_advanced():
             'admin_approved': True,
             'approved_at': datetime.now().isoformat(),
             'account_type': account_type,
-            'is_admin': (account_type == 'admin'),  # Set is_admin=True ONLY for admin accounts
+            'is_admin': (account_type == 'admin'),  # SECURITY: Set is_admin=True ONLY for admin accounts
             'email_verified': True,
             'login_count': 0,
             'total_login_time': 0,
@@ -3909,8 +3916,8 @@ def admin_approve_user_advanced():
         email_sent = send_email(email, 'AtlasNexus - Account Approved', email_html)
         print(f"[APPROVAL] Credentials email sent: {email_sent} to {email}")
         
-        # Update credentials_sent status
-        if email_sent:
+        # Update credentials_sent status (only if user exists in users dict)
+        if email_sent and email in users:
             users[email]['credentials_sent'] = True
             users[email]['credentials_sent_at'] = datetime.now().isoformat()
             save_user_data(email, users[email])
