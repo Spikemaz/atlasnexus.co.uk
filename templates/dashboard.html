@@ -8287,16 +8287,44 @@ if (window.showSection) {
         // Populate metadata
         document.getElementById('sponsor-projectTitle').value = project.title || '';
         document.getElementById('sponsor-locationCountry').value = project.location || '';
-        document.getElementById('sponsor-status').value = project.status || 'Draft';
-        document.getElementById('sponsor-currency').value = project.currency || 'EUR';
+        document.getElementById('sponsor-status').value = project.status || '1. Site Identified';
+        
+        // Handle separate currency fields
+        const capexCurrency = document.getElementById('sponsor-capex-currency');
+        const kwhCurrency = document.getElementById('sponsor-kwh-currency');
+        if (capexCurrency) capexCurrency.value = project.capexCurrency || project.currency || 'EUR';
+        if (kwhCurrency) kwhCurrency.value = project.kwhCurrency || project.currency || 'EUR';
+        
         document.getElementById('sponsor-grossITLoadMW').value = project.grossITLoad || '';
         document.getElementById('sponsor-pue').value = project.pue || '1.25';
         
-        // Populate other fields if they exist
-        if (project.meta) {
-            document.getElementById('sponsor-grossMonthlyRent').value = project.meta.grossMonthlyRent || '';
-            document.getElementById('sponsor-constructionStart').value = project.meta.constructionStart || '';
-            document.getElementById('sponsor-constructionDurationMonths').value = project.meta.constructionDurationMonths || '24';
+        // Populate new fields
+        const grossMonthlyRent = document.getElementById('sponsor-grossMonthlyRent');
+        const opexPercent = document.getElementById('sponsor-opexPercent');
+        if (grossMonthlyRent) grossMonthlyRent.value = project.grossMonthlyRent || project.meta?.grossMonthlyRent || '';
+        if (opexPercent) opexPercent.value = project.opexPercent || project.meta?.opexPercent || '';
+        
+        // Populate construction fields
+        const constructionStart = document.getElementById('sponsor-constructionStart');
+        const constructionDuration = document.getElementById('sponsor-constructionDurationMonths');
+        if (constructionStart) constructionStart.value = project.constructionStart || project.meta?.constructionStart || '';
+        if (constructionDuration) constructionDuration.value = project.constructionDuration || project.meta?.constructionDurationMonths || '';
+        
+        // Trigger currency display updates
+        if (capexCurrency) {
+            const event = new Event('change');
+            capexCurrency.dispatchEvent(event);
+        }
+        if (kwhCurrency) {
+            const event = new Event('change');
+            kwhCurrency.dispatchEvent(event);
+        }
+        
+        // Trigger MW calculations
+        const grossITInput = document.getElementById('sponsor-grossITLoadMW');
+        if (grossITInput) {
+            const event = new Event('input');
+            grossITInput.dispatchEvent(event);
         }
     }
     
