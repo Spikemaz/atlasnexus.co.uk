@@ -5387,18 +5387,37 @@ def delete_project(project_id):
     
     # Load projects
     projects_data = load_projects_data()
-    user_projects = projects_data.get(email, [])
     
-    # Find and remove the project
-    project_index = next((i for i, p in enumerate(user_projects) if p.get('projectId') == project_id), None)
+    # Handle both data formats - dict with email keys or direct project list
+    if isinstance(projects_data.get(email), dict):
+        # Format: {email: {'projects': [], 'order': []}}
+        user_data = projects_data.get(email, {'projects': [], 'order': []})
+        user_projects = user_data.get('projects', [])
+    elif isinstance(projects_data.get(email), list):
+        # Format: {email: [projects]}
+        user_projects = projects_data.get(email, [])
+        user_data = {'projects': user_projects, 'order': []}
+    else:
+        # Initialize if not exists
+        user_projects = []
+        user_data = {'projects': [], 'order': []}
+    
+    # Find and remove the project - handle both 'id' and 'projectId' fields
+    project_index = None
+    for i, p in enumerate(user_projects):
+        if p.get('projectId') == project_id or p.get('id') == project_id:
+            project_index = i
+            break
     
     if project_index is not None:
         # Remove the project
         deleted_project = user_projects.pop(project_index)
         
+        # Update user data
+        user_data['projects'] = user_projects
+        
         # Save updated data
-        projects_data[email] = user_projects
-        save_projects_data(email, {'projects': user_projects, 'order': []})
+        save_projects_data(email, user_data)
         
         return jsonify({
             'success': True,
@@ -5406,11 +5425,12 @@ def delete_project(project_id):
             'status': 'success'
         })
     
+    # Return success even if not found (idempotent delete)
     return jsonify({
-        'success': False,
-        'message': 'Project not found',
-        'status': 'error'
-    }), 404
+        'success': True,
+        'message': 'Project not found or already deleted',
+        'status': 'success'
+    })
 
 @app.route('/api/projects/<project_id>', methods=['POST'])
 def save_project(project_id):
