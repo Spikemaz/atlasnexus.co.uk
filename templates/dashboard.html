@@ -697,9 +697,6 @@
                     <i class="fas fa-cog"></i> Control Panel
                 </a>
                 {% endif %}
-                <a href="/projects" style="background: linear-gradient(135deg, #0a0e27, #020617); color: white; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block;">
-                    <i class="fas fa-folder"></i> Projects
-                </a>
                 <a href="/account" style="background: linear-gradient(135deg, #0a0e27, #020617); color: white; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block;">
                     <i class="fas fa-user"></i> Account
                 </a>
@@ -1454,26 +1451,71 @@
         </div>
     </div>
 
-    <!-- Market News Section - Dynamic Content with AI & Expert Analysis -->
+    <!-- Market News Section - Original Layout with Bullish/Bearish Indicators -->
     <div id="market-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
-        <div style="max-width: 1400px; margin: 0 auto;">
-            <!-- Live Market Ticker -->
-            <div style="background: linear-gradient(90deg, #0a0e27, #020617); border: 1px solid #60a5fa; border-radius: 8px; padding: 0.75rem; margin-bottom: 2rem; overflow: hidden;">
-                <div id="live-ticker" style="display: flex; animation: scroll-left 30s linear infinite;">
-                    <span style="color: #60a5fa; margin-right: 2rem;"><i class="fas fa-chart-line"></i> FTSE 100: 7,893.21 <span style="color: #22c55e;">+0.82%</span></span>
-                    <span style="color: #60a5fa; margin-right: 2rem;">DAX: 18,456.32 <span style="color: #22c55e;">+1.15%</span></span>
-                    <span style="color: #60a5fa; margin-right: 2rem;">EUR/GBP: 0.8543 <span style="color: #ef4444;">-0.23%</span></span>
-                    <span style="color: #60a5fa; margin-right: 2rem;">Brent Crude: $82.45 <span style="color: #22c55e;">+2.1%</span></span>
-                    <span style="color: #60a5fa; margin-right: 2rem;">Gold: $2,043.20 <span style="color: #22c55e;">+0.45%</span></span>
-                    <span style="color: #60a5fa; margin-right: 2rem;">Bitcoin: $67,234 <span style="color: #22c55e;">+5.2%</span></span>
+        <div class="container-fluid">
+            <!-- Header with Live Status -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="text-white mb-0">
+                            <i class="fas fa-newspaper me-2"></i>Securitisation Market Intelligence
+                        </h2>
+                        <div class="d-flex align-items-center gap-3">
+                            <button class="btn btn-sm btn-outline-warning" onclick="showSavedArticles()">
+                                <i class="fas fa-bookmark me-1"></i>Saved Articles <span id="savedArticleCount" class="badge bg-warning ms-1">0</span>
+                            </button>
+                            <span class="badge bg-success pulse-animation">
+                                <i class="fas fa-circle me-1"></i>Live Updates
+                            </span>
+                            <small class="text-muted">Last updated: <span id="lastUpdateTime">Just now</span></small>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
-                <h2 style="color: #60a5fa; font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">
-                    <i class="fas fa-chart-line"></i> Market Intelligence Hub
-                </h2>
-                <p style="color: #94a3b8; margin-bottom: 2rem;">AI-powered analysis, expert insights, and real-time market data</p>
+
+            <!-- Market Sentiment Bar -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-lg" style="background: rgba(54, 64, 73, 0.95); border: 1px solid #60a5fa;">
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <div class="sentiment-indicator">
+                                        <h5 class="text-white mb-2">Market Sentiment</h5>
+                                        <div class="sentiment-gauge" id="sentimentGauge">
+                                            <span class="badge bg-warning fs-5">NEUTRAL</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="metric-box">
+                                        <small class="text-muted">Issuance Volume (24h)</small>
+                                        <div id="issuanceVolume"><h4 class="text-success">€4.2B <i class="fas fa-arrow-up"></i></h4></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="metric-box">
+                                        <small class="text-muted">Active Deals</small>
+                                        <div id="activeDeals" style="cursor: pointer;" onclick="showActiveDeals()">
+                                            <h4 class="text-white">
+                                                <span id="activeDealsCount">127</span>
+                                                <i class="fas fa-external-link-alt ms-2" style="font-size: 0.7em;"></i>
+                                            </h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="metric-box">
+                                        <small class="text-muted">Avg. Spread Change</small>
+                                        <div id="avgSpreadChange"><h4 class="text-danger">+12 bps <i class="fas fa-arrow-down"></i></h4></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
                 
                 <!-- Tab Navigation -->
                 <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
@@ -6833,6 +6875,310 @@ if (window.showSection) {
         if (modal) modal.style.display = 'none';
         currentEditingProject = null;
     }
+
+    // New Sponsor Input Modal Functions
+    let currentSponsorProjectId = null;
+    let sponsorUploadedData = null;
+
+    function showSponsorEditModal(projectId) {
+        currentSponsorProjectId = projectId || generateProjectId();
+        const project = findProjectById(projectId);
+        
+        // Update modal to show new sponsor input form
+        const modal = document.getElementById('project-edit-modal');
+        if (!modal) return;
+        
+        // Transform the modal content to sponsor input format
+        transformToSponsorModal(modal, project);
+        modal.style.display = 'flex';
+    }
+
+    function transformToSponsorModal(modal, project) {
+        // Replace modal content with comprehensive sponsor input form
+        const modalContent = modal.querySelector('div');
+        modalContent.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2 style="color: #60a5fa; font-size: 1.5rem; font-weight: 700; margin: 0;">
+                    <i class="fas fa-edit"></i> ${project ? 'Edit Project' : 'Create New Project'}
+                </h2>
+                <button onclick="closeSponsorModal()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                    ×
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(96, 165, 250, 0.2);">
+                <button type="button" class="sponsor-tab active" onclick="switchSponsorTab('upload')" style="padding: 0.75rem 1rem; background: none; border: none; color: #60a5fa; cursor: pointer;">Upload Template</button>
+                <button type="button" class="sponsor-tab" onclick="switchSponsorTab('manual')" style="padding: 0.75rem 1rem; background: none; border: none; color: #94a3b8; cursor: pointer;">Manual Entry</button>
+            </div>
+
+            <!-- Upload Tab -->
+            <div id="uploadSponsorTab" class="sponsor-tab-content" style="display: block;">
+                <div style="border: 2px dashed rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer;" onclick="document.getElementById('sponsorFileInput').click()">
+                    <input type="file" id="sponsorFileInput" accept=".xlsx" style="display: none;" onchange="handleSponsorFileSelect(event)">
+                    <h3 style="color: #60a5fa;">Upload Sponsor Input Template</h3>
+                    <p style="color: #94a3b8;">Drag and drop your Excel file here or click to browse</p>
+                    <p style="font-size: 0.875rem; color: #64748b;">Accepts: Project_Sponsor_Input_Template.xlsx</p>
+                </div>
+                <div id="uploadSponsorPreview" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(15, 23, 42, 0.8); border-radius: 8px;">
+                    <h4 style="color: #60a5fa;">Uploaded Data Preview</h4>
+                    <div id="sponsorPreviewContent"></div>
+                </div>
+            </div>
+
+            <!-- Manual Entry Tab -->
+            <div id="manualSponsorTab" class="sponsor-tab-content" style="display: none; overflow-y: auto; max-height: 60vh;">
+                ${getSponsorManualForm(project)}
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                <button onclick="closeSponsorModal()" style="background: rgba(75, 85, 99, 0.3); color: #94a3b8; border: 1px solid rgba(75, 85, 99, 0.5); padding: 12px 24px; border-radius: 8px; cursor: pointer;">
+                    Cancel
+                </button>
+                <button onclick="saveSponsorProject()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    Save Changes
+                </button>
+            </div>
+        `;
+    }
+
+    function getSponsorManualForm(project) {
+        return `
+            <form id="sponsor-form">
+                <!-- Project Metadata -->
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="color: #60a5fa; margin-bottom: 1rem;">Project Metadata</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <div>
+                            <label style="color: #94a3b8; font-size: 0.9rem;">Project Title *</label>
+                            <input type="text" id="sponsor-projectTitle" required value="${project?.title || ''}" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                        </div>
+                        <div>
+                            <label style="color: #94a3b8; font-size: 0.9rem;">Location Country *</label>
+                            <input type="text" id="sponsor-locationCountry" required value="${project?.location || ''}" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                        </div>
+                        <div>
+                            <label style="color: #94a3b8; font-size: 0.9rem;">Status</label>
+                            <select id="sponsor-status" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                                <option value="Draft">Draft</option>
+                                <option value="Final">Final</option>
+                                <option value="Submitted">Submitted</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="color: #94a3b8; font-size: 0.9rem;">Currency *</label>
+                            <select id="sponsor-currency" required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                                <option value="EUR">EUR</option>
+                                <option value="USD">USD</option>
+                                <option value="GBP">GBP</option>
+                                <option value="JPY">JPY</option>
+                                <option value="AED">AED</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="color: #94a3b8; font-size: 0.9rem;">Gross IT Load (MW) *</label>
+                            <input type="number" id="sponsor-grossITLoadMW" min="0.1" step="0.01" required value="${project?.grossITLoad || ''}" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                        </div>
+                        <div>
+                            <label style="color: #94a3b8; font-size: 0.9rem;">PUE *</label>
+                            <input type="number" id="sponsor-pue" min="1.0" max="2.5" step="0.01" value="${project?.pue || '1.25'}" required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Build (CapEx) -->
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="color: #60a5fa; margin-bottom: 1rem;">Build (CapEx) - EUR</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <div>
+                            <label style="color: #94a3b8; font-size: 0.9rem;">Architectural</label>
+                            <input type="number" id="sponsor-buildArchitectural" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                        </div>
+                        <div>
+                            <label style="color: #94a3b8; font-size: 0.9rem;">Civil & Structural</label>
+                            <input type="number" id="sponsor-buildCivilStructural" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                        </div>
+                        <div>
+                            <label style="color: #94a3b8; font-size: 0.9rem;">Substations</label>
+                            <input type="number" id="sponsor-buildSubstations" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Totals Display -->
+                <div style="background: rgba(15, 23, 42, 0.8); border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+                    <h4 style="color: #60a5fa; margin-bottom: 1rem;">Totals</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #94a3b8;">Build Total</span>
+                            <span id="sponsor-buildTotal" style="color: white;">€0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #94a3b8;">Land Total</span>
+                            <span id="sponsor-landTotal" style="color: white;">€0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #94a3b8;">Grand Total</span>
+                            <span id="sponsor-grandTotal" style="color: #60a5fa; font-weight: bold;">€0</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        `;
+    }
+
+    function closeSponsorModal() {
+        const modal = document.getElementById('project-edit-modal');
+        if (modal) modal.style.display = 'none';
+        currentSponsorProjectId = null;
+        sponsorUploadedData = null;
+    }
+
+    function switchSponsorTab(tabName) {
+        // Switch tabs
+        document.querySelectorAll('.sponsor-tab').forEach(tab => {
+            tab.classList.remove('active');
+            tab.style.color = '#94a3b8';
+        });
+        document.querySelectorAll('.sponsor-tab-content').forEach(content => {
+            content.style.display = 'none';
+        });
+
+        if (tabName === 'upload') {
+            document.querySelector('.sponsor-tab:first-child').classList.add('active');
+            document.querySelector('.sponsor-tab:first-child').style.color = '#60a5fa';
+            document.getElementById('uploadSponsorTab').style.display = 'block';
+        } else {
+            document.querySelector('.sponsor-tab:last-child').classList.add('active');
+            document.querySelector('.sponsor-tab:last-child').style.color = '#60a5fa';
+            document.getElementById('manualSponsorTab').style.display = 'block';
+        }
+    }
+
+    function calculateSponsorTotals() {
+        // Calculate build total
+        const buildFields = ['buildArchitectural', 'buildCivilStructural', 'buildSubstations'];
+        let buildTotal = 0;
+        buildFields.forEach(field => {
+            const value = document.getElementById('sponsor-' + field)?.value || 0;
+            buildTotal += parseFloat(value) || 0;
+        });
+
+        // Update display
+        document.getElementById('sponsor-buildTotal').textContent = '€' + buildTotal.toLocaleString();
+        document.getElementById('sponsor-grandTotal').textContent = '€' + buildTotal.toLocaleString();
+    }
+
+    async function handleSponsorFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file || !file.name.endsWith('.xlsx')) {
+            alert('Please upload an Excel (.xlsx) file');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch(`/api/projects/${currentSponsorProjectId}/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                sponsorUploadedData = data.parsed;
+                displaySponsorUploadPreview();
+            } else {
+                alert(data.message);
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('Failed to upload file');
+        }
+    }
+
+    function displaySponsorUploadPreview() {
+        if (!sponsorUploadedData) return;
+
+        const preview = document.getElementById('uploadSponsorPreview');
+        const content = document.getElementById('sponsorPreviewContent');
+
+        content.innerHTML = `
+            <div style="display: grid; gap: 0.5rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #94a3b8;">Project Title</span>
+                    <span style="color: white;">${sponsorUploadedData.meta.projectTitle || 'Not set'}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #94a3b8;">Location</span>
+                    <span style="color: white;">${sponsorUploadedData.meta.locationCountry || 'Not set'}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #94a3b8;">IT Load</span>
+                    <span style="color: white;">${sponsorUploadedData.meta.grossITLoadMW} MW</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #94a3b8;">Grand Total</span>
+                    <span style="color: #60a5fa; font-weight: bold;">€${(sponsorUploadedData.rollups.grandTotalEUR || 0).toLocaleString()}</span>
+                </div>
+            </div>
+        `;
+
+        preview.style.display = 'block';
+    }
+
+    async function saveSponsorProject() {
+        let projectData;
+
+        if (sponsorUploadedData) {
+            projectData = sponsorUploadedData;
+        } else {
+            // Collect from manual form
+            projectData = {
+                meta: {
+                    projectTitle: document.getElementById('sponsor-projectTitle').value,
+                    locationCountry: document.getElementById('sponsor-locationCountry').value,
+                    status: document.getElementById('sponsor-status').value,
+                    currency: document.getElementById('sponsor-currency').value,
+                    grossITLoadMW: parseFloat(document.getElementById('sponsor-grossITLoadMW').value) || 0,
+                    pue: parseFloat(document.getElementById('sponsor-pue').value) || 1.25
+                },
+                rollups: {
+                    capexCostPriceEUR: 0,
+                    grandTotalEUR: 0
+                }
+            };
+        }
+
+        // Save to projects array
+        const existingIndex = projectsData.findIndex(p => p.id === currentSponsorProjectId);
+        const project = {
+            id: currentSponsorProjectId,
+            title: projectData.meta.projectTitle,
+            location: projectData.meta.locationCountry,
+            status: projectData.meta.status?.toLowerCase() || 'draft',
+            currency: projectData.meta.currency,
+            grossITLoad: projectData.meta.grossITLoadMW,
+            pue: projectData.meta.pue,
+            value: projectData.rollups.grandTotalEUR || 0,
+            ...projectData
+        };
+
+        if (existingIndex >= 0) {
+            projectsData[existingIndex] = project;
+        } else {
+            projectsData.push(project);
+        }
+
+        renderProjects();
+        closeSponsorModal();
+        await saveProjects();
+    }
+
+    function generateProjectId() {
+        return 'proj_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
     
     function saveProjectEdit(event) {
         event.preventDefault();
@@ -7139,8 +7485,8 @@ if (window.showSection) {
     
     // Edit project
     function editProject(projectId) {
-        // Redirect to the dedicated projects page with the project ID
-        window.location.href = '/projects?edit=' + projectId;
+        // Show the new sponsor input modal
+        showSponsorEditModal(projectId);
     }
     
     // Launch permutation tool with project data
