@@ -5053,6 +5053,26 @@ def admin_get_ip_tracking():
     
     return jsonify({'status': 'success', 'ip_data': list(ip_data.values())})
 
+@app.route('/projects')
+def projects():
+    """Projects management page"""
+    ip_address = get_real_ip()
+    
+    # Verify both authentications
+    if not session.get(f'site_authenticated_{ip_address}'):
+        return redirect(url_for('index'))
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return redirect(url_for('secure_login'))
+    
+    username = session.get(f'username_{ip_address}', 'User')
+    email = session.get(f'user_email_{ip_address}', '')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    
+    return render_template('projects.html',
+                         username=username,
+                         email=email,
+                         account_type=account_type)
+
 @app.route('/account')
 def account():
     """Account settings page"""
@@ -5215,6 +5235,294 @@ def request_password_reset():
             return jsonify({'success': False, 'message': 'Failed to send email. Please contact support.'})
     
     return jsonify({'success': False, 'message': 'User not found'}), 404
+
+# ==================== PROJECTS API ENDPOINTS ====================
+
+@app.route('/api/projects', methods=['GET'])
+def get_projects():
+    """Get all projects for current user"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    email = session.get(f'user_email_{ip_address}')
+    
+    # Load projects from MongoDB or local storage
+    projects_data = load_projects_data()
+    user_projects = projects_data.get(email, [])
+    
+    return jsonify({
+        'success': True,
+        'projects': user_projects
+    })
+
+@app.route('/api/projects/<project_id>', methods=['GET'])
+def get_project(project_id):
+    """Get single project details"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    email = session.get(f'user_email_{ip_address}')
+    projects_data = load_projects_data()
+    user_projects = projects_data.get(email, [])
+    
+    project = next((p for p in user_projects if p.get('projectId') == project_id), None)
+    
+    if not project:
+        return jsonify({'success': False, 'message': 'Project not found'}), 404
+    
+    return jsonify({
+        'success': True,
+        'project': project
+    })
+
+@app.route('/api/projects/<project_id>', methods=['POST'])
+def save_project(project_id):
+    """Save/update project with sponsor input"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    email = session.get(f'user_email_{ip_address}')
+    data = request.get_json()
+    
+    # Validate required fields
+    if not data.get('meta'):
+        return jsonify({'success': False, 'message': 'Missing meta data'}), 400
+    
+    meta = data['meta']
+    
+    # Validation rules
+    if meta.get('currency') not in ['EUR', 'USD', 'GBP', 'JPY', 'AED']:
+        return jsonify({'success': False, 'message': 'Invalid currency'}), 400
+    
+    if not meta.get('grossITLoadMW') or float(meta.get('grossITLoadMW', 0)) <= 0:
+        return jsonify({'success': False, 'message': 'Invalid IT Load (must be > 0)'}), 400
+    
+    pue = float(meta.get('pue', 0))
+    if pue < 1.0 or pue > 2.5:
+        return jsonify({'success': False, 'message': 'PUE must be between 1.0 and 2.5'}), 400
+    
+    # Calculate derived values
+    rollups = data.get('rollups', {})
+    
+    # Build engine input object
+    engine_input = {
+        'currency': meta.get('currency'),
+        'grossITLoadMW': meta.get('grossITLoadMW'),
+        'pue': meta.get('pue'),
+        'capexCostPriceEUR': rollups.get('capexCostPriceEUR', 0),
+        'landPurchaseFeesEUR': rollups.get('landPurchaseFeesEUR', 0),
+        'operationsOpexAnnualEUR': rollups.get('operationsAnnualEUR', 0),
+        'grossMonthlyRentEUR': meta.get('grossMonthlyRent', 0),
+        'contingencyEUR': rollups.get('contingencyEUR', 0),
+        'feesTotalEUR': rollups.get('feesTotalEUR', 0),
+        'grandTotalProjectEUR': rollups.get('grandTotalEUR', 0),
+        'constructionStart': meta.get('constructionStart'),
+        'constructionDurationMonths': meta.get('constructionDurationMonths'),
+        'monthlyCurve': None
+    }
+    
+    # Add monthly curve if schedule exists
+    if data.get('schedule'):
+        engine_input['monthlyCurve'] = {
+            'months': data['schedule'].get('months', []),
+            'totalPerMonth': data['schedule'].get('byBucket', {}).get('TOTAL', [])
+        }
+    
+    # Save project
+    projects_data = load_projects_data()
+    if email not in projects_data:
+        projects_data[email] = []
+    
+    # Find existing project or create new
+    user_projects = projects_data[email]
+    existing_index = next((i for i, p in enumerate(user_projects) if p.get('projectId') == project_id), None)
+    
+    project = {
+        'projectId': project_id,
+        'meta': meta,
+        'rollups': rollups,
+        'schedule': data.get('schedule'),
+        'engineInput': engine_input,
+        'lastModified': datetime.now().isoformat(),
+        'createdBy': email
+    }
+    
+    if existing_index is not None:
+        user_projects[existing_index] = project
+    else:
+        user_projects.append(project)
+    
+    save_projects_data(projects_data)
+    
+    # Trigger permutation engine calculation
+    # This would normally emit an event to the permutation engine
+    print(f"[PROJECTS] Triggering permutation engine for project {project_id}")
+    
+    return jsonify({
+        'success': True,
+        'projectId': project_id,
+        'engineInputPreview': engine_input
+    })
+
+@app.route('/api/projects/<project_id>/upload', methods=['POST'])
+def upload_project_file(project_id):
+    """Upload and parse Excel sponsor input template"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'message': 'No file uploaded'}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({'success': False, 'message': 'No file selected'}), 400
+    
+    if not file.filename.endswith('.xlsx'):
+        return jsonify({'success': False, 'message': 'Only .xlsx files are accepted'}), 400
+    
+    try:
+        # Parse Excel file
+        import pandas as pd
+        from io import BytesIO
+        
+        file_data = BytesIO(file.read())
+        
+        # Read Engine_Inputs sheet
+        try:
+            engine_df = pd.read_excel(file_data, sheet_name='Engine_Inputs', header=None, index_col=0)
+            engine_data = engine_df.to_dict()[1]  # Convert to dict using first column as keys
+        except:
+            return jsonify({'success': False, 'message': 'Template not recognized. Please use the provided template.'}), 400
+        
+        # Read Project_Meta sheet if exists
+        file_data.seek(0)
+        try:
+            meta_df = pd.read_excel(file_data, sheet_name='Project_Meta', header=None, index_col=0)
+            meta_data = meta_df.to_dict()[1]
+        except:
+            meta_data = {}
+        
+        # Parse meta fields
+        meta = {
+            'projectTitle': str(meta_data.get('Project_Title', engine_data.get('Project_Title', ''))),
+            'locationCountry': str(meta_data.get('Location_Country', engine_data.get('Location_Country', ''))),
+            'status': str(meta_data.get('Status', 'Draft')),
+            'currency': str(engine_data.get('Currency', meta_data.get('Currency', 'EUR'))),
+            'grossITLoadMW': float(engine_data.get('GrossITLoad_MW', meta_data.get('Gross_IT_Load_MW', 0))),
+            'pue': float(engine_data.get('PUE', meta_data.get('PUE', 1.25))),
+            'grossMonthlyRent': float(engine_data.get('GrossMonthlyRent_EUR__optional_', meta_data.get('Gross_Monthly_Rent', 0)) or 0),
+            'useOpexPercent': str(meta_data.get('Use_OPEX_Percent', 'YES')).upper() == 'YES',
+            'opexPercent': float(meta_data.get('OPEX_Percent', 0.2)),
+            'constructionStart': str(engine_data.get('Construction_Start_YYYY_MM', meta_data.get('Construction_Start_YYYY_MM', ''))),
+            'constructionDurationMonths': int(engine_data.get('Construction_Duration_Months', meta_data.get('Construction_Duration_Months', 24)))
+        }
+        
+        # Parse rollups
+        rollups = {
+            'capexCostPriceEUR': float(engine_data.get('CapEx_CostPrice_EUR', 0)),
+            'landPurchaseFeesEUR': float(engine_data.get('LandPurchaseFees_EUR', 0)),
+            'operationsAnnualEUR': float(engine_data.get('Operations_OPEX_Annual_EUR__if_used_', 0)),
+            'contingencyEUR': float(engine_data.get('Contingency_EUR', 0)),
+            'feesTotalEUR': float(engine_data.get('Fees_Total_EUR', 0)),
+            'grandTotalEUR': float(engine_data.get('Grand_Total_Project_EUR', 0))
+        }
+        
+        # Check for optional schedule
+        schedule = None
+        file_data.seek(0)
+        try:
+            schedule_df = pd.read_excel(file_data, sheet_name='Schedule_Optional')
+            rollup_df = pd.read_excel(file_data, sheet_name='Monthly_Rollup', index_col=0)
+            
+            # Extract months and buckets
+            months = [col for col in rollup_df.columns if col.startswith('M') and col != 'Total']
+            
+            if months:
+                schedule = {
+                    'months': months,
+                    'buckets': ['BUILD', 'LAND', 'OPS', 'FEES', 'CONTINGENCY', 'TOTAL'],
+                    'byBucket': {}
+                }
+                
+                for bucket in schedule['buckets']:
+                    if bucket in rollup_df.index:
+                        schedule['byBucket'][bucket] = [float(rollup_df.loc[bucket, m]) for m in months]
+        except:
+            pass
+        
+        return jsonify({
+            'success': True,
+            'parsed': {
+                'meta': meta,
+                'rollups': rollups,
+                'schedule': schedule
+            }
+        })
+        
+    except Exception as e:
+        print(f"[PROJECTS] Upload parsing error: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error parsing file: {str(e)}'}), 400
+
+def load_projects_data():
+    """Load projects data from storage"""
+    try:
+        if ENABLE_MONGODB and mongo_client:
+            db = mongo_client[MONGODB_DB_NAME]
+            collection = db['projects']
+            projects = {}
+            for doc in collection.find():
+                email = doc.get('email')
+                if email:
+                    if email not in projects:
+                        projects[email] = []
+                    projects[email].append(doc.get('project', {}))
+            return projects
+    except Exception as e:
+        print(f"[PROJECTS] MongoDB load error: {e}")
+    
+    # Fallback to local JSON
+    try:
+        with open('data/projects.json', 'r') as f:
+            return json.load(f)
+    except:
+        return {}
+
+def save_projects_data(projects_data):
+    """Save projects data to storage"""
+    try:
+        if ENABLE_MONGODB and mongo_client:
+            db = mongo_client[MONGODB_DB_NAME]
+            collection = db['projects']
+            
+            for email, projects in projects_data.items():
+                for project in projects:
+                    collection.update_one(
+                        {'email': email, 'project.projectId': project.get('projectId')},
+                        {'$set': {'email': email, 'project': project}},
+                        upsert=True
+                    )
+            return True
+    except Exception as e:
+        print(f"[PROJECTS] MongoDB save error: {e}")
+    
+    # Fallback to local JSON
+    try:
+        os.makedirs('data', exist_ok=True)
+        with open('data/projects.json', 'w') as f:
+            json.dump(projects_data, f, indent=2)
+        return True
+    except Exception as e:
+        print(f"[PROJECTS] Local save error: {e}")
+        return False
 
 # ==================== DOCUMENT UPLOAD WITH BLOB STORAGE ====================
 @app.route('/api/documents/upload', methods=['POST'])
