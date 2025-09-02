@@ -752,6 +752,15 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             loadProjects();
+            
+            // Check if we should open edit modal for a specific project
+            const urlParams = new URLSearchParams(window.location.search);
+            const editProjectId = urlParams.get('edit');
+            if (editProjectId) {
+                setTimeout(() => {
+                    editProject(editProjectId);
+                }, 500);
+            }
         });
 
         // Load projects from API

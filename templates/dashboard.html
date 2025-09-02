@@ -697,6 +697,9 @@
                     <i class="fas fa-cog"></i> Control Panel
                 </a>
                 {% endif %}
+                <a href="/projects" style="background: linear-gradient(135deg, #0a0e27, #020617); color: white; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block;">
+                    <i class="fas fa-folder"></i> Projects
+                </a>
                 <a href="/account" style="background: linear-gradient(135deg, #0a0e27, #020617); color: white; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block;">
                     <i class="fas fa-user"></i> Account
                 </a>
@@ -7136,7 +7139,8 @@ if (window.showSection) {
     
     // Edit project
     function editProject(projectId) {
-        showProjectEditModal(projectId);
+        // Redirect to the dedicated projects page with the project ID
+        window.location.href = '/projects?edit=' + projectId;
     }
     
     // Launch permutation tool with project data
