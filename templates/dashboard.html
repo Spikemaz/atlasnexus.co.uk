@@ -5098,8 +5098,14 @@ if (window.showSection) {
                 
                 // Initialize market news when market section is shown
                 if (section === 'market' && !window.marketNewsLoaded) {
-                    loadMarketNewsData();
+                    // Don't call loadMarketNewsData as it clears the content
+                    // Just set the flag to prevent re-initialization
                     window.marketNewsLoaded = true;
+                    
+                    // Initialize market news if available
+                    if (window.marketNews && window.marketNews.initialize) {
+                        window.marketNews.initialize();
+                    }
                 }
             }
         }
@@ -6056,16 +6062,11 @@ if (window.showSection) {
         const marketSection = document.getElementById('market-section');
         if (!marketSection) return;
         
-        // Insert the market news HTML structure
-        // Note: Market news content is loaded dynamically
-        marketSection.innerHTML = '';
-        
-        // Wait a moment for DOM to update, then initialize
-        setTimeout(() => {
-            if (window.marketNews) {
-                window.marketNews.initialize();
-            }
-        }, 100);
+        // Don't clear the existing content - it's already in the HTML
+        // Just initialize the market news functionality if available
+        if (window.marketNews && window.marketNews.initialize) {
+            window.marketNews.initialize();
+        }
     }
     
     // Initialize market news when market tab is clicked
