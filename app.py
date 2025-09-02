@@ -520,6 +520,33 @@ def get_real_ip():
         # Fallback to remote_addr
         return request.remote_addr
 
+def verify_admin_access(ip_address=None):
+    """
+    CRITICAL SECURITY FUNCTION: Verify that the current user is truly an admin.
+    This function performs multiple checks to prevent unauthorized admin access.
+    Returns True only if ALL checks pass.
+    """
+    if ip_address is None:
+        ip_address = get_real_ip()
+    
+    # Check 1: Must have is_admin flag in session
+    if not session.get(f'is_admin_{ip_address}'):
+        return False
+    
+    # Check 2: Must have admin account_type in session
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    if account_type != 'admin':
+        print(f"[SECURITY WARNING] User with is_admin=True but account_type={account_type} attempted admin access")
+        return False
+    
+    # Check 3: Verify email is actually an admin email
+    user_email = session.get(f'user_email_{ip_address}')
+    if user_email != 'spikemaz8@aol.com':  # Only this email is truly admin
+        print(f"[SECURITY WARNING] Non-admin email {user_email} attempted admin access")
+        return False
+    
+    return True
+
 # ==================== CONFIGURATION ====================
 # Auto-detect environment
 def get_environment():
@@ -5826,12 +5853,15 @@ def admin_panel():
     """New comprehensive admin panel"""
     ip_address = get_real_ip()
     
-    # Verify both authentications and admin status
+    # Verify both authentications
     if not session.get(f'site_authenticated_{ip_address}'):
         return redirect(url_for('index'))
     if not session.get(f'user_authenticated_{ip_address}'):
         return redirect(url_for('secure_login'))
-    if not session.get(f'is_admin_{ip_address}'):
+    
+    # CRITICAL SECURITY: Use the comprehensive admin verification
+    if not verify_admin_access(ip_address):
+        print(f"[SECURITY] Unauthorized admin panel access attempt from {session.get(f'user_email_{ip_address}')}")
         return redirect(url_for('dashboard'))
     
     return render_template('admin_panel.html')
