@@ -5327,6 +5327,45 @@ def get_project(project_id):
         'project': project
     })
 
+@app.route('/api/projects/<project_id>', methods=['DELETE'])
+def delete_project(project_id):
+    """Delete a project"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    email = session.get(f'user_email_{ip_address}')
+    if not email:
+        return jsonify({'success': False, 'message': 'User not found', 'status': 'error'}), 404
+    
+    # Load projects
+    projects_data = load_projects_data()
+    user_projects = projects_data.get(email, [])
+    
+    # Find and remove the project
+    project_index = next((i for i, p in enumerate(user_projects) if p.get('projectId') == project_id), None)
+    
+    if project_index is not None:
+        # Remove the project
+        deleted_project = user_projects.pop(project_index)
+        
+        # Save updated data
+        projects_data[email] = user_projects
+        save_projects_data(projects_data)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Project deleted successfully',
+            'status': 'success'
+        })
+    
+    return jsonify({
+        'success': False,
+        'message': 'Project not found',
+        'status': 'error'
+    }), 404
+
 @app.route('/api/projects/<project_id>', methods=['POST'])
 def save_project(project_id):
     """Save/update project with sponsor input"""

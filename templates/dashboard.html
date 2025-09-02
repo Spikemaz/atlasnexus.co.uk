@@ -1845,7 +1845,7 @@
                 
                 <!-- AI Analysis Tab -->
                 <div id="market-tab-ai-analysis" class="market-tab-content" style="display: none;">
-                    <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 197, 94, 0.05)); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 197, 94, 0.05)); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
                         <h3 style="color: #10b981; margin-bottom: 1rem;">
                             <i class="fas fa-robot"></i> AI Market Analysis - Powered by Advanced ML Models
                         </h3>
@@ -2321,7 +2321,7 @@
                         <p style="font-size: 0.875rem; color: #64748b;">Accepts: Project_Sponsor_Input_Template.xlsx or Project_Sponsor_Input_Template_PLUS_Schedule.xlsx</p>
                     </div>
                     
-                    <div id="uploadSponsorPreview" style="display: none; margin-top: 2rem; padding: 1.5rem; background: rgba(15, 23, 42, 0.8); border-radius: 12px; border: 1px solid rgba(96, 165, 250, 0.2);">
+                    <div id="uploadSponsorPreview" style="display: none; margin-top: 2rem; padding: 1.5rem; background: #0a0e27; border-radius: 12px; border: 1px solid rgba(96, 165, 250, 0.2);">
                         <h4 style="color: #60a5fa; margin-bottom: 1rem;">Uploaded Data Preview</h4>
                         <div id="sponsorPreviewContent"></div>
                     </div>
@@ -2331,22 +2331,22 @@
                 <div id="manualSponsorTab" class="sponsor-tab-content" style="display: none;">
                     <form id="sponsor-form" style="max-height: 70vh; overflow-y: auto; padding-right: 1rem;">
                         <!-- Project Metadata -->
-                        <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                        <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
                                 <i class="fas fa-info-circle"></i> Project Metadata
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Project Title *</label>
-                                    <input type="text" id="sponsor-projectTitle" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="text" id="sponsor-projectTitle" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Location Country *</label>
-                                    <input type="text" id="sponsor-locationCountry" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="text" id="sponsor-locationCountry" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Status</label>
-                                    <select id="sponsor-status" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <select id="sponsor-status" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                         <option value="Draft">Draft</option>
                                         <option value="Final">Final</option>
                                         <option value="Submitted">Submitted</option>
@@ -2354,7 +2354,7 @@
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Currency *</label>
-                                    <select id="sponsor-currency" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <select id="sponsor-currency" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                         <option value="EUR">EUR (€)</option>
                                         <option value="USD">USD ($)</option>
                                         <option value="GBP">GBP (£)</option>
@@ -2364,103 +2364,103 @@
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Gross IT Load (MW) *</label>
-                                    <input type="number" id="sponsor-grossITLoadMW" min="0.1" step="0.01" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-grossITLoadMW" min="0.1" step="0.01" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">PUE * (1.0 - 2.5)</label>
-                                    <input type="number" id="sponsor-pue" min="1.0" max="2.5" step="0.01" value="1.25" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-pue" min="1.0" max="2.5" step="0.01" value="1.25" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Gross Monthly Rent</label>
-                                    <input type="number" id="sponsor-grossMonthlyRent" min="0" step="0.01" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-grossMonthlyRent" min="0" step="0.01" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
                                         <input type="checkbox" id="sponsor-useOpexPercent" checked> Use OPEX Percent
                                     </label>
-                                    <input type="number" id="sponsor-opexPercent" min="0" max="1" step="0.01" value="0.20" placeholder="OPEX %" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-opexPercent" min="0" max="1" step="0.01" value="0.20" placeholder="OPEX %" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Construction Start</label>
-                                    <input type="month" id="sponsor-constructionStart" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="month" id="sponsor-constructionStart" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Duration (Months)</label>
-                                    <input type="number" id="sponsor-constructionDurationMonths" min="0" max="40" value="24" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-constructionDurationMonths" min="0" max="40" value="24" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Build (CapEx) -->
-                        <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                        <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
                                 <i class="fas fa-building"></i> Build (CapEx) - EUR
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Architectural</label>
-                                    <input type="number" id="sponsor-buildArchitectural" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-buildArchitectural" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Civil & Structural</label>
-                                    <input type="number" id="sponsor-buildCivilStructural" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-buildCivilStructural" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Substations</label>
-                                    <input type="number" id="sponsor-buildSubstations" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-buildSubstations" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Underground Utilities</label>
-                                    <input type="number" id="sponsor-buildUndergroundUtilities" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-buildUndergroundUtilities" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Crusader Modules</label>
-                                    <input type="number" id="sponsor-buildCrusaderModules" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-buildCrusaderModules" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">BESS</label>
-                                    <input type="number" id="sponsor-buildBess" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-buildBess" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Main Contractor Installation</label>
-                                    <input type="number" id="sponsor-buildMainContractorInstallation" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-buildMainContractorInstallation" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Photovoltaic System</label>
-                                    <input type="number" id="sponsor-buildPhotovoltaicSystem" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-buildPhotovoltaicSystem" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Landscaping</label>
-                                    <input type="number" id="sponsor-buildLandscaping" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-buildLandscaping" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Preliminaries General</label>
-                                    <input type="number" id="sponsor-buildPreliminariesGeneral" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-buildPreliminariesGeneral" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Main Contractor Margin</label>
-                                    <input type="number" id="sponsor-buildMainContractorMargin" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-buildMainContractorMargin" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Land & Infrastructure -->
-                        <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                        <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
                                 <i class="fas fa-map-marked-alt"></i> Land & Infrastructure - EUR
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Land Purchase</label>
-                                    <input type="number" id="sponsor-landPurchase" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-landPurchase" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Additional Land</label>
-                                    <input type="number" id="sponsor-landAdditional" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-landAdditional" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Grid Connection</label>
-                                    <input type="number" id="sponsor-landGridConnection" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-landGridConnection" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">
@@ -2469,62 +2469,62 @@
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Stamp Duty %</label>
-                                    <input type="number" id="sponsor-landStampDutyPercent" min="0" max="1" step="0.01" value="0.10" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-landStampDutyPercent" min="0" max="1" step="0.01" value="0.10" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Stamp Duty Fixed (overrides %)</label>
-                                    <input type="number" id="sponsor-landStampDutyFixed" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-landStampDutyFixed" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Operations -->
-                        <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                        <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
                                 <i class="fas fa-cogs"></i> Operations - EUR
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Operations Team</label>
-                                    <input type="number" id="sponsor-opsOperationsTeam" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-opsOperationsTeam" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">OSE</label>
-                                    <input type="number" id="sponsor-opsOse" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-opsOse" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Marketing</label>
-                                    <input type="number" id="sponsor-opsMarketing" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-opsMarketing" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Fees -->
-                        <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                        <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
                                 <i class="fas fa-file-invoice-dollar"></i> Fees - EUR
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">DM</label>
-                                    <input type="number" id="sponsor-feesDm" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-feesDm" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Management 3%</label>
-                                    <input type="number" id="sponsor-feesManagement3pct" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-feesManagement3pct" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Contingency -->
-                        <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                        <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
                                 <i class="fas fa-shield-alt"></i> Contingency
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Contingency Percent (applied to Build + Land + Ops)</label>
-                                    <input type="number" id="sponsor-contingencyPercent" min="0" max="1" step="0.01" value="0.10" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-contingencyPercent" min="0" max="1" step="0.01" value="0.10" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                             </div>
                         </div>
@@ -2535,23 +2535,23 @@
                                 <i class="fas fa-calculator"></i> Calculated Totals
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                                <div style="background: rgba(15, 23, 42, 0.8); padding: 1rem; border-radius: 8px;">
+                                <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
                                     <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Build Total</div>
                                     <div id="sponsor-buildTotal" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
                                 </div>
-                                <div style="background: rgba(15, 23, 42, 0.8); padding: 1rem; border-radius: 8px;">
+                                <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
                                     <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Land Total</div>
                                     <div id="sponsor-landTotal" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
                                 </div>
-                                <div style="background: rgba(15, 23, 42, 0.8); padding: 1rem; border-radius: 8px;">
+                                <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
                                     <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Operations Total</div>
                                     <div id="sponsor-opsTotal" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
                                 </div>
-                                <div style="background: rgba(15, 23, 42, 0.8); padding: 1rem; border-radius: 8px;">
+                                <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
                                     <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Fees Total</div>
                                     <div id="sponsor-feesTotal" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
                                 </div>
-                                <div style="background: rgba(15, 23, 42, 0.8); padding: 1rem; border-radius: 8px;">
+                                <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
                                     <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Contingency Amount</div>
                                     <div id="sponsor-contingencyAmount" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
                                 </div>
@@ -2617,12 +2617,12 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                             <div>
                                 <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Project Title</label>
-                                <input type="text" id="edit-project-title" required placeholder="Project name" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                <input type="text" id="edit-project-title" required placeholder="Project name" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                             </div>
                             
                             <div>
                                 <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Status</label>
-                                <select id="edit-project-status" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                <select id="edit-project-status" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                     <option value="draft">Draft</option>
                                     <option value="in-progress">In Progress</option>
                                     <option value="active">Active</option>
@@ -2633,18 +2633,18 @@
                         
                         <div style="margin-top: 1.5rem;">
                             <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Description</label>
-                            <textarea id="edit-project-description" rows="4" placeholder="Project description" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; resize: vertical;"></textarea>
+                            <textarea id="edit-project-description" rows="4" placeholder="Project description" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; resize: vertical;"></textarea>
                         </div>
                         
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
                             <div>
                                 <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Value (€)</label>
-                                <input type="number" id="edit-project-value" min="0" placeholder="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                <input type="number" id="edit-project-value" min="0" placeholder="0" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                             </div>
                             
                             <div>
                                 <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Progress (%)</label>
-                                <input type="number" id="edit-project-progress" min="0" max="100" placeholder="0" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                <input type="number" id="edit-project-progress" min="0" max="100" placeholder="0" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                             </div>
                         </div>
                         
@@ -2661,7 +2661,7 @@
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
                                         Currency <span style="color: #ef4444;">*</span>
                                     </label>
-                                    <select id="edit-project-currency" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <select id="edit-project-currency" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                         <option value="">Select Currency</option>
                                         <option value="EUR">EUR (€)</option>
                                         <option value="USD">USD ($)</option>
@@ -2673,35 +2673,35 @@
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
                                         Gross IT Load (MW) <span style="color: #ef4444;">*</span>
                                     </label>
-                                    <input type="number" id="edit-project-gross-it-load" step="0.01" placeholder="e.g., 10.5" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="edit-project-gross-it-load" step="0.01" placeholder="e.g., 10.5" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
                                         PUE <span style="color: #ef4444;">*</span>
                                     </label>
-                                    <input type="number" id="edit-project-pue" step="0.01" min="1" placeholder="e.g., 1.2" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="edit-project-pue" step="0.01" min="1" placeholder="e.g., 1.2" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
                                         CapEx Cost Price <span style="color: #ef4444;">*</span>
                                     </label>
-                                    <input type="number" id="edit-project-capex-cost" step="0.01" placeholder="Amount" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="edit-project-capex-cost" step="0.01" placeholder="Amount" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
                                         CapEx Market Rate (%) <span style="color: #ef4444;">*</span>
                                     </label>
-                                    <input type="number" id="edit-project-capex-rate" step="0.01" placeholder="e.g., 5.5" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="edit-project-capex-rate" step="0.01" placeholder="e.g., 5.5" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                                 
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
                                         Land Purchase Fees <span style="color: #ef4444;">*</span>
                                     </label>
-                                    <input type="number" id="edit-project-land-fees" step="0.01" placeholder="Amount" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="edit-project-land-fees" step="0.01" placeholder="Amount" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                             </div>
                             
@@ -2713,14 +2713,14 @@
                                         <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
                                             Gross Monthly Rent (kWh)
                                         </label>
-                                        <input type="number" id="edit-project-monthly-rent" step="0.01" placeholder="Optional" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                        <input type="number" id="edit-project-monthly-rent" step="0.01" placeholder="Optional" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                     </div>
                                     
                                     <div>
                                         <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
                                             OPEX
                                         </label>
-                                        <input type="number" id="edit-project-opex" step="0.01" placeholder="Optional" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                        <input type="number" id="edit-project-opex" step="0.01" placeholder="Optional" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                     </div>
                                 </div>
                             </div>
@@ -2728,7 +2728,7 @@
                         
                         <div style="margin-top: 1.5rem;">
                             <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Additional Details</label>
-                            <textarea id="edit-project-details" rows="6" placeholder="Enter any additional project information, notes, or requirements" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; resize: vertical;"></textarea>
+                            <textarea id="edit-project-details" rows="6" placeholder="Enter any additional project information, notes, or requirements" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; resize: vertical;"></textarea>
                         </div>
                         
                         <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
@@ -2752,7 +2752,7 @@
                         <i class="fas fa-times"></i> Close
                     </button>
                 </div>
-                <div id="project-editor-content" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 0; min-height: calc(100vh - 300px); height: calc(100vh - 300px); overflow: hidden;">
+                <div id="project-editor-content" style="background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 12px; padding: 0; min-height: calc(100vh - 300px); height: calc(100vh - 300px); overflow: hidden;">
                     <!-- Project editor iframe will be inserted here -->
                 </div>
             </div>
@@ -3250,11 +3250,11 @@
                     <i class="fas fa-download"></i> Load Project from Projects Tool
                 </button>
                 
-                <select id="project-selector" onchange="loadProjectData()" style="width: 100%; padding: 0.75rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0; margin-bottom: 1rem;">
+                <select id="project-selector" onchange="loadProjectData()" style="width: 100%; padding: 0.75rem; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: #e2e8f0; margin-bottom: 1rem;">
                     <option value="">-- Or Select Project Specification --</option>
                 </select>
                 
-                <div id="project-info" style="display: none; padding: 1rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px;">
+                <div id="project-info" style="display: none; padding: 1rem; background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px;">
                     <div style="color: #10b981; font-size: 0.9rem;">Project Loaded</div>
                     <div id="project-name" style="color: #e2e8f0; font-weight: 600; margin-top: 0.25rem;"></div>
                 </div>
@@ -3275,23 +3275,23 @@
                 
                 <div style="display: grid; gap: 1rem;">
                     <!-- Senior Debt Configuration -->
-                    <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+                    <div style="padding: 0.75rem; background: linear-gradient(135deg, #0a0e27, #020617); border-radius: 6px;">
                         <div style="color: #10b981; font-size: 0.8rem;">Target DSCR Senior [37]</div>
-                        <input type="number" id="TargetDSCRSenior_37" value="1.30" min="1.10" max="2.50" step="0.05" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
+                        <input type="number" id="TargetDSCRSenior_37" value="1.30" min="1.10" max="2.50" step="0.05" style="width: 100%; padding: 0.5rem; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
                         <input type="checkbox" id="TargetDSCRSenior_37_range" style="margin-top: 0.5rem;"> <label for="TargetDSCRSenior_37_range" style="color: #94a3b8; font-size: 0.8rem;">Enable Range (1.20 - 1.50)</label>
                     </div>
-                    <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+                    <div style="padding: 0.75rem; background: linear-gradient(135deg, #0a0e27, #020617); border-radius: 6px;">
                         <div style="color: #10b981; font-size: 0.8rem;">Senior Coupon [38] (%)</div>
-                        <input type="number" id="SeniorCoupon_38" value="5.00" min="0.5" max="12" step="0.25" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
+                        <input type="number" id="SeniorCoupon_38" value="5.00" min="0.5" max="12" step="0.25" style="width: 100%; padding: 0.5rem; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
                         <input type="checkbox" id="SeniorCoupon_38_range" checked style="margin-top: 0.5rem;"> <label for="SeniorCoupon_38_range" style="color: #94a3b8; font-size: 0.8rem;">Enable Range (3.5 - 7.0)</label>
                     </div>
-                    <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+                    <div style="padding: 0.75rem; background: linear-gradient(135deg, #0a0e27, #020617); border-radius: 6px;">
                         <div style="color: #10b981; font-size: 0.8rem;">Senior Tenor [39] (Years)</div>
-                        <input type="number" id="SeniorTenorY_39" value="25" min="3" max="40" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
+                        <input type="number" id="SeniorTenorY_39" value="25" min="3" max="40" style="width: 100%; padding: 0.5rem; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
                     </div>
-                    <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+                    <div style="padding: 0.75rem; background: linear-gradient(135deg, #0a0e27, #020617); border-radius: 6px;">
                         <div style="color: #10b981; font-size: 0.8rem;">Senior Amortization Type [40]</div>
-                        <select id="SeniorAmortType_40" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
+                        <select id="SeniorAmortType_40" style="width: 100%; padding: 0.5rem; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0; margin-top: 0.25rem;">
                             <option value="Annuity" selected>Annuity</option>
                             <option value="Sculpted">Sculpted</option>
                             <option value="Bullet">Bullet</option>
@@ -3312,30 +3312,30 @@
                     <!-- Gross IT Load [02] -->
                     <div>
                         <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Gross IT Load [02] (MW)</label>
-                        <input type="number" id="GrossITLoad_02" value="100" min="1" max="3000" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <input type="number" id="GrossITLoad_02" value="100" min="1" max="3000" style="width: 100%; padding: 0.5rem; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
-                            <input type="number" id="GrossITLoad_02_min" placeholder="Min" value="10" step="10" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
-                            <input type="number" id="GrossITLoad_02_max" placeholder="Max" value="1000" step="10" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
+                            <input type="number" id="GrossITLoad_02_min" placeholder="Min" value="10" step="10" style="padding: 0.25rem; background: rgba(10, 14, 39, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
+                            <input type="number" id="GrossITLoad_02_max" placeholder="Max" value="1000" step="10" style="padding: 0.25rem; background: rgba(10, 14, 39, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
                         </div>
                     </div>
                     
                     <!-- PUE [03] -->
                     <div>
                         <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">PUE Factor [03] (x)</label>
-                        <input type="number" id="PUE_03" value="1.30" min="1.05" max="1.8" step="0.05" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <input type="number" id="PUE_03" value="1.30" min="1.05" max="1.8" step="0.05" style="width: 100%; padding: 0.5rem; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
-                            <input type="number" id="PUE_03_min" placeholder="Min" value="1.15" step="0.05" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
-                            <input type="number" id="PUE_03_max" placeholder="Max" value="1.5" step="0.05" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
+                            <input type="number" id="PUE_03_min" placeholder="Min" value="1.15" step="0.05" style="padding: 0.25rem; background: rgba(10, 14, 39, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
+                            <input type="number" id="PUE_03_max" placeholder="Max" value="1.5" step="0.05" style="padding: 0.25rem; background: rgba(10, 14, 39, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
                         </div>
                     </div>
                     
                     <!-- Gross Monthly Rent [07] -->
                     <div>
                         <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Gross Monthly Rent [07] (£/month)</label>
-                        <input type="number" id="GrossMonthlyRent_07" value="2500000" min="100000" max="200000000" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <input type="number" id="GrossMonthlyRent_07" value="2500000" min="100000" max="200000000" style="width: 100%; padding: 0.5rem; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
-                            <input type="number" id="GrossMonthlyRent_07_min" placeholder="Min" value="500000" step="50000" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
-                            <input type="number" id="GrossMonthlyRent_07_max" placeholder="Max" value="5000000" step="50000" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
+                            <input type="number" id="GrossMonthlyRent_07_min" placeholder="Min" value="500000" step="50000" style="padding: 0.25rem; background: rgba(10, 14, 39, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
+                            <input type="number" id="GrossMonthlyRent_07_max" placeholder="Max" value="5000000" step="50000" style="padding: 0.25rem; background: rgba(10, 14, 39, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
                         </div>
                         <input type="checkbox" id="GrossMonthlyRent_07_range" checked style="margin-top: 0.5rem;"> <label for="GrossMonthlyRent_07_range" style="color: #94a3b8; font-size: 0.8rem;">Enable Range</label>
                     </div>
@@ -3343,10 +3343,10 @@
                     <!-- OPEX [08] -->
                     <div>
                         <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">OPEX [08] (%)</label>
-                        <input type="number" id="OPEX_08" value="25" min="0" max="80" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <input type="number" id="OPEX_08" value="25" min="0" max="80" style="width: 100%; padding: 0.5rem; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
-                            <input type="number" id="OPEX_08_min" placeholder="Min" value="15" step="1" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
-                            <input type="number" id="OPEX_08_max" placeholder="Max" value="35" step="1" style="padding: 0.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
+                            <input type="number" id="OPEX_08_min" placeholder="Min" value="15" step="1" style="padding: 0.25rem; background: rgba(10, 14, 39, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
+                            <input type="number" id="OPEX_08_max" placeholder="Max" value="35" step="1" style="padding: 0.25rem; background: rgba(10, 14, 39, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 4px; color: #94a3b8; font-size: 0.85rem;">
                         </div>
                         <input type="checkbox" id="OPEX_08_range" checked style="margin-top: 0.5rem;"> <label for="OPEX_08_range" style="color: #94a3b8; font-size: 0.8rem;">Enable Range</label>
                     </div>
@@ -3354,7 +3354,7 @@
                     <!-- Lease Term Years [22] -->
                     <div>
                         <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Lease Term [22] (Years)</label>
-                        <input type="number" id="LeaseTermYears_22" value="25" min="5" max="40" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                        <input type="number" id="LeaseTermYears_22" value="25" min="5" max="40" style="width: 100%; padding: 0.5rem; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
                     </div>
                 </div>
             </div>
@@ -3369,7 +3369,7 @@
                 <!-- Ranking Objective [109] -->
                 <div style="margin-bottom: 1rem;">
                     <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Ranking Objective [109]</label>
-                    <select id="RankingObjective_109" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                    <select id="RankingObjective_109" style="width: 100%; padding: 0.5rem; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
                         <option value="MaxSeniorRaise">Max Senior Raise</option>
                         <option value="MinWACC">Min WACC</option>
                         <option value="MaxDay1Cash">Max Day 1 Cash</option>
@@ -3381,7 +3381,7 @@
                 <!-- Max Permutations [108] -->
                 <div style="margin-bottom: 1rem;">
                     <label style="color: #e2e8f0; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Max Permutations [108]</label>
-                    <input type="number" id="MaxPermutations_108" value="150000" min="1000" max="1000000" style="width: 100%; padding: 0.5rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
+                    <input type="number" id="MaxPermutations_108" value="150000" min="1000" max="1000000" style="width: 100%; padding: 0.5rem; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 4px; color: #e2e8f0;">
                 </div>
                 
                 <!-- Estimation Display -->
@@ -3412,7 +3412,7 @@
                 </div>
                 
                 <!-- Quick Stats -->
-                <div id="quick-stats" style="display: none; margin-top: 1.5rem; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px;">
+                <div id="quick-stats" style="display: none; margin-top: 1.5rem; padding: 1rem; background: linear-gradient(135deg, #0a0e27, #020617); border-radius: 8px;">
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
                         <div>
                             <div style="color: #10b981; font-size: 0.8rem;">Total</div>
@@ -7104,7 +7104,7 @@ if (window.showSection) {
             
             window.deletedItemsList.forEach(item => {
                 const card = document.createElement('div');
-                card.style.cssText = 'background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 1rem;';
+                card.style.cssText = 'background: #0a0e27; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 1rem;';
                 
                 const timeRemaining = item.days_remaining > 0 
                     ? `${item.days_remaining}d ${item.hours_remaining}h remaining`
@@ -7390,7 +7390,7 @@ if (window.showSection) {
                     <p style="color: #94a3b8;">Drag and drop your Excel file here or click to browse</p>
                     <p style="font-size: 0.875rem; color: #64748b;">Accepts: Project_Sponsor_Input_Template.xlsx</p>
                 </div>
-                <div id="uploadSponsorPreview" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(15, 23, 42, 0.8); border-radius: 8px;">
+                <div id="uploadSponsorPreview" style="display: none; margin-top: 1rem; padding: 1rem; background: #0a0e27; border-radius: 8px;">
                     <h4 style="color: #60a5fa;">Uploaded Data Preview</h4>
                     <div id="sponsorPreviewContent"></div>
                 </div>
@@ -7421,15 +7421,15 @@ if (window.showSection) {
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
                         <div>
                             <label style="color: #94a3b8; font-size: 0.9rem;">Project Title *</label>
-                            <input type="text" id="sponsor-projectTitle" required value="${project?.title || ''}" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                            <input type="text" id="sponsor-projectTitle" required value="${project?.title || ''}" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                         </div>
                         <div>
                             <label style="color: #94a3b8; font-size: 0.9rem;">Location Country *</label>
-                            <input type="text" id="sponsor-locationCountry" required value="${project?.location || ''}" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                            <input type="text" id="sponsor-locationCountry" required value="${project?.location || ''}" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                         </div>
                         <div>
                             <label style="color: #94a3b8; font-size: 0.9rem;">Status</label>
-                            <select id="sponsor-status" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                            <select id="sponsor-status" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                                 <option value="Draft">Draft</option>
                                 <option value="Final">Final</option>
                                 <option value="Submitted">Submitted</option>
@@ -7437,7 +7437,7 @@ if (window.showSection) {
                         </div>
                         <div>
                             <label style="color: #94a3b8; font-size: 0.9rem;">Currency *</label>
-                            <select id="sponsor-currency" required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                            <select id="sponsor-currency" required style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                                 <option value="EUR">EUR</option>
                                 <option value="USD">USD</option>
                                 <option value="GBP">GBP</option>
@@ -7447,11 +7447,11 @@ if (window.showSection) {
                         </div>
                         <div>
                             <label style="color: #94a3b8; font-size: 0.9rem;">Gross IT Load (MW) *</label>
-                            <input type="number" id="sponsor-grossITLoadMW" min="0.1" step="0.01" required value="${project?.grossITLoad || ''}" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                            <input type="number" id="sponsor-grossITLoadMW" min="0.1" step="0.01" required value="${project?.grossITLoad || ''}" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                         </div>
                         <div>
                             <label style="color: #94a3b8; font-size: 0.9rem;">PUE *</label>
-                            <input type="number" id="sponsor-pue" min="1.0" max="2.5" step="0.01" value="${project?.pue || '1.25'}" required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                            <input type="number" id="sponsor-pue" min="1.0" max="2.5" step="0.01" value="${project?.pue || '1.25'}" required style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                         </div>
                     </div>
                 </div>
@@ -7462,21 +7462,21 @@ if (window.showSection) {
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
                         <div>
                             <label style="color: #94a3b8; font-size: 0.9rem;">Architectural</label>
-                            <input type="number" id="sponsor-buildArchitectural" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                            <input type="number" id="sponsor-buildArchitectural" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                         </div>
                         <div>
                             <label style="color: #94a3b8; font-size: 0.9rem;">Civil & Structural</label>
-                            <input type="number" id="sponsor-buildCivilStructural" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                            <input type="number" id="sponsor-buildCivilStructural" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                         </div>
                         <div>
                             <label style="color: #94a3b8; font-size: 0.9rem;">Substations</label>
-                            <input type="number" id="sponsor-buildSubstations" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                            <input type="number" id="sponsor-buildSubstations" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                         </div>
                     </div>
                 </div>
 
                 <!-- Totals Display -->
-                <div style="background: rgba(15, 23, 42, 0.8); border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+                <div style="background: #0a0e27; border-radius: 8px; padding: 1rem; margin-top: 1rem;">
                     <h4 style="color: #60a5fa; margin-bottom: 1rem;">Totals</h4>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
                         <div style="display: flex; justify-content: space-between;">
