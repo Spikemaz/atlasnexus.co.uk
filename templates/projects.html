@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects - Atlas Nexus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <style>
+        .projects-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .projects-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .projects-header h1 {
+            color: var(--primary-color);
+        }
+
+        .btn-new-project {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-new-project:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Project Tiles Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .project-tile {
+            background: var(--surface-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .project-tile:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .project-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-draft {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+
+        .status-final {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-submitted {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info-color);
+        }
+
+        .project-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .project-location {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .project-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .metric {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-edit, .btn-view, .btn-delete {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .btn-view:hover {
+            background: var(--info-color);
+            color: white;
+            border-color: var(--info-color);
+        }
+
+        .btn-delete:hover {
+            background: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--surface-color);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 0.75rem 1rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form Styles */
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 0.625rem;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-color-alpha);
+        }
+
+        .form-group input[readonly] {
+            background: var(--border-color);
+            cursor: not-allowed;
+        }
+
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-color-alpha);
+        }
+
+        .file-upload.dragging {
+            border-color: var(--primary-color);
+            background: var(--primary-color-alpha);
+        }
+
+        /* Rollup Display */
+        .rollup-display {
+            background: var(--background-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .rollup-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .rollup-item:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .btn-cancel, .btn-save {
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-cancel:hover {
+            background: var(--border-color);
+        }
+
+        .btn-save {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: var(--primary-hover);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state h2 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="theme-dark">
+    <!-- Navigation -->
+    <nav class="dashboard-nav">
+        <div class="nav-container">
+            <div class="nav-left">
+                <h1 class="nav-title">Atlas Nexus</h1>
+            </div>
+            <div class="nav-right">
+                <a href="/dashboard" class="nav-link">Dashboard</a>
+                <a href="/projects" class="nav-link active">Projects</a>
+                <a href="/account" class="nav-link">Account</a>
+                <a href="/logout" class="nav-link">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="projects-container">
+        <div class="projects-header">
+            <div>
+                <h1>Project Management</h1>
+                <p style="color: var(--text-secondary); margin-top: 0.5rem;">Manage your data centre and infrastructure projects</p>
+            </div>
+            <button class="btn-new-project" onclick="createNewProject()">+ New Project</button>
+        </div>
+
+        <div id="loadingState" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading projects...</p>
+        </div>
+
+        <div id="projectsGrid" class="projects-grid">
+            <!-- Projects will be loaded here -->
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <h2>No Projects Yet</h2>
+            <p>Create your first project to get started</p>
+            <button class="btn-new-project" onclick="createNewProject()" style="margin-top: 1rem;">Create First Project</button>
+        </div>
+    </div>
+
+    <!-- Edit Project Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Edit Project</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                <div id="successMessage" class="success-message" style="display: none;"></div>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('upload')">Upload Template</button>
+                    <button class="tab" onclick="switchTab('manual')">Manual Entry</button>
+                </div>
+
+                <!-- Upload Tab -->
+                <div id="uploadTab" class="tab-content active">
+                    <div class="file-upload" onclick="document.getElementById('fileInput').click()" 
+                         ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                        <input type="file" id="fileInput" accept=".xlsx" style="display: none;" onchange="handleFileSelect(event)">
+                        <h3>Upload Sponsor Input Template</h3>
+                        <p>Drag and drop your Excel file here or click to browse</p>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary);">Accepts: Project_Sponsor_Input_Template.xlsx</p>
+                    </div>
+                    
+                    <div id="uploadPreview" class="rollup-display" style="display: none;">
+                        <h4>Uploaded Data Preview</h4>
+                        <div id="previewContent"></div>
+                    </div>
+                </div>
+
+                <!-- Manual Entry Tab -->
+                <div id="manualTab" class="tab-content">
+                    <form id="projectForm">
+                        <!-- Project Metadata -->
+                        <div class="form-section">
+                            <h3>Project Metadata</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Project Title *</label>
+                                    <input type="text" id="projectTitle" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Location Country *</label>
+                                    <input type="text" id="locationCountry" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select id="status">
+                                        <option value="Draft">Draft</option>
+                                        <option value="Final">Final</option>
+                                        <option value="Submitted">Submitted</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Currency *</label>
+                                    <select id="currency" required>
+                                        <option value="EUR">EUR</option>
+                                        <option value="USD">USD</option>
+                                        <option value="GBP">GBP</option>
+                                        <option value="JPY">JPY</option>
+                                        <option value="AED">AED</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Gross IT Load (MW) *</label>
+                                    <input type="number" id="grossITLoadMW" min="0.1" step="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>PUE *</label>
+                                    <input type="number" id="pue" min="1.0" max="2.5" step="0.01" value="1.25" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Gross Monthly Rent</label>
+                                    <input type="number" id="grossMonthlyRent" min="0" step="0.01">
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="useOpexPercent" checked> Use OPEX Percent
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>OPEX Percent</label>
+                                    <input type="number" id="opexPercent" min="0" max="1" step="0.01" value="0.20">
+                                </div>
+                                <div class="form-group">
+                                    <label>Construction Start (YYYY-MM)</label>
+                                    <input type="month" id="constructionStart">
+                                </div>
+                                <div class="form-group">
+                                    <label>Construction Duration (Months)</label>
+                                    <input type="number" id="constructionDurationMonths" min="0" max="40" value="24">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Build (CapEx) -->
+                        <div class="form-section">
+                            <h3>Build (CapEx) - EUR</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Architectural</label>
+                                    <input type="number" id="buildArchitectural" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Civil & Structural</label>
+                                    <input type="number" id="buildCivilStructural" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Substations</label>
+                                    <input type="number" id="buildSubstations" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Underground Utilities</label>
+                                    <input type="number" id="buildUndergroundUtilities" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Crusader Modules</label>
+                                    <input type="number" id="buildCrusaderModules" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>BESS</label>
+                                    <input type="number" id="buildBess" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Main Contractor Installation</label>
+                                    <input type="number" id="buildMainContractorInstallation" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Photovoltaic System</label>
+                                    <input type="number" id="buildPhotovoltaicSystem" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Landscaping</label>
+                                    <input type="number" id="buildLandscaping" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Preliminaries General</label>
+                                    <input type="number" id="buildPreliminariesGeneral" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Main Contractor Margin</label>
+                                    <input type="number" id="buildMainContractorMargin" min="0" onchange="calculateTotals()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Land & Infrastructure -->
+                        <div class="form-section">
+                            <h3>Land & Infrastructure - EUR</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Land Purchase</label>
+                                    <input type="number" id="landPurchase" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Additional Land</label>
+                                    <input type="number" id="landAdditional" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Grid Connection</label>
+                                    <input type="number" id="landGridConnection" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="landGridIncluded"> Grid Included
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>Stamp Duty %</label>
+                                    <input type="number" id="landStampDutyPercent" min="0" max="1" step="0.01" value="0.10" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Stamp Duty Fixed (overrides %)</label>
+                                    <input type="number" id="landStampDutyFixed" min="0" onchange="calculateTotals()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Operations -->
+                        <div class="form-section">
+                            <h3>Operations - EUR</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Operations Team</label>
+                                    <input type="number" id="opsOperationsTeam" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>OSE</label>
+                                    <input type="number" id="opsOse" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Marketing</label>
+                                    <input type="number" id="opsMarketing" min="0" onchange="calculateTotals()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fees -->
+                        <div class="form-section">
+                            <h3>Fees - EUR</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>DM</label>
+                                    <input type="number" id="feesDm" min="0" onchange="calculateTotals()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Management 3%</label>
+                                    <input type="number" id="feesManagement3pct" min="0" onchange="calculateTotals()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contingency -->
+                        <div class="form-section">
+                            <h3>Contingency</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Contingency Percent</label>
+                                    <input type="number" id="contingencyPercent" min="0" max="1" step="0.01" value="0.10" onchange="calculateTotals()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rollup Totals -->
+                        <div class="rollup-display">
+                            <h4>Totals</h4>
+                            <div class="rollup-item">
+                                <span>Build Total</span>
+                                <span id="buildTotal">€0</span>
+                            </div>
+                            <div class="rollup-item">
+                                <span>Land Total</span>
+                                <span id="landTotal">€0</span>
+                            </div>
+                            <div class="rollup-item">
+                                <span>Operations Total</span>
+                                <span id="opsTotal">€0</span>
+                            </div>
+                            <div class="rollup-item">
+                                <span>Fees Total</span>
+                                <span id="feesTotal">€0</span>
+                            </div>
+                            <div class="rollup-item">
+                                <span>Contingency Amount</span>
+                                <span id="contingencyAmount">€0</span>
+                            </div>
+                            <div class="rollup-item">
+                                <span>Grand Total</span>
+                                <span id="grandTotal">€0</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-save" onclick="saveProject()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let projects = [];
+        let currentProjectId = null;
+        let uploadedData = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProjects();
+        });
+
+        // Load projects from API
+        async function loadProjects() {
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('projectsGrid').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/projects');
+                const data = await response.json();
+
+                if (data.success) {
+                    projects = data.projects;
+                    renderProjects();
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                showError('Failed to load projects');
+            }
+
+            document.getElementById('loadingState').style.display = 'none';
+        }
+
+        // Render project tiles
+        function renderProjects() {
+            const grid = document.getElementById('projectsGrid');
+            
+            if (projects.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                grid.style.display = 'none';
+                return;
+            }
+
+            document.getElementById('emptyState').style.display = 'none';
+            grid.style.display = 'grid';
+
+            grid.innerHTML = projects.map(project => `
+                <div class="project-tile">
+                    <span class="project-status status-${(project.meta?.status || 'draft').toLowerCase()}">
+                        ${project.meta?.status || 'Draft'}
+                    </span>
+                    <h3 class="project-title">${project.meta?.projectTitle || 'Untitled Project'}</h3>
+                    <p class="project-location">${project.meta?.locationCountry || 'Location not set'}</p>
+                    
+                    <div class="project-metrics">
+                        <div class="metric">
+                            <span class="metric-label">IT Load</span>
+                            <span class="metric-value">${project.meta?.grossITLoadMW || 0} MW</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">PUE</span>
+                            <span class="metric-value">${project.meta?.pue || 1.25}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Total CapEx</span>
+                            <span class="metric-value">${formatCurrency(project.rollups?.grandTotalEUR || 0, project.meta?.currency || 'EUR')}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Duration</span>
+                            <span class="metric-value">${project.meta?.constructionDurationMonths || 0} months</span>
+                        </div>
+                    </div>
+                    
+                    <div class="project-actions">
+                        <button class="btn-edit" onclick="editProject('${project.projectId}')">Edit</button>
+                        <button class="btn-view" onclick="viewProject('${project.projectId}')">View</button>
+                        <button class="btn-delete" onclick="deleteProject('${project.projectId}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Create new project
+        function createNewProject() {
+            currentProjectId = generateProjectId();
+            document.getElementById('modalTitle').textContent = 'Create New Project';
+            clearForm();
+            openModal();
+        }
+
+        // Edit existing project
+        async function editProject(projectId) {
+            currentProjectId = projectId;
+            document.getElementById('modalTitle').textContent = 'Edit Project';
+            
+            try {
+                const response = await fetch(`/api/projects/${projectId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    populateForm(data.project);
+                    openModal();
+                }
+            } catch (error) {
+                console.error('Error loading project:', error);
+                showError('Failed to load project details');
+            }
+        }
+
+        // View project (read-only)
+        function viewProject(projectId) {
+            // Could open modal in read-only mode or navigate to dedicated view
+            editProject(projectId);
+        }
+
+        // Delete project
+        async function deleteProject(projectId) {
+            if (!confirm('Are you sure you want to delete this project?')) {
+                return;
+            }
+
+            // For now, remove from local array
+            projects = projects.filter(p => p.projectId !== projectId);
+            renderProjects();
+            showSuccess('Project deleted successfully');
+        }
+
+        // Generate unique project ID
+        function generateProjectId() {
+            return 'proj_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Modal controls
+        function openModal() {
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('active');
+            currentProjectId = null;
+            uploadedData = null;
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // File handling
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragging');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('dragging');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragging');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        }
+
+        async function processFile(file) {
+            if (!file.name.endsWith('.xlsx')) {
+                showError('Please upload an Excel (.xlsx) file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`/api/projects/${currentProjectId}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    uploadedData = data.parsed;
+                    displayUploadPreview();
+                    showSuccess('File uploaded and parsed successfully');
+                } else {
+                    showError(data.message);
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showError('Failed to upload file');
+            }
+        }
+
+        function displayUploadPreview() {
+            if (!uploadedData) return;
+
+            const preview = document.getElementById('uploadPreview');
+            const content = document.getElementById('previewContent');
+
+            content.innerHTML = `
+                <div class="rollup-item">
+                    <span>Project Title</span>
+                    <span>${uploadedData.meta.projectTitle || 'Not set'}</span>
+                </div>
+                <div class="rollup-item">
+                    <span>Location</span>
+                    <span>${uploadedData.meta.locationCountry || 'Not set'}</span>
+                </div>
+                <div class="rollup-item">
+                    <span>IT Load</span>
+                    <span>${uploadedData.meta.grossITLoadMW} MW</span>
+                </div>
+                <div class="rollup-item">
+                    <span>CapEx Total</span>
+                    <span>${formatCurrency(uploadedData.rollups.capexCostPriceEUR, uploadedData.meta.currency)}</span>
+                </div>
+                <div class="rollup-item">
+                    <span>Land & Fees</span>
+                    <span>${formatCurrency(uploadedData.rollups.landPurchaseFeesEUR, uploadedData.meta.currency)}</span>
+                </div>
+                <div class="rollup-item">
+                    <span>Grand Total</span>
+                    <span>${formatCurrency(uploadedData.rollups.grandTotalEUR, uploadedData.meta.currency)}</span>
+                </div>
+            `;
+
+            if (uploadedData.schedule) {
+                content.innerHTML += `
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                        <strong>Monthly Schedule: ${uploadedData.schedule.months.length} months</strong>
+                    </div>
+                `;
+            }
+
+            preview.style.display = 'block';
+        }
+
+        // Calculate totals in manual entry
+        function calculateTotals() {
+            // Build total
+            const buildFields = [
+                'buildArchitectural', 'buildCivilStructural', 'buildSubstations',
+                'buildUndergroundUtilities', 'buildCrusaderModules', 'buildBess',
+                'buildMainContractorInstallation', 'buildPhotovoltaicSystem',
+                'buildLandscaping', 'buildPreliminariesGeneral', 'buildMainContractorMargin'
+            ];
+            
+            let buildTotal = 0;
+            buildFields.forEach(field => {
+                buildTotal += parseFloat(document.getElementById(field).value) || 0;
+            });
+
+            // Land total
+            const landPurchase = parseFloat(document.getElementById('landPurchase').value) || 0;
+            const landAdditional = parseFloat(document.getElementById('landAdditional').value) || 0;
+            const gridIncluded = document.getElementById('landGridIncluded').checked;
+            const gridConnection = gridIncluded ? 0 : (parseFloat(document.getElementById('landGridConnection').value) || 0);
+            
+            let stampDuty = 0;
+            const stampDutyFixed = parseFloat(document.getElementById('landStampDutyFixed').value) || 0;
+            if (stampDutyFixed > 0) {
+                stampDuty = stampDutyFixed;
+            } else {
+                const stampDutyPercent = parseFloat(document.getElementById('landStampDutyPercent').value) || 0;
+                stampDuty = stampDutyPercent * (landPurchase + landAdditional);
+            }
+            
+            const landTotal = landPurchase + landAdditional + gridConnection + stampDuty;
+
+            // Ops total
+            const opsFields = ['opsOperationsTeam', 'opsOse', 'opsMarketing'];
+            let opsTotal = 0;
+            opsFields.forEach(field => {
+                opsTotal += parseFloat(document.getElementById(field).value) || 0;
+            });
+
+            // Fees total
+            const feesFields = ['feesDm', 'feesManagement3pct'];
+            let feesTotal = 0;
+            feesFields.forEach(field => {
+                feesTotal += parseFloat(document.getElementById(field).value) || 0;
+            });
+
+            // Contingency
+            const contingencyPercent = parseFloat(document.getElementById('contingencyPercent').value) || 0;
+            const contingencyBase = buildTotal + landPurchase + landAdditional + gridConnection + opsTotal;
+            const contingencyAmount = contingencyPercent * contingencyBase;
+
+            // Grand total
+            const grandTotal = buildTotal + landTotal + opsTotal + feesTotal + contingencyAmount;
+
+            // Update display
+            document.getElementById('buildTotal').textContent = formatCurrency(buildTotal, 'EUR');
+            document.getElementById('landTotal').textContent = formatCurrency(landTotal, 'EUR');
+            document.getElementById('opsTotal').textContent = formatCurrency(opsTotal, 'EUR');
+            document.getElementById('feesTotal').textContent = formatCurrency(feesTotal, 'EUR');
+            document.getElementById('contingencyAmount').textContent = formatCurrency(contingencyAmount, 'EUR');
+            document.getElementById('grandTotal').textContent = formatCurrency(grandTotal, 'EUR');
+        }
+
+        // Save project
+        async function saveProject() {
+            let projectData;
+
+            if (uploadedData) {
+                // Use uploaded data
+                projectData = uploadedData;
+            } else {
+                // Collect from manual form
+                projectData = collectFormData();
+            }
+
+            try {
+                const response = await fetch(`/api/projects/${currentProjectId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(projectData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Project saved successfully');
+                    closeModal();
+                    loadProjects();
+                } else {
+                    showError(data.message);
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                showError('Failed to save project');
+            }
+        }
+
+        // Collect form data
+        function collectFormData() {
+            const meta = {
+                projectTitle: document.getElementById('projectTitle').value,
+                locationCountry: document.getElementById('locationCountry').value,
+                status: document.getElementById('status').value,
+                currency: document.getElementById('currency').value,
+                grossITLoadMW: parseFloat(document.getElementById('grossITLoadMW').value) || 0,
+                pue: parseFloat(document.getElementById('pue').value) || 1.25,
+                grossMonthlyRent: parseFloat(document.getElementById('grossMonthlyRent').value) || 0,
+                useOpexPercent: document.getElementById('useOpexPercent').checked,
+                opexPercent: parseFloat(document.getElementById('opexPercent').value) || 0,
+                constructionStart: document.getElementById('constructionStart').value,
+                constructionDurationMonths: parseInt(document.getElementById('constructionDurationMonths').value) || 0
+            };
+
+            // Calculate rollups (reuse the calculateTotals logic)
+            calculateTotals();
+            
+            const rollups = {
+                capexCostPriceEUR: parseFloat(document.getElementById('buildTotal').textContent.replace(/[^0-9.-]+/g, '')) || 0,
+                landPurchaseFeesEUR: parseFloat(document.getElementById('landTotal').textContent.replace(/[^0-9.-]+/g, '')) || 0,
+                operationsAnnualEUR: parseFloat(document.getElementById('opsTotal').textContent.replace(/[^0-9.-]+/g, '')) || 0,
+                contingencyEUR: parseFloat(document.getElementById('contingencyAmount').textContent.replace(/[^0-9.-]+/g, '')) || 0,
+                feesTotalEUR: parseFloat(document.getElementById('feesTotal').textContent.replace(/[^0-9.-]+/g, '')) || 0,
+                grandTotalEUR: parseFloat(document.getElementById('grandTotal').textContent.replace(/[^0-9.-]+/g, '')) || 0
+            };
+
+            return { meta, rollups, schedule: null };
+        }
+
+        // Populate form with existing data
+        function populateForm(project) {
+            if (!project) return;
+
+            // Populate meta fields
+            if (project.meta) {
+                document.getElementById('projectTitle').value = project.meta.projectTitle || '';
+                document.getElementById('locationCountry').value = project.meta.locationCountry || '';
+                document.getElementById('status').value = project.meta.status || 'Draft';
+                document.getElementById('currency').value = project.meta.currency || 'EUR';
+                document.getElementById('grossITLoadMW').value = project.meta.grossITLoadMW || '';
+                document.getElementById('pue').value = project.meta.pue || 1.25;
+                document.getElementById('grossMonthlyRent').value = project.meta.grossMonthlyRent || '';
+                document.getElementById('useOpexPercent').checked = project.meta.useOpexPercent !== false;
+                document.getElementById('opexPercent').value = project.meta.opexPercent || 0.20;
+                document.getElementById('constructionStart').value = project.meta.constructionStart || '';
+                document.getElementById('constructionDurationMonths').value = project.meta.constructionDurationMonths || 24;
+            }
+
+            // Note: Build, Land, Ops, Fees fields would need to be stored separately
+            // For now, just calculate totals
+            calculateTotals();
+        }
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('projectForm').reset();
+            document.getElementById('uploadPreview').style.display = 'none';
+            uploadedData = null;
+            calculateTotals();
+        }
+
+        // Utility functions
+        function formatCurrency(amount, currency = 'EUR') {
+            const symbols = {
+                EUR: '€',
+                USD: '$',
+                GBP: '£',
+                JPY: '¥',
+                AED: 'د.إ'
+            };
+            
+            const symbol = symbols[currency] || currency + ' ';
+            return symbol + amount.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
