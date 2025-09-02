@@ -3930,25 +3930,25 @@ if (window.showSection) {
     <!-- Securitization Engine Section -->
     <div id="securitization-section" style="display: none; padding: 185px 2rem 2rem; min-height: 100vh; transition: padding-top 0.3s ease;">
         <div style="max-width: 1800px; margin: 0 auto;">
-            <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #ffd700; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
-                <h2 style="color: #ffd700; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">
+            <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
+                <h2 style="color: #60a5fa; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">
                     <i class="fas fa-layer-group"></i> Securitization Engine
                 </h2>
                 <p style="color: #94a3b8; text-align: center; margin-bottom: 2rem;">Structured Finance • Capital Stack Optimization • Real-time Analysis</p>
 
                 <!-- Control Panel -->
-                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                         <!-- Left Panel - Input Configuration -->
                         <div>
-                            <h3 style="color: #ffd700; margin-bottom: 1rem;">
+                            <h3 style="color: #60a5fa; margin-bottom: 1rem;">
                                 <i class="fas fa-sliders-h"></i> Configuration
                             </h3>
                             
                             <!-- Asset Type Selection -->
                             <div style="margin-bottom: 1.5rem;">
                                 <label style="color: #94a3b8; display: block; margin-bottom: 0.5rem;">Asset Type</label>
-                                <select id="sec-asset-type" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; color: white;">
+                                <select id="sec-asset-type" style="width: 100%; padding: 0.75rem; background: rgba(54, 64, 73, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                                     <option value="datacenter">Data Center REIT</option>
                                     <option value="mbs">Mortgage-Backed Securities</option>
                                     <option value="abs">Asset-Backed Securities</option>
@@ -3961,19 +3961,19 @@ if (window.showSection) {
                             <!-- Pool Size -->
                             <div style="margin-bottom: 1.5rem;">
                                 <label style="color: #94a3b8; display: block; margin-bottom: 0.5rem;">Total Pool Size (£)</label>
-                                <input type="number" id="sec-pool-size" placeholder="e.g., 100000000" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; color: white;">
+                                <input type="number" id="sec-pool-size" placeholder="e.g., 100000000" style="width: 100%; padding: 0.75rem; background: rgba(54, 64, 73, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                             </div>
 
                             <!-- Number of Tranches -->
                             <div style="margin-bottom: 1.5rem;">
                                 <label style="color: #94a3b8; display: block; margin-bottom: 0.5rem;">Number of Tranches</label>
-                                <input type="number" id="sec-tranches" value="3" min="2" max="10" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; color: white;">
+                                <input type="number" id="sec-tranches" value="3" min="2" max="10" style="width: 100%; padding: 0.75rem; background: rgba(54, 64, 73, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                             </div>
 
                             <!-- Structuring Method -->
                             <div style="margin-bottom: 1.5rem;">
                                 <label style="color: #94a3b8; display: block; margin-bottom: 0.5rem;">Structuring Method</label>
-                                <select id="sec-method" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; color: white;">
+                                <select id="sec-method" style="width: 100%; padding: 0.75rem; background: rgba(54, 64, 73, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                                     <option value="waterfall">Waterfall</option>
                                     <option value="pro-rata">Pro-Rata</option>
                                     <option value="sequential">Sequential</option>
@@ -3984,15 +3984,15 @@ if (window.showSection) {
 
                         <!-- Right Panel - Project Data Import -->
                         <div>
-                            <h3 style="color: #ffd700; margin-bottom: 1rem;">
+                            <h3 style="color: #60a5fa; margin-bottom: 1rem;">
                                 <i class="fas fa-database"></i> Project Data Import
                             </h3>
                             
-                            <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                            <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
                                 <p style="color: #94a3b8; margin-bottom: 1rem;">Import data from your project specifications:</p>
                                 
                                 <!-- Project Selection -->
-                                <select id="project-selector" onchange="loadProjectData()" style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 6px; color: white; margin-bottom: 1rem;">
+                                <select id="project-selector" onchange="loadProjectData()" style="width: 100%; padding: 0.75rem; background: rgba(54, 64, 73, 0.5); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white; margin-bottom: 1rem;">
                                     <option value="">Select a Project...</option>
                                 </select>
                                 
@@ -4001,7 +4001,7 @@ if (window.showSection) {
                                 </button>
                                 
                                 <div id="project-data-preview" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(0, 0, 0, 0.3); border-radius: 6px;">
-                                    <p style="color: #ffd700; margin-bottom: 0.5rem;">Imported Data:</p>
+                                    <p style="color: #60a5fa; margin-bottom: 0.5rem;">Imported Data:</p>
                                     <div id="imported-data-display" style="color: #94a3b8; font-size: 0.9rem;"></div>
                                 </div>
                             </div>
@@ -4011,7 +4011,7 @@ if (window.showSection) {
                                 <button onclick="loadFromPermutation()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 0.75rem; border-radius: 6px; font-weight: 600; cursor: pointer; flex: 1;">
                                     <i class="fas fa-exchange-alt"></i> From Permutation
                                 </button>
-                                <button onclick="loadTemplate()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); padding: 0.75rem; border-radius: 6px; font-weight: 600; cursor: pointer; flex: 1;">
+                                <button onclick="loadTemplate()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 0.75rem; border-radius: 6px; font-weight: 600; cursor: pointer; flex: 1;">
                                     <i class="fas fa-file-alt"></i> Template
                                 </button>
                             </div>
@@ -4024,25 +4024,25 @@ if (window.showSection) {
                     <button onclick="runSecuritization()" style="background: linear-gradient(135deg, #ffd700, #ffed4e); color: #0a0e27; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
                         <i class="fas fa-play"></i> Run Securitization
                     </button>
-                    <button onclick="runStressTest()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    <button onclick="runStressTest()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
                         <i class="fas fa-chart-line"></i> Stress Test
                     </button>
-                    <button onclick="generateReport()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    <button onclick="generateReport()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
                         <i class="fas fa-file-pdf"></i> Generate Report
                     </button>
-                    <button onclick="resetSecuritization()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    <button onclick="resetSecuritization()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 1rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
                         <i class="fas fa-redo"></i> Reset
                     </button>
                 </div>
 
                 <!-- Results Panel -->
-                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 12px; padding: 2rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 215, 0, 0.2);">
-                        <div style="font-size: 1.5rem; color: #ffd700;">
+                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(96, 165, 250, 0.2);">
+                        <div style="font-size: 1.5rem; color: #60a5fa;">
                             <i class="fas fa-chart-pie"></i> Securitization Results
                         </div>
                         <div style="display: flex; gap: 2rem; color: #64748b; font-size: 0.9rem;">
-                            <span>Status: <strong id="sec-status" style="color: #ffd700;">Ready</strong></span>
+                            <span>Status: <strong id="sec-status" style="color: #60a5fa;">Ready</strong></span>
                             <span>Runtime: <strong id="sec-runtime">--:--</strong></span>
                         </div>
                     </div>
@@ -4058,20 +4058,20 @@ if (window.showSection) {
 
                     <!-- Metrics Grid -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="metric-irr">--%</div>
+                        <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="metric-irr">--%</div>
                             <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Expected IRR</div>
                         </div>
-                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="metric-rating">--</div>
+                        <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="metric-rating">--</div>
                             <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Weighted Rating</div>
                         </div>
-                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="metric-leverage">--x</div>
+                        <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="metric-leverage">--x</div>
                             <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Leverage Ratio</div>
                         </div>
-                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
-                            <div style="font-size: 1.8rem; color: #ffd700; font-weight: bold;" id="metric-coverage">--x</div>
+                        <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.8rem; color: #60a5fa; font-weight: bold;" id="metric-coverage">--x</div>
                             <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;">Coverage Ratio</div>
                         </div>
                     </div>
@@ -6690,11 +6690,11 @@ if (window.showSection) {
 
     function createPermParameterInput(param) {
         if (param.type === 'select') {
-            return `<select style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: white;">
+            return `<select style="width: 100%; padding: 0.5rem; background: rgba(54, 64, 73, 0.5); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: white;">
                 ${param.options.map(opt => `<option value="${opt}" ${opt === param.default ? 'selected' : ''}>${opt}</option>`).join('')}
             </select>`;
         } else {
-            return `<input type="${param.type}" value="${param.default}" style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: white;">`;
+            return `<input type="${param.type}" value="${param.default}" style="width: 100%; padding: 0.5rem; background: rgba(54, 64, 73, 0.5); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 6px; color: white;">`;
         }
     }
 
@@ -7804,8 +7804,16 @@ if (window.showSection) {
                     credentials: 'include'  // Include cookies for session
                 });
                 
-                if (response.ok) {
-                    console.log('Project deleted successfully from backend');
+                const data = await response.json();
+                
+                if (response.ok || response.status === 404) {
+                    // If OK or not found in backend, proceed with local deletion
+                    if (response.ok) {
+                        console.log('Project deleted successfully from backend');
+                    } else {
+                        console.log('Project not found in backend, deleting locally');
+                    }
+                    
                     // Remove from local data
                     if (pendingDeleteItem.seriesId) {
                         const series = seriesData.find(s => s.id === pendingDeleteItem.seriesId);
@@ -7821,9 +7829,8 @@ if (window.showSection) {
                     await saveSeriesData();
                     showSaveIndicator('success');
                 } else {
-                    const errorData = await response.json();
-                    console.error('Delete failed:', errorData);
-                    alert(`Failed to delete project: ${errorData.message || 'Unknown error'}`);
+                    console.error('Delete failed:', data);
+                    alert(`Failed to delete project: ${data.message || 'Unknown error'}`);
                 }
             } catch (error) {
                 console.error('Error deleting project:', error);
@@ -9321,7 +9328,7 @@ if (window.showSection) {
             let stackHtml = '<div style="max-width: 600px; margin: 0 auto;">';
             
             if (data.results.tranches && data.results.tranches.length > 0) {
-                stackHtml += '<h4 style="color: #ffd700; margin-bottom: 1rem;">Capital Stack Structure</h4>';
+                stackHtml += '<h4 style="color: #60a5fa; margin-bottom: 1rem;">Capital Stack Structure</h4>';
                 
                 data.results.tranches.forEach((tranche, index) => {
                     const color = index === 0 ? '#22c55e' : index === 1 ? '#60a5fa' : '#ffd700';
@@ -9622,7 +9629,7 @@ if (window.showSection) {
                     <td style="padding: 0.5rem; color: white;">${(perm.TargetDSCRSenior_16 || 0).toFixed(2)}x</td>
                     <td style="padding: 0.5rem; color: white;">${perm.SeniorCoupon_17 || 0}%</td>
                     <td style="padding: 0.5rem; color: #22c55e;">${(perm.TargetEquityIRR || 0).toFixed(1)}%</td>
-                    <td style="padding: 0.5rem; color: #ffd700;">£${(perm.TotalCapitalStack || 0).toLocaleString()}</td>
+                    <td style="padding: 0.5rem; color: #60a5fa;">£${(perm.TotalCapitalStack || 0).toLocaleString()}</td>
                 </tr>
             `;
         });

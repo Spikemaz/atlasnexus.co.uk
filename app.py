@@ -5286,6 +5286,52 @@ def request_password_reset():
 
 # ==================== PROJECTS API ENDPOINTS ====================
 
+@app.route('/api/projects', methods=['POST'])
+def save_all_projects():
+    """Save all projects for current user"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    email = session.get(f'user_email_{ip_address}')
+    if not email:
+        return jsonify({'success': False, 'message': 'User not found'}), 404
+    
+    data = request.get_json()
+    projects = data.get('projects', [])
+    
+    # Save all projects for this user
+    projects_data = load_projects_data()
+    
+    # Convert frontend format to backend format if needed
+    formatted_projects = []
+    for project in projects:
+        formatted_project = {
+            'projectId': project.get('id', project.get('projectId')),
+            'title': project.get('title', ''),
+            'location': project.get('location', ''),
+            'status': project.get('status', 'draft'),
+            'currency': project.get('currency', 'EUR'),
+            'grossITLoad': project.get('grossITLoad', 0),
+            'pue': project.get('pue', 1.25),
+            'value': project.get('value', 0),
+            'meta': project.get('meta', {}),
+            'rollups': project.get('rollups', {}),
+            'schedule': project.get('schedule'),
+            'lastModified': datetime.now().isoformat()
+        }
+        formatted_projects.append(formatted_project)
+    
+    projects_data[email] = formatted_projects
+    save_projects_data(projects_data)
+    
+    return jsonify({
+        'success': True,
+        'message': 'Projects saved successfully',
+        'count': len(formatted_projects)
+    })
+
 @app.route('/api/projects', methods=['GET'])
 def get_projects():
     """Get all projects for current user"""
