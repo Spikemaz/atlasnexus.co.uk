@@ -5398,7 +5398,7 @@ def delete_project(project_id):
         
         # Save updated data
         projects_data[email] = user_projects
-        save_projects_data(projects_data)
+        save_projects_data(email, {'projects': user_projects, 'order': []})
         
         return jsonify({
             'success': True,
@@ -5912,7 +5912,7 @@ def admin_system_config():
         return jsonify({'status': 'success', 'message': 'Configuration updated'})
 
 @app.route('/download-template/<template_type>')
-def download_template(template_type):
+def download_project_template(template_type):
     """Download template files"""
     ip_address = get_real_ip()
     
