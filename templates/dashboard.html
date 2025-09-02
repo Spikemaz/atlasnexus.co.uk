@@ -7621,6 +7621,87 @@ if (window.showSection) {
         sponsorUploadedData = null;
     }
 
+    // Formatting helper functions
+    function formatCurrencyInput(value, currencyCode = 'EUR') {
+        const num = parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
+        const symbol = currencyCode === 'EUR' ? '€' : currencyCode === 'USD' ? '$' : currencyCode === 'GBP' ? '£' : currencyCode;
+        return symbol + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    
+    function formatPercentageInput(value) {
+        const num = parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
+        return num.toFixed(2) + '%';
+    }
+    
+    function parseCurrencyValue(value) {
+        return parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
+    }
+    
+    function parsePercentageValue(value) {
+        return parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
+    }
+    
+    // Add formatting to currency inputs
+    function addCurrencyFormatting(inputId, currencySelectId) {
+        const input = document.getElementById(inputId);
+        const currencySelect = document.getElementById(currencySelectId);
+        
+        if (!input) return;
+        
+        // Store raw value
+        let rawValue = '';
+        
+        input.addEventListener('focus', function() {
+            // Show raw value on focus
+            this.value = rawValue || parseCurrencyValue(this.value);
+        });
+        
+        input.addEventListener('blur', function() {
+            // Format on blur
+            rawValue = parseCurrencyValue(this.value);
+            const currency = currencySelect ? currencySelect.value : 'EUR';
+            if (rawValue > 0) {
+                this.value = formatCurrencyInput(rawValue, currency);
+            }
+        });
+        
+        input.addEventListener('input', function() {
+            rawValue = parseCurrencyValue(this.value);
+        });
+    }
+    
+    // Add formatting to percentage inputs
+    function addPercentageFormatting(inputId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        
+        let rawValue = '';
+        
+        input.addEventListener('focus', function() {
+            // Show raw value on focus
+            this.value = rawValue || parsePercentageValue(this.value);
+        });
+        
+        input.addEventListener('blur', function() {
+            // Format on blur
+            rawValue = parsePercentageValue(this.value);
+            if (rawValue >= 0) {
+                this.value = formatPercentageInput(rawValue);
+            }
+        });
+        
+        input.addEventListener('input', function() {
+            rawValue = parsePercentageValue(this.value);
+        });
+    }
+    
+    // Format date consistently
+    function formatDateDisplay(dateValue) {
+        if (!dateValue) return '';
+        const date = new Date(dateValue + '-01'); // Add day for month input
+        return date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+    }
+    
     // Update currency displays and initialize CapEx functionality
     document.addEventListener('DOMContentLoaded', function() {
         const kwhCurrencySelect = document.getElementById('sponsor-kwh-currency');
@@ -7630,6 +7711,14 @@ if (window.showSection) {
         if (kwhCurrencySelect && kwhCurrencyDisplay) {
             kwhCurrencySelect.addEventListener('change', function() {
                 kwhCurrencyDisplay.textContent = this.value;
+                // Re-format gross monthly rent when currency changes
+                const rentInput = document.getElementById('sponsor-grossMonthlyRent');
+                if (rentInput && rentInput.value) {
+                    const rawValue = parseCurrencyValue(rentInput.value);
+                    if (rawValue > 0) {
+                        rentInput.value = formatCurrencyInput(rawValue, this.value);
+                    }
+                }
             });
         }
         
@@ -7641,8 +7730,57 @@ if (window.showSection) {
                 const marketCurrencySpan = document.getElementById('capex-market-currency');
                 if (internalCurrencySpan) internalCurrencySpan.textContent = currency;
                 if (marketCurrencySpan) marketCurrencySpan.textContent = currency;
+                
+                // Re-format all CapEx fields when currency changes
+                const capexFields = [
+                    'sponsor-capexInternalPerMW', 'sponsor-capexMarketPerMW',
+                    'sponsor-buildArchitectural', 'sponsor-buildCivilStructural',
+                    'sponsor-buildSubstations', 'sponsor-buildUndergroundUtilities',
+                    'sponsor-buildCrusaderModules', 'sponsor-buildBess',
+                    'sponsor-buildMainContractorInstallation', 'sponsor-buildPhotovoltaicSystem',
+                    'sponsor-buildLandscaping', 'sponsor-buildPreliminariesGeneral',
+                    'sponsor-buildMainContractorMargin'
+                ];
+                
+                capexFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field && field.value) {
+                        const rawValue = parseCurrencyValue(field.value);
+                        if (rawValue > 0) {
+                            field.value = formatCurrencyInput(rawValue, currency);
+                        }
+                    }
+                });
             });
         }
+        
+        // Apply formatting to currency fields
+        addCurrencyFormatting('sponsor-grossMonthlyRent', 'sponsor-kwh-currency');
+        addCurrencyFormatting('sponsor-capexInternalPerMW', 'sponsor-capex-currency');
+        addCurrencyFormatting('sponsor-capexMarketPerMW', 'sponsor-capex-currency');
+        
+        // Apply formatting to all build/capex fields
+        const capexFields = [
+            'sponsor-buildArchitectural', 'sponsor-buildCivilStructural',
+            'sponsor-buildSubstations', 'sponsor-buildUndergroundUtilities',
+            'sponsor-buildCrusaderModules', 'sponsor-buildBess',
+            'sponsor-buildMainContractorInstallation', 'sponsor-buildPhotovoltaicSystem',
+            'sponsor-buildLandscaping', 'sponsor-buildPreliminariesGeneral',
+            'sponsor-buildMainContractorMargin',
+            'sponsor-marketArchitectural', 'sponsor-marketCivilStructural',
+            'sponsor-marketSubstations', 'sponsor-marketUndergroundUtilities',
+            'sponsor-marketCrusaderModules', 'sponsor-marketBess',
+            'sponsor-marketMainContractorInstallation', 'sponsor-marketPhotovoltaicSystem',
+            'sponsor-marketLandscaping', 'sponsor-marketPreliminariesGeneral',
+            'sponsor-marketMainContractorMargin'
+        ];
+        
+        capexFields.forEach(fieldId => {
+            addCurrencyFormatting(fieldId, 'sponsor-capex-currency');
+        });
+        
+        // Apply formatting to percentage fields
+        addPercentageFormatting('sponsor-opexPercent');
         
         // Update MW displays when gross IT load changes
         const grossITLoadInput = document.getElementById('sponsor-grossITLoadMW');
@@ -7660,25 +7798,38 @@ if (window.showSection) {
             });
         }
         
-        // Set default construction start date to next January
+        // Format construction date display
         const constructionStartInput = document.getElementById('sponsor-constructionStart');
-        if (constructionStartInput && !constructionStartInput.value) {
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth();
+        if (constructionStartInput) {
+            // Set default construction start date to next January
+            if (!constructionStartInput.value) {
+                const today = new Date();
+                const currentYear = today.getFullYear();
+                const currentMonth = today.getMonth();
+                
+                // If we're past January, use next year's January, otherwise use this year's January
+                const targetYear = currentMonth >= 0 ? currentYear + 1 : currentYear;
+                const defaultDate = `${targetYear}-01`;
+                constructionStartInput.value = defaultDate;
+                
+                // Set min to current month and max to 24 months from now
+                const minDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+                const maxYear = currentYear + 2;
+                const maxDate = `${maxYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+                
+                constructionStartInput.min = minDate;
+                constructionStartInput.max = maxDate;
+            }
             
-            // If we're past January, use next year's January, otherwise use this year's January
-            const targetYear = currentMonth >= 0 ? currentYear + 1 : currentYear;
-            const defaultDate = `${targetYear}-01`;
-            constructionStartInput.value = defaultDate;
-            
-            // Set min to current month and max to 24 months from now
-            const minDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-            const maxYear = currentYear + 2;
-            const maxDate = `${maxYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-            
-            constructionStartInput.min = minDate;
-            constructionStartInput.max = maxDate;
+            // Add label to show formatted date
+            constructionStartInput.addEventListener('change', function() {
+                const formattedDate = formatDateDisplay(this.value);
+                // Update a display label if needed
+                const label = this.parentElement.querySelector('.date-display');
+                if (label) {
+                    label.textContent = formattedDate;
+                }
+            });
         }
     });
     
@@ -7885,7 +8036,7 @@ if (window.showSection) {
         if (sponsorUploadedData) {
             projectData = sponsorUploadedData;
         } else {
-            // Collect from manual form
+            // Collect from manual form - parse formatted values
             projectData = {
                 meta: {
                     projectTitle: document.getElementById('sponsor-projectTitle').value,
@@ -7895,8 +8046,40 @@ if (window.showSection) {
                     kwhCurrency: document.getElementById('sponsor-kwh-currency').value,
                     grossITLoadMW: parseFloat(document.getElementById('sponsor-grossITLoadMW').value) || 0,
                     pue: parseFloat(document.getElementById('sponsor-pue').value) || 1.25,
-                    grossMonthlyRent: parseFloat(document.getElementById('sponsor-grossMonthlyRent').value) || 0,
-                    opexPercent: parseFloat(document.getElementById('sponsor-opexPercent').value) || 0
+                    grossMonthlyRent: parseCurrencyValue(document.getElementById('sponsor-grossMonthlyRent').value) || 0,
+                    opexPercent: parsePercentageValue(document.getElementById('sponsor-opexPercent').value) || 0,
+                    constructionStart: document.getElementById('sponsor-constructionStart').value,
+                    constructionDurationMonths: parseInt(document.getElementById('sponsor-constructionDurationMonths').value) || 0
+                },
+                capex: {
+                    internal: {
+                        perMW: parseCurrencyValue(document.getElementById('sponsor-capexInternalPerMW')?.value) || 0,
+                        architectural: parseCurrencyValue(document.getElementById('sponsor-buildArchitectural')?.value) || 0,
+                        civilStructural: parseCurrencyValue(document.getElementById('sponsor-buildCivilStructural')?.value) || 0,
+                        substations: parseCurrencyValue(document.getElementById('sponsor-buildSubstations')?.value) || 0,
+                        undergroundUtilities: parseCurrencyValue(document.getElementById('sponsor-buildUndergroundUtilities')?.value) || 0,
+                        crusaderModules: parseCurrencyValue(document.getElementById('sponsor-buildCrusaderModules')?.value) || 0,
+                        bess: parseCurrencyValue(document.getElementById('sponsor-buildBess')?.value) || 0,
+                        mainContractorInstallation: parseCurrencyValue(document.getElementById('sponsor-buildMainContractorInstallation')?.value) || 0,
+                        photovoltaicSystem: parseCurrencyValue(document.getElementById('sponsor-buildPhotovoltaicSystem')?.value) || 0,
+                        landscaping: parseCurrencyValue(document.getElementById('sponsor-buildLandscaping')?.value) || 0,
+                        preliminariesGeneral: parseCurrencyValue(document.getElementById('sponsor-buildPreliminariesGeneral')?.value) || 0,
+                        mainContractorMargin: parseCurrencyValue(document.getElementById('sponsor-buildMainContractorMargin')?.value) || 0
+                    },
+                    market: {
+                        perMW: parseCurrencyValue(document.getElementById('sponsor-capexMarketPerMW')?.value) || 0,
+                        architectural: parseCurrencyValue(document.getElementById('sponsor-marketArchitectural')?.value) || 0,
+                        civilStructural: parseCurrencyValue(document.getElementById('sponsor-marketCivilStructural')?.value) || 0,
+                        substations: parseCurrencyValue(document.getElementById('sponsor-marketSubstations')?.value) || 0,
+                        undergroundUtilities: parseCurrencyValue(document.getElementById('sponsor-marketUndergroundUtilities')?.value) || 0,
+                        crusaderModules: parseCurrencyValue(document.getElementById('sponsor-marketCrusaderModules')?.value) || 0,
+                        bess: parseCurrencyValue(document.getElementById('sponsor-marketBess')?.value) || 0,
+                        mainContractorInstallation: parseCurrencyValue(document.getElementById('sponsor-marketMainContractorInstallation')?.value) || 0,
+                        photovoltaicSystem: parseCurrencyValue(document.getElementById('sponsor-marketPhotovoltaicSystem')?.value) || 0,
+                        landscaping: parseCurrencyValue(document.getElementById('sponsor-marketLandscaping')?.value) || 0,
+                        preliminariesGeneral: parseCurrencyValue(document.getElementById('sponsor-marketPreliminariesGeneral')?.value) || 0,
+                        mainContractorMargin: parseCurrencyValue(document.getElementById('sponsor-marketMainContractorMargin')?.value) || 0
+                    }
                 },
                 rollups: {
                     capexCostPriceEUR: 0,
@@ -8292,23 +8475,104 @@ if (window.showSection) {
         // Handle separate currency fields
         const capexCurrency = document.getElementById('sponsor-capex-currency');
         const kwhCurrency = document.getElementById('sponsor-kwh-currency');
-        if (capexCurrency) capexCurrency.value = project.capexCurrency || project.currency || 'EUR';
-        if (kwhCurrency) kwhCurrency.value = project.kwhCurrency || project.currency || 'EUR';
+        if (capexCurrency) capexCurrency.value = project.capexCurrency || project.meta?.capexCurrency || project.currency || 'EUR';
+        if (kwhCurrency) kwhCurrency.value = project.kwhCurrency || project.meta?.kwhCurrency || project.currency || 'EUR';
         
-        document.getElementById('sponsor-grossITLoadMW').value = project.grossITLoad || '';
-        document.getElementById('sponsor-pue').value = project.pue || '1.25';
+        document.getElementById('sponsor-grossITLoadMW').value = project.grossITLoad || project.meta?.grossITLoadMW || '';
+        document.getElementById('sponsor-pue').value = project.pue || project.meta?.pue || '1.25';
         
-        // Populate new fields
+        // Populate new fields with formatting
         const grossMonthlyRent = document.getElementById('sponsor-grossMonthlyRent');
         const opexPercent = document.getElementById('sponsor-opexPercent');
-        if (grossMonthlyRent) grossMonthlyRent.value = project.grossMonthlyRent || project.meta?.grossMonthlyRent || '';
-        if (opexPercent) opexPercent.value = project.opexPercent || project.meta?.opexPercent || '';
+        
+        if (grossMonthlyRent) {
+            const rentValue = project.grossMonthlyRent || project.meta?.grossMonthlyRent || 0;
+            if (rentValue > 0) {
+                grossMonthlyRent.value = formatCurrencyInput(rentValue, kwhCurrency?.value || 'EUR');
+            } else {
+                grossMonthlyRent.value = '';
+            }
+        }
+        
+        if (opexPercent) {
+            const opexValue = project.opexPercent || project.meta?.opexPercent || 0;
+            if (opexValue > 0) {
+                opexPercent.value = formatPercentageInput(opexValue);
+            } else {
+                opexPercent.value = '';
+            }
+        }
         
         // Populate construction fields
         const constructionStart = document.getElementById('sponsor-constructionStart');
         const constructionDuration = document.getElementById('sponsor-constructionDurationMonths');
         if (constructionStart) constructionStart.value = project.constructionStart || project.meta?.constructionStart || '';
         if (constructionDuration) constructionDuration.value = project.constructionDuration || project.meta?.constructionDurationMonths || '';
+        
+        // Populate CapEx fields if they exist
+        if (project.capex) {
+            // Internal CapEx
+            if (project.capex.internal) {
+                const currency = capexCurrency?.value || 'EUR';
+                if (project.capex.internal.perMW > 0) {
+                    const perMWInput = document.getElementById('sponsor-capexInternalPerMW');
+                    if (perMWInput) perMWInput.value = formatCurrencyInput(project.capex.internal.perMW, currency);
+                }
+                
+                // Populate internal detail fields
+                const internalFields = [
+                    ['sponsor-buildArchitectural', project.capex.internal.architectural],
+                    ['sponsor-buildCivilStructural', project.capex.internal.civilStructural],
+                    ['sponsor-buildSubstations', project.capex.internal.substations],
+                    ['sponsor-buildUndergroundUtilities', project.capex.internal.undergroundUtilities],
+                    ['sponsor-buildCrusaderModules', project.capex.internal.crusaderModules],
+                    ['sponsor-buildBess', project.capex.internal.bess],
+                    ['sponsor-buildMainContractorInstallation', project.capex.internal.mainContractorInstallation],
+                    ['sponsor-buildPhotovoltaicSystem', project.capex.internal.photovoltaicSystem],
+                    ['sponsor-buildLandscaping', project.capex.internal.landscaping],
+                    ['sponsor-buildPreliminariesGeneral', project.capex.internal.preliminariesGeneral],
+                    ['sponsor-buildMainContractorMargin', project.capex.internal.mainContractorMargin]
+                ];
+                
+                internalFields.forEach(([fieldId, value]) => {
+                    const field = document.getElementById(fieldId);
+                    if (field && value > 0) {
+                        field.value = formatCurrencyInput(value, currency);
+                    }
+                });
+            }
+            
+            // Market CapEx
+            if (project.capex.market) {
+                const currency = capexCurrency?.value || 'EUR';
+                if (project.capex.market.perMW > 0) {
+                    const perMWInput = document.getElementById('sponsor-capexMarketPerMW');
+                    if (perMWInput) perMWInput.value = formatCurrencyInput(project.capex.market.perMW, currency);
+                }
+                
+                // Populate market detail fields
+                const marketFields = [
+                    ['sponsor-marketArchitectural', project.capex.market.architectural],
+                    ['sponsor-marketCivilStructural', project.capex.market.civilStructural],
+                    ['sponsor-marketSubstations', project.capex.market.substations],
+                    ['sponsor-marketUndergroundUtilities', project.capex.market.undergroundUtilities],
+                    ['sponsor-marketCrusaderModules', project.capex.market.crusaderModules],
+                    ['sponsor-marketBess', project.capex.market.bess],
+                    ['sponsor-marketMainContractorInstallation', project.capex.market.mainContractorInstallation],
+                    ['sponsor-marketPhotovoltaicSystem', project.capex.market.photovoltaicSystem],
+                    ['sponsor-marketLandscaping', project.capex.market.landscaping],
+                    ['sponsor-marketPreliminariesGeneral', project.capex.market.preliminariesGeneral],
+                    ['sponsor-marketMainContractorMargin', project.capex.market.mainContractorMargin]
+                ];
+                
+                marketFields.forEach(([fieldId, value]) => {
+                    const field = document.getElementById(fieldId);
+                    if (field && value > 0) {
+                        field.value = formatCurrencyInput(value, currency);
+                    }
+                });
+            }
+        }
         
         // Trigger currency display updates
         if (capexCurrency) {
