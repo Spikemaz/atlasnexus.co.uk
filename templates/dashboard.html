@@ -846,11 +846,11 @@
             <button class="nav-btn" data-section="support" onclick="showSection('support')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-headset"></i> Support
             </button>
-            {% else %}
-            <!-- Admin and Internal accounts see all options -->
             <button class="nav-btn" data-section="market" onclick="showSection('market')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-chart-line"></i> Market
             </button>
+            {% else %}
+            <!-- Admin and Internal accounts see additional options -->
             <button class="nav-btn" data-section="analytics" onclick="showSection('analytics')" style="background: transparent; color: #ffffff; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 <i class="fas fa-chart-bar"></i> Analytics
             </button>
@@ -8312,11 +8312,16 @@ if (window.showSection) {
     
     // Update permutation estimate in real-time
     function updatePermutationEstimate() {
-        // Early return if PermutationEngine is not available
+        // Early return - PermutationEngine is not properly initialized
+        console.log('updatePermutationEstimate called but PermutationEngine not available');
+        return;
+        
+        /* Disabled until PermutationEngine is fixed
         if (!window.PermutationEngine || typeof window.PermutationEngine.getCurrentRanges !== 'function') {
             console.log('PermutationEngine not available yet');
             return;
         }
+        */
         
         // Get current ranges from the engine
         const ranges = PermutationEngine.getCurrentRanges();
@@ -8465,7 +8470,7 @@ if (window.showSection) {
         alert('Analyzing inputs to suggest optimal ranges...\n\nThis will:\n- Narrow ranges based on market conditions\n- Remove unlikely scenarios\n- Focus on fundable outcomes');
         
         // You'll implement the actual optimization logic
-        updatePermutationEstimate();
+        // updatePermutationEstimate(); // Disabled temporarily
     }
     
     // Reset to default ranges
@@ -8478,7 +8483,7 @@ if (window.showSection) {
             }
         });
         
-        updatePermutationEstimate();
+        // updatePermutationEstimate(); // Disabled temporarily
     }
     
     // Permutation Engine Project Data Functions
@@ -8548,7 +8553,7 @@ if (window.showSection) {
             PermutationEngine.loadProjectData(currentPermProjectData);
             
             // Update the estimate display
-            updatePermutationEstimate();
+            // updatePermutationEstimate(); // Disabled temporarily
             
             // Show success message
             const message = document.createElement('div');
@@ -8574,11 +8579,9 @@ if (window.showSection) {
     document.addEventListener('DOMContentLoaded', function() {
         // Delay initialization to ensure all elements are loaded
         setTimeout(function() {
-            if (window.PermutationEngine) {
-                // Initialize with default values
-                updatePermutationEstimate();
-                console.log('Permutation Engine initialized with 83 inputs');
-            }
+            // Temporarily disable PermutationEngine initialization to prevent errors
+            // TODO: Fix PermutationEngine object creation
+            console.log('Permutation Engine initialization disabled temporarily');
         }, 100);
     });
     </script>
