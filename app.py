@@ -5053,6 +5053,54 @@ def admin_get_ip_tracking():
     
     return jsonify({'status': 'success', 'ip_data': list(ip_data.values())})
 
+@app.route('/static/templates/<filename>')
+def download_template(filename):
+    """Serve Excel templates for download"""
+    if filename == 'Project_Sponsor_Input_Template.xlsx':
+        # Create a sample Excel template
+        import pandas as pd
+        from io import BytesIO
+        
+        # Create Engine_Inputs sheet
+        engine_data = {
+            'Field': [
+                'Currency', 'GrossITLoad_MW', 'PUE', 'CapEx_CostPrice_EUR',
+                'LandPurchaseFees_EUR', 'Operations_OPEX_Annual_EUR__if_used_',
+                'GrossMonthlyRent_EUR__optional_', 'Contingency_EUR',
+                'Fees_Total_EUR', 'Grand_Total_Project_EUR',
+                'Construction_Start_YYYY_MM', 'Construction_Duration_Months'
+            ],
+            'Value': ['EUR', 83.33, 1.25, 742197829, 142500000, 0, 0, 73129269, 343, 958327441, '2025-05', 24]
+        }
+        
+        # Create Project_Meta sheet
+        meta_data = {
+            'Field': [
+                'Project_Title', 'Location_Country', 'Status', 'Use_OPEX_Percent', 'OPEX_Percent'
+            ],
+            'Value': ['Portugal Hyperscale', 'Portugal', 'Draft', 'YES', 0.20]
+        }
+        
+        # Create Excel file
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            pd.DataFrame(engine_data).to_excel(writer, sheet_name='Engine_Inputs', index=False)
+            pd.DataFrame(meta_data).to_excel(writer, sheet_name='Project_Meta', index=False)
+            
+            # Add empty Schedule_Optional sheet
+            pd.DataFrame().to_excel(writer, sheet_name='Schedule_Optional', index=False)
+            
+        output.seek(0)
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name='Project_Sponsor_Input_Template.xlsx'
+        )
+    
+    return "Template not found", 404
+
 @app.route('/projects')
 def projects():
     """Projects management page"""
