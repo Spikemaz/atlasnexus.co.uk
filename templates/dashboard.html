@@ -7027,9 +7027,19 @@ if (window.showSection) {
                         }
                     });
                 }
+            } else if (response.status === 403) {
+                // Not admin - hide the user selector
+                const selector = document.getElementById('user-selector');
+                if (selector) {
+                    selector.style.display = 'none';
+                }
+                // This is expected for non-admin users, don't log error
             }
         } catch (error) {
-            console.error('Error loading users list:', error);
+            // Only log unexpected errors, not 403s
+            if (!error.message || !error.message.includes('403')) {
+                console.error('Error loading users list:', error);
+            }
         }
     }
     
