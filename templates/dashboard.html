@@ -3358,7 +3358,7 @@
                     Project Fixed Inputs
                 </h3>
                 
-                <button onclick="applyProjectToPermutation()" style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #60a5fa, #3b82f6); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
+                <button onclick="applyProjectToPermutation(event)" style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #60a5fa, #3b82f6); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
                     <i class="fas fa-download"></i> Load Project from Projects Tool
                 </button>
                 
@@ -9986,20 +9986,96 @@ if (window.showSection) {
     }
     
     // Apply project data to permutation engine
-    function applyProjectToPermutation() {
-        // Get the first project from projects data
-        if (window.projectsData && window.projectsData.length > 0) {
-            const project = window.projectsData[0];
+    async function applyProjectToPermutation(event) {
+        try {
+            // Show loading state
+            const button = event ? event.target : document.querySelector('button[onclick*="applyProjectToPermutation"]');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Projects...';
+            button.disabled = true;
+            
+            // Fetch all projects from cloud database (admin only)
+            const response = await fetch('/api/permutation/projects');
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.message || 'Failed to load projects');
+            }
+            
+            if (data.projects && data.projects.length > 0) {
+                // Create a modal to select project
+                const modalHtml = `
+                    <div id="project-select-modal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                        <div style="background: #1e293b; border-radius: 12px; padding: 2rem; max-width: 600px; max-height: 80vh; overflow-y: auto; border: 1px solid #60a5fa;">
+                            <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">Select Project to Load</h3>
+                            <div style="max-height: 400px; overflow-y: auto;">
+                                ${data.projects.map(project => `
+                                    <div onclick="loadProjectToPermutation('${project.projectId}')" style="padding: 1rem; margin-bottom: 0.5rem; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                                        <div style="color: #e2e8f0; font-weight: 600;">${project.title || 'Untitled Project'}</div>
+                                        <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 0.25rem;">
+                                            Owner: ${project.owner} | Status: ${project.status || 'draft'}
+                                        </div>
+                                        <div style="color: #60a5fa; font-size: 0.85rem; margin-top: 0.25rem;">
+                                            ${project.currency} | ${project.grossITLoad} MW | PUE: ${project.pue}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button onclick="document.getElementById('project-select-modal').remove()" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: rgba(239, 68, 68, 0.8); color: white; border: none; border-radius: 6px; cursor: pointer;">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+            } else {
+                alert('No projects available in the system.');
+            }
+            
+            // Restore button
+            button.innerHTML = originalText;
+            button.disabled = false;
+            
+        } catch (error) {
+            console.error('Error loading projects:', error);
+            alert('Failed to load projects: ' + error.message);
+            
+            // Restore button
+            if (button) {
+                button.innerHTML = '<i class="fas fa-download"></i> Load Project from Projects Tool';
+                button.disabled = false;
+            }
+        }
+    }
+    
+    // Load specific project to permutation engine
+    async function loadProjectToPermutation(projectId) {
+        try {
+            // Close modal
+            const modal = document.getElementById('project-select-modal');
+            if (modal) modal.remove();
+            
+            // Fetch specific project details
+            const response = await fetch(`/api/permutation/project/${projectId}`);
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.message || 'Failed to load project');
+            }
+            
+            const project = data.project.data;
             
             // Map project fields to permutation inputs
             const mappings = {
-                'GrossITLoad_02': project.grossITLoad || 100,
-                'PUE_03': project.pue || 1.3,
-                'CapexCostPrice_04': project.capexCost || 7500,
-                'CapexRate_05': project.capexRate || 4.5,
-                'LandPurchaseFees_06': project.landPurchaseFees || 5000000,
-                'GrossMonthlyRent_07': project.grossMonthlyRent || 2500000,
-                'OPEX_08': project.opex || 25
+                'GrossITLoad_02': project.meta?.grossITLoadMW || project.grossITLoad || 100,
+                'PUE_03': project.meta?.pue || project.pue || 1.3,
+                'CapexCostPrice_04': (project.rollups?.capexCostPriceEUR || 0) / ((project.meta?.grossITLoadMW || 100) * 1000), // Convert to per kW
+                'LandPurchaseFees_06': project.rollups?.landPurchaseFeesEUR || 0,
+                'GrossMonthlyRent_07': project.meta?.grossMonthlyRent || 0,
+                'OPEX_08': (project.meta?.opexPercent || 0.2) * 100, // Convert to percentage
+                'Contingency_09': project.rollups?.contingencyEUR || 0,
+                'Fees_10': project.rollups?.feesTotalEUR || 0
             };
             
             // Apply values to inputs
@@ -10011,10 +10087,20 @@ if (window.showSection) {
                 }
             }
             
-            console.log('Project data applied to permutation engine:', project);
-            alert('Project data loaded into Permutation Engine successfully!');
-        } else {
-            alert('No projects available. Please create a project first.');
+            // Update project info display
+            const projectInfo = document.getElementById('project-info');
+            const projectName = document.getElementById('project-name');
+            if (projectInfo && projectName) {
+                projectName.textContent = `${project.meta?.projectTitle || 'Untitled'} (${data.project.owner})`;
+                projectInfo.style.display = 'block';
+            }
+            
+            console.log('Project loaded to permutation engine:', project);
+            alert(`Project "${project.meta?.projectTitle || 'Untitled'}" loaded successfully!`);
+            
+        } catch (error) {
+            console.error('Error loading project:', error);
+            alert('Failed to load project: ' + error.message);
         }
     }
     

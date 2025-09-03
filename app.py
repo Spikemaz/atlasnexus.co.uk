@@ -4093,8 +4093,9 @@ def get_users_list():
     """Get list of all users (admin only)"""
     ip_address = get_real_ip()
     
-    # Verify admin access
-    if not session.get(f'is_admin_{ip_address}'):
+    # CRITICAL SECURITY: Use comprehensive admin verification
+    if not verify_admin_access(ip_address):
+        print(f"[SECURITY] Unauthorized API access to /api/admin/users from {session.get(f'user_email_{ip_address}')}")
         return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
     
     users_data = load_users_data()
@@ -5335,9 +5336,6 @@ def save_all_projects():
     data = request.get_json()
     projects = data.get('projects', [])
     
-    # Save all projects for this user
-    projects_data = load_projects_data()
-    
     # Convert frontend format to backend format if needed
     formatted_projects = []
     for project in projects:
@@ -5357,8 +5355,13 @@ def save_all_projects():
         }
         formatted_projects.append(formatted_project)
     
-    projects_data[email] = formatted_projects
-    save_projects_data(projects_data)
+    # Save projects for this user to cloud database
+    project_data = {
+        'projects': formatted_projects,
+        'order': data.get('order', []),
+        'series': data.get('series', [])
+    }
+    save_projects_data(email, project_data)
     
     return jsonify({
         'success': True,
@@ -5375,15 +5378,43 @@ def get_projects():
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
     
     email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
     
-    # Load projects from MongoDB or local storage
+    # Load projects from cloud database
     projects_data = load_projects_data()
-    user_projects = projects_data.get(email, [])
     
-    return jsonify({
-        'success': True,
-        'projects': user_projects
-    })
+    # Admin can see all projects
+    if account_type == 'admin' or email == 'spikemaz8@aol.com':
+        # Return all projects with user info
+        all_projects = []
+        for user_email, user_data in projects_data.items():
+            if isinstance(user_data, dict):
+                user_projects = user_data.get('projects', [])
+            else:
+                user_projects = user_data if isinstance(user_data, list) else []
+            
+            for project in user_projects:
+                project['owner_email'] = user_email
+                all_projects.append(project)
+        
+        return jsonify({
+            'success': True,
+            'projects': all_projects,
+            'is_admin': True,
+            'users': list(projects_data.keys())
+        })
+    else:
+        # Regular users see only their projects
+        user_data = projects_data.get(email, {})
+        if isinstance(user_data, dict):
+            user_projects = user_data.get('projects', [])
+        else:
+            user_projects = user_data if isinstance(user_data, list) else []
+        
+        return jsonify({
+            'success': True,
+            'projects': user_projects
+        })
 
 @app.route('/api/projects/<project_id>', methods=['GET'])
 def get_project(project_id):
@@ -5523,11 +5554,14 @@ def save_project(project_id):
     
     # Save project
     projects_data = load_projects_data()
-    if email not in projects_data:
-        projects_data[email] = []
+    user_data = projects_data.get(email, {})
+    if isinstance(user_data, dict):
+        user_projects = user_data.get('projects', [])
+    else:
+        user_projects = user_data if isinstance(user_data, list) else []
+        user_data = {'projects': user_projects, 'order': []}
     
     # Find existing project or create new
-    user_projects = projects_data[email]
     existing_index = next((i for i, p in enumerate(user_projects) if p.get('projectId') == project_id), None)
     
     project = {
@@ -5545,7 +5579,9 @@ def save_project(project_id):
     else:
         user_projects.append(project)
     
-    save_projects_data(projects_data)
+    # Update user data structure
+    user_data['projects'] = user_projects
+    save_projects_data(email, user_data)
     
     # Trigger permutation engine calculation
     # This would normally emit an event to the permutation engine
@@ -5556,6 +5592,98 @@ def save_project(project_id):
         'projectId': project_id,
         'engineInputPreview': engine_input
     })
+
+@app.route('/api/permutation/projects', methods=['GET'])
+def get_permutation_projects():
+    """Get all projects for permutation engine (admin only)"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    
+    # Only admins can access this endpoint
+    if account_type != 'admin' and email != 'spikemaz8@aol.com':
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+    
+    # Load all projects from cloud database
+    projects_data = load_projects_data()
+    
+    # Format projects for permutation engine
+    formatted_projects = []
+    for user_email, user_data in projects_data.items():
+        if isinstance(user_data, dict):
+            user_projects = user_data.get('projects', [])
+        else:
+            user_projects = user_data if isinstance(user_data, list) else []
+        
+        for project in user_projects:
+            # Add owner info and format for permutation
+            formatted_project = {
+                'projectId': project.get('projectId'),
+                'title': project.get('title', project.get('meta', {}).get('projectTitle', 'Untitled')),
+                'owner': user_email,
+                'status': project.get('status', 'draft'),
+                'currency': project.get('currency', project.get('meta', {}).get('currency', 'EUR')),
+                'grossITLoad': project.get('grossITLoad', project.get('meta', {}).get('grossITLoadMW', 0)),
+                'pue': project.get('pue', project.get('meta', {}).get('pue', 1.25)),
+                'location': project.get('location', project.get('meta', {}).get('locationCountry', '')),
+                'value': project.get('value', project.get('rollups', {}).get('grandTotalEUR', 0)),
+                'meta': project.get('meta', {}),
+                'rollups': project.get('rollups', {}),
+                'schedule': project.get('schedule'),
+                'engineInput': project.get('engineInput'),
+                'lastModified': project.get('lastModified')
+            }
+            formatted_projects.append(formatted_project)
+    
+    return jsonify({
+        'success': True,
+        'projects': formatted_projects,
+        'count': len(formatted_projects),
+        'users': list(projects_data.keys())
+    })
+
+@app.route('/api/permutation/project/<project_id>', methods=['GET'])
+def get_permutation_project(project_id):
+    """Get specific project for permutation engine (admin only)"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    
+    # Only admins can access this endpoint
+    if account_type != 'admin' and email != 'spikemaz8@aol.com':
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+    
+    # Load all projects from cloud database
+    projects_data = load_projects_data()
+    
+    # Find the project
+    for user_email, user_data in projects_data.items():
+        if isinstance(user_data, dict):
+            user_projects = user_data.get('projects', [])
+        else:
+            user_projects = user_data if isinstance(user_data, list) else []
+        
+        for project in user_projects:
+            if project.get('projectId') == project_id:
+                # Return project with full details
+                return jsonify({
+                    'success': True,
+                    'project': {
+                        'projectId': project.get('projectId'),
+                        'owner': user_email,
+                        'data': project
+                    }
+                })
+    
+    return jsonify({'success': False, 'message': 'Project not found'}), 404
 
 @app.route('/api/projects/<project_id>/upload', methods=['POST'])
 def upload_project_file(project_id):
@@ -5660,18 +5788,23 @@ def upload_project_file(project_id):
         return jsonify({'success': False, 'message': f'Error parsing file: {str(e)}'}), 400
 
 def load_projects_data():
-    """Load projects data from storage"""
+    """Load projects data from cloud storage"""
+    # First try cloud database
+    if CLOUD_DB_AVAILABLE:
+        projects = db_load_projects()
+        if projects:
+            return projects
+    
+    # Then try MongoDB
     try:
         if ENABLE_MONGODB and mongo_client:
             db = mongo_client[MONGODB_DB_NAME]
             collection = db['projects']
             projects = {}
             for doc in collection.find():
-                email = doc.get('email')
-                if email:
-                    if email not in projects:
-                        projects[email] = []
-                    projects[email].append(doc.get('project', {}))
+                user_email = doc.get('user_email')
+                if user_email:
+                    projects[user_email] = doc.get('data', {'projects': [], 'order': []})
             return projects
     except Exception as e:
         print(f"[PROJECTS] MongoDB load error: {e}")
@@ -5683,20 +5816,30 @@ def load_projects_data():
     except:
         return {}
 
-def save_projects_data(projects_data):
-    """Save projects data to storage"""
+def save_projects_data(email, project_data):
+    """Save projects data to cloud storage"""
+    # First try cloud database
+    if CLOUD_DB_AVAILABLE:
+        success = db_save_project_data(email, project_data)
+        if success:
+            print(f"[PROJECTS] Saved projects for {email} to cloud database")
+            return True
+    
+    # Then try MongoDB
     try:
         if ENABLE_MONGODB and mongo_client:
             db = mongo_client[MONGODB_DB_NAME]
             collection = db['projects']
             
-            for email, projects in projects_data.items():
-                for project in projects:
-                    collection.update_one(
-                        {'email': email, 'project.projectId': project.get('projectId')},
-                        {'$set': {'email': email, 'project': project}},
-                        upsert=True
-                    )
+            collection.update_one(
+                {'user_email': email},
+                {'$set': {
+                    'user_email': email,
+                    'data': project_data,
+                    'updated_at': datetime.now().isoformat()
+                }},
+                upsert=True
+            )
             return True
     except Exception as e:
         print(f"[PROJECTS] MongoDB save error: {e}")
@@ -5704,8 +5847,17 @@ def save_projects_data(projects_data):
     # Fallback to local JSON
     try:
         os.makedirs('data', exist_ok=True)
+        projects = {}
+        try:
+            with open('data/projects.json', 'r') as f:
+                projects = json.load(f)
+        except:
+            pass
+        
+        projects[email] = project_data
+        
         with open('data/projects.json', 'w') as f:
-            json.dump(projects_data, f, indent=2)
+            json.dump(projects, f, indent=2)
         return True
     except Exception as e:
         print(f"[PROJECTS] Local save error: {e}")
@@ -6749,7 +6901,9 @@ def get_users_with_projects():
     """Get list of users who have projects (admin only)"""
     ip_address = get_real_ip()
     
-    if not session.get(f'is_admin_{ip_address}'):
+    # CRITICAL SECURITY: Use comprehensive admin verification
+    if not verify_admin_access(ip_address):
+        print(f"[SECURITY] Unauthorized API access to /api/project-specifications/users from {session.get(f'user_email_{ip_address}')}")
         return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
     
     # Load all data sources
