@@ -2481,19 +2481,6 @@
                             </div>
                         </div>
 
-                        <!-- Contingency (Applied to CapEx) -->
-                        <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-                            <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
-                                <i class="fas fa-shield-alt"></i> Contingency
-                            </h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-                                <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Contingency Percent (applied to each CapEx individually)</label>
-                                    <input type="text" id="sponsor-contingencyPercent" placeholder="e.g., 10%" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Build (CapEx Market) -->
                         <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
@@ -2560,6 +2547,19 @@
                                         <label style="color: #94a3b8; font-size: 0.9rem;">Main Contractor Margin</label>
                                         <input type="number" id="sponsor-marketMainContractorMargin" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contingency (Applied to CapEx) -->
+                        <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                            <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
+                                <i class="fas fa-shield-alt"></i> Contingency
+                            </h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Contingency Percent (applied to each CapEx individually)</label>
+                                    <input type="text" id="sponsor-contingencyPercent" placeholder="e.g., 10%" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                 </div>
                             </div>
                         </div>
