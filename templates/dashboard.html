@@ -2589,27 +2589,6 @@
                             </div>
                         </div>
 
-                        <!-- Operations -->
-                        <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-                            <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
-                                <i class="fas fa-cogs"></i> Operations - <span id="ops-currency">EUR</span>
-                            </h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-                                <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem;">Operations Team</label>
-                                    <input type="text" id="sponsor-opsOperationsTeam" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
-                                </div>
-                                <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem;">OSE</label>
-                                    <input type="text" id="sponsor-opsOse" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
-                                </div>
-                                <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem;">Marketing</label>
-                                    <input type="text" id="sponsor-opsMarketing" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Fees -->
                         <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
@@ -2644,10 +2623,6 @@
                                 <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
                                     <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Land Total</div>
                                     <div id="sponsor-landTotal" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
-                                </div>
-                                <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
-                                    <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Operations Total</div>
-                                    <div id="sponsor-opsTotal" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
                                 </div>
                                 <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
                                     <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Fees Total</div>
@@ -7885,14 +7860,12 @@ if (window.showSection) {
             });
         }
         
-        // Update land, ops and fees currency displays
+        // Update land and fees currency displays
         if (capexCurrencySelect) {
             capexCurrencySelect.addEventListener('change', function() {
                 const landCurrencySpan = document.getElementById('land-currency');
-                const opsCurrencySpan = document.getElementById('ops-currency');
                 const feesCurrencySpan = document.getElementById('fees-currency');
                 if (landCurrencySpan) landCurrencySpan.textContent = this.value;
-                if (opsCurrencySpan) opsCurrencySpan.textContent = this.value;
                 if (feesCurrencySpan) feesCurrencySpan.textContent = this.value;
             });
         }
@@ -7906,11 +7879,6 @@ if (window.showSection) {
         addCurrencyFormatting('sponsor-landPurchase', 'sponsor-capex-currency');
         addCurrencyFormatting('sponsor-gridConnectionCosts', 'sponsor-capex-currency');
         addCurrencyFormatting('sponsor-stampDutyFixed', 'sponsor-capex-currency');
-        
-        // Apply formatting to operations fields
-        addCurrencyFormatting('sponsor-opsOperationsTeam', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-opsOse', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-opsMarketing', 'sponsor-capex-currency');
         
         // Apply formatting to fees fields
         addCurrencyFormatting('sponsor-feesDM', 'sponsor-capex-currency');
@@ -8244,13 +8212,6 @@ if (window.showSection) {
         const marketCapexContingency = marketCapexBase * contingencyPercent;
         const marketCapexTotal = marketCapexBase + marketCapexContingency;
 
-        // Calculate ops total
-        const opsFields = ['opsOperationsTeam', 'opsOse', 'opsMarketing'];
-        let opsTotal = 0;
-        opsFields.forEach(field => {
-            const value = parseCurrencyValue(document.getElementById('sponsor-' + field)?.value) || 0;
-            opsTotal += value;
-        });
 
         // Calculate fees total
         const feesDM = parseCurrencyValue(document.getElementById('sponsor-feesDM')?.value) || 0;
@@ -8268,13 +8229,12 @@ if (window.showSection) {
         const feesTotal = feesDM + managementFee;
 
         // Calculate grand total (using internal capex for the total)
-        const grandTotal = internalCapexTotal + landTotal + opsTotal + feesTotal;
+        const grandTotal = internalCapexTotal + landTotal + feesTotal;
 
         // Update display with null checks
         const capexInternalTotalEl = document.getElementById('sponsor-capexInternalTotal');
         const capexMarketTotalEl = document.getElementById('sponsor-capexMarketTotal');
         const landTotalEl = document.getElementById('sponsor-landTotal');
-        const opsTotalEl = document.getElementById('sponsor-opsTotal');
         const feesTotalEl = document.getElementById('sponsor-feesTotal');
         const grandTotalEl = document.getElementById('sponsor-grandTotal');
         
@@ -8283,7 +8243,6 @@ if (window.showSection) {
         if (capexInternalTotalEl) capexInternalTotalEl.textContent = currencySymbol + internalCapexTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
         if (capexMarketTotalEl) capexMarketTotalEl.textContent = currencySymbol + marketCapexTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
         if (landTotalEl) landTotalEl.textContent = currencySymbol + landTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        if (opsTotalEl) opsTotalEl.textContent = currencySymbol + opsTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
         if (feesTotalEl) feesTotalEl.textContent = currencySymbol + feesTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
         if (grandTotalEl) grandTotalEl.textContent = currencySymbol + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
     }
