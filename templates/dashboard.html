@@ -6999,7 +6999,6 @@ if (window.showSection) {
     async function loadUsersList() {
         // Double-check admin status before making API call
         if (!isAdmin || accountType !== 'admin') {
-            console.log('User is not admin, skipping user list load');
             return;
         }
         
@@ -7164,15 +7163,9 @@ if (window.showSection) {
         loadProjects();
         setupProjectsDragAndDrop();
         
-        // Debug logging
-        console.log('User context:', { isAdmin, accountType, userEmail });
-        
         // Load users list if admin
         if (isAdmin && accountType === 'admin') {
-            console.log('Loading admin user list...');
             loadUsersList();
-        } else {
-            console.log('Not loading user list - user is not admin');
         }
         
         // Setup the main grid as a drop zone for standalone projects

@@ -2435,6 +2435,7 @@ def auth():
         session[f'user_email_{ip_address}'] = email
         session[f'access_level_{ip_address}'] = 'admin'
         session[f'is_admin_{ip_address}'] = True
+        session[f'account_type_{ip_address}'] = 'admin'  # Set account type in session
         
         # Track admin login in login attempts
         login_attempts = load_json_db(LOGIN_ATTEMPTS_FILE)
