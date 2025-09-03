@@ -2614,6 +2614,10 @@ def dashboard():
     if user_email and user_email in users:
         account_type = users[user_email].get('account_type', 'external')
     
+    # Override account_type if admin
+    if is_admin:
+        account_type = 'admin'
+    
     # Get account type for display (capitalized)
     if is_admin:
         account_type_display = 'Admin'

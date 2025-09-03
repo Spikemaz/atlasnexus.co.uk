@@ -6997,7 +6997,11 @@ if (window.showSection) {
     
     // Load users list for admin selector
     async function loadUsersList() {
-        if (!isAdmin) return;
+        // Double-check admin status before making API call
+        if (!isAdmin || accountType !== 'admin') {
+            console.log('User is not admin, skipping user list load');
+            return;
+        }
         
         try {
             const response = await fetch('/api/admin/users', {
@@ -7160,9 +7164,15 @@ if (window.showSection) {
         loadProjects();
         setupProjectsDragAndDrop();
         
+        // Debug logging
+        console.log('User context:', { isAdmin, accountType, userEmail });
+        
         // Load users list if admin
-        if (isAdmin) {
+        if (isAdmin && accountType === 'admin') {
+            console.log('Loading admin user list...');
             loadUsersList();
+        } else {
+            console.log('Not loading user list - user is not admin');
         }
         
         // Setup the main grid as a drop zone for standalone projects
