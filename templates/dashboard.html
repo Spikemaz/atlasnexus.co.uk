@@ -7936,6 +7936,12 @@ if (window.showSection) {
     }
 
     function calculateSponsorTotals() {
+        // Check if sponsor editor is visible
+        const sponsorEditor = document.getElementById('sponsor-editor-section');
+        if (!sponsorEditor || sponsorEditor.style.display === 'none') {
+            return; // Don't calculate if editor is not visible
+        }
+        
         // Calculate build total
         const buildFields = [
             'buildArchitectural', 'buildCivilStructural', 'buildSubstations',
@@ -7991,13 +7997,20 @@ if (window.showSection) {
         // Calculate grand total
         const grandTotal = buildTotal + landTotal + opsTotal + feesTotal + contingencyAmount;
 
-        // Update display
-        document.getElementById('sponsor-buildTotal').textContent = '€' + buildTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        document.getElementById('sponsor-landTotal').textContent = '€' + landTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        document.getElementById('sponsor-opsTotal').textContent = '€' + opsTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        document.getElementById('sponsor-feesTotal').textContent = '€' + feesTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        document.getElementById('sponsor-contingencyAmount').textContent = '€' + contingencyAmount.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        document.getElementById('sponsor-grandTotal').textContent = '€' + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        // Update display with null checks
+        const buildTotalEl = document.getElementById('sponsor-buildTotal');
+        const landTotalEl = document.getElementById('sponsor-landTotal');
+        const opsTotalEl = document.getElementById('sponsor-opsTotal');
+        const feesTotalEl = document.getElementById('sponsor-feesTotal');
+        const contingencyAmountEl = document.getElementById('sponsor-contingencyAmount');
+        const grandTotalEl = document.getElementById('sponsor-grandTotal');
+        
+        if (buildTotalEl) buildTotalEl.textContent = '€' + buildTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (landTotalEl) landTotalEl.textContent = '€' + landTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (opsTotalEl) opsTotalEl.textContent = '€' + opsTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (feesTotalEl) feesTotalEl.textContent = '€' + feesTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (contingencyAmountEl) contingencyAmountEl.textContent = '€' + contingencyAmount.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (grandTotalEl) grandTotalEl.textContent = '€' + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
     }
 
     async function handleSponsorFileSelect(event) {
