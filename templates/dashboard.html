@@ -2392,27 +2392,17 @@
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Gross Monthly Rent (per kWh) *</label>
                                     <div style="display: flex; gap: 0.5rem;">
-                                        <input type="number" id="sponsor-grossMonthlyRent" min="0" step="0.01" required style="flex: 1; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                        <input type="text" id="sponsor-grossMonthlyRent" min="0" max="300" step="0.01" required style="flex: 1; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="0.00 - 300.00">
                                         <span id="sponsor-kwh-currency-display" style="padding: 12px; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: #60a5fa; min-width: 60px; text-align: center;">EUR</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">OPEX as % *</label>
-                                    <input type="number" id="sponsor-opexPercent" min="0" max="100" step="0.1" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="e.g., 15">
-                                </div>
-                                <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Gross Monthly Rent</label>
-                                    <input type="number" id="sponsor-grossMonthlyRent" min="0" step="0.01" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
-                                </div>
-                                <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
-                                        <input type="checkbox" id="sponsor-useOpexPercent" checked> Use OPEX Percent
-                                    </label>
-                                    <input type="number" id="sponsor-opexPercent" min="0" max="1" step="0.01" value="0.20" placeholder="OPEX %" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">OPEX % *</label>
+                                    <input type="text" id="sponsor-opexPercent" min="0" max="100" step="1" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="0% - 100%">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Construction Start Date *</label>
-                                    <input type="month" id="sponsor-constructionStart" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Within next 24 months">
+                                    <input type="date" id="sponsor-constructionStart" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="DD/MM/YYYY">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Construction Duration (Months) *</label>
@@ -7683,18 +7673,50 @@ if (window.showSection) {
         const input = document.getElementById(inputId);
         if (!input) return;
         
+        // For OPEX percent, limit to 0-100 and format as %
+        if (inputId === 'sponsor-opexPercent') {
+            input.addEventListener('input', function() {
+                // Remove any non-numeric characters except decimal point
+                let value = this.value.replace(/[^0-9.]/g, '');
+                let numValue = parseFloat(value) || 0;
+                
+                // Limit to 0-100
+                if (numValue > 100) {
+                    numValue = 100;
+                }
+                if (numValue < 0) {
+                    numValue = 0;
+                }
+                
+                this.value = numValue || '';
+            });
+            
+            input.addEventListener('blur', function() {
+                // Add % sign on blur
+                let value = parseFloat(this.value) || 0;
+                if (value > 0) {
+                    this.value = value + '%';
+                }
+            });
+            
+            input.addEventListener('focus', function() {
+                // Remove % sign on focus
+                this.value = this.value.replace('%', '');
+            });
+            return;
+        }
+        
+        // For other percentage fields
         let rawValue = '';
         
         input.addEventListener('focus', function() {
-            // Show raw value on focus
             this.value = rawValue || parsePercentageValue(this.value);
         });
         
         input.addEventListener('blur', function() {
-            // Format on blur
             rawValue = parsePercentageValue(this.value);
             if (rawValue >= 0) {
-                this.value = formatPercentageInput(rawValue);
+                this.value = rawValue + '%';
             }
         });
         
@@ -7830,9 +7852,23 @@ if (window.showSection) {
         // Format construction date display
         const constructionStartInput = document.getElementById('sponsor-constructionStart');
         if (constructionStartInput) {
-            // Set default construction start date to next January
+            // Set min date to today
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const yyyy = today.getFullYear();
+            constructionStartInput.min = `${yyyy}-${mm}-${dd}`;
+            
+            // Set max date to 3 years from today
+            const maxDate = new Date();
+            maxDate.setFullYear(maxDate.getFullYear() + 3);
+            const maxDd = String(maxDate.getDate()).padStart(2, '0');
+            const maxMm = String(maxDate.getMonth() + 1).padStart(2, '0');
+            const maxYyyy = maxDate.getFullYear();
+            constructionStartInput.max = `${maxYyyy}-${maxMm}-${maxDd}`;
+            
+            // Set default construction start date to next January if not set
             if (!constructionStartInput.value) {
-                const today = new Date();
                 const currentYear = today.getFullYear();
                 const currentMonth = today.getMonth();
                 
