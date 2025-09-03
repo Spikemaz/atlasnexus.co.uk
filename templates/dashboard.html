@@ -2421,7 +2421,7 @@
                             <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(96, 165, 250, 0.05); border-radius: 8px;">
                                 <label style="color: #60a5fa; font-weight: 600; display: block; margin-bottom: 0.5rem;">Option 1: Per MW Costing</label>
                                 <div style="display: flex; gap: 1rem; align-items: center;">
-                                    <input type="number" id="sponsor-capexInternalPerMW" min="0" step="0.01" placeholder="Cost per MW" style="flex: 1; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="calculateCapexFromPerMW('internal')">
+                                    <input type="text" id="sponsor-capexInternalPerMW" min="0" max="25000000" placeholder="0 - 25,000,000" style="flex: 1; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="calculateCapexFromPerMW('internal')">
                                     <span style="color: #94a3b8;">× <span id="capex-internal-mw">0</span> MW =</span>
                                     <span id="capex-internal-permw-total" style="color: #60a5fa; font-weight: 600; font-size: 1.2rem;">0</span>
                                 </div>
@@ -2491,7 +2491,7 @@
                             <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(96, 165, 250, 0.05); border-radius: 8px;">
                                 <label style="color: #60a5fa; font-weight: 600; display: block; margin-bottom: 0.5rem;">Option 1: Per MW Costing</label>
                                 <div style="display: flex; gap: 1rem; align-items: center;">
-                                    <input type="number" id="sponsor-capexMarketPerMW" min="0" step="0.01" placeholder="Cost per MW" style="flex: 1; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="calculateCapexFromPerMW('market')">
+                                    <input type="text" id="sponsor-capexMarketPerMW" min="0" max="25000000" placeholder="0 - 25,000,000" style="flex: 1; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="calculateCapexFromPerMW('market')">
                                     <span style="color: #94a3b8;">× <span id="capex-market-mw">0</span> MW =</span>
                                     <span id="capex-market-permw-total" style="color: #60a5fa; font-weight: 600; font-size: 1.2rem;">0</span>
                                 </div>
@@ -2559,19 +2559,19 @@
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Land Purchase</label>
-                                    <input type="number" id="sponsor-landPurchase" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
+                                    <input type="text" id="sponsor-landPurchase" min="0" max="1000000000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="0 - 1,000,000,000">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Grid Connection Costs</label>
-                                    <input type="number" id="sponsor-gridConnectionCosts" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
+                                    <input type="text" id="sponsor-gridConnectionCosts" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
                                 </div>
                                 <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Stamp Duty as %</label>
-                                    <input type="number" id="sponsor-stampDutyPercent" min="0" max="100" step="0.01" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="e.g., 5">
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Stamp Duty %</label>
+                                    <input type="text" id="sponsor-stampDutyPercent" min="0" max="20" step="0.01" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="0% - 20%">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Stamp Duty Fixed (overrides %)</label>
-                                    <input type="number" id="sponsor-stampDutyFixed" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter fixed amount">
+                                    <input type="text" id="sponsor-stampDutyFixed" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter fixed amount">
                                 </div>
                             </div>
                         </div>
@@ -2605,11 +2605,11 @@
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">DM</label>
-                                    <input type="number" id="sponsor-feesDM" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
+                                    <input type="text" id="sponsor-feesDM" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Management 3%</label>
-                                    <input type="number" id="sponsor-feesManagement" min="0" readonly style="width: 100%; padding: 12px; background: rgba(10, 14, 39, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8;" placeholder="Auto-calculated">
+                                    <input type="text" id="sponsor-feesManagement" readonly style="width: 100%; padding: 12px; background: rgba(10, 14, 39, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8;" placeholder="Auto-calculated">
                                 </div>
                             </div>
                         </div>
@@ -7646,20 +7646,95 @@ if (window.showSection) {
         
         if (!input) return;
         
-        // Store raw value
+        // For gross monthly rent, limit to 0-300
+        if (inputId === 'sponsor-grossMonthlyRent') {
+            input.addEventListener('input', function() {
+                let value = parseFloat(this.value.replace(/[^0-9.]/g, '')) || 0;
+                if (value > 300) {
+                    this.value = 300;
+                    value = 300;
+                }
+                if (value < 0) {
+                    this.value = 0;
+                    value = 0;
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                let value = parseFloat(this.value) || 0;
+                if (value > 0) {
+                    const currency = currencySelect ? currencySelect.value : 'EUR';
+                    const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : '';
+                    this.value = symbol + value.toFixed(2);
+                }
+            });
+            
+            input.addEventListener('focus', function() {
+                this.value = parseCurrencyValue(this.value);
+            });
+            return;
+        }
+        
+        // For Cost per MW fields (limit to 0-25M)
+        if (inputId === 'sponsor-capexInternalPerMW' || inputId === 'sponsor-capexMarketPerMW') {
+            input.addEventListener('focus', function() {
+                this.value = parseCurrencyValue(this.value);
+            });
+            
+            input.addEventListener('blur', function() {
+                let value = parseCurrencyValue(this.value);
+                if (value > 25000000) value = 25000000;
+                if (value < 0) value = 0;
+                
+                if (value > 0) {
+                    const currency = currencySelect ? currencySelect.value : 'EUR';
+                    const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : '';
+                    this.value = symbol + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+            });
+            
+            input.addEventListener('input', function() {
+                let value = parseCurrencyValue(this.value);
+                if (value > 25000000) {
+                    this.value = '25000000';
+                }
+            });
+            return;
+        }
+        
+        // For Land Purchase (limit to 1B)
+        if (inputId === 'sponsor-landPurchase') {
+            input.addEventListener('focus', function() {
+                this.value = parseCurrencyValue(this.value);
+            });
+            
+            input.addEventListener('blur', function() {
+                let value = parseCurrencyValue(this.value);
+                if (value > 1000000000) value = 1000000000;
+                if (value < 0) value = 0;
+                
+                if (value > 0) {
+                    const currency = currencySelect ? currencySelect.value : 'EUR';
+                    const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : '';
+                    this.value = symbol + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+            });
+            return;
+        }
+        
+        // For other currency fields
         let rawValue = '';
         
         input.addEventListener('focus', function() {
-            // Show raw value on focus
             this.value = rawValue || parseCurrencyValue(this.value);
         });
         
         input.addEventListener('blur', function() {
-            // Format on blur
             rawValue = parseCurrencyValue(this.value);
-            const currency = currencySelect ? currencySelect.value : 'EUR';
             if (rawValue > 0) {
-                this.value = formatCurrencyInput(rawValue, currency);
+                const currency = currencySelect ? currencySelect.value : 'EUR';
+                const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : '';
+                this.value = symbol + rawValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
         });
         
@@ -7701,6 +7776,36 @@ if (window.showSection) {
             
             input.addEventListener('focus', function() {
                 // Remove % sign on focus
+                this.value = this.value.replace('%', '');
+            });
+            return;
+        }
+        
+        // For Stamp Duty percent, limit to 0-20 and format as %
+        if (inputId === 'sponsor-stampDutyPercent') {
+            input.addEventListener('input', function() {
+                let value = this.value.replace(/[^0-9.]/g, '');
+                let numValue = parseFloat(value) || 0;
+                
+                // Limit to 0-20
+                if (numValue > 20) {
+                    numValue = 20;
+                }
+                if (numValue < 0) {
+                    numValue = 0;
+                }
+                
+                this.value = numValue || '';
+            });
+            
+            input.addEventListener('blur', function() {
+                let value = parseFloat(this.value) || 0;
+                if (value > 0) {
+                    this.value = value + '%';
+                }
+            });
+            
+            input.addEventListener('focus', function() {
                 this.value = this.value.replace('%', '');
             });
             return;
@@ -7826,6 +7931,17 @@ if (window.showSection) {
         
         capexFields.forEach(fieldId => {
             addCurrencyFormatting(fieldId, 'sponsor-capex-currency');
+            
+            // Add event listener to trigger calculation and override
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.addEventListener('input', function() {
+                    calculateSponsorTotals();
+                });
+                field.addEventListener('blur', function() {
+                    calculateSponsorTotals();
+                });
+            }
         });
         
         // Apply formatting to percentage fields
@@ -7842,6 +7958,9 @@ if (window.showSection) {
                 const marketMWSpan = document.getElementById('capex-market-mw');
                 if (internalMWSpan) internalMWSpan.textContent = mw.toFixed(2);
                 if (marketMWSpan) marketMWSpan.textContent = mw.toFixed(2);
+                
+                // Recalculate totals including override logic
+                calculateSponsorTotals();
                 
                 // Recalculate per MW totals if per MW costs are entered
                 calculateCapexFromPerMW('internal');
@@ -7978,32 +8097,133 @@ if (window.showSection) {
             return; // Don't calculate if editor is not visible
         }
         
-        // Calculate build total
-        const buildFields = [
+        // Calculate build total from internal fields
+        const internalBuildFields = [
             'buildArchitectural', 'buildCivilStructural', 'buildSubstations',
             'buildUndergroundUtilities', 'buildCrusaderModules', 'buildBess',
             'buildMainContractorInstallation', 'buildPhotovoltaicSystem',
             'buildLandscaping', 'buildPreliminariesGeneral', 'buildMainContractorMargin'
         ];
-        let buildTotal = 0;
-        buildFields.forEach(field => {
-            const value = document.getElementById('sponsor-' + field)?.value || 0;
-            buildTotal += parseFloat(value) || 0;
+        let internalBuildTotal = 0;
+        let hasInternalBuildValues = false;
+        
+        internalBuildFields.forEach(field => {
+            const element = document.getElementById('sponsor-' + field);
+            if (element) {
+                const value = parseCurrencyValue(element.value);
+                if (value > 0) {
+                    hasInternalBuildValues = true;
+                    internalBuildTotal += value;
+                }
+            }
         });
+        
+        // Calculate build total from market fields
+        const marketBuildFields = [
+            'marketArchitectural', 'marketCivilStructural', 'marketSubstations',
+            'marketUndergroundUtilities', 'marketCrusaderModules', 'marketBess',
+            'marketMainContractorInstallation', 'marketPhotovoltaicSystem',
+            'marketLandscaping', 'marketPreliminariesGeneral', 'marketMainContractorMargin'
+        ];
+        let marketBuildTotal = 0;
+        let hasMarketBuildValues = false;
+        
+        marketBuildFields.forEach(field => {
+            const element = document.getElementById('sponsor-' + field);
+            if (element) {
+                const value = parseCurrencyValue(element.value);
+                if (value > 0) {
+                    hasMarketBuildValues = true;
+                    marketBuildTotal += value;
+                }
+            }
+        });
+        
+        // Get MW value
+        const mwValue = parseFloat(document.getElementById('sponsor-grossITLoadMW')?.value) || 0;
+        const currency = document.getElementById('sponsor-capex-currency')?.value || 'EUR';
+        
+        // Override Internal Cost per MW if individual build fields are filled
+        if (hasInternalBuildValues && mwValue > 0) {
+            const internalPerMW = internalBuildTotal / mwValue;
+            const internalPerMWInput = document.getElementById('sponsor-capexInternalPerMW');
+            if (internalPerMWInput) {
+                internalPerMWInput.value = formatCurrencyInput(internalPerMW, currency);
+                internalPerMWInput.disabled = true; // Disable when override is active
+                // Add visual indicator that it's calculated
+                internalPerMWInput.style.backgroundColor = 'rgba(96, 165, 250, 0.1)';
+                internalPerMWInput.title = 'Auto-calculated from individual build fields';
+            }
+            
+            // Update the total display
+            const internalTotalSpan = document.getElementById('capex-internal-permw-total');
+            if (internalTotalSpan) {
+                const currencySymbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : '';
+                internalTotalSpan.textContent = currencySymbol + internalBuildTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+            }
+        } else {
+            // Re-enable the input if no individual fields are filled
+            const internalPerMWInput = document.getElementById('sponsor-capexInternalPerMW');
+            if (internalPerMWInput) {
+                internalPerMWInput.disabled = false;
+                internalPerMWInput.style.backgroundColor = '#0a0e27';
+                internalPerMWInput.title = '';
+            }
+        }
+        
+        // Override Market Cost per MW if individual build fields are filled
+        if (hasMarketBuildValues && mwValue > 0) {
+            const marketPerMW = marketBuildTotal / mwValue;
+            const marketPerMWInput = document.getElementById('sponsor-capexMarketPerMW');
+            if (marketPerMWInput) {
+                marketPerMWInput.value = formatCurrencyInput(marketPerMW, currency);
+                marketPerMWInput.disabled = true; // Disable when override is active
+                // Add visual indicator that it's calculated
+                marketPerMWInput.style.backgroundColor = 'rgba(96, 165, 250, 0.1)';
+                marketPerMWInput.title = 'Auto-calculated from individual build fields';
+            }
+            
+            // Update the total display
+            const marketTotalSpan = document.getElementById('capex-market-permw-total');
+            if (marketTotalSpan) {
+                const currencySymbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : '';
+                marketTotalSpan.textContent = currencySymbol + marketBuildTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+            }
+        } else {
+            // Re-enable the input if no individual fields are filled
+            const marketPerMWInput = document.getElementById('sponsor-capexMarketPerMW');
+            if (marketPerMWInput) {
+                marketPerMWInput.disabled = false;
+                marketPerMWInput.style.backgroundColor = '#0a0e27';
+                marketPerMWInput.title = '';
+            }
+        }
+        
+        // Use internal build total for remaining calculations
+        let buildTotal = hasInternalBuildValues ? internalBuildTotal : 0;
+        
+        // If no internal build fields but per MW is set, calculate from that
+        if (!hasInternalBuildValues) {
+            const internalPerMW = parseCurrencyValue(document.getElementById('sponsor-capexInternalPerMW')?.value) || 0;
+            if (internalPerMW > 0 && mwValue > 0) {
+                buildTotal = internalPerMW * mwValue;
+            }
+        }
 
         // Calculate land total
-        const landPurchase = parseFloat(document.getElementById('sponsor-landPurchase')?.value) || 0;
-        const landAdditional = parseFloat(document.getElementById('sponsor-landAdditional')?.value) || 0;
+        const landPurchase = parseCurrencyValue(document.getElementById('sponsor-landPurchase')?.value) || 0;
+        const landAdditional = parseCurrencyValue(document.getElementById('sponsor-landAdditional')?.value) || 0;
         const gridIncluded = document.getElementById('sponsor-landGridIncluded')?.checked;
-        const gridConnection = gridIncluded ? 0 : (parseFloat(document.getElementById('sponsor-landGridConnection')?.value) || 0);
+        const gridConnection = gridIncluded ? 0 : (parseCurrencyValue(document.getElementById('sponsor-gridConnectionCosts')?.value) || 0);
         
         // Calculate stamp duty
         let stampDuty = 0;
-        const stampDutyFixed = parseFloat(document.getElementById('sponsor-landStampDutyFixed')?.value) || 0;
+        const stampDutyFixed = parseCurrencyValue(document.getElementById('sponsor-stampDutyFixed')?.value) || 0;
         if (stampDutyFixed > 0) {
             stampDuty = stampDutyFixed;
         } else {
-            const stampDutyPercent = parseFloat(document.getElementById('sponsor-landStampDutyPercent')?.value) || 0;
+            const stampDutyPercentValue = document.getElementById('sponsor-stampDutyPercent')?.value || '0';
+            const stampDutyPercent = parseFloat(stampDutyPercentValue.replace('%', '')) / 100 || 0;
             stampDuty = stampDutyPercent * (landPurchase + landAdditional);
         }
         
@@ -8013,20 +8233,28 @@ if (window.showSection) {
         const opsFields = ['opsOperationsTeam', 'opsOse', 'opsMarketing'];
         let opsTotal = 0;
         opsFields.forEach(field => {
-            const value = document.getElementById('sponsor-' + field)?.value || 0;
-            opsTotal += parseFloat(value) || 0;
+            const value = parseCurrencyValue(document.getElementById('sponsor-' + field)?.value) || 0;
+            opsTotal += value;
         });
 
         // Calculate fees total
-        const feesFields = ['feesDm', 'feesManagement3pct'];
-        let feesTotal = 0;
-        feesFields.forEach(field => {
-            const value = document.getElementById('sponsor-' + field)?.value || 0;
-            feesTotal += parseFloat(value) || 0;
-        });
+        const feesDM = parseCurrencyValue(document.getElementById('sponsor-feesDM')?.value) || 0;
+        
+        // Calculate Management 3% based on total build costs
+        const managementFeeBase = buildTotal + landPurchase + landAdditional + gridConnection;
+        const managementFee = managementFeeBase * 0.03;
+        
+        // Update Management 3% display
+        const managementFeeInput = document.getElementById('sponsor-feesManagement');
+        if (managementFeeInput) {
+            managementFeeInput.value = formatCurrencyInput(managementFee, currency);
+        }
+        
+        const feesTotal = feesDM + managementFee;
 
         // Calculate contingency
-        const contingencyPercent = parseFloat(document.getElementById('sponsor-contingencyPercent')?.value) || 0;
+        const contingencyPercentValue = document.getElementById('sponsor-contingencyPercent')?.value || '0';
+        const contingencyPercent = parseFloat(contingencyPercentValue.replace('%', '')) / 100 || 0;
         const contingencyBase = buildTotal + landPurchase + landAdditional + gridConnection + opsTotal;
         const contingencyAmount = contingencyPercent * contingencyBase;
 
@@ -8041,12 +8269,14 @@ if (window.showSection) {
         const contingencyAmountEl = document.getElementById('sponsor-contingencyAmount');
         const grandTotalEl = document.getElementById('sponsor-grandTotal');
         
-        if (buildTotalEl) buildTotalEl.textContent = '€' + buildTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        if (landTotalEl) landTotalEl.textContent = '€' + landTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        if (opsTotalEl) opsTotalEl.textContent = '€' + opsTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        if (feesTotalEl) feesTotalEl.textContent = '€' + feesTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        if (contingencyAmountEl) contingencyAmountEl.textContent = '€' + contingencyAmount.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        if (grandTotalEl) grandTotalEl.textContent = '€' + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        const currencySymbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : '';
+        
+        if (buildTotalEl) buildTotalEl.textContent = currencySymbol + buildTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (landTotalEl) landTotalEl.textContent = currencySymbol + landTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (opsTotalEl) opsTotalEl.textContent = currencySymbol + opsTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (feesTotalEl) feesTotalEl.textContent = currencySymbol + feesTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (contingencyAmountEl) contingencyAmountEl.textContent = currencySymbol + contingencyAmount.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (grandTotalEl) grandTotalEl.textContent = currencySymbol + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
     }
 
     async function handleSponsorFileSelect(event) {
