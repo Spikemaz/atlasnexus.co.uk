@@ -2481,6 +2481,19 @@
                             </div>
                         </div>
 
+                        <!-- Contingency (Applied to CapEx) -->
+                        <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                            <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
+                                <i class="fas fa-shield-alt"></i> Contingency
+                            </h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Contingency Percent (applied to each CapEx individually)</label>
+                                    <input type="text" id="sponsor-contingencyPercent" placeholder="e.g., 10%" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Build (CapEx Market) -->
                         <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
@@ -2579,20 +2592,20 @@
                         <!-- Operations -->
                         <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
-                                <i class="fas fa-cogs"></i> Operations - EUR
+                                <i class="fas fa-cogs"></i> Operations - <span id="ops-currency">EUR</span>
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Operations Team</label>
-                                    <input type="number" id="sponsor-opsOperationsTeam" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="text" id="sponsor-opsOperationsTeam" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">OSE</label>
-                                    <input type="number" id="sponsor-opsOse" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="text" id="sponsor-opsOse" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem;">Marketing</label>
-                                    <input type="number" id="sponsor-opsMarketing" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="text" id="sponsor-opsMarketing" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
                                 </div>
                             </div>
                         </div>
@@ -2614,19 +2627,6 @@
                             </div>
                         </div>
 
-                        <!-- Contingency -->
-                        <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-                            <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
-                                <i class="fas fa-shield-alt"></i> Contingency
-                            </h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-                                <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Contingency Percent (applied to both CapEx sections individually)</label>
-                                    <input type="number" id="sponsor-contingencyPercent" min="0" max="100" step="0.1" placeholder="e.g., 10" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Totals Display -->
                         <div style="background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(59, 130, 246, 0.1)); border: 2px solid #60a5fa; border-radius: 12px; padding: 1.5rem;">
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.3rem;">
@@ -2634,11 +2634,11 @@
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
                                 <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
-                                    <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">CapEx Internal</div>
+                                    <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">CapEx Internal (incl. contingency)</div>
                                     <div id="sponsor-capexInternalTotal" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
                                 </div>
                                 <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
-                                    <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">CapEx Market</div>
+                                    <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">CapEx Market (incl. contingency)</div>
                                     <div id="sponsor-capexMarketTotal" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
                                 </div>
                                 <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
@@ -2652,10 +2652,6 @@
                                 <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
                                     <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Fees Total</div>
                                     <div id="sponsor-feesTotal" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
-                                </div>
-                                <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
-                                    <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Contingency Amount</div>
-                                    <div id="sponsor-contingencyAmount" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
                                 </div>
                                 <div style="background: linear-gradient(135deg, #60a5fa, #3b82f6); padding: 1rem; border-radius: 8px;">
                                     <div style="color: white; font-size: 0.875rem; margin-bottom: 0.5rem; font-weight: 600;">GRAND TOTAL</div>
@@ -7889,12 +7885,14 @@ if (window.showSection) {
             });
         }
         
-        // Update land and fees currency displays
+        // Update land, ops and fees currency displays
         if (capexCurrencySelect) {
             capexCurrencySelect.addEventListener('change', function() {
                 const landCurrencySpan = document.getElementById('land-currency');
+                const opsCurrencySpan = document.getElementById('ops-currency');
                 const feesCurrencySpan = document.getElementById('fees-currency');
                 if (landCurrencySpan) landCurrencySpan.textContent = this.value;
+                if (opsCurrencySpan) opsCurrencySpan.textContent = this.value;
                 if (feesCurrencySpan) feesCurrencySpan.textContent = this.value;
             });
         }
@@ -7908,6 +7906,11 @@ if (window.showSection) {
         addCurrencyFormatting('sponsor-landPurchase', 'sponsor-capex-currency');
         addCurrencyFormatting('sponsor-gridConnectionCosts', 'sponsor-capex-currency');
         addCurrencyFormatting('sponsor-stampDutyFixed', 'sponsor-capex-currency');
+        
+        // Apply formatting to operations fields
+        addCurrencyFormatting('sponsor-opsOperationsTeam', 'sponsor-capex-currency');
+        addCurrencyFormatting('sponsor-opsOse', 'sponsor-capex-currency');
+        addCurrencyFormatting('sponsor-opsMarketing', 'sponsor-capex-currency');
         
         // Apply formatting to fees fields
         addCurrencyFormatting('sponsor-feesDM', 'sponsor-capex-currency');
@@ -8212,9 +8215,7 @@ if (window.showSection) {
 
         // Calculate land total
         const landPurchase = parseCurrencyValue(document.getElementById('sponsor-landPurchase')?.value) || 0;
-        const landAdditional = parseCurrencyValue(document.getElementById('sponsor-landAdditional')?.value) || 0;
-        const gridIncluded = document.getElementById('sponsor-landGridIncluded')?.checked;
-        const gridConnection = gridIncluded ? 0 : (parseCurrencyValue(document.getElementById('sponsor-gridConnectionCosts')?.value) || 0);
+        const gridConnection = parseCurrencyValue(document.getElementById('sponsor-gridConnectionCosts')?.value) || 0;
         
         // Calculate stamp duty
         let stampDuty = 0;
@@ -8224,10 +8225,24 @@ if (window.showSection) {
         } else {
             const stampDutyPercentValue = document.getElementById('sponsor-stampDutyPercent')?.value || '0';
             const stampDutyPercent = parseFloat(stampDutyPercentValue.replace('%', '')) / 100 || 0;
-            stampDuty = stampDutyPercent * (landPurchase + landAdditional);
+            stampDuty = stampDutyPercent * landPurchase;
         }
         
-        const landTotal = landPurchase + landAdditional + gridConnection + stampDuty;
+        const landTotal = landPurchase + gridConnection + stampDuty;
+
+        // Calculate contingency percentage first
+        const contingencyPercentValue = document.getElementById('sponsor-contingencyPercent')?.value || '0';
+        const contingencyPercent = parseFloat(contingencyPercentValue.replace('%', '')) / 100 || 0;
+        
+        // Calculate Internal CapEx with contingency
+        const internalCapexBase = hasInternalBuildValues ? internalBuildTotal : (parseCurrencyValue(document.getElementById('sponsor-capexInternalPerMW')?.value) || 0) * mwValue;
+        const internalCapexContingency = internalCapexBase * contingencyPercent;
+        const internalCapexTotal = internalCapexBase + internalCapexContingency;
+        
+        // Calculate Market CapEx with contingency  
+        const marketCapexBase = hasMarketBuildValues ? marketBuildTotal : (parseCurrencyValue(document.getElementById('sponsor-capexMarketPerMW')?.value) || 0) * mwValue;
+        const marketCapexContingency = marketCapexBase * contingencyPercent;
+        const marketCapexTotal = marketCapexBase + marketCapexContingency;
 
         // Calculate ops total
         const opsFields = ['opsOperationsTeam', 'opsOse', 'opsMarketing'];
@@ -8240,8 +8255,8 @@ if (window.showSection) {
         // Calculate fees total
         const feesDM = parseCurrencyValue(document.getElementById('sponsor-feesDM')?.value) || 0;
         
-        // Calculate Management 3% based on total build costs
-        const managementFeeBase = buildTotal + landPurchase + landAdditional + gridConnection;
+        // Calculate Management 3% based on total build costs (without contingency)
+        const managementFeeBase = internalCapexBase + landPurchase + gridConnection;
         const managementFee = managementFeeBase * 0.03;
         
         // Update Management 3% display
@@ -8252,30 +8267,24 @@ if (window.showSection) {
         
         const feesTotal = feesDM + managementFee;
 
-        // Calculate contingency
-        const contingencyPercentValue = document.getElementById('sponsor-contingencyPercent')?.value || '0';
-        const contingencyPercent = parseFloat(contingencyPercentValue.replace('%', '')) / 100 || 0;
-        const contingencyBase = buildTotal + landPurchase + landAdditional + gridConnection + opsTotal;
-        const contingencyAmount = contingencyPercent * contingencyBase;
-
-        // Calculate grand total
-        const grandTotal = buildTotal + landTotal + opsTotal + feesTotal + contingencyAmount;
+        // Calculate grand total (using internal capex for the total)
+        const grandTotal = internalCapexTotal + landTotal + opsTotal + feesTotal;
 
         // Update display with null checks
-        const buildTotalEl = document.getElementById('sponsor-buildTotal');
+        const capexInternalTotalEl = document.getElementById('sponsor-capexInternalTotal');
+        const capexMarketTotalEl = document.getElementById('sponsor-capexMarketTotal');
         const landTotalEl = document.getElementById('sponsor-landTotal');
         const opsTotalEl = document.getElementById('sponsor-opsTotal');
         const feesTotalEl = document.getElementById('sponsor-feesTotal');
-        const contingencyAmountEl = document.getElementById('sponsor-contingencyAmount');
         const grandTotalEl = document.getElementById('sponsor-grandTotal');
         
         const currencySymbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : '';
         
-        if (buildTotalEl) buildTotalEl.textContent = currencySymbol + buildTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (capexInternalTotalEl) capexInternalTotalEl.textContent = currencySymbol + internalCapexTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (capexMarketTotalEl) capexMarketTotalEl.textContent = currencySymbol + marketCapexTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
         if (landTotalEl) landTotalEl.textContent = currencySymbol + landTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
         if (opsTotalEl) opsTotalEl.textContent = currencySymbol + opsTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
         if (feesTotalEl) feesTotalEl.textContent = currencySymbol + feesTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        if (contingencyAmountEl) contingencyAmountEl.textContent = currencySymbol + contingencyAmount.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
         if (grandTotalEl) grandTotalEl.textContent = currencySymbol + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
     }
 
