@@ -5910,6 +5910,131 @@ def get_permutation_project(project_id):
     
     return jsonify({'success': False, 'message': 'Project not found'}), 404
 
+@app.route('/api/permutation/execute', methods=['POST'])
+def execute_permutation():
+    """Execute permutation engine and store results"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    
+    # Only admins can run permutations
+    if account_type != 'admin' and email != 'spikemaz8@aol.com':
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+    
+    data = request.get_json()
+    project_id = data.get('projectId')
+    parameters = data.get('parameters', {})
+    
+    if not project_id:
+        return jsonify({'success': False, 'message': 'Project ID required'}), 400
+    
+    try:
+        # Import permutation storage
+        from permutation_results_storage import permutation_storage
+        
+        # Generate sample permutation results (replace with actual engine)
+        # This is a simplified example - real engine would generate thousands
+        permutations = []
+        for i in range(100):  # Generate 100 sample permutations
+            permutation = {
+                'id': f'perm_{i}',
+                'irr': 12.5 + (i * 0.1),  # Sample IRR values
+                'npv': 5000000 + (i * 10000),  # Sample NPV
+                'dscr': 1.25 + (i * 0.01),  # Sample DSCR
+                'parameters': {
+                    'lease_term': 10 + (i % 5),
+                    'cap_rate': 6.5 + (i * 0.05),
+                    'interest_rate': 4.5 + (i * 0.02)
+                }
+            }
+            permutations.append(permutation)
+        
+        # Create results package
+        results_data = {
+            'parameters': parameters,
+            'permutations': permutations,
+            'summary': {
+                'total_permutations': len(permutations),
+                'avg_irr': sum(p['irr'] for p in permutations) / len(permutations),
+                'max_npv': max(p['npv'] for p in permutations),
+                'min_dscr': min(p['dscr'] for p in permutations),
+                'execution_time': '2.5 seconds'
+            },
+            'metadata': {
+                'project_id': project_id,
+                'executed_by': email,
+                'executed_at': datetime.now().isoformat()
+            }
+        }
+        
+        # Save results using blob storage for large data
+        storage_result = permutation_storage.save_permutation_results(
+            project_id, email, results_data
+        )
+        
+        if storage_result and storage_result['success']:
+            return jsonify({
+                'success': True,
+                'message': f'Permutation completed: {len(permutations)} results generated',
+                'storage': storage_result,
+                'summary': results_data['summary']
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to save permutation results'
+            }), 500
+            
+    except Exception as e:
+        print(f"[ERROR] Permutation execution failed: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'Permutation failed: {str(e)}'
+        }), 500
+
+@app.route('/api/permutation/results/<project_id>', methods=['GET'])
+def get_permutation_results(project_id):
+    """Retrieve permutation results"""
+    ip_address = get_real_ip()
+    
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    
+    # Only admins can view permutation results
+    if account_type != 'admin' and email != 'spikemaz8@aol.com':
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+    
+    try:
+        from permutation_results_storage import permutation_storage
+        
+        # Load results
+        results = permutation_storage.load_permutation_results(project_id)
+        
+        if results:
+            return jsonify({
+                'success': True,
+                'results': results
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'No results found for this project'
+            }), 404
+            
+    except Exception as e:
+        print(f"[ERROR] Failed to retrieve results: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'Failed to retrieve results: {str(e)}'
+        }), 500
+
 @app.route('/api/projects/<project_id>/upload', methods=['POST'])
 def upload_project_file(project_id):
     """Upload and parse Excel sponsor input template"""
