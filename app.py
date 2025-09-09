@@ -471,8 +471,28 @@ def load_registrations_data():
     return cloud_db.load_registrations()
 
 def delete_registration_data(email):
-    """Delete registration from MongoDB cloud database"""
-    return cloud_db.delete_registration(email)
+    """Delete registration from MongoDB cloud database or local storage"""
+    global CLOUD_DB_AVAILABLE
+    
+    # Try cloud database first
+    if CLOUD_DB_AVAILABLE and cloud_db and cloud_db.connected:
+        return cloud_db.delete_registration(email)
+    
+    # Fallback to local storage
+    try:
+        registrations = load_registrations_data()
+        if email in registrations:
+            del registrations[email]
+            # Save back to local file
+            REGISTRATIONS_FILE = 'data/registrations.json'
+            os.makedirs('data', exist_ok=True)
+            with open(REGISTRATIONS_FILE, 'w') as f:
+                json.dump(registrations, f, indent=2)
+            return True
+        return False
+    except Exception as e:
+        print(f"[ERROR] Failed to delete registration: {e}")
+        return False
 
 def save_user_data(email, data):
     """Save user data to MongoDB cloud database"""
