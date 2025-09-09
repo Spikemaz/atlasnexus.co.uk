@@ -10366,6 +10366,27 @@ if (window.showSection) {
                 projectInfo.style.display = 'block';
             }
             
+            // Save a snapshot of the project data to the permutation engine
+            try {
+                const snapshotResponse = await fetch('/api/permutation/snapshot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        projectId: projectId,
+                        projectData: project,
+                        mappedValues: mappings
+                    })
+                });
+                
+                if (snapshotResponse.ok) {
+                    console.log('Snapshot saved for permutation engine');
+                }
+            } catch (error) {
+                console.error('Failed to save snapshot:', error);
+            }
+            
             console.log('Project loaded to permutation engine:', project);
             alert(`Project "${project.meta?.projectTitle || 'Untitled'}" loaded successfully!`);
             

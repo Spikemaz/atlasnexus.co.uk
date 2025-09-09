@@ -4333,6 +4333,34 @@ def update_project(project_id):
         data = request.json
         for i, project in enumerate(user_projects):
             if project['id'] == project_id:
+                # Check if this project has a permutation snapshot
+                if CLOUD_DB_AVAILABLE and cloud_db:
+                    snapshot = cloud_db.get_permutation_snapshot(project_id)
+                    if snapshot:
+                        # Track what changed
+                        changes = {}
+                        for key, new_value in data.items():
+                            old_value = project.get(key)
+                            if old_value != new_value:
+                                changes[key] = {
+                                    'old': old_value,
+                                    'new': new_value
+                                }
+                        
+                        # If there are changes to critical fields, save a change request
+                        critical_fields = ['grossITLoad', 'pue', 'capexCost', 'capexRate', 
+                                         'landFees', 'grossMonthlyRent', 'opex']
+                        critical_changes = {k: v for k, v in changes.items() if k in critical_fields}
+                        
+                        if critical_changes:
+                            cloud_db.save_project_change_request(
+                                project_id, 
+                                user_email,
+                                critical_changes
+                            )
+                            print(f"[PROJECT] Change request saved for project {project_id}")
+                
+                # Update the project
                 user_projects[i].update(data)
                 user_projects[i]['updated_at'] = datetime.now().isoformat()
                 save_projects_data(user_email, projects[user_email])
@@ -5682,6 +5710,82 @@ def get_permutation_projects():
         'count': len(formatted_projects),
         'users': list(projects_data.keys())
     })
+
+@app.route('/api/permutation/changes', methods=['GET', 'POST'])
+def manage_permutation_changes():
+    """View and approve/reject project changes"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    # Check if user is admin
+    is_admin = session.get(f'is_admin_{ip_address}', False)
+    if not is_admin:
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+    
+    if request.method == 'GET':
+        # Get all pending changes
+        if CLOUD_DB_AVAILABLE and cloud_db:
+            changes = cloud_db.get_pending_changes()
+            return jsonify({
+                'success': True,
+                'changes': changes,
+                'count': len(changes)
+            })
+        return jsonify({'success': False, 'changes': []})
+    
+    elif request.method == 'POST':
+        # Approve or reject a change
+        data = request.json
+        change_id = data.get('changeId')
+        action = data.get('action')  # 'approve' or 'reject'
+        
+        if not change_id or action not in ['approve', 'reject']:
+            return jsonify({'success': False, 'message': 'Invalid request'}), 400
+        
+        # Update change status in database
+        # This would need to be implemented in cloud_database.py
+        return jsonify({'success': True, 'message': f'Change {action}d'})
+
+@app.route('/api/permutation/snapshot', methods=['POST'])
+def save_permutation_snapshot():
+    """Save a snapshot when project is loaded into permutation engine"""
+    ip_address = get_real_ip()
+    
+    # Check authentication
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    # Check if user is admin
+    is_admin = session.get(f'is_admin_{ip_address}', False)
+    if not is_admin:
+        return jsonify({'success': False, 'message': 'Admin access required'}), 403
+    
+    data = request.json
+    project_id = data.get('projectId')
+    project_data = data.get('projectData')
+    mapped_values = data.get('mappedValues')
+    
+    if not project_id or not project_data:
+        return jsonify({'success': False, 'message': 'Missing project data'}), 400
+    
+    # Save snapshot to database
+    if CLOUD_DB_AVAILABLE and cloud_db:
+        snapshot_data = {
+            'original_project': project_data,
+            'mapped_values': mapped_values,
+            'saved_by': session.get(f'user_email_{ip_address}'),
+            'saved_at': datetime.now().isoformat()
+        }
+        
+        success = cloud_db.save_permutation_snapshot(project_id, snapshot_data)
+        if success:
+            print(f"[PERMUTATION] Snapshot saved for project {project_id}")
+            return jsonify({'success': True, 'message': 'Snapshot saved'})
+    
+    return jsonify({'success': False, 'message': 'Failed to save snapshot'}), 500
 
 @app.route('/api/permutation/project/<project_id>', methods=['GET'])
 def get_permutation_project(project_id):

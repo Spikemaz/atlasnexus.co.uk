@@ -311,6 +311,81 @@ class CloudDatabase:
             print(f"[DATABASE] Error saving projects: {e}")
             return False
     
+    def save_permutation_snapshot(self, project_id, snapshot_data):
+        """Save a snapshot of project data when loaded into permutation engine"""
+        if not self.connected:
+            return False
+        
+        try:
+            doc = {
+                'project_id': project_id,
+                'snapshot_data': snapshot_data,
+                'created_at': datetime.now().isoformat(),
+                'approved': True,  # Initial snapshot is auto-approved
+                'version': 1
+            }
+            
+            # Check if snapshot exists and increment version
+            existing = self.db.permutation_snapshots.find_one({'project_id': project_id})
+            if existing:
+                doc['version'] = existing.get('version', 1) + 1
+            
+            self.db.permutation_snapshots.insert_one(doc)
+            return True
+        except Exception as e:
+            print(f"[DATABASE] Error saving permutation snapshot: {e}")
+            return False
+    
+    def get_permutation_snapshot(self, project_id):
+        """Get the latest approved snapshot for a project"""
+        if not self.connected:
+            return None
+        
+        try:
+            # Get the latest approved snapshot
+            snapshot = self.db.permutation_snapshots.find_one(
+                {'project_id': project_id, 'approved': True},
+                sort=[('version', -1)]
+            )
+            return snapshot
+        except Exception as e:
+            print(f"[DATABASE] Error loading permutation snapshot: {e}")
+            return None
+    
+    def save_project_change_request(self, project_id, user_email, changes):
+        """Save a change request when client modifies project"""
+        if not self.connected:
+            return False
+        
+        try:
+            doc = {
+                'project_id': project_id,
+                'user_email': user_email,
+                'changes': changes,
+                'status': 'pending',  # pending, approved, rejected
+                'created_at': datetime.now().isoformat(),
+                'reviewed_at': None,
+                'reviewed_by': None
+            }
+            
+            self.db.project_changes.insert_one(doc)
+            return True
+        except Exception as e:
+            print(f"[DATABASE] Error saving change request: {e}")
+            return False
+    
+    def get_pending_changes(self):
+        """Get all pending change requests"""
+        if not self.connected:
+            return []
+        
+        try:
+            changes = list(self.db.project_changes.find({'status': 'pending'}))
+            return changes
+        except Exception as e:
+            print(f"[DATABASE] Error loading pending changes: {e}")
+            return []
+    
     def get_database_stats(self):
         """Get MongoDB database statistics including storage usage"""
         if not self.connected:
