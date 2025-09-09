@@ -5933,7 +5933,7 @@ def execute_permutation():
         return jsonify({'success': False, 'message': 'Project ID required'}), 400
     
     try:
-        # Import permutation storage
+        # Import Vercel Blob storage (100GB available with Pro plan)
         from permutation_results_storage import permutation_storage
         
         # Generate sample permutation results (replace with actual engine)
@@ -5971,7 +5971,7 @@ def execute_permutation():
             }
         }
         
-        # Save results using blob storage for large data
+        # Save results using Vercel Blob (100GB with Pro plan)
         storage_result = permutation_storage.save_permutation_results(
             project_id, email, results_data
         )
@@ -6014,7 +6014,7 @@ def get_permutation_results(project_id):
     try:
         from permutation_results_storage import permutation_storage
         
-        # Load results
+        # Load results from Vercel Blob
         results = permutation_storage.load_permutation_results(project_id)
         
         if results:
