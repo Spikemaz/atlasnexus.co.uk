@@ -9031,6 +9031,16 @@ if (window.showSection) {
         card.dataset.index = index;
         card.dataset.projectId = project.id;
         
+        // Debug admin status for delete button
+        if (project.ownerEmail && project.ownerEmail !== userEmail) {
+            console.log(`Project from ${project.ownerEmail}:`, {
+                isAdmin: isAdmin,
+                accountType: accountType,
+                userEmail: userEmail,
+                shouldShowDelete: (isAdmin === true || accountType === 'admin')
+            });
+        }
+        
         // Set seriesId if project is in a series
         if (seriesId) {
             card.dataset.seriesId = seriesId;
@@ -9088,8 +9098,8 @@ if (window.showSection) {
                     ${isAdmin ? `<button onclick="launchPermutationWithProject('${project.id}')" style="flex: 1; background: linear-gradient(135deg, #0a0e27, #020617); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
                         <i class="fas fa-cogs"></i> Permutation
                     </button>` : ''}
-                    ${isAdmin || !project.ownerEmail || project.ownerEmail === userEmail ? `
-                    <button onclick="deleteProject('${project.id}')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                    ${(isAdmin === true || accountType === 'admin' || !project.ownerEmail || project.ownerEmail === userEmail) ? `
+                    <button onclick="deleteProject('${project.id}')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;" title="${isAdmin ? 'Delete project from ' + (project.ownerEmail || 'unknown') : 'Delete project'}">
                         <i class="fas fa-trash"></i>
                     </button>` : ''}
                 </div>
