@@ -471,28 +471,8 @@ def load_registrations_data():
     return cloud_db.load_registrations()
 
 def delete_registration_data(email):
-    """Delete registration from MongoDB cloud database or local storage"""
-    global CLOUD_DB_AVAILABLE
-    
-    # Try cloud database first
-    if CLOUD_DB_AVAILABLE and cloud_db and cloud_db.connected:
-        return cloud_db.delete_registration(email)
-    
-    # Fallback to local storage
-    try:
-        registrations = load_registrations_data()
-        if email in registrations:
-            del registrations[email]
-            # Save back to local file
-            REGISTRATIONS_FILE = 'data/registrations.json'
-            os.makedirs('data', exist_ok=True)
-            with open(REGISTRATIONS_FILE, 'w') as f:
-                json.dump(registrations, f, indent=2)
-            return True
-        return False
-    except Exception as e:
-        print(f"[ERROR] Failed to delete registration: {e}")
-        return False
+    """Delete registration from MongoDB cloud database"""
+    return cloud_db.delete_registration(email)
 
 def save_user_data(email, data):
     """Save user data to MongoDB cloud database"""
@@ -507,54 +487,12 @@ def delete_user_data(email):
     return cloud_db.delete_user(email)
 
 def load_projects_data():
-    """Load projects from MongoDB cloud database or local file"""
-    global CLOUD_DB_AVAILABLE
-    
-    # Try to reinitialize if not connected
-    if not CLOUD_DB_AVAILABLE and 'cloud_db' in globals():
-        try:
-            from cloud_database import reinitialize_db
-            CLOUD_DB_AVAILABLE = reinitialize_db()
-            if CLOUD_DB_AVAILABLE:
-                print("[DATABASE] Reconnected to MongoDB for projects")
-        except:
-            pass
-    
-    if CLOUD_DB_AVAILABLE and cloud_db and cloud_db.connected:
-        projects = cloud_db.load_projects()
-        if projects is not None:
-            return projects
-    
-    # Fallback to local file
-    PROJECTS_FILE = 'data/projects.json'
-    return load_json_db(PROJECTS_FILE)
+    """Load projects from MongoDB cloud database"""
+    return cloud_db.load_projects()
 
 def save_projects_data(user_email, project_data):
-    """Save projects to MongoDB cloud database or local file"""
-    global CLOUD_DB_AVAILABLE
-    
-    # Try to reinitialize if not connected
-    if not CLOUD_DB_AVAILABLE and 'cloud_db' in globals():
-        try:
-            from cloud_database import reinitialize_db
-            CLOUD_DB_AVAILABLE = reinitialize_db()
-            if CLOUD_DB_AVAILABLE:
-                print("[DATABASE] Reconnected to MongoDB for saving projects")
-        except:
-            pass
-    
-    if CLOUD_DB_AVAILABLE and cloud_db and cloud_db.connected:
-        success = cloud_db.save_projects(user_email, project_data)
-        if success:
-            print(f"[DATABASE] Saved projects for {user_email} to MongoDB")
-            return True
-    
-    # Fallback to local file
-    print(f"[DATABASE] Saving projects for {user_email} to local file (MongoDB not available)")
-    PROJECTS_FILE = 'data/projects.json'
-    projects = load_json_db(PROJECTS_FILE)
-    projects[user_email] = project_data
-    return save_json_db(PROJECTS_FILE, projects)
+    """Save projects to MongoDB cloud database"""
+    return cloud_db.save_projects(user_email, project_data)
 
 def get_real_ip():
     """Get the real IP address, handling proxies and CDNs"""

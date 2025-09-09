@@ -386,6 +386,58 @@ class CloudDatabase:
             print(f"[DATABASE] Error loading pending changes: {e}")
             return []
     
+    def load_ip_tracking(self):
+        """Load IP tracking data"""
+        if not self.connected:
+            return {}
+        try:
+            tracking = self.db.ip_tracking.find_one({'_id': 'tracking'})
+            return tracking.get('data', {}) if tracking else {}
+        except Exception as e:
+            print(f"[DATABASE] Error loading IP tracking: {e}")
+            return {}
+    
+    def save_ip_tracking(self, tracking_data):
+        """Save IP tracking data"""
+        if not self.connected:
+            return False
+        try:
+            self.db.ip_tracking.replace_one(
+                {'_id': 'tracking'},
+                {'_id': 'tracking', 'data': tracking_data},
+                upsert=True
+            )
+            return True
+        except Exception as e:
+            print(f"[DATABASE] Error saving IP tracking: {e}")
+            return False
+    
+    def load_login_attempts(self):
+        """Load login attempts data"""
+        if not self.connected:
+            return {}
+        try:
+            attempts = self.db.login_attempts.find_one({'_id': 'attempts'})
+            return attempts.get('data', {}) if attempts else {}
+        except Exception as e:
+            print(f"[DATABASE] Error loading login attempts: {e}")
+            return {}
+    
+    def save_login_attempts(self, attempts_data):
+        """Save login attempts data"""
+        if not self.connected:
+            return False
+        try:
+            self.db.login_attempts.replace_one(
+                {'_id': 'attempts'},
+                {'_id': 'attempts', 'data': attempts_data},
+                upsert=True
+            )
+            return True
+        except Exception as e:
+            print(f"[DATABASE] Error saving login attempts: {e}")
+            return False
+    
     def get_database_stats(self):
         """Get MongoDB database statistics including storage usage"""
         if not self.connected:
