@@ -34,10 +34,12 @@ try:
     from cloud_database import reinitialize_db, cloud_db, get_mongodb_uri
     
     # Check if MongoDB is actually connected
-    CLOUD_DB_AVAILABLE = False
+    CLOUD_DB_AVAILABLE = cloud_db and cloud_db.connected
     
-    # We'll initialize the connection on first request instead
-    print("[DATABASE] Cloud database module loaded - will connect on first request")
+    if CLOUD_DB_AVAILABLE:
+        print("[DATABASE] Cloud database connected successfully!")
+    else:
+        print("[DATABASE] Cloud database module loaded - will attempt connection")
 except ImportError:
     CLOUD_DB_AVAILABLE = False
     db_load_projects = None
@@ -486,23 +488,53 @@ def delete_user_data(email):
 
 def load_projects_data():
     """Load projects from MongoDB cloud database or local file"""
-    if cloud_db and cloud_db.connected:
-        return cloud_db.load_projects()
-    else:
-        # Fallback to local file
-        PROJECTS_FILE = 'data/projects.json'
-        return load_json_db(PROJECTS_FILE)
+    global CLOUD_DB_AVAILABLE
+    
+    # Try to reinitialize if not connected
+    if not CLOUD_DB_AVAILABLE and 'cloud_db' in globals():
+        try:
+            from cloud_database import reinitialize_db
+            CLOUD_DB_AVAILABLE = reinitialize_db()
+            if CLOUD_DB_AVAILABLE:
+                print("[DATABASE] Reconnected to MongoDB for projects")
+        except:
+            pass
+    
+    if CLOUD_DB_AVAILABLE and cloud_db and cloud_db.connected:
+        projects = cloud_db.load_projects()
+        if projects is not None:
+            return projects
+    
+    # Fallback to local file
+    PROJECTS_FILE = 'data/projects.json'
+    return load_json_db(PROJECTS_FILE)
 
 def save_projects_data(user_email, project_data):
     """Save projects to MongoDB cloud database or local file"""
-    if cloud_db and cloud_db.connected:
-        return cloud_db.save_projects(user_email, project_data)
-    else:
-        # Fallback to local file
-        PROJECTS_FILE = 'data/projects.json'
-        projects = load_json_db(PROJECTS_FILE)
-        projects[user_email] = project_data
-        return save_json_db(PROJECTS_FILE, projects)
+    global CLOUD_DB_AVAILABLE
+    
+    # Try to reinitialize if not connected
+    if not CLOUD_DB_AVAILABLE and 'cloud_db' in globals():
+        try:
+            from cloud_database import reinitialize_db
+            CLOUD_DB_AVAILABLE = reinitialize_db()
+            if CLOUD_DB_AVAILABLE:
+                print("[DATABASE] Reconnected to MongoDB for saving projects")
+        except:
+            pass
+    
+    if CLOUD_DB_AVAILABLE and cloud_db and cloud_db.connected:
+        success = cloud_db.save_projects(user_email, project_data)
+        if success:
+            print(f"[DATABASE] Saved projects for {user_email} to MongoDB")
+            return True
+    
+    # Fallback to local file
+    print(f"[DATABASE] Saving projects for {user_email} to local file (MongoDB not available)")
+    PROJECTS_FILE = 'data/projects.json'
+    projects = load_json_db(PROJECTS_FILE)
+    projects[user_email] = project_data
+    return save_json_db(PROJECTS_FILE, projects)
 
 def get_real_ip():
     """Get the real IP address, handling proxies and CDNs"""
@@ -5792,81 +5824,15 @@ def upload_project_file(project_id):
         print(f"[PROJECTS] Upload parsing error: {str(e)}")
         return jsonify({'success': False, 'message': f'Error parsing file: {str(e)}'}), 400
 
-def load_projects_data():
-    """Load projects data from cloud storage"""
-    # First try cloud database
-    if CLOUD_DB_AVAILABLE:
-        projects = db_load_projects()
-        if projects:
-            return projects
-    
-    # Then try MongoDB
-    try:
-        if ENABLE_MONGODB and mongo_client:
-            db = mongo_client[MONGODB_DB_NAME]
-            collection = db['projects']
-            projects = {}
-            for doc in collection.find():
-                user_email = doc.get('user_email')
-                if user_email:
-                    projects[user_email] = doc.get('data', {'projects': [], 'order': []})
-            return projects
-    except Exception as e:
-        print(f"[PROJECTS] MongoDB load error: {e}")
-    
-    # Fallback to local JSON
-    try:
-        with open('data/projects.json', 'r') as f:
-            return json.load(f)
-    except:
-        return {}
+# Duplicate function removed - using the one defined at line 489
+# def load_projects_data():
+#     """Load projects data from cloud storage"""
+#     # This was a duplicate - removed to avoid conflicts
 
-def save_projects_data(email, project_data):
-    """Save projects data to cloud storage"""
-    # First try cloud database
-    if CLOUD_DB_AVAILABLE:
-        success = db_save_project_data(email, project_data)
-        if success:
-            print(f"[PROJECTS] Saved projects for {email} to cloud database")
-            return True
-    
-    # Then try MongoDB
-    try:
-        if ENABLE_MONGODB and mongo_client:
-            db = mongo_client[MONGODB_DB_NAME]
-            collection = db['projects']
-            
-            collection.update_one(
-                {'user_email': email},
-                {'$set': {
-                    'user_email': email,
-                    'data': project_data,
-                    'updated_at': datetime.now().isoformat()
-                }},
-                upsert=True
-            )
-            return True
-    except Exception as e:
-        print(f"[PROJECTS] MongoDB save error: {e}")
-    
-    # Fallback to local JSON
-    try:
-        os.makedirs('data', exist_ok=True)
-        projects = {}
-        try:
-            with open('data/projects.json', 'r') as f:
-                projects = json.load(f)
-        except:
-            pass
-        
-        projects[email] = project_data
-        
-        with open('data/projects.json', 'w') as f:
-            json.dump(projects, f, indent=2)
-        return True
-    except Exception as e:
-        print(f"[PROJECTS] Local save error: {e}")
-        return False
+# Duplicate function removed - using the one defined at line 512
+# def save_projects_data(email, project_data):
+#     """Save projects data to cloud storage"""
+#     # This was a duplicate - removed to avoid conflicts
 
 # ==================== DOCUMENT UPLOAD WITH BLOB STORAGE ====================
 @app.route('/api/documents/upload', methods=['POST'])

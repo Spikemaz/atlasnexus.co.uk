@@ -75,7 +75,8 @@
       "Bash(sed:*)",
       "Bash(start https://vercel.com/marcus-moores-projects/atlasnexus-securitization)",
       "Bash(start http://localhost:5000/admin-panel)",
-      "Bash(start https://vercel.com/marcus-moores-projects/atlasnexus-securitization/settings/environment-variables)"
+      "Bash(start https://vercel.com/marcus-moores-projects/atlasnexus-securitization/settings/environment-variables)",
+      "Bash(git config:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"
