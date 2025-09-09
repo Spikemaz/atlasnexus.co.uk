@@ -3127,10 +3127,34 @@ def admin_verify_email():
         # Save back to database
         save_registration_data(email, registrations[email])
         
-        # Also update in users if exists
-        if email in users:
-            users[email]['email_verified'] = True
+        # If also approved, create user account now
+        if registrations[email].get('admin_approved'):
+            # Create user account since both verified and approved
+            password = registrations[email].get('generated_password', 'TestPassword123!')
+            account_type = registrations[email].get('account_type', 'external')
+            password_expiry = datetime.now() + timedelta(days=30)
+            
+            users[email] = {
+                **registrations[email],
+                'password': password,
+                'password_expiry': password_expiry.isoformat(),
+                'admin_approved': True,
+                'account_type': account_type,
+                'is_admin': (account_type == 'admin'),
+                'email_verified': True,
+                'login_count': 0,
+                'created_at': datetime.now().isoformat()
+            }
             save_user_data(email, users[email])
+            
+            # Log that user was created
+            add_admin_action({
+                'action': 'user_created_after_verification',
+                'email': email,
+                'admin': session.get(f'user_email_{ip_address}'),
+                'timestamp': datetime.now().isoformat(),
+                'details': 'User account created after manual email verification'
+            })
         
         # Log admin action
         add_admin_action({
@@ -3166,6 +3190,40 @@ def admin_verify_email():
         })
     
     return jsonify({'status': 'error', 'message': 'User not found'}), 404
+
+@app.route('/admin/delete-registration', methods=['POST'])
+def admin_delete_registration():
+    """Admin delete a registration"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    email = request.json.get('email')
+    
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email required'}), 400
+    
+    # Delete from registrations
+    success = delete_registration_data(email)
+    
+    if success:
+        # Log admin action
+        add_admin_action({
+            'action': 'registration_deleted',
+            'email': email,
+            'admin': session.get(f'user_email_{ip_address}'),
+            'timestamp': datetime.now().isoformat(),
+            'details': 'Registration deleted by admin'
+        })
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'Registration deleted for {email}'
+        })
+    else:
+        return jsonify({'status': 'error', 'message': 'Failed to delete registration'}), 400
 
 @app.route('/admin/reject-user', methods=['POST'])
 def admin_reject_user():
@@ -5754,7 +5812,7 @@ def get_permutation_projects():
         for project in user_projects:
             # Add owner info and format for permutation
             formatted_project = {
-                'projectId': project.get('projectId'),
+                'projectId': project.get('id') or project.get('projectId'),
                 'title': project.get('title', project.get('meta', {}).get('projectTitle', 'Untitled')),
                 'owner': user_email,
                 'status': project.get('status', 'draft'),
@@ -5880,12 +5938,13 @@ def get_permutation_project(project_id):
             user_projects = user_data if isinstance(user_data, list) else []
         
         for project in user_projects:
-            if project.get('projectId') == project_id:
+            # Check both 'id' and 'projectId' fields for compatibility
+            if project.get('id') == project_id or project.get('projectId') == project_id:
                 # Return project with full details
                 return jsonify({
                     'success': True,
                     'project': {
-                        'projectId': project.get('projectId'),
+                        'projectId': project.get('id') or project.get('projectId'),
                         'owner': user_email,
                         'data': project
                     }

@@ -1559,6 +1559,9 @@
                                         <i class="fas fa-key"></i> Password
                                     </button>
                                 `}
+                                <button class="action-btn action-delete" style="background: #dc3545;" onclick="deleteRegistration('${email}')" title="Delete registration">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -2013,7 +2016,32 @@
                     showAlert(data.message || 'Error rejecting user', 'danger');
                 }
             } catch (error) {
+                console.error('Error:', error);
                 showAlert('Error rejecting user', 'danger');
+            }
+        }
+        
+        async function deleteRegistration(email) {
+            if (!confirm(`Delete registration for ${email}? This action cannot be undone.`)) return;
+            
+            try {
+                const response = await fetch('/admin/delete-registration', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('Registration deleted successfully', 'success');
+                    loadRegistrationsData();
+                    loadDashboardData();
+                } else {
+                    showAlert(data.message || 'Error deleting registration', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error deleting registration', 'danger');
             }
         }
 
