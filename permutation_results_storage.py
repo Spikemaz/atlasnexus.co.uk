@@ -1,6 +1,7 @@
 """
 Permutation Results Storage System
-Handles large permutation results using Vercel Blob Storage
+Always uses Vercel Blob Storage for all permutation results
+Provides consistent, scalable storage with 100GB capacity
 """
 import json
 import gzip
@@ -13,11 +14,10 @@ class PermutationResultsStorage:
     
     def __init__(self):
         self.blob = blob_storage
-        self.max_inline_size = 1024 * 100  # 100KB - store inline if smaller
         
     def save_permutation_results(self, project_id, user_email, results_data):
         """
-        Save permutation results - uses blob for large data
+        Save permutation results to Vercel Blob Storage
         
         Args:
             project_id: The project identifier
@@ -55,51 +55,15 @@ class PermutationResultsStorage:
                   f"Compressed: {metadata['compressed_size_kb']}KB "
                   f"({compression_ratio}% reduction)")
             
-            # Determine storage method
-            if compressed_size < self.max_inline_size:
-                # Small enough to store in MongoDB
-                return self._save_inline(project_id, compressed_data, metadata)
-            else:
-                # Large - use blob storage
-                return self._save_to_blob(project_id, compressed_data, metadata)
+            # Always use Vercel Blob for consistency and simplicity
+            return self._save_to_blob(project_id, compressed_data, metadata)
                 
         except Exception as e:
             print(f"[ERROR] Failed to save permutation results: {e}")
             return None
     
-    def _save_inline(self, project_id, compressed_data, metadata):
-        """Save small results directly to MongoDB"""
-        try:
-            from cloud_database import CloudDatabase
-            db = CloudDatabase()
-            
-            doc = {
-                'project_id': project_id,
-                'metadata': metadata,
-                'compressed_data': compressed_data.hex(),  # Store as hex string
-                'storage_type': 'inline'
-            }
-            
-            # Save to MongoDB
-            result = db.db.permutation_results.replace_one(
-                {'project_id': project_id},
-                doc,
-                upsert=True
-            )
-            
-            return {
-                'success': True,
-                'storage_type': 'inline',
-                'result_id': str(result.upserted_id) if result.upserted_id else project_id,
-                'size_kb': metadata['compressed_size_kb']
-            }
-            
-        except Exception as e:
-            print(f"[ERROR] Failed to save inline: {e}")
-            return None
-    
     def _save_to_blob(self, project_id, compressed_data, metadata):
-        """Save large results to Vercel Blob Storage"""
+        """Save results to Vercel Blob Storage"""
         try:
             # Create blob filename
             filename = f"permutation_results/{project_id}/{metadata['parameters_hash']}.gz"
@@ -145,7 +109,7 @@ class PermutationResultsStorage:
             return None
     
     def load_permutation_results(self, project_id):
-        """Load permutation results from storage"""
+        """Load permutation results from Vercel Blob"""
         try:
             from cloud_database import CloudDatabase
             db = CloudDatabase()
@@ -156,15 +120,17 @@ class PermutationResultsStorage:
             if not doc:
                 return None
             
-            # Load based on storage type
-            if doc['storage_type'] == 'inline':
-                # Decompress from inline storage
-                compressed_data = bytes.fromhex(doc['compressed_data'])
-            else:
-                # Fetch from blob storage
-                blob_url = doc['blob_url']
-                response = self.blob.get(blob_url)
-                compressed_data = response.content
+            # Always fetch from blob storage
+            blob_url = doc['blob_url']
+            
+            # Fetch from Vercel Blob
+            import requests
+            response = requests.get(blob_url)
+            if response.status_code != 200:
+                print(f"[ERROR] Failed to fetch from blob: {response.status_code}")
+                return None
+            
+            compressed_data = response.content
             
             # Decompress
             json_data = gzip.decompress(compressed_data).decode('utf-8')
