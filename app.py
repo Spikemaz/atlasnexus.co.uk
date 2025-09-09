@@ -3100,6 +3100,73 @@ def admin_quick_reject():
     </html>
     """
 
+@app.route('/admin/verify-email', methods=['POST'])
+def admin_verify_email():
+    """Admin manually verify user email"""
+    ip_address = get_real_ip()
+    
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    email = request.json.get('email')
+    
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email required'}), 400
+    
+    # Load registrations and users
+    registrations = load_registrations_data()
+    users = load_users_data()
+    
+    # Check if it's in registrations
+    if email in registrations:
+        registrations[email]['email_verified'] = True
+        registrations[email]['verified_at'] = datetime.now().isoformat()
+        registrations[email]['verified_by'] = 'admin_manual'
+        
+        # Save back to database
+        save_registration_data(email, registrations[email])
+        
+        # Also update in users if exists
+        if email in users:
+            users[email]['email_verified'] = True
+            save_user_data(email, users[email])
+        
+        # Log admin action
+        add_admin_action({
+            'action': 'email_verified',
+            'email': email,
+            'admin': session.get(f'user_email_{ip_address}'),
+            'timestamp': datetime.now().isoformat(),
+            'details': 'Manual email verification by admin'
+        })
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'Email verified for {email}'
+        })
+    
+    # Check if user exists directly in users
+    elif email in users:
+        users[email]['email_verified'] = True
+        save_user_data(email, users[email])
+        
+        # Log admin action
+        add_admin_action({
+            'action': 'email_verified',
+            'email': email,
+            'admin': session.get(f'user_email_{ip_address}'),
+            'timestamp': datetime.now().isoformat(),
+            'details': 'Manual email verification by admin (user account)'
+        })
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'Email verified for {email}'
+        })
+    
+    return jsonify({'status': 'error', 'message': 'User not found'}), 404
+
 @app.route('/admin/reject-user', methods=['POST'])
 def admin_reject_user():
     """Admin reject user - completely removes from system"""

@@ -1534,6 +1534,11 @@
                         <td>${approvedBadge}</td>
                         <td>
                             <div class="action-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                ${!reg.email_verified ? `
+                                    <button class="action-btn" style="background: #17a2b8;" onclick="verifyUserEmail('${email}')" title="Verify email">
+                                        <i class="fas fa-envelope-check"></i> Verify
+                                    </button>
+                                ` : ''}
                                 ${!reg.admin_approved ? `
                                     <button class="action-btn action-edit" onclick="approveUserAdvanced('${email}')" title="Approve with settings">
                                         <i class="fas fa-check"></i> Approve
@@ -2009,6 +2014,33 @@
                 }
             } catch (error) {
                 showAlert('Error rejecting user', 'danger');
+            }
+        }
+
+        async function verifyUserEmail(email) {
+            if (!confirm(`Manually verify email for: ${email}?`)) return;
+            
+            try {
+                const response = await fetch('/admin/verify-email', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showAlert('Email verified successfully!', 'success');
+                    // Update the registration in the local data
+                    if (allRegistrations[email]) {
+                        allRegistrations[email].email_verified = true;
+                    }
+                    // Reload the table to show updated status
+                    loadRegistrationsData();
+                } else {
+                    showAlert(data.message || 'Error verifying email', 'danger');
+                }
+            } catch (error) {
+                showAlert('Error verifying email', 'danger');
             }
         }
 
