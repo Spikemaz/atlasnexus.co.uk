@@ -15,8 +15,8 @@ class BlobStorage:
     def __init__(self):
         # Vercel Blob requires a token - will be set in environment
         self.blob_token = os.environ.get('BLOB_READ_WRITE_TOKEN', '')
-        self.store_id = 'store_7ceE5O6mxIxmHWR2'
-        self.public_url = 'https://7cee5o6mxixmhwr2.public.blob.vercel-storage.com'
+        self.store_id = 'store_7ceE5O6mxIxmHWR2'  # Your actual store ID
+        self.public_url = 'https://7cee5o6mxixmhwr2.public.blob.vercel-storage.com'  # London region
         self.blob_api_url = 'https://blob.vercel-storage.com'
         self.connected = bool(self.blob_token)
         
