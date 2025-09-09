@@ -5542,7 +5542,10 @@ def get_projects():
                 user_projects = user_data if isinstance(user_data, list) else []
             
             for project in user_projects:
+                # Ensure each project has owner information
                 project['owner_email'] = user_email
+                project['ownerEmail'] = user_email  # For frontend compatibility
+                project['ownerName'] = user_email.split('@')[0]  # Simple name from email
                 all_projects.append(project)
         
         return jsonify({
@@ -5588,55 +5591,93 @@ def get_project(project_id):
 
 @app.route('/api/projects/<project_id>', methods=['DELETE'])
 def delete_project(project_id):
-    """Delete a project"""
+    """Delete a project - admin can delete any project"""
     ip_address = get_real_ip()
     
     if not session.get(f'user_authenticated_{ip_address}'):
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
     
     email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    
     if not email:
         return jsonify({'success': False, 'message': 'User not found', 'status': 'error'}), 404
     
-    # Load projects
+    # Load all projects
     projects_data = load_projects_data()
     
-    # Handle both data formats - dict with email keys or direct project list
-    if isinstance(projects_data.get(email), dict):
-        # Format: {email: {'projects': [], 'order': []}}
-        user_data = projects_data.get(email, {'projects': [], 'order': []})
-        user_projects = user_data.get('projects', [])
-    elif isinstance(projects_data.get(email), list):
-        # Format: {email: [projects]}
-        user_projects = projects_data.get(email, [])
-        user_data = {'projects': user_projects, 'order': []}
+    # Admin can delete any project from any user
+    if account_type == 'admin' or email == 'spikemaz8@aol.com':
+        # Search through all users to find the project
+        project_owner = None
+        project_index = None
+        
+        for user_email, user_data in projects_data.items():
+            if isinstance(user_data, dict):
+                user_projects = user_data.get('projects', [])
+            else:
+                user_projects = user_data if isinstance(user_data, list) else []
+            
+            # Find the project
+            for i, p in enumerate(user_projects):
+                if p.get('projectId') == project_id or p.get('id') == project_id:
+                    project_owner = user_email
+                    project_index = i
+                    break
+            
+            if project_owner:
+                break
+        
+        if project_owner and project_index is not None:
+            # Get the owner's data
+            if isinstance(projects_data.get(project_owner), dict):
+                user_data = projects_data[project_owner]
+                user_projects = user_data.get('projects', [])
+            else:
+                user_projects = projects_data.get(project_owner, [])
+                user_data = {'projects': user_projects, 'order': []}
+            
+            # Remove the project
+            deleted_project = user_projects.pop(project_index)
+            user_data['projects'] = user_projects
+            
+            # Save to the correct user's data
+            save_projects_data(project_owner, user_data)
+            
+            return jsonify({
+                'success': True,
+                'message': f'Project deleted from {project_owner}',
+                'status': 'success'
+            })
     else:
-        # Initialize if not exists
-        user_projects = []
-        user_data = {'projects': [], 'order': []}
-    
-    # Find and remove the project - handle both 'id' and 'projectId' fields
-    project_index = None
-    for i, p in enumerate(user_projects):
-        if p.get('projectId') == project_id or p.get('id') == project_id:
-            project_index = i
-            break
-    
-    if project_index is not None:
-        # Remove the project
-        deleted_project = user_projects.pop(project_index)
+        # Regular users can only delete their own projects
+        if isinstance(projects_data.get(email), dict):
+            user_data = projects_data.get(email, {'projects': [], 'order': []})
+            user_projects = user_data.get('projects', [])
+        elif isinstance(projects_data.get(email), list):
+            user_projects = projects_data.get(email, [])
+            user_data = {'projects': user_projects, 'order': []}
+        else:
+            user_projects = []
+            user_data = {'projects': [], 'order': []}
         
-        # Update user data
-        user_data['projects'] = user_projects
+        # Find and remove the project
+        project_index = None
+        for i, p in enumerate(user_projects):
+            if p.get('projectId') == project_id or p.get('id') == project_id:
+                project_index = i
+                break
         
-        # Save updated data
-        save_projects_data(email, user_data)
-        
-        return jsonify({
-            'success': True,
-            'message': 'Project deleted successfully',
-            'status': 'success'
-        })
+        if project_index is not None:
+            deleted_project = user_projects.pop(project_index)
+            user_data['projects'] = user_projects
+            save_projects_data(email, user_data)
+            
+            return jsonify({
+                'success': True,
+                'message': 'Project deleted successfully',
+                'status': 'success'
+            })
     
     # Return success even if not found (idempotent delete)
     return jsonify({
