@@ -87,22 +87,23 @@ class PaulDeploymentMonitor:
             }
             # Note: Authentication endpoint might need adjustment
 
-            # Test 1: Check if Projects tab exists in admin panel
-            logging.info("✓ Test 1: Checking Projects & Trash tab...")
+            # Test 1: Check if admin panel loads
+            logging.info("✓ Test 1: Checking admin panel...")
             response = session.get(f"{self.site_url}/admin-panel")
 
-            # Check both the tab text and the data-page attribute
-            if "Projects & Trash" in response.text or 'data-page="projects"' in response.text:
-                tests_passed.append("Projects tab exists")
-                logging.info("✅ Projects & Trash tab found!")
-            else:
-                # For unauthenticated access, just check if admin panel loads
-                if response.status_code == 200:
-                    tests_passed.append("Admin panel loads")
-                    logging.info("✅ Admin panel accessible (auth required for full features)")
+            if response.status_code == 200:
+                tests_passed.append("Admin panel loads")
+                logging.info("✅ Admin panel accessible!")
+
+                # Check if Projects & Trash tab is in the HTML
+                if "Projects & Trash" in response.text or 'data-page="projects"' in response.text:
+                    tests_passed.append("Projects tab exists")
+                    logging.info("✅ Projects & Trash tab found!")
                 else:
-                    tests_failed.append("Projects tab missing")
-                    logging.warning("❌ Projects & Trash tab not found")
+                    logging.info("ℹ️ Projects & Trash tab requires admin authentication")
+            else:
+                tests_failed.append("Admin panel error")
+                logging.warning(f"❌ Admin panel returned {response.status_code}")
 
             # Test 2: Check trash API endpoint
             logging.info("✓ Test 2: Testing /api/trash endpoint...")
