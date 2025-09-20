@@ -453,30 +453,48 @@ class CloudDatabase:
             # Get database stats with scale=1 for bytes
             stats = self.db.command('dbStats', 1)
 
-            # Calculate total storage used (includes data, indexes, and storage overhead)
-            # Using storageSize for actual disk space used
-            storage_bytes = stats.get('storageSize', 0)
-            # If storageSize is not available, fall back to dataSize + indexSize
-            if storage_bytes == 0:
-                storage_bytes = stats.get('dataSize', 0) + stats.get('indexSize', 0)
+            # MongoDB Atlas shows the total data size across all databases
+            # We need to get stats from all databases in the cluster
+            total_data_size = 0
+            total_storage_size = 0
 
-            # Convert to MB
-            storage_mb = round(storage_bytes / (1024 * 1024), 2)
+            # Get list of all databases
+            database_list = self.client.list_database_names()
+
+            for db_name in database_list:
+                if db_name not in ['admin', 'local', 'config']:  # Skip system databases
+                    try:
+                        db_stats = self.client[db_name].command('dbStats', 1)
+                        # Atlas "Data Size" is the sum of dataSize (uncompressed data)
+                        total_data_size += db_stats.get('dataSize', 0)
+                        total_storage_size += db_stats.get('storageSize', 0)
+                    except:
+                        pass
+
+            # If we couldn't get cluster-wide stats, use current database
+            if total_data_size == 0:
+                total_data_size = stats.get('dataSize', 0)
+                total_storage_size = stats.get('storageSize', 0)
+
+            # Convert to MB - Atlas shows Data Size (uncompressed)
+            # This should match the 116.23 MB shown in Atlas
+            storage_mb = round(total_data_size / (1024 * 1024), 2)
             storage_limit_mb = 512  # Free tier limit
             storage_percentage = round((storage_mb / storage_limit_mb) * 100, 1)
 
-            # Get detailed collection stats
+            # Get detailed collection stats for current database
             collection_stats = {}
-            total_collections_size = 0
+            total_collections_data = 0
 
             for coll_name in self.db.list_collection_names():
                 try:
                     coll_stats = self.db.command('collStats', coll_name, scale=1)
-                    size_mb = round(coll_stats.get('storageSize', 0) / (1024 * 1024), 2)
-                    total_collections_size += coll_stats.get('storageSize', 0)
+                    # Use dataSize for actual data (matches Atlas reporting)
+                    data_size_mb = round(coll_stats.get('size', 0) / (1024 * 1024), 2)
+                    total_collections_data += coll_stats.get('size', 0)
                     collection_stats[coll_name] = {
                         'count': coll_stats.get('count', 0),
-                        'size_mb': size_mb
+                        'size_mb': data_size_mb
                     }
                 except:
                     # Fallback to simple count if collStats fails
@@ -484,11 +502,6 @@ class CloudDatabase:
                         'count': self.db[coll_name].count_documents({}),
                         'size_mb': 0
                     }
-
-            # If we got collection sizes, use that for more accurate total
-            if total_collections_size > 0:
-                storage_mb = round(total_collections_size / (1024 * 1024), 2)
-                storage_percentage = round((storage_mb / storage_limit_mb) * 100, 1)
 
             return {
                 'connected': True,
@@ -498,7 +511,8 @@ class CloudDatabase:
                 'storage_remaining_mb': round(storage_limit_mb - storage_mb, 2),
                 'collections': collection_stats,
                 'database_name': self.db.name,
-                'data_size_mb': round(stats.get('dataSize', 0) / (1024 * 1024), 2),
+                'data_size_mb': storage_mb,  # This is the actual data size
+                'storage_size_mb': round(total_storage_size / (1024 * 1024), 2),  # Compressed storage
                 'index_size_mb': round(stats.get('indexSize', 0) / (1024 * 1024), 2)
             }
         except Exception as e:
