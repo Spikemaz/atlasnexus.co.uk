@@ -2857,26 +2857,10 @@
                         {% endif %}
                     </div>
                 </div>
-                
-                <!-- Loading indicator -->
-                <div id="projects-loading" style="text-align: center; padding: 2rem; color: #94a3b8;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                    <p>Loading projects...</p>
-                </div>
-                
-                <!-- Dynamic Projects Grid with Drag & Drop -->
-                <div id="projects-grid" class="main-drop-zone" style="display: none; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; min-height: 200px; padding: 1rem; border: 2px dashed transparent; border-radius: 12px; transition: all 0.3s ease;">
-                    <!-- Series and Projects will be loaded dynamically here -->
-                </div>
-                
-                <!-- Empty State - Completely blank until user adds items -->
-                <div id="projects-empty" style="display: none;">
-                    <!-- Intentionally blank - items appear when user adds them -->
-                </div>
 
-                <!-- Trash Section (Admin Only) -->
+                <!-- Trash Section (Admin Only) - Positioned at the top -->
                 {% if is_admin %}
-                <div id="trash-section" style="display: none; margin-top: 2rem; padding: 2rem; background: rgba(239, 68, 68, 0.1); border: 2px solid rgba(239, 68, 68, 0.3); border-radius: 12px;">
+                <div id="trash-section" style="display: none; margin-bottom: 2rem; padding: 2rem; background: rgba(239, 68, 68, 0.1); border: 2px solid rgba(239, 68, 68, 0.3); border-radius: 12px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                         <h3 style="color: #ef4444; font-size: 1.5rem; font-weight: 600; margin: 0;">
                             <i class="fas fa-trash-alt"></i> Deleted Projects
@@ -2904,6 +2888,22 @@
                     </div>
                 </div>
                 {% endif %}
+
+                <!-- Loading indicator -->
+                <div id="projects-loading" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>Loading projects...</p>
+                </div>
+
+                <!-- Dynamic Projects Grid with Drag & Drop -->
+                <div id="projects-grid" class="main-drop-zone" style="display: none; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; min-height: 200px; padding: 1rem; border: 2px dashed transparent; border-radius: 12px; transition: all 0.3s ease;">
+                    <!-- Series and Projects will be loaded dynamically here -->
+                </div>
+
+                <!-- Empty State - Completely blank until user adds items -->
+                <div id="projects-empty" style="display: none;">
+                    <!-- Intentionally blank - items appear when user adds them -->
+                </div>
                 
                 <!-- Old drop zone indicator removed - now using inline placeholders -->
                 

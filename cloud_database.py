@@ -635,22 +635,33 @@ class CloudDatabase:
         """Permanently delete an item from trash"""
         if not self.connected:
             print("[DATABASE] Not connected - cannot delete from trash")
-            return False
+            return None
 
         try:
             from bson import ObjectId
-            result = self.db.trash.delete_one({'_id': ObjectId(item_id)})
 
-            if result.deleted_count > 0:
-                print(f"[TRASH] Permanently deleted item {item_id}")
-                return True
-            else:
-                print(f"[TRASH] Item {item_id} not found in trash")
-                return False
+            # First find the item to return its data
+            trash_item = self.db.trash.find_one({'_id': ObjectId(item_id)})
+
+            if trash_item:
+                # Delete the item
+                result = self.db.trash.delete_one({'_id': ObjectId(item_id)})
+
+                if result.deleted_count > 0:
+                    print(f"[TRASH] Permanently deleted item {item_id}")
+                    # Return the deleted item data for logging
+                    return {
+                        'original_owner': trash_item.get('original_owner', 'unknown'),
+                        'deleted_by': trash_item.get('deleted_by', 'unknown'),
+                        'project_data': trash_item.get('project_data', {})
+                    }
+
+            print(f"[TRASH] Item {item_id} not found in trash")
+            return None
 
         except Exception as e:
             print(f"[DATABASE] Error deleting from trash: {e}")
-            return False
+            raise  # Re-raise the exception to be caught by the endpoint
 
     def empty_trash(self):
         """Empty all items from trash (admin only)"""
