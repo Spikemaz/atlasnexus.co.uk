@@ -8921,6 +8921,25 @@ if (window.showSection) {
     
     // Create new project (with series support)
     async function createNewProject() {
+        // Prevent rapid creation of multiple projects
+        if (window.creatingProject) {
+            console.log('Project creation already in progress');
+            return;
+        }
+
+        // Check if there's already a "New Project" draft - don't create duplicates
+        const existingDraft = projectsData.find(p =>
+            p.title === 'New Project' && p.status === 'draft'
+        );
+
+        if (existingDraft) {
+            console.log('A "New Project" draft already exists - opening for editing');
+            editProject(existingDraft.id);
+            return;
+        }
+
+        window.creatingProject = true;
+
         // Create project locally (works without backend)
         const newProject = {
             id: 'project-' + Date.now(),
@@ -8971,7 +8990,10 @@ if (window.showSection) {
         // Update UI and save
         renderProjects();
         updateProjectStats();
-        saveProjects();
+        await saveProjects();
+
+        // Reset the flag
+        window.creatingProject = false;
     }
 
     // Legacy function for compatibility
