@@ -720,6 +720,10 @@ else:
 # These will be migrated to MongoDB soon
 LOGIN_ATTEMPTS_FILE = DATA_DIR / 'login_attempts.json'
 
+# Project specifications and drafts files (temporary until MongoDB migration)
+PROJECT_SPECS_FILE = DATA_DIR / 'project_specs.json'
+PROJECT_DRAFTS_FILE = DATA_DIR / 'project_drafts.json'
+
 # Email configuration - Try to import from email_config.py first
 try:
     from email_config import SENDER_EMAIL, SENDER_PASSWORD, ADMIN_EMAIL, SMTP_SERVER, SMTP_PORT
