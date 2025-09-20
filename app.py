@@ -5476,16 +5476,25 @@ def account():
     # Get user information
     username = session.get(f'username_{ip_address}', 'User')
     email = session.get(f'user_email_{ip_address}', '')
-    account_type = session.get(f'account_type_{ip_address}', 'external')
-    
-    # Determine account type based on email or session
-    if email:
+    is_admin = session.get(f'is_admin_{ip_address}', False)
+
+    # Determine account type - Priority order:
+    # 1. Check if user is admin via session flag or specific email
+    if is_admin or email == 'spikemaz8@aol.com':
+        account_type = 'admin'
+    # 2. Check session account_type
+    elif f'account_type_{ip_address}' in session:
+        account_type = session[f'account_type_{ip_address}']
+    # 3. Fallback to email pattern matching
+    elif email:
         if 'admin' in email.lower() or email == 'maz@atlasnexus.co.uk':
             account_type = 'admin'
         elif '@atlasnexus' in email.lower():
             account_type = 'internal'
         else:
             account_type = 'external'
+    else:
+        account_type = 'external'
     
     # Get user data from database
     users = load_users_data()
