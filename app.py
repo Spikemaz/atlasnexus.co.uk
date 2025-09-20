@@ -5851,95 +5851,92 @@ def get_project(project_id):
 
 @app.route('/api/projects/<project_id>', methods=['DELETE'])
 def delete_project(project_id):
-    """Delete a project - admin can delete any project"""
+    """Delete a project - moves to trash in MongoDB"""
     ip_address = get_real_ip()
-    
+
     if not session.get(f'user_authenticated_{ip_address}'):
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
-    
+
     email = session.get(f'user_email_{ip_address}')
     account_type = session.get(f'account_type_{ip_address}', 'external')
-    
+    is_admin = account_type == 'admin' or email == 'spikemaz8@aol.com'
+
     if not email:
         return jsonify({'success': False, 'message': 'User not found', 'status': 'error'}), 404
-    
-    # Load all projects
+
+    print(f"[DELETE] User {email} (admin: {is_admin}) attempting to delete project {project_id}")
+
+    # Load all projects from MongoDB
     projects_data = load_projects_data()
-    
-    # Admin can delete any project from any user
-    if account_type == 'admin' or email == 'spikemaz8@aol.com':
-        # Search through all users to find the project
-        project_owner = None
-        project_index = None
-        
-        for user_email, user_data in projects_data.items():
-            if isinstance(user_data, dict):
-                user_projects = user_data.get('projects', [])
-            else:
-                user_projects = user_data if isinstance(user_data, list) else []
-            
-            # Find the project
-            for i, p in enumerate(user_projects):
-                if p.get('projectId') == project_id or p.get('id') == project_id:
-                    project_owner = user_email
-                    project_index = i
-                    break
-            
-            if project_owner:
-                break
-        
-        if project_owner and project_index is not None:
-            # Get the owner's data
-            if isinstance(projects_data.get(project_owner), dict):
-                user_data = projects_data[project_owner]
-                user_projects = user_data.get('projects', [])
-            else:
-                user_projects = projects_data.get(project_owner, [])
-                user_data = {'projects': user_projects, 'order': []}
-            
-            # Remove the project
-            deleted_project = user_projects.pop(project_index)
-            user_data['projects'] = user_projects
-            
-            # Save to the correct user's data
-            save_projects_data(project_owner, user_data)
-            
-            return jsonify({
-                'success': True,
-                'message': f'Project deleted from {project_owner}',
-                'status': 'success'
-            })
-    else:
-        # Regular users can only delete their own projects
-        if isinstance(projects_data.get(email), dict):
-            user_data = projects_data.get(email, {'projects': [], 'order': []})
+
+    # Find the project and its owner
+    project_owner = None
+    project_to_delete = None
+    project_index = None
+
+    for user_email, user_data in projects_data.items():
+        if isinstance(user_data, dict):
             user_projects = user_data.get('projects', [])
-        elif isinstance(projects_data.get(email), list):
-            user_projects = projects_data.get(email, [])
-            user_data = {'projects': user_projects, 'order': []}
         else:
-            user_projects = []
-            user_data = {'projects': [], 'order': []}
-        
-        # Find and remove the project
-        project_index = None
+            user_projects = user_data if isinstance(user_data, list) else []
+
+        # Find the project
         for i, p in enumerate(user_projects):
             if p.get('projectId') == project_id or p.get('id') == project_id:
+                project_owner = user_email
+                project_to_delete = p.copy()  # Make a copy of the project
                 project_index = i
                 break
-        
-        if project_index is not None:
-            deleted_project = user_projects.pop(project_index)
-            user_data['projects'] = user_projects
-            save_projects_data(email, user_data)
-            
-            return jsonify({
-                'success': True,
-                'message': 'Project deleted successfully',
-                'status': 'success'
-            })
-    
-    # Return success even if not found (idempotent delete)
+
+        if project_owner:
+            break
+
+    # Check permissions
+    if not project_owner:
+        print(f"[DELETE] Project {project_id} not found")
+        return jsonify({'success': True, 'message': 'Project not found or already deleted', 'status': 'success'})
+
+    if not is_admin and project_owner != email:
+        print(f"[DELETE] Permission denied for {email} to delete project from {project_owner}")
+        return jsonify({'success': False, 'message': 'Permission denied'}), 403
+
+    # Move to trash in MongoDB
+    if cloud_db and cloud_db.connected and project_to_delete:
+        print(f"[DELETE] Moving project {project_id} to trash")
+        trash_result = cloud_db.move_to_trash(
+            project_data=project_to_delete,
+            original_owner=project_owner,
+            deleted_by=email
+        )
+
+        if not trash_result:
+            print(f"[DELETE] Failed to move project to trash")
+            return jsonify({'success': False, 'message': 'Failed to move to trash'}), 500
+
+    # Remove from the owner's projects in MongoDB
+    if isinstance(projects_data.get(project_owner), dict):
+        user_data = projects_data[project_owner]
+        user_projects = user_data.get('projects', [])
+    else:
+        user_projects = projects_data.get(project_owner, [])
+        user_data = {'projects': user_projects, 'order': []}
+
+    # Remove the project from the list
+    if project_index is not None:
+        user_projects.pop(project_index)
+        user_data['projects'] = user_projects
+
+        # Save updated projects to MongoDB (without the deleted project)
+        save_projects_data(project_owner, user_data)
+
+        print(f"[DELETE] Successfully moved project {project_id} from {project_owner} to trash")
+
+        return jsonify({
+            'success': True,
+            'message': f'Project moved to trash',
+            'status': 'success'
+        })
+
     return jsonify({
         'success': True,
         'message': 'Project not found or already deleted',
