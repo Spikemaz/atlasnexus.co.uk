@@ -4678,6 +4678,71 @@ def empty_trash():
         print(f"[TRASH] Error emptying trash: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+@app.route('/api/clean-drafts', methods=['POST'])
+def clean_drafts():
+    """Clean draft projects from MongoDB (admin only)"""
+    try:
+        # Admin check
+        user_email = session.get('email')
+
+        # Only admin can clean drafts
+        if user_email != 'spikemaz8@aol.com':
+            return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+
+        if not cloud_db or not cloud_db.connected:
+            return jsonify({'status': 'error', 'message': 'Database not available'}), 500
+
+        print(f"[CLEAN] Admin {user_email} cleaning drafts from MongoDB")
+
+        total_drafts_removed = 0
+        users_affected = []
+
+        # Get all users' projects from MongoDB
+        try:
+            projects_cursor = cloud_db.db.projects.find()
+
+            for proj_doc in projects_cursor:
+                user = proj_doc.get('user_email', 'Unknown')
+                projects_list = proj_doc.get('projects', [])
+
+                # Filter out drafts
+                original_count = len(projects_list)
+                non_drafts = [p for p in projects_list if 'draft' not in str(p.get('title', '')).lower()]
+                drafts_removed = original_count - len(non_drafts)
+
+                if drafts_removed > 0:
+                    print(f"[CLEAN] Removing {drafts_removed} drafts from {user}")
+
+                    # Update the document
+                    cloud_db.db.projects.update_one(
+                        {'user_email': user},
+                        {'$set': {'projects': non_drafts}}
+                    )
+
+                    total_drafts_removed += drafts_removed
+                    users_affected.append({
+                        'email': user,
+                        'drafts_removed': drafts_removed,
+                        'projects_remaining': len(non_drafts)
+                    })
+
+            return jsonify({
+                'status': 'success',
+                'total_removed': total_drafts_removed,
+                'users_affected': users_affected,
+                'message': f'Successfully removed {total_drafts_removed} drafts from MongoDB'
+            })
+
+        except Exception as db_error:
+            print(f"[CLEAN] Database error: {db_error}")
+            return jsonify({'status': 'error', 'message': f'Database error: {str(db_error)}'}), 500
+
+    except Exception as e:
+        print(f"[CLEAN] Error cleaning drafts: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @app.route('/api/deleted-items', methods=['GET'])
 def get_deleted_items():
     """Get all deleted items for the current user"""

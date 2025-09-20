@@ -2869,6 +2869,9 @@
                             <button onclick="emptyTrash()" style="background: linear-gradient(90deg, #dc2626, #b91c1c); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">
                                 <i class="fas fa-trash-restore"></i> Delete All
                             </button>
+                            <button onclick="cleanDrafts()" style="background: linear-gradient(90deg, #f59e0b, #d97706); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                <i class="fas fa-broom"></i> Clean Drafts
+                            </button>
                             <button onclick="toggleTrashSection()" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer;">
                                 <i class="fas fa-times"></i> Close
                             </button>
@@ -8576,6 +8579,40 @@ if (window.showSection) {
         } catch (error) {
             console.error('Error emptying trash:', error);
             showNotification('Error emptying trash', 'error');
+        }
+    }
+
+    async function cleanDrafts() {
+        if (!confirm('This will permanently remove all draft projects from MongoDB.\n\nDrafts are projects with "draft" in their title.\n\nAre you sure?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/clean-drafts', {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                let message = `Successfully removed ${result.total_removed} drafts from MongoDB`;
+                if (result.users_affected && result.users_affected.length > 0) {
+                    message += '\n\nAffected users:';
+                    result.users_affected.forEach(user => {
+                        message += `\n• ${user.email}: ${user.drafts_removed} drafts removed`;
+                    });
+                }
+                showNotification(message, 'success');
+
+                // Reload projects to reflect changes
+                await loadProjects();
+            } else {
+                showNotification('Failed to clean drafts: ' + (result.message || 'Unknown error'), 'error');
+            }
+        } catch (error) {
+            console.error('Error cleaning drafts:', error);
+            showNotification('Error cleaning drafts from MongoDB', 'error');
         }
     }
 
