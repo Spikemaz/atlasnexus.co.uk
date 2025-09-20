@@ -5396,15 +5396,17 @@ if (window.showSection) {
 
     function createTickerItem(symbol, data) {
         const formatValue = (val) => {
-            if (val === undefined || val === null || isNaN(val)) {
+            // Convert to number and check validity
+            const numVal = parseFloat(val);
+            if (val === undefined || val === null || isNaN(numVal)) {
                 return 'N/A';
             }
-            if (symbol.includes('/')) return val.toFixed(4);
-            else if (symbol.includes('JPY')) return val.toFixed(2);
-            else if (symbol.includes('RATE') || symbol.includes('SPREAD') || symbol.includes('AAA') || symbol.includes('SOFR') || symbol.includes('SONIA') || symbol.includes('ESTR') || symbol.includes('TONAR')) return val.toFixed(2) + '%';
-            else if (symbol.includes('GOLD') || symbol.includes('SILVER') || symbol.includes('OIL')) return '$' + val.toFixed(2);
-            else if (symbol.includes('S&P') || symbol.includes('FTSE') || symbol.includes('DAX') || symbol.includes('NIKKEI') || symbol.includes('VIX')) return val.toFixed(2);
-            else return val.toFixed(2) + '%';
+            if (symbol.includes('/')) return numVal.toFixed(4);
+            else if (symbol.includes('JPY')) return numVal.toFixed(2);
+            else if (symbol.includes('RATE') || symbol.includes('SPREAD') || symbol.includes('AAA') || symbol.includes('SOFR') || symbol.includes('SONIA') || symbol.includes('ESTR') || symbol.includes('TONAR')) return numVal.toFixed(2) + '%';
+            else if (symbol.includes('GOLD') || symbol.includes('SILVER') || symbol.includes('OIL')) return '$' + numVal.toFixed(2);
+            else if (symbol.includes('S&P') || symbol.includes('FTSE') || symbol.includes('DAX') || symbol.includes('NIKKEI') || symbol.includes('VIX')) return numVal.toFixed(2);
+            else return numVal.toFixed(2) + '%';
         };
         
         const getChangeColor = (change) => {
@@ -8490,7 +8492,9 @@ if (window.showSection) {
         if (pendingDeleteType === 'project') {
             // Call backend to soft delete
             try {
-                const response = await fetch(`/api/projects/${pendingDeleteItem.id}`, {
+                // Get user email from session or local storage
+                const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail');
+                const response = await fetch(`/api/project/${userEmail}/${pendingDeleteItem.id}`, {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include'  // Include cookies for session
