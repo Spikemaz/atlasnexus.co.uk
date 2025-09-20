@@ -448,25 +448,48 @@ class CloudDatabase:
                 'storage_percentage': 0,
                 'collections': {}
             }
-        
+
         try:
-            # Get database stats
-            stats = self.db.command('dbStats')
-            
-            # Calculate storage in MB
-            storage_bytes = stats.get('dataSize', 0) + stats.get('indexSize', 0)
+            # Get database stats with scale=1 for bytes
+            stats = self.db.command('dbStats', 1)
+
+            # Calculate total storage used (includes data, indexes, and storage overhead)
+            # Using storageSize for actual disk space used
+            storage_bytes = stats.get('storageSize', 0)
+            # If storageSize is not available, fall back to dataSize + indexSize
+            if storage_bytes == 0:
+                storage_bytes = stats.get('dataSize', 0) + stats.get('indexSize', 0)
+
+            # Convert to MB
             storage_mb = round(storage_bytes / (1024 * 1024), 2)
             storage_limit_mb = 512  # Free tier limit
             storage_percentage = round((storage_mb / storage_limit_mb) * 100, 1)
-            
-            # Get collection counts
-            collection_stats = {
-                'users': self.db.users.count_documents({}),
-                'registrations': self.db.registrations.count_documents({}),
-                'admin_actions': self.db.admin_actions.count_documents({}),
-                'files': self.db.files.count_documents({})
-            }
-            
+
+            # Get detailed collection stats
+            collection_stats = {}
+            total_collections_size = 0
+
+            for coll_name in self.db.list_collection_names():
+                try:
+                    coll_stats = self.db.command('collStats', coll_name, scale=1)
+                    size_mb = round(coll_stats.get('storageSize', 0) / (1024 * 1024), 2)
+                    total_collections_size += coll_stats.get('storageSize', 0)
+                    collection_stats[coll_name] = {
+                        'count': coll_stats.get('count', 0),
+                        'size_mb': size_mb
+                    }
+                except:
+                    # Fallback to simple count if collStats fails
+                    collection_stats[coll_name] = {
+                        'count': self.db[coll_name].count_documents({}),
+                        'size_mb': 0
+                    }
+
+            # If we got collection sizes, use that for more accurate total
+            if total_collections_size > 0:
+                storage_mb = round(total_collections_size / (1024 * 1024), 2)
+                storage_percentage = round((storage_mb / storage_limit_mb) * 100, 1)
+
             return {
                 'connected': True,
                 'storage_used_mb': storage_mb,
@@ -474,7 +497,9 @@ class CloudDatabase:
                 'storage_percentage': storage_percentage,
                 'storage_remaining_mb': round(storage_limit_mb - storage_mb, 2),
                 'collections': collection_stats,
-                'database_name': self.db.name
+                'database_name': self.db.name,
+                'data_size_mb': round(stats.get('dataSize', 0) / (1024 * 1024), 2),
+                'index_size_mb': round(stats.get('indexSize', 0) / (1024 * 1024), 2)
             }
         except Exception as e:
             print(f"[DATABASE] Error getting database stats: {e}")
