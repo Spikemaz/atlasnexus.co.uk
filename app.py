@@ -4650,6 +4650,34 @@ def permanently_delete_from_trash(item_id):
         print(f"[TRASH] Error permanently deleting item {item_id}: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+@app.route('/api/trash/empty', methods=['DELETE'])
+def empty_trash():
+    """Empty all items from trash (admin only)"""
+    ip_address = get_real_ip()
+    user_email = session.get(f'user_email_{ip_address}')
+
+    if not user_email:
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+
+    # Only admin can empty trash
+    if user_email != 'spikemaz8@aol.com':
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+
+    try:
+        result = cloud_db.empty_trash()
+        if result:
+            # Log admin action
+            cloud_db.add_admin_action({
+                'action': 'trash_emptied',
+                'admin': user_email
+            })
+            return jsonify({'status': 'success', 'message': 'Trash emptied successfully'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Failed to empty trash'}), 500
+    except Exception as e:
+        print(f"[TRASH] Error emptying trash: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @app.route('/api/deleted-items', methods=['GET'])
 def get_deleted_items():
     """Get all deleted items for the current user"""
