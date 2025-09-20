@@ -8523,12 +8523,8 @@ if (window.showSection) {
                     userEmail = pendingDeleteItem.owner;
                 }
 
-                // Use appropriate endpoint based on whether we have email
-                const endpoint = userEmail
-                    ? `/api/project/${userEmail}/${pendingDeleteItem.id}`
-                    : `/api/projects/${pendingDeleteItem.id}`;
-
-                const response = await fetch(endpoint, {
+                // Use the existing backend endpoint format
+                const response = await fetch(`/api/projects/${pendingDeleteItem.id}`, {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include'  // Include cookies for session
