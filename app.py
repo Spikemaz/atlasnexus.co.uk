@@ -4686,12 +4686,15 @@ def empty_trash():
 def clean_drafts():
     """Clean draft projects from MongoDB (admin only)"""
     try:
-        # Admin check
-        user_email = session.get('email')
+        # Get IP-based session
+        ip_address = get_real_ip()
+        user_email = session.get(f'user_email_{ip_address}')
+
+        print(f"[CLEAN-DRAFTS] Request from IP: {ip_address}, user: {user_email}")
 
         # Only admin can clean drafts
         if user_email != 'spikemaz8@aol.com':
-            return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+            return jsonify({'status': 'error', 'message': 'Unauthorized - admin only'}), 403
 
         if not cloud_db or not cloud_db.connected:
             return jsonify({'status': 'error', 'message': 'Database not available'}), 500
