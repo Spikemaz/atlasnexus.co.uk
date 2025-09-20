@@ -704,6 +704,14 @@
         </div>
 
         <div class="nav-section">
+            <div class="nav-section-title">Content Management</div>
+            <a class="nav-item" data-page="projects">
+                <i class="fas fa-project-diagram"></i>
+                Projects & Trash
+            </a>
+        </div>
+
+        <div class="nav-section">
             <div class="nav-section-title">Security</div>
             <a class="nav-item" data-page="ip-management">
                 <i class="fas fa-network-wired"></i>
@@ -976,6 +984,61 @@
                 </div>
             </div>
         </div>
+
+        <!-- Projects Content -->
+        <div id="projectsContent" class="tab-content" style="display: none;">
+            <!-- All Projects Section -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">All User Projects</h2>
+                    <button onclick="loadAllProjects()" class="btn btn-primary">Refresh Projects</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Owner Email</th>
+                                <th>Project Title</th>
+                                <th>Project ID</th>
+                                <th>Created Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projectsTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem;">Loading projects...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Trash Section -->
+            <div class="content-section" style="margin-top: 2rem;">
+                <div class="section-header">
+                    <h2 class="section-title">Trash (Admin Only)</h2>
+                    <p style="color: #888; margin-top: 0.5rem;">Projects deleted by admin - can be restored or permanently deleted</p>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Original Owner</th>
+                                <th>Project Title</th>
+                                <th>Deleted By</th>
+                                <th>Deleted At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trashTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem;">Loading trash...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1054,7 +1117,8 @@
                 'users': 'User Management',
                 'registrations': 'Registration Management',
                 'ip-management': 'IP Address Management',
-                'login-attempts': 'Login Attempts'
+                'login-attempts': 'Login Attempts',
+                'projects': 'Projects & Trash'
             };
             document.getElementById('pageTitle').textContent = titles[page] || 'Admin Panel';
         }
@@ -1072,6 +1136,9 @@
                     break;
                 case 'ip-management':
                     loadIPData();
+                    break;
+                case 'projects':
+                    loadProjectsData();
                     break;
             }
         }
@@ -2832,6 +2899,9 @@
                 case 'ip-management':
                     updateIPTable(adminData);
                     break;
+                case 'projects':
+                    loadProjectsData();
+                    break;
             }
         }
         
@@ -2965,6 +3035,154 @@
             // Then load the dashboard specific view
             loadDashboardData();
         });
+        // Projects and Trash Functions
+        async function loadProjectsData() {
+            await loadAllProjects();
+            await loadTrash();
+        }
+
+        async function loadAllProjects() {
+            try {
+                const response = await fetch('/admin/all-projects');
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    updateProjectsTable(data.projects);
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                showAlert('Error loading projects', 'danger');
+            }
+        }
+
+        async function loadTrash() {
+            try {
+                const response = await fetch('/api/trash');
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    updateTrashTable(data.items);
+                }
+            } catch (error) {
+                console.error('Error loading trash:', error);
+                showAlert('Error loading trash', 'danger');
+            }
+        }
+
+        function updateProjectsTable(projects) {
+            const tbody = document.getElementById('projectsTableBody');
+
+            if (!projects || projects.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No projects found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = projects.map(project => `
+                <tr>
+                    <td>${project.owner}</td>
+                    <td>${project.title}</td>
+                    <td style="font-family: monospace; font-size: 0.9em;">${project.id}</td>
+                    <td>${project.created || 'N/A'}</td>
+                    <td>
+                        <button onclick="deleteProject('${project.owner}', '${project.id}')"
+                                class="btn btn-danger btn-sm">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateTrashTable(items) {
+            const tbody = document.getElementById('trashTableBody');
+
+            if (!items || items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">Trash is empty</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = items.map(item => `
+                <tr>
+                    <td>${item.original_owner}</td>
+                    <td>${item.project_data?.title || 'Unknown'}</td>
+                    <td>${item.deleted_by}</td>
+                    <td>${new Date(item.deleted_at).toLocaleString()}</td>
+                    <td>
+                        <button onclick="restoreFromTrash('${item._id}')"
+                                class="btn btn-success btn-sm">Restore</button>
+                        <button onclick="permanentlyDelete('${item._id}')"
+                                class="btn btn-danger btn-sm">Delete Forever</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function deleteProject(owner, projectId) {
+            if (!confirm(`Are you sure you want to move this project to trash?\n\nProject ID: ${projectId}\nOwner: ${owner}`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/project/${owner}/${projectId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showAlert('Project moved to trash', 'success');
+                    await loadProjectsData(); // Reload both projects and trash
+                } else {
+                    showAlert(data.message || 'Error deleting project', 'danger');
+                }
+            } catch (error) {
+                console.error('Error deleting project:', error);
+                showAlert('Error deleting project', 'danger');
+            }
+        }
+
+        async function restoreFromTrash(itemId) {
+            if (!confirm('Are you sure you want to restore this project?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/trash/${itemId}/restore`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showAlert('Project restored successfully', 'success');
+                    await loadProjectsData(); // Reload both projects and trash
+                } else {
+                    showAlert(data.message || 'Error restoring project', 'danger');
+                }
+            } catch (error) {
+                console.error('Error restoring project:', error);
+                showAlert('Error restoring project', 'danger');
+            }
+        }
+
+        async function permanentlyDelete(itemId) {
+            if (!confirm('WARNING: This will permanently delete the project. This action cannot be undone!\n\nAre you absolutely sure?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/trash/${itemId}/delete`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showAlert('Project permanently deleted', 'success');
+                    await loadTrash(); // Reload trash
+                } else {
+                    showAlert(data.message || 'Error permanently deleting project', 'danger');
+                }
+            } catch (error) {
+                console.error('Error permanently deleting project:', error);
+                showAlert('Error permanently deleting project', 'danger');
+            }
+        }
     </script>
     
     <!-- Smooth Keyboard Scrolling -->

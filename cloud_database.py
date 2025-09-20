@@ -543,7 +543,144 @@ class CloudDatabase:
         users = self._load_local('users')
         users[email] = user_data
         return self._save_local('users', users)
-    
+
+    # ==================== TRASH SYSTEM METHODS ====================
+
+    def move_project_to_trash(self, project_data, deleted_by, original_owner):
+        """Move a project to trash (soft delete)"""
+        if not self.connected:
+            print("[DATABASE] Not connected - cannot move to trash")
+            return False
+
+        try:
+            trash_item = {
+                'project_data': project_data,
+                'deleted_by': deleted_by,
+                'original_owner': original_owner,
+                'deleted_at': datetime.now().isoformat(),
+                'type': 'project'
+            }
+            self.db.trash.insert_one(trash_item)
+            print(f"[TRASH] Moved project {project_data.get('id')} to trash")
+            return True
+        except Exception as e:
+            print(f"[DATABASE] Error moving to trash: {e}")
+            return False
+
+    def get_trash_items(self):
+        """Get all items in trash (admin only)"""
+        if not self.connected:
+            print("[DATABASE] Not connected - returning empty trash")
+            return []
+
+        try:
+            items = []
+            for item in self.db.trash.find().sort('deleted_at', -1):
+                item['_id'] = str(item['_id'])  # Convert ObjectId to string
+                items.append(item)
+            return items
+        except Exception as e:
+            print(f"[DATABASE] Error getting trash items: {e}")
+            return []
+
+    def restore_from_trash(self, item_id):
+        """Restore an item from trash"""
+        if not self.connected:
+            print("[DATABASE] Not connected - cannot restore from trash")
+            return False
+
+        try:
+            from bson import ObjectId
+            trash_item = self.db.trash.find_one({'_id': ObjectId(item_id)})
+
+            if not trash_item:
+                print(f"[TRASH] Item {item_id} not found in trash")
+                return False
+
+            # Restore to original owner's projects
+            original_owner = trash_item['original_owner']
+            project_data = trash_item['project_data']
+
+            # Get user's current projects
+            user_data = self.get_user_by_email(original_owner)
+            if not user_data:
+                print(f"[TRASH] Original owner {original_owner} not found")
+                return False
+
+            # Add project back to user's projects
+            if 'projects' not in user_data:
+                user_data['projects'] = {'projects': [], 'order': []}
+            if 'projects' not in user_data['projects']:
+                user_data['projects']['projects'] = []
+            if 'order' not in user_data['projects']:
+                user_data['projects']['order'] = []
+
+            user_data['projects']['projects'].append(project_data)
+            user_data['projects']['order'].append(project_data['id'])
+
+            # Save updated user data
+            self.save_user(original_owner, user_data)
+
+            # Remove from trash
+            self.db.trash.delete_one({'_id': ObjectId(item_id)})
+
+            print(f"[TRASH] Restored project {project_data.get('id')} to {original_owner}")
+            return True
+
+        except Exception as e:
+            print(f"[DATABASE] Error restoring from trash: {e}")
+            return False
+
+    def permanently_delete_from_trash(self, item_id):
+        """Permanently delete an item from trash"""
+        if not self.connected:
+            print("[DATABASE] Not connected - cannot delete from trash")
+            return False
+
+        try:
+            from bson import ObjectId
+            result = self.db.trash.delete_one({'_id': ObjectId(item_id)})
+
+            if result.deleted_count > 0:
+                print(f"[TRASH] Permanently deleted item {item_id}")
+                return True
+            else:
+                print(f"[TRASH] Item {item_id} not found in trash")
+                return False
+
+        except Exception as e:
+            print(f"[DATABASE] Error deleting from trash: {e}")
+            return False
+
+    def empty_trash(self):
+        """Empty all items from trash (admin only)"""
+        if not self.connected:
+            print("[DATABASE] Not connected - cannot empty trash")
+            return False
+
+        try:
+            result = self.db.trash.delete_many({})
+            print(f"[TRASH] Emptied trash - deleted {result.deleted_count} items")
+            return True
+        except Exception as e:
+            print(f"[DATABASE] Error emptying trash: {e}")
+            return False
+
+    def get_all_projects(self):
+        """Get all projects from all users"""
+        try:
+            all_projects = {}
+            # Get all project documents from MongoDB
+            cursor = self.db.projects.find()
+            for doc in cursor:
+                email = doc.get('user_email')
+                if email:
+                    all_projects[email] = doc.get('data', {})
+            return all_projects
+        except Exception as e:
+            print(f"Error getting all projects: {e}")
+            return {}
+
     def _delete_local_user(self, email):
         """Delete user from local file"""
         if email == 'spikemaz8@aol.com':

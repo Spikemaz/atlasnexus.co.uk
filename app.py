@@ -3839,11 +3839,58 @@ def admin_delete_data():
         print(f"[ADMIN ERROR] Failed to delete {data_type} {identifier}: {e}")
         return jsonify({'status': 'error', 'message': str(e)})
 
+@app.route('/admin/all-projects')
+def admin_get_all_projects():
+    """Get all projects from all users (admin only)"""
+    ip_address = get_real_ip()
+
+    # Verify admin access
+    if not session.get(f'is_admin_{ip_address}'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+
+    try:
+        all_projects = []
+
+        # Load projects from cloud database
+        projects_data = cloud_db.get_all_projects()
+
+        for user_email, user_data in projects_data.items():
+            # Get standalone projects
+            if 'projects' in user_data:
+                for project in user_data['projects']:
+                    all_projects.append({
+                        'owner': user_email,
+                        'id': project.get('id'),
+                        'title': project.get('title', 'Untitled'),
+                        'created': project.get('created', 'Unknown')
+                    })
+
+            # Get projects from series
+            if 'series' in user_data:
+                for series in user_data['series']:
+                    if 'projects' in series:
+                        for project in series['projects']:
+                            all_projects.append({
+                                'owner': user_email,
+                                'id': project.get('id'),
+                                'title': f"{series.get('title', 'Series')}: {project.get('title', 'Untitled')}",
+                                'created': project.get('created', 'Unknown')
+                            })
+
+        return jsonify({
+            'status': 'success',
+            'projects': all_projects
+        })
+
+    except Exception as e:
+        print(f"[ADMIN] Error loading all projects: {e}")
+        return jsonify({'status': 'error', 'message': str(e)})
+
 @app.route('/admin/check-updates')
 def admin_check_updates():
     """Lightweight endpoint to check if data has changed"""
     ip_address = get_real_ip()
-    
+
     # Verify admin access
     if not session.get(f'is_admin_{ip_address}'):
         return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
@@ -4452,26 +4499,46 @@ def update_project(project_id):
         return jsonify({'status': 'error', 'message': 'Project not found'}), 404
     
     elif request.method == 'DELETE':
-        # Delete project - now permanently delete instead of soft delete
-        print(f"[DELETE] Attempting to delete project {project_id} for user {user_email}")
+        # Soft delete - move to trash instead of permanently deleting
+        print(f"[DELETE] Attempting to soft delete project {project_id} for user {user_email}")
         print(f"[DELETE] User has {len(user_projects)} projects")
-        
+
+        # Get current user info (who is deleting)
+        deleter_email = session.get(f'user_email_{get_real_ip()}')
+
         # Find project in standalone projects
         for i, project in enumerate(user_projects):
             if project['id'] == project_id:
-                print(f"[DELETE] Found standalone project to delete: {project['title']}")
+                print(f"[DELETE] Found standalone project to move to trash: {project['title']}")
+
+                # Move to trash in MongoDB
+                cloud_db.move_project_to_trash(
+                    project_data=project,
+                    deleted_by=deleter_email,
+                    original_owner=user_email
+                )
+
                 # Remove from active projects
                 del user_projects[i]
-                
+
                 # Remove from order list if present
                 if 'order' in projects[user_email] and project_id in projects[user_email]['order']:
                     projects[user_email]['order'].remove(project_id)
-                
+
                 # Save to cloud database
                 save_projects_data(user_email, projects[user_email])
-                
-                print(f"[DELETE] Successfully deleted project {project_id}")
-                return jsonify({'status': 'success', 'message': 'Project deleted'})
+
+                # Log admin action if admin is deleting another user's project
+                if deleter_email == 'spikemaz8@aol.com' and deleter_email != user_email:
+                    cloud_db.add_admin_action({
+                        'action': 'project_moved_to_trash',
+                        'project_id': project_id,
+                        'original_owner': user_email,
+                        'project_title': project['title']
+                    })
+
+                print(f"[DELETE] Successfully moved project {project_id} to trash")
+                return jsonify({'status': 'success', 'message': 'Project moved to trash'})
         
         # Also check if project is in a series
         if 'series' in projects[user_email]:
@@ -4492,18 +4559,96 @@ def update_project(project_id):
         print(f"[DELETE] Project {project_id} not found")
         return jsonify({'status': 'error', 'message': 'Project not found'}), 404
 
+@app.route('/api/trash', methods=['GET'])
+def get_trash_items():
+    """Get all items in trash (admin only)"""
+    ip_address = get_real_ip()
+    user_email = session.get(f'user_email_{ip_address}')
+
+    if not user_email:
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+
+    # Only admin can view trash
+    if user_email != 'spikemaz8@aol.com':
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+
+    try:
+        trash_items = cloud_db.get_trash_items()
+        return jsonify({'status': 'success', 'items': trash_items})
+    except Exception as e:
+        print(f"[TRASH] Error getting trash items: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/trash/<item_id>/restore', methods=['POST'])
+def restore_from_trash(item_id):
+    """Restore an item from trash (admin only)"""
+    ip_address = get_real_ip()
+    user_email = session.get(f'user_email_{ip_address}')
+
+    if not user_email:
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+
+    # Only admin can restore from trash
+    if user_email != 'spikemaz8@aol.com':
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+
+    try:
+        restored_item = cloud_db.restore_from_trash(item_id)
+        if restored_item:
+            # Log admin action
+            cloud_db.add_admin_action({
+                'action': 'project_restored_from_trash',
+                'item_id': item_id,
+                'original_owner': restored_item.get('original_owner')
+            })
+            return jsonify({'status': 'success', 'message': 'Item restored successfully'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Item not found in trash'}), 404
+    except Exception as e:
+        print(f"[TRASH] Error restoring item {item_id}: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/trash/<item_id>/delete', methods=['DELETE'])
+def permanently_delete_from_trash(item_id):
+    """Permanently delete an item from trash (admin only)"""
+    ip_address = get_real_ip()
+    user_email = session.get(f'user_email_{ip_address}')
+
+    if not user_email:
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+
+    # Only admin can permanently delete from trash
+    if user_email != 'spikemaz8@aol.com':
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+
+    try:
+        deleted_item = cloud_db.permanently_delete_from_trash(item_id)
+        if deleted_item:
+            # Log admin action
+            cloud_db.add_admin_action({
+                'action': 'project_permanently_deleted',
+                'item_id': item_id,
+                'original_owner': deleted_item.get('original_owner')
+            })
+            return jsonify({'status': 'success', 'message': 'Item permanently deleted'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Item not found in trash'}), 404
+    except Exception as e:
+        print(f"[TRASH] Error permanently deleting item {item_id}: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @app.route('/api/deleted-items', methods=['GET'])
 def get_deleted_items():
     """Get all deleted items for the current user"""
     ip_address = get_real_ip()
     user_email = session.get(f'user_email_{ip_address}')
-    
+
     if not user_email:
         return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
-    
+
     DELETED_FILE = 'data/deleted_items.json'
     deleted_items = load_json_db(DELETED_FILE)
-    
+
     # Get user's deleted items
     user_deleted = deleted_items.get(user_email, [])
     
