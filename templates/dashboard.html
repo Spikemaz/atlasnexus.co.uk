@@ -2850,6 +2850,11 @@
                         <button id="add-project-btn" onclick="if(typeof createNewProject !== 'undefined') createNewProject()" style="background: linear-gradient(90deg, #60a5fa, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
                             <i class="fas fa-plus"></i> Add Project
                         </button>
+                        {% if is_admin %}
+                        <button id="trash-btn" onclick="if(typeof toggleTrashSection !== 'undefined') toggleTrashSection()" style="background: linear-gradient(90deg, #ef4444, #dc2626); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
+                            <i class="fas fa-trash"></i> Trash
+                        </button>
+                        {% endif %}
                     </div>
                 </div>
                 
@@ -2868,6 +2873,37 @@
                 <div id="projects-empty" style="display: none;">
                     <!-- Intentionally blank - items appear when user adds them -->
                 </div>
+
+                <!-- Trash Section (Admin Only) -->
+                {% if is_admin %}
+                <div id="trash-section" style="display: none; margin-top: 2rem; padding: 2rem; background: rgba(239, 68, 68, 0.1); border: 2px solid rgba(239, 68, 68, 0.3); border-radius: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 style="color: #ef4444; font-size: 1.5rem; font-weight: 600; margin: 0;">
+                            <i class="fas fa-trash-alt"></i> Deleted Projects
+                        </h3>
+                        <button onclick="toggleTrashSection()" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+
+                    <!-- Trash Loading -->
+                    <div id="trash-loading" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem;"></i>
+                        <p>Loading deleted projects...</p>
+                    </div>
+
+                    <!-- Trash Items Grid -->
+                    <div id="trash-grid" style="display: none; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                        <!-- Deleted items will be loaded here -->
+                    </div>
+
+                    <!-- Trash Empty State -->
+                    <div id="trash-empty" style="display: none; text-align: center; padding: 3rem; color: #94a3b8;">
+                        <i class="fas fa-recycle" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No deleted projects in trash</p>
+                    </div>
+                </div>
+                {% endif %}
                 
                 <!-- Old drop zone indicator removed - now using inline placeholders -->
                 
@@ -8497,6 +8533,150 @@ if (window.showSection) {
         pendingDeleteType = null;
     }
     
+    // Toggle Trash Section
+    async function toggleTrashSection() {
+        const trashSection = document.getElementById('trash-section');
+        if (!trashSection) return;
+
+        if (trashSection.style.display === 'none') {
+            // Show trash section and load items
+            trashSection.style.display = 'block';
+            await loadTrashItems();
+        } else {
+            // Hide trash section
+            trashSection.style.display = 'none';
+        }
+    }
+
+    // Load Trash Items
+    async function loadTrashItems() {
+        const loadingEl = document.getElementById('trash-loading');
+        const gridEl = document.getElementById('trash-grid');
+        const emptyEl = document.getElementById('trash-empty');
+
+        if (loadingEl) loadingEl.style.display = 'block';
+        if (gridEl) gridEl.style.display = 'none';
+        if (emptyEl) emptyEl.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/trash', {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const items = data.items || [];
+
+                if (loadingEl) loadingEl.style.display = 'none';
+
+                if (items.length > 0) {
+                    displayTrashItems(items);
+                    if (gridEl) gridEl.style.display = 'grid';
+                } else {
+                    if (emptyEl) emptyEl.style.display = 'block';
+                }
+            } else {
+                console.error('Failed to load trash items');
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (emptyEl) emptyEl.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error loading trash:', error);
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (emptyEl) emptyEl.style.display = 'block';
+        }
+    }
+
+    // Display Trash Items
+    function displayTrashItems(items) {
+        const gridEl = document.getElementById('trash-grid');
+        if (!gridEl) return;
+
+        gridEl.innerHTML = '';
+
+        items.forEach(item => {
+            const projectData = item.project_data || {};
+            const deletedBy = item.deleted_by || 'Unknown';
+            const originalOwner = item.original_owner || 'Unknown';
+            const deletedAt = new Date(item.deleted_at).toLocaleDateString();
+
+            const card = document.createElement('div');
+            card.style.cssText = 'background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 1rem;';
+
+            card.innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <h4 style="color: #ef4444; font-size: 1.1rem; margin: 0 0 0.5rem 0;">
+                        ${projectData.title || projectData.name || 'Untitled Project'}
+                    </h4>
+                    <p style="color: #94a3b8; font-size: 0.85rem; margin: 0.25rem 0;">
+                        <i class="fas fa-user"></i> Owner: ${originalOwner}
+                    </p>
+                    <p style="color: #94a3b8; font-size: 0.85rem; margin: 0.25rem 0;">
+                        <i class="fas fa-trash"></i> Deleted by: ${deletedBy}
+                    </p>
+                    <p style="color: #94a3b8; font-size: 0.85rem; margin: 0.25rem 0;">
+                        <i class="fas fa-calendar"></i> Deleted: ${deletedAt}
+                    </p>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button onclick="restoreFromTrash('${item._id}')" style="flex: 1; background: rgba(34, 197, 94, 0.2); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                        <i class="fas fa-undo"></i> Restore
+                    </button>
+                    <button onclick="permanentlyDeleteFromTrash('${item._id}')" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                        <i class="fas fa-times"></i> Delete
+                    </button>
+                </div>
+            `;
+
+            gridEl.appendChild(card);
+        });
+    }
+
+    // Restore from Trash
+    async function restoreFromTrash(itemId) {
+        if (!confirm('Restore this project?')) return;
+
+        try {
+            const response = await fetch(`/api/trash/${itemId}/restore`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                await loadTrashItems();
+                await loadProjects(); // Reload main projects
+                alert('Project restored successfully!');
+            } else {
+                alert('Failed to restore project');
+            }
+        } catch (error) {
+            console.error('Error restoring:', error);
+            alert('Error restoring project');
+        }
+    }
+
+    // Permanently Delete from Trash
+    async function permanentlyDeleteFromTrash(itemId) {
+        if (!confirm('Permanently delete this project? This cannot be undone!')) return;
+
+        try {
+            const response = await fetch(`/api/trash/${itemId}/delete`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                await loadTrashItems();
+                alert('Project permanently deleted');
+            } else {
+                alert('Failed to delete project');
+            }
+        } catch (error) {
+            console.error('Error deleting:', error);
+            alert('Error deleting project');
+        }
+    }
+
     // Confirm delete
     async function confirmDelete() {
         if (!pendingDeleteItem || !pendingDeleteType) return;
