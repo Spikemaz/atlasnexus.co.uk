@@ -4559,6 +4559,19 @@ def update_project(project_id):
         print(f"[DELETE] Project {project_id} not found")
         return jsonify({'status': 'error', 'message': 'Project not found'}), 404
 
+@app.route('/api/user', methods=['GET'])
+def get_current_user():
+    """Get current user information"""
+    ip_address = get_real_ip()
+    user_email = session.get(f'user_email_{ip_address}')
+
+    if user_email:
+        return jsonify({
+            'email': user_email,
+            'is_admin': user_email == 'spikemaz8@aol.com'
+        })
+    return jsonify({'error': 'Not authenticated'}), 401
+
 @app.route('/api/trash', methods=['GET'])
 def get_trash_items():
     """Get all items in trash (admin only)"""

@@ -7287,6 +7287,21 @@ if (window.showSection) {
     // Load projects from API
     async function loadProjects(showLoading = true) {
         const loadingElement = document.getElementById('projects-loading');
+
+        // Store user email if available
+        try {
+            const userResponse = await fetch('/api/user', {
+                credentials: 'include'
+            });
+            if (userResponse.ok) {
+                const userData = await userResponse.json();
+                if (userData.email) {
+                    localStorage.setItem('userEmail', userData.email);
+                }
+            }
+        } catch (err) {
+            // Ignore user fetch errors
+        }
         const gridElement = document.getElementById('projects-grid');
         const emptyElement = document.getElementById('projects-empty');
         const statsElement = document.getElementById('project-stats');
@@ -8492,9 +8507,28 @@ if (window.showSection) {
         if (pendingDeleteType === 'project') {
             // Call backend to soft delete
             try {
-                // Get user email from session or local storage
-                const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail');
-                const response = await fetch(`/api/project/${userEmail}/${pendingDeleteItem.id}`, {
+                // First get user info from session
+                const userResponse = await fetch('/api/user', {
+                    credentials: 'include'
+                });
+
+                let userEmail = null;
+                if (userResponse.ok) {
+                    const userData = await userResponse.json();
+                    userEmail = userData.email;
+                }
+
+                // If no email from session, use the owner from the project
+                if (!userEmail && pendingDeleteItem.owner) {
+                    userEmail = pendingDeleteItem.owner;
+                }
+
+                // Use appropriate endpoint based on whether we have email
+                const endpoint = userEmail
+                    ? `/api/project/${userEmail}/${pendingDeleteItem.id}`
+                    : `/api/projects/${pendingDeleteItem.id}`;
+
+                const response = await fetch(endpoint, {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include'  // Include cookies for session
