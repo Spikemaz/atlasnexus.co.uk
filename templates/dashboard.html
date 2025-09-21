@@ -8968,29 +8968,36 @@ if (window.showSection) {
                 credentials: 'include',  // Include cookies for session
                 body: JSON.stringify(newProject)
             });
-            
+
             if (response.ok) {
                 const savedProject = await response.json();
                 // Use the server's ID if available
                 newProject.id = savedProject.id || newProject.id;
+                // Project was already added to DB by the backend, so just add to local array
+                projectsData.push(newProject);
+            } else {
+                // Backend failed, don't add the project
+                console.error('Failed to create project on server');
+                window.creatingProject = false;
+                alert('Failed to create project. Please try again.');
+                return;
             }
         } catch (error) {
             // API not available, but we can continue with local storage
             console.log('Using local storage only - API not available');
+            // Add project to list only if backend is not available
+            projectsData.push(newProject);
         }
-        
-        // Add project to list
-        projectsData.push(newProject);
         
         // Hide empty state and show grid
         document.getElementById('projects-empty').style.display = 'none';
         document.getElementById('projects-grid').style.display = 'grid';
         document.getElementById('project-stats').style.display = 'grid';
         
-        // Update UI and save
+        // Update UI - don't save again since backend already saved
         renderProjects();
         updateProjectStats();
-        await saveProjects();
+        // Don't call saveProjects() here - the project was already saved to MongoDB by the backend
 
         // Reset the flag
         window.creatingProject = false;
