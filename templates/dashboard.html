@@ -8457,7 +8457,7 @@ if (window.showSection) {
 
         renderProjects();
         closeSponsorModal();
-        await saveProjects();
+        // await saveProjects(); // DISABLED - causes duplicate projects
     }
 
     function generateProjectId() {
@@ -8797,16 +8797,19 @@ if (window.showSection) {
                     } else {
                         console.log('Project not found in backend, deleting locally');
                     }
-                    
+
                     // Remove from local data
                     if (pendingDeleteItem.seriesId) {
+                        // Project is in a series
                         const series = seriesData.find(s => s.id === pendingDeleteItem.seriesId);
                         if (series && series.projects) {
                             series.projects = series.projects.filter(p => p.id !== pendingDeleteItem.id);
                         }
-                    } else {
-                        projectsData = projectsData.filter(p => p.id !== pendingDeleteItem.id);
                     }
+
+                    // Always remove from main projectsData array (avoid duplicating the filter)
+                    projectsData = projectsData.filter(p => p.id !== pendingDeleteItem.id);
+                    console.log('Project deleted. Remaining projects:', projectsData.length);
                     
                     renderProjects();
                     updateProjectStats();
@@ -8852,9 +8855,14 @@ if (window.showSection) {
     
     // Save series data
     async function saveProjects() {
+        // DISABLED - This function was causing duplicate projects
+        // Projects are now saved individually via API endpoints
+        console.log('saveProjects is disabled - projects are saved via individual API calls');
+        return;
+
         try {
-            // Save to backend database (cloud storage)
-            const response = await fetch('/api/projects', {
+            // OLD CODE - DO NOT USE
+            const response = await fetch('/api/projects/sync', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',  // Include cookies for session

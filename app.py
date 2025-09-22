@@ -5698,34 +5698,35 @@ def save_theme():
     
     return jsonify({'status': 'success', 'theme': theme})
 
-@app.route('/api/projects', methods=['GET', 'POST'])
-def handle_projects():
-    """Handle project listing and creation"""
-    ip_address = get_real_ip()
-
-    # Verify authentication
-    if not session.get(f'user_authenticated_{ip_address}'):
-        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
-
-    if request.method == 'GET':
-        # List all projects
-        projects = []
-        if CLOUD_DB_AVAILABLE and cloud_db:
-            projects = cloud_db.get_all_projects()
-        return jsonify({'status': 'success', 'projects': projects})
-
-    elif request.method == 'POST':
-        # Create new project
-        project_data = request.get_json()
-        if not project_data.get('name'):
-            return jsonify({'status': 'error', 'message': 'Project name is required'}), 400
-
-        if CLOUD_DB_AVAILABLE and cloud_db:
-            project_id = cloud_db.create_project(project_data)
-            if project_id:
-                return jsonify({'status': 'success', 'project_id': project_id})
-
-        return jsonify({'status': 'error', 'message': 'Failed to create project'}), 500
+# Commented out - duplicate route definition, using manage_projects instead
+# @app.route('/api/projects', methods=['GET', 'POST'])
+# def handle_projects():
+#     """Handle project listing and creation"""
+#     ip_address = get_real_ip()
+#
+#     # Verify authentication
+#     if not session.get(f'user_authenticated_{ip_address}'):
+#         return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+#
+#     if request.method == 'GET':
+#         # List all projects
+#         projects = []
+#         if CLOUD_DB_AVAILABLE and cloud_db:
+#             projects = cloud_db.get_all_projects()
+#         return jsonify({'status': 'success', 'projects': projects})
+#
+#     elif request.method == 'POST':
+#         # Create new project
+#         project_data = request.get_json()
+#         if not project_data.get('name'):
+#             return jsonify({'status': 'error', 'message': 'Project name is required'}), 400
+#
+#         if CLOUD_DB_AVAILABLE and cloud_db:
+#             project_id = cloud_db.create_project(project_data)
+#             if project_id:
+#                 return jsonify({'status': 'success', 'project_id': project_id})
+#
+#         return jsonify({'status': 'error', 'message': 'Failed to create project'}), 500
 
 @app.route('/api/projects/<project_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_single_project(project_id):
@@ -5964,18 +5965,18 @@ def request_password_reset():
 
 # ==================== PROJECTS API ENDPOINTS ====================
 
-@app.route('/api/projects', methods=['POST'])
-def save_all_projects():
-    """Save all projects for current user"""
+@app.route('/api/projects/sync', methods=['POST'])
+def sync_all_projects():
+    """Sync all projects for current user - this replaces the entire project list"""
     ip_address = get_real_ip()
-    
+
     if not session.get(f'user_authenticated_{ip_address}'):
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
-    
+
     email = session.get(f'user_email_{ip_address}')
     if not email:
         return jsonify({'success': False, 'message': 'User not found'}), 404
-    
+
     data = request.get_json()
     projects = data.get('projects', [])
     
