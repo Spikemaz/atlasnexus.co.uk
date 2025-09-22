@@ -2552,11 +2552,6 @@ def auth():
                     'user_type': user.get('account_type', 'external')
                 })
                 save_json_db(LOGIN_ATTEMPTS_FILE, login_attempts)
-
-                # Also track in MongoDB if available
-                if CLOUD_DB_AVAILABLE and cloud_db:
-                    user_agent = request.headers.get('User-Agent', 'Unknown')
-                    cloud_db.add_login_attempt(email, ip_address, user_agent, True)
                 
                 session[f'user_authenticated_{ip_address}'] = True
                 session[f'username_{ip_address}'] = user.get('full_name', email)
@@ -2590,12 +2585,7 @@ def auth():
         'reason': 'Invalid credentials'
     })
     save_json_db(LOGIN_ATTEMPTS_FILE, login_attempts)
-
-    # Also track in MongoDB if available
-    if CLOUD_DB_AVAILABLE and cloud_db:
-        user_agent = request.headers.get('User-Agent', 'Unknown')
-        cloud_db.add_login_attempt(email, ip_address, user_agent, False, 'Invalid credentials')
-
+    
     return jsonify({'status': 'error', 'message': 'Invalid credentials or account not approved'}), 401
 
 @app.route('/dashboard')
@@ -5615,9 +5605,8 @@ def account():
     department = ''
     phone = ''
     location = ''
-    timezone = 'Europe/London'  # Default to UK timezone
-    theme = 'dark'  # Default theme
-
+    timezone = 'UTC'
+    
     if email in users:
         user_data = users[email]
         created_date = user_data.get('created_at', '')
@@ -5627,18 +5616,14 @@ def account():
                 member_since = dt.strftime('%B %Y')
             except:
                 pass
-
+        
         # Get personal information from user data
         full_name = user_data.get('full_name', '')
         company = user_data.get('company', '')
         department = user_data.get('department', '')
         phone = user_data.get('phone', '')
         location = user_data.get('location', '')
-
-        # Get preferences - with defaults
-        preferences = user_data.get('preferences', {})
-        timezone = preferences.get('timezone', 'Europe/London')
-        theme = preferences.get('theme', 'dark')
+        timezone = user_data.get('timezone', 'UTC')
         
         # Get last login
         last_login_dt = user_data.get('last_login', '')
@@ -5667,245 +5652,32 @@ def account():
                          department=department,
                          phone=phone,
                          location=location,
-                         timezone=timezone,
-                         theme=theme)
+                         timezone=timezone)
 
 @app.route('/api/save-theme', methods=['POST'])
 def save_theme():
     """Save user's theme preference"""
     ip_address = get_real_ip()
-
+    
     # Verify authentication
     if not session.get(f'user_authenticated_{ip_address}'):
         return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
-
+    
     data = request.get_json()
-    theme = data.get('theme', 'dark')
-
+    theme = data.get('theme', 'dark-blue')
+    
     # Save theme preference to user's data
     email = session.get(f'user_email_{ip_address}')
     if email:
         users = load_users_data()
         if email in users:
-            # Ensure preferences object exists
-            if 'preferences' not in users[email]:
-                users[email]['preferences'] = {}
-            users[email]['preferences']['theme'] = theme
+            users[email]['theme_preference'] = theme
             save_user_data(email, users[email])
     
     # Also store in session
     session[f'theme_{ip_address}'] = theme
     
     return jsonify({'status': 'success', 'theme': theme})
-
-@app.route('/api/projects', methods=['GET', 'POST'])
-def handle_projects():
-    """Handle project listing and creation"""
-    ip_address = get_real_ip()
-
-    # Verify authentication
-    if not session.get(f'user_authenticated_{ip_address}'):
-        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
-
-    if request.method == 'GET':
-        # List all projects
-        projects = []
-        if CLOUD_DB_AVAILABLE and cloud_db:
-            projects = cloud_db.get_all_projects()
-        return jsonify({'status': 'success', 'projects': projects})
-
-    elif request.method == 'POST':
-        # Create new project
-        project_data = request.get_json()
-        if not project_data.get('name'):
-            return jsonify({'status': 'error', 'message': 'Project name is required'}), 400
-
-        if CLOUD_DB_AVAILABLE and cloud_db:
-            project_id = cloud_db.create_project(project_data)
-            if project_id:
-                return jsonify({'status': 'success', 'project_id': project_id})
-
-        return jsonify({'status': 'error', 'message': 'Failed to create project'}), 500
-
-@app.route('/api/projects/<project_id>', methods=['GET', 'PUT', 'DELETE'])
-def handle_single_project(project_id):
-    """Handle single project operations"""
-    ip_address = get_real_ip()
-
-    # Verify authentication
-    if not session.get(f'user_authenticated_{ip_address}'):
-        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
-
-    if request.method == 'GET':
-        # Get single project
-        if CLOUD_DB_AVAILABLE and cloud_db:
-            project = cloud_db.get_project(project_id)
-            if project:
-                return jsonify({'status': 'success', 'project': project})
-        return jsonify({'status': 'error', 'message': 'Project not found'}), 404
-
-    elif request.method == 'PUT':
-        # Update project
-        project_data = request.get_json()
-        if CLOUD_DB_AVAILABLE and cloud_db:
-            if cloud_db.update_project(project_id, project_data):
-                return jsonify({'status': 'success', 'message': 'Project updated'})
-        return jsonify({'status': 'error', 'message': 'Failed to update project'}), 500
-
-    elif request.method == 'DELETE':
-        # Delete project
-        if CLOUD_DB_AVAILABLE and cloud_db:
-            if cloud_db.delete_project(project_id):
-                return jsonify({'status': 'success', 'message': 'Project deleted'})
-        return jsonify({'status': 'error', 'message': 'Failed to delete project'}), 500
-
-@app.route('/api/analytics/metrics')
-def get_analytics_metrics():
-    """Get analytics metrics for Control Centre"""
-    try:
-        # Get users count
-        users = load_users_data()
-        total_users = len(users)
-
-        # Get projects count
-        projects = []
-        if CLOUD_DB_AVAILABLE and cloud_db:
-            projects = cloud_db.load_projects()
-        total_projects = len(projects)
-
-        # Calculate project pipeline (same as before)
-        total_pipeline = 0
-        for project in projects:
-            if isinstance(project, dict):
-                market_capex = float(project.get('marketCapex', 0) or 0)
-                total_fees = float(project.get('totalFees', 0) or 0)
-                total_pipeline += (market_capex + total_fees)
-
-        # Get login attempts last 7 days
-        login_attempts_7d = 0
-        if CLOUD_DB_AVAILABLE and cloud_db:
-            attempts = cloud_db.get_login_attempts(limit=1000)
-            from datetime import datetime, timedelta
-            seven_days_ago = datetime.now() - timedelta(days=7)
-            for attempt in attempts:
-                if 'timestamp' in attempt:
-                    try:
-                        attempt_time = datetime.fromisoformat(attempt['timestamp'])
-                        if attempt_time > seven_days_ago:
-                            login_attempts_7d += 1
-                    except:
-                        pass
-
-        # Get top projects by capex
-        top_projects = []
-        sorted_projects = sorted(projects, key=lambda x: float(x.get('marketCapex', 0) or 0), reverse=True)[:5]
-        for proj in sorted_projects:
-            top_projects.append({
-                'name': proj.get('name', 'Unnamed'),
-                'marketCapex': float(proj.get('marketCapex', 0) or 0),
-                'totalFees': float(proj.get('totalFees', 0) or 0)
-            })
-
-        return jsonify({
-            'total_users': total_users,
-            'total_projects': total_projects,
-            'project_pipeline': total_pipeline,
-            'project_pipeline_formatted': f"€{total_pipeline / 1_000_000_000:.1f}B" if total_pipeline >= 1_000_000_000 else f"€{total_pipeline / 1_000_000:.1f}M",
-            'logins_7d': login_attempts_7d,
-            'top_projects': top_projects
-        })
-    except Exception as e:
-        print(f"[ERROR] Failed to get analytics metrics: {e}")
-        return jsonify({
-            'total_users': 0,
-            'total_projects': 0,
-            'project_pipeline': 0,
-            'project_pipeline_formatted': '€0.0B',
-            'logins_7d': 0,
-            'top_projects': []
-        })
-
-@app.route('/api/project-pipeline-total')
-def get_project_pipeline_total():
-    """Calculate the total project pipeline value"""
-    try:
-        # Load projects
-        projects = []
-        if CLOUD_DB_AVAILABLE and cloud_db:
-            projects = cloud_db.load_projects()
-
-        # Calculate total pipeline value (marketCapex + totalFees)
-        total_pipeline = 0
-        for project in projects:
-            if isinstance(project, dict):
-                market_capex = float(project.get('marketCapex', 0) or 0)
-                total_fees = float(project.get('totalFees', 0) or 0)
-                total_pipeline += (market_capex + total_fees)
-
-        # Format as billions with 1 decimal
-        if total_pipeline >= 1_000_000_000:
-            formatted = f"€{total_pipeline / 1_000_000_000:.1f}B"
-        elif total_pipeline >= 1_000_000:
-            formatted = f"€{total_pipeline / 1_000_000:.1f}M"
-        else:
-            formatted = f"€{total_pipeline:.0f}"
-
-        return jsonify({
-            'total': total_pipeline,
-            'formatted': formatted,
-            'project_count': len(projects)
-        })
-    except Exception as e:
-        print(f"[ERROR] Failed to calculate project pipeline: {e}")
-        return jsonify({
-            'total': 0,
-            'formatted': '€0.0B',
-            'project_count': 0
-        })
-
-@app.route('/api/user/preferences', methods=['POST', 'PUT'])
-def update_user_preferences():
-    """Update user preferences (timezone, theme, etc)"""
-    ip_address = get_real_ip()
-
-    # Verify authentication
-    if not session.get(f'user_authenticated_{ip_address}'):
-        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
-
-    data = request.get_json()
-    email = session.get(f'user_email_{ip_address}')
-
-    if not email:
-        return jsonify({'status': 'error', 'message': 'User not found'}), 404
-
-    # Load user data
-    users = load_users_data()
-    if email not in users:
-        return jsonify({'status': 'error', 'message': 'User not found'}), 404
-
-    user = users[email]
-
-    # Ensure preferences object exists
-    if 'preferences' not in user:
-        user['preferences'] = {
-            'timezone': 'Europe/London',
-            'theme': 'dark'
-        }
-
-    # Update preferences
-    if 'timezone' in data:
-        user['preferences']['timezone'] = data['timezone']
-    if 'theme' in data:
-        user['preferences']['theme'] = data['theme']
-        session[f'theme_{ip_address}'] = data['theme']
-
-    # Save to database
-    if CLOUD_DB_AVAILABLE and cloud_db:
-        cloud_db.update_user_preferences(email, user['preferences'])
-    else:
-        save_user_data(email, user)
-
-    return jsonify({'status': 'success', 'message': 'Preferences updated', 'preferences': user['preferences']})
 
 @app.route('/api/request-password-reset', methods=['POST'])
 def request_password_reset():

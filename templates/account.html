@@ -7,6 +7,35 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
     <style>
+        /* Premium Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #0a0e27, #020617);
+            border-bottom: 2px solid #60a5fa;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            height: 70px;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
         .account-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -285,11 +314,22 @@
                     </div>
                     <div class="info-row">
                         <span class="info-label">Timezone</span>
-                        <span class="info-value">{{ timezone|default('UTC') }}</span>
+                        <select id="timezone-select" class="info-value" style="background: var(--background-color); border: 1px solid var(--border-color); padding: 0.25rem; border-radius: 4px;">
+                            <option value="Europe/London" {% if timezone == 'Europe/London' %}selected{% endif %}>Europe/London (UK)</option>
+                            <option value="Europe/Dublin" {% if timezone == 'Europe/Dublin' %}selected{% endif %}>Europe/Dublin</option>
+                            <option value="Europe/Paris" {% if timezone == 'Europe/Paris' %}selected{% endif %}>Europe/Paris</option>
+                            <option value="Europe/Berlin" {% if timezone == 'Europe/Berlin' %}selected{% endif %}>Europe/Berlin</option>
+                            <option value="America/New_York" {% if timezone == 'America/New_York' %}selected{% endif %}>America/New_York</option>
+                            <option value="America/Chicago" {% if timezone == 'America/Chicago' %}selected{% endif %}>America/Chicago</option>
+                            <option value="America/Los_Angeles" {% if timezone == 'America/Los_Angeles' %}selected{% endif %}>America/Los_Angeles</option>
+                            <option value="Asia/Tokyo" {% if timezone == 'Asia/Tokyo' %}selected{% endif %}>Asia/Tokyo</option>
+                            <option value="Asia/Singapore" {% if timezone == 'Asia/Singapore' %}selected{% endif %}>Asia/Singapore</option>
+                            <option value="UTC" {% if timezone == 'UTC' %}selected{% endif %}>UTC</option>
+                        </select>
                     </div>
                 </div>
                 <div class="btn-group">
-                    <button class="btn btn-primary" onclick="updatePersonalInfo()">Update Information</button>
+                    <button class="btn btn-primary" onclick="savePreferences()">Save Settings</button>
                 </div>
             </div>
 
@@ -311,49 +351,24 @@
                 </h2>
                 <p style="color: var(--text-secondary); margin-bottom: 1rem;">Choose your preferred theme</p>
                 <div class="theme-selector">
-                    <div class="theme-option theme-dark active" onclick="changeTheme('dark')">
+                    <div class="theme-option theme-dark {% if theme == 'dark' %}active{% endif %}" onclick="selectTheme('dark')">
                         <div class="theme-preview"></div>
                         <span>Dark</span>
                     </div>
-                    <div class="theme-option theme-light" onclick="changeTheme('light')">
+                    <div class="theme-option theme-light {% if theme == 'light' %}active{% endif %}" onclick="selectTheme('light')">
                         <div class="theme-preview"></div>
                         <span>Light</span>
                     </div>
-                    <div class="theme-option theme-blue" onclick="changeTheme('blue')">
-                        <div class="theme-preview"></div>
-                        <span>Blue</span>
+                    <div class="theme-option theme-system {% if theme == 'system' %}active{% endif %}" onclick="selectTheme('system')">
+                        <div class="theme-preview" style="background: linear-gradient(135deg, #1a1a1a 50%, #f5f5f5 50%);"></div>
+                        <span>System</span>
                     </div>
+                </div>
+                <div class="btn-group" style="margin-top: 1.5rem;">
+                    <button class="btn btn-primary" onclick="saveTheme()">Save Theme</button>
                 </div>
             </div>
 
-            <!-- Security Settings -->
-            <div class="account-section">
-                <h2>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    Security Settings
-                </h2>
-                <div class="account-info">
-                    <div class="info-row">
-                        <span class="info-label">Two-Factor Authentication</span>
-                        <span class="info-value">Disabled</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Login Notifications</span>
-                        <span class="info-value">Enabled</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Session Timeout</span>
-                        <span class="info-value">30 minutes</span>
-                    </div>
-                </div>
-                <div class="btn-group">
-                    <button class="btn btn-primary" onclick="enableTwoFactor()">Enable 2FA</button>
-                    <button class="btn btn-secondary" onclick="viewSessions()">Active Sessions</button>
-                </div>
-            </div>
 
             <!-- Notifications -->
             <div class="account-section">
@@ -449,35 +464,78 @@
     </style>
 
     <script>
-        // Get current theme from localStorage or default
-        const currentTheme = localStorage.getItem('theme') || 'dark';
-        document.body.className = 'theme-' + currentTheme;
+        // Apply saved theme on load
+        const savedTheme = '{{ theme }}' || localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'system') {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.body.className = 'theme-' + (prefersDark ? 'dark' : 'light');
+        } else {
+            document.body.className = 'theme-' + savedTheme;
+        }
         
-        // Update active theme option
-        document.querySelectorAll('.theme-option').forEach(option => {
-            option.classList.remove('active');
-            if (option.classList.contains('theme-' + currentTheme)) {
-                option.classList.add('active');
+        let selectedTheme = '{{ theme }}';
+
+        function selectTheme(theme) {
+            selectedTheme = theme;
+
+            // Apply theme immediately for preview
+            if (theme === 'system') {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.body.className = 'theme-' + (prefersDark ? 'dark' : 'light');
+            } else {
+                document.body.className = 'theme-' + theme;
             }
-        });
-        
-        function changeTheme(theme) {
-            document.body.className = 'theme-' + theme;
-            localStorage.setItem('theme', theme);
-            
+
             // Update active state
             document.querySelectorAll('.theme-option').forEach(option => {
                 option.classList.remove('active');
             });
             document.querySelector('.theme-' + theme).classList.add('active');
-            
+        }
+
+        function saveTheme() {
+            localStorage.setItem('theme', selectedTheme);
+
             // Save to server
-            fetch('/api/save-theme', {
+            fetch('/api/user/preferences', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ theme: theme })
+                body: JSON.stringify({ theme: selectedTheme })
+            }).then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Theme saved successfully!');
+                } else {
+                    alert('Failed to save theme. Please try again.');
+                }
+            }).catch(error => {
+                alert('An error occurred while saving theme.');
+            });
+        }
+
+        function savePreferences() {
+            const timezone = document.getElementById('timezone-select').value;
+
+            fetch('/api/user/preferences', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    timezone: timezone,
+                    theme: selectedTheme
+                })
+            }).then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Preferences saved successfully!');
+                } else {
+                    alert('Failed to save preferences. Please try again.');
+                }
+            }).catch(error => {
+                alert('An error occurred while saving preferences.');
             });
         }
         
@@ -517,9 +575,6 @@
             alert('Notification preferences saved!');
         }
         
-        function updatePersonalInfo() {
-            alert('Personal information update form will be available soon. Please contact support to update your information.');
-        }
     </script>
 </body>
 </html>

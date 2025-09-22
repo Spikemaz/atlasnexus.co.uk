@@ -121,15 +121,9 @@ class CloudDatabase:
         if not self.connected:
             print(f"[DATABASE] Not connected - cannot save user {email}")
             return False
-
+        
         try:
             user_data['email'] = email
-            # Ensure default preferences exist
-            if 'preferences' not in user_data:
-                user_data['preferences'] = {
-                    'timezone': 'Europe/London',
-                    'theme': 'dark'
-                }
             self.db.users.update_one(
                 {'email': email},
                 {'$set': user_data},
@@ -140,33 +134,15 @@ class CloudDatabase:
             print(f"[DATABASE] Error saving user: {e}")
             return False
     
-    def update_user_preferences(self, email, preferences):
-        """Update user preferences (timezone, theme)"""
-        if not self.connected:
-            print(f"[DATABASE] Not connected - cannot update preferences for {email}")
-            return False
-
-        try:
-            # Merge with existing preferences
-            result = self.db.users.update_one(
-                {'email': email},
-                {'$set': {'preferences': preferences}},
-                upsert=False
-            )
-            return result.modified_count > 0 or result.matched_count > 0
-        except Exception as e:
-            print(f"[DATABASE] Error updating user preferences: {e}")
-            return False
-
     def delete_user(self, email):
         """Delete a user (except admin)"""
         if email == 'spikemaz8@aol.com':
             return False  # Never delete admin
-
+        
         if not self.connected:
             print(f"[DATABASE] Not connected - cannot delete user {email}")
             return False
-
+        
         try:
             self.db.users.delete_one({'email': email})
             return True
@@ -461,90 +437,6 @@ class CloudDatabase:
         except Exception as e:
             print(f"[DATABASE] Error saving login attempts: {e}")
             return False
-
-    def add_login_attempt(self, email, ip, user_agent, success, error=None):
-        """Add a single login attempt record"""
-        if not self.connected:
-            return False
-        try:
-            attempt = {
-                'email': email,
-                'ip': ip,
-                'user_agent': user_agent,
-                'success': success,
-                'error': error,
-                'timestamp': datetime.now().isoformat()
-            }
-            self.db.login_attempts_log.insert_one(attempt)
-            return True
-        except Exception as e:
-            print(f"[DATABASE] Error adding login attempt: {e}")
-            return False
-
-    def get_login_attempts(self, limit=100, email=None, success=None):
-        """Get login attempts with filters"""
-        if not self.connected:
-            return []
-        try:
-            query = {}
-            if email:
-                query['email'] = email
-            if success is not None:
-                query['success'] = success
-
-            attempts = []
-            cursor = self.db.login_attempts_log.find(query).sort('timestamp', -1).limit(limit)
-            for attempt in cursor:
-                attempt.pop('_id', None)
-                attempts.append(attempt)
-            return attempts
-        except Exception as e:
-            print(f"[DATABASE] Error getting login attempts: {e}")
-            return []
-
-    def add_ip_rule(self, rule_type, cidr, note, created_by):
-        """Add an IP rule (allow/deny)"""
-        if not self.connected:
-            return False
-        try:
-            rule = {
-                'type': rule_type,  # 'allow' or 'deny'
-                'cidr': cidr,
-                'note': note,
-                'created_by': created_by,
-                'created_at': datetime.now().isoformat()
-            }
-            result = self.db.ip_rules.insert_one(rule)
-            return str(result.inserted_id)
-        except Exception as e:
-            print(f"[DATABASE] Error adding IP rule: {e}")
-            return False
-
-    def get_ip_rules(self):
-        """Get all IP rules"""
-        if not self.connected:
-            return []
-        try:
-            rules = []
-            for rule in self.db.ip_rules.find():
-                rule['_id'] = str(rule['_id'])
-                rules.append(rule)
-            return rules
-        except Exception as e:
-            print(f"[DATABASE] Error getting IP rules: {e}")
-            return []
-
-    def delete_ip_rule(self, rule_id):
-        """Delete an IP rule"""
-        if not self.connected:
-            return False
-        try:
-            from bson import ObjectId
-            self.db.ip_rules.delete_one({'_id': ObjectId(rule_id)})
-            return True
-        except Exception as e:
-            print(f"[DATABASE] Error deleting IP rule: {e}")
-            return False
     
     def get_database_stats(self):
         """Get MongoDB database statistics including storage usage"""
@@ -784,63 +676,6 @@ class CloudDatabase:
         except Exception as e:
             print(f"[DATABASE] Error emptying trash: {e}")
             return False
-
-    def create_project(self, project_data):
-        """Create a new project"""
-        if not self.connected:
-            return None
-        try:
-            from datetime import datetime
-            project_data['created_at'] = datetime.now().isoformat()
-            project_data['updated_at'] = datetime.now().isoformat()
-            result = self.db.projects.insert_one(project_data)
-            return str(result.inserted_id)
-        except Exception as e:
-            print(f"[DATABASE] Error creating project: {e}")
-            return None
-
-    def update_project(self, project_id, project_data):
-        """Update an existing project"""
-        if not self.connected:
-            return False
-        try:
-            from bson import ObjectId
-            from datetime import datetime
-            project_data['updated_at'] = datetime.now().isoformat()
-            result = self.db.projects.update_one(
-                {'_id': ObjectId(project_id)},
-                {'$set': project_data}
-            )
-            return result.modified_count > 0
-        except Exception as e:
-            print(f"[DATABASE] Error updating project: {e}")
-            return False
-
-    def delete_project(self, project_id):
-        """Delete a project"""
-        if not self.connected:
-            return False
-        try:
-            from bson import ObjectId
-            result = self.db.projects.delete_one({'_id': ObjectId(project_id)})
-            return result.deleted_count > 0
-        except Exception as e:
-            print(f"[DATABASE] Error deleting project: {e}")
-            return False
-
-    def get_project(self, project_id):
-        """Get a single project by ID"""
-        if not self.connected:
-            return None
-        try:
-            from bson import ObjectId
-            project = self.db.projects.find_one({'_id': ObjectId(project_id)})
-            if project:
-                project['_id'] = str(project['_id'])
-            return project
-        except Exception as e:
-            print(f"[DATABASE] Error getting project: {e}")
-            return None
 
     def get_all_projects(self):
         """Get all projects from all users"""

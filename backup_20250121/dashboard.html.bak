@@ -949,7 +949,7 @@
                                     </div>
                                     <div class="col-auto">
                                         <div class="badge bg-info bg-opacity-90 text-white px-3 py-2">
-                                            <i class="fas fa-user-tie me-2"></i>{% if account_type == 'admin' %}Admin Access{% elif account_type == 'internal' %}Internal Access{% else %}External Access{% endif %}
+                                            <i class="fas fa-user-tie me-2"></i>{{ account_type }} Access
                                         </div>
                                     </div>
                                     <div class="col-auto">
@@ -969,8 +969,8 @@
                                     </div>
                                     <div class="col-6">
                                         <div class="text-center">
-                                            <div class="h2 fw-bold mb-0" id="dealsCounter">€0.0B</div>
-                                            <small class="opacity-75">Project Pipeline</small>
+                                            <div class="h2 fw-bold mb-0" id="dealsCounter">342</div>
+                                            <small class="opacity-75">Active Structures</small>
                                         </div>
                                     </div>
                                 </div>
@@ -2675,8 +2675,8 @@
 
 
             <!-- Project Edit Modal -->
-            <div id="project-edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10000; align-items: center; justify-content: center; overflow-y: auto;">
-                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto; margin: auto; position: relative; top: 10vh;">
+            <div id="project-edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10000; align-items: center; justify-content: center;">
+                <div style="background: linear-gradient(135deg, #0a0e27, #020617); border: 2px solid #60a5fa; border-radius: 16px; padding: 2rem; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                         <h2 style="color: #60a5fa; font-size: 1.5rem; font-weight: 700; margin: 0;">
                             <i class="fas fa-edit"></i> Edit Project
@@ -5110,16 +5110,15 @@ if (window.showSection) {
         function animate() {
             if (!isDragging) {
                 tickerPosition -= 0.3; // Slower smooth scroll speed
-
+                
                 // Get actual width of one set of content
                 const tickerWidth = ticker.scrollWidth / 3;
-
-                // Reset position for SEAMLESS endless loop
-                // When we've scrolled past one complete set, reset to 0
+                
+                // Reset position for endless loop
                 if (Math.abs(tickerPosition) >= tickerWidth) {
-                    tickerPosition = 0;
+                    tickerPosition = tickerPosition % tickerWidth;
                 }
-
+                
                 ticker.style.transform = 'translateX(' + tickerPosition + 'px)';
                 tickerAnimationId = requestAnimationFrame(animate);
             }
@@ -5633,16 +5632,7 @@ if (window.showSection) {
         }
         // Animate counters
         animateCounter('aumCounter', 0, 127.5, 'B', 2000);
-        // Fetch and display project pipeline total
-        fetch('/api/project-pipeline-total')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('dealsCounter').textContent = data.formatted;
-            })
-            .catch(error => {
-                console.error('Failed to fetch project pipeline:', error);
-                document.getElementById('dealsCounter').textContent = '€0.0B';
-            });
+        animateCounter('dealsCounter', 0, 342, '', 2000);
         
         // Initialize Chart
         const ctx = document.getElementById('spreadChart');
