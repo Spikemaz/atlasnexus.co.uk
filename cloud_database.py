@@ -691,6 +691,35 @@ class CloudDatabase:
             print(f"[DATABASE] Error getting trash items: {e}")
             return []
 
+    def move_to_trash(self, project_data, original_owner, deleted_by):
+        """Move a project to the trash bin"""
+        if not self.connected:
+            print("[DATABASE] Not connected - cannot move to trash")
+            return False
+
+        try:
+            from datetime import datetime
+
+            trash_item = {
+                'project_data': project_data,
+                'original_owner': original_owner,
+                'deleted_by': deleted_by,
+                'deleted_at': datetime.now().isoformat(),
+                'item_type': 'project'
+            }
+
+            result = self.db.trash.insert_one(trash_item)
+
+            if result.inserted_id:
+                print(f"[TRASH] Moved project {project_data.get('id')} to trash")
+                return str(result.inserted_id)
+
+            return False
+
+        except Exception as e:
+            print(f"[DATABASE] Error moving to trash: {e}")
+            return False
+
     def restore_from_trash(self, item_id):
         """Restore an item from trash"""
         if not self.connected:

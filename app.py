@@ -6087,7 +6087,7 @@ def get_project(project_id):
 
 @app.route('/api/projects/<project_id>', methods=['DELETE'])
 def delete_project(project_id):
-    """Delete a project - moves to trash in MongoDB"""
+    """Delete a project - admin permanently deletes, users move to trash"""
     ip_address = get_real_ip()
 
     if not session.get(f'user_authenticated_{ip_address}'):
@@ -6132,22 +6132,45 @@ def delete_project(project_id):
         print(f"[DELETE] Project {project_id} not found")
         return jsonify({'success': True, 'message': 'Project not found or already deleted', 'status': 'success'})
 
+    # Admin can delete any project, users can only delete their own
     if not is_admin and project_owner != email:
         print(f"[DELETE] Permission denied for {email} to delete project from {project_owner}")
         return jsonify({'success': False, 'message': 'Permission denied'}), 403
 
-    # Move to trash in MongoDB
-    if cloud_db and cloud_db.connected and project_to_delete:
-        print(f"[DELETE] Moving project {project_id} to trash")
-        trash_result = cloud_db.move_to_trash(
-            project_data=project_to_delete,
-            original_owner=project_owner,
-            deleted_by=email
-        )
+    # Different behavior for admin vs regular users
+    if is_admin:
+        # Admin deletion - completely remove the project (no trash)
+        print(f"[DELETE] Admin {email} permanently deleting project {project_id} owned by {project_owner}")
 
-        if not trash_result:
-            print(f"[DELETE] Failed to move project to trash")
-            return jsonify({'success': False, 'message': 'Failed to move to trash'}), 500
+        # For admin's own projects, move to trash for recovery
+        # For other users' projects, permanently delete
+        if project_owner == email:
+            # Admin deleting own project - move to trash
+            if cloud_db and cloud_db.connected and project_to_delete:
+                print(f"[DELETE] Moving admin's own project {project_id} to trash")
+                trash_result = cloud_db.move_to_trash(
+                    project_data=project_to_delete,
+                    original_owner=project_owner,
+                    deleted_by=email
+                )
+                if not trash_result:
+                    print(f"[DELETE] Failed to move project to trash")
+        else:
+            # Admin deleting another user's project - permanent deletion
+            print(f"[DELETE] Admin permanently deleting {project_owner}'s project {project_id}")
+    else:
+        # Regular user deletion - move to trash
+        if cloud_db and cloud_db.connected and project_to_delete:
+            print(f"[DELETE] Moving project {project_id} to trash for admin review")
+            trash_result = cloud_db.move_to_trash(
+                project_data=project_to_delete,
+                original_owner=project_owner,
+                deleted_by=email
+            )
+
+            if not trash_result:
+                print(f"[DELETE] Failed to move project to trash")
+                return jsonify({'success': False, 'message': 'Failed to move to trash'}), 500
 
     # Remove from the owner's projects in MongoDB
     if isinstance(projects_data.get(project_owner), dict):
@@ -6165,11 +6188,16 @@ def delete_project(project_id):
         # Save updated projects to MongoDB (without the deleted project)
         save_projects_data(project_owner, user_data)
 
-        print(f"[DELETE] Successfully moved project {project_id} from {project_owner} to trash")
+        if is_admin and project_owner != email:
+            print(f"[DELETE] Admin successfully deleted project {project_id} from {project_owner}")
+            message = 'Project permanently deleted'
+        else:
+            print(f"[DELETE] Successfully moved project {project_id} from {project_owner} to trash")
+            message = 'Project moved to trash'
 
         return jsonify({
             'success': True,
-            'message': f'Project moved to trash',
+            'message': message,
             'status': 'success'
         })
 
