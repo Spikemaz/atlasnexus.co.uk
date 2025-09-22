@@ -1087,24 +1087,46 @@
             }
         }
 
-        /* Cookie Consent Popup */
-        .cookie-popup {
+        /* Cookie Consent Popup with Overlay */
+        .cookie-overlay {
             position: fixed;
-            bottom: 0;
+            top: 0;
             left: 0;
             right: 0;
-            background: rgba(26, 29, 35, 0.98);
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .cookie-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .cookie-popup {
+            position: fixed;
+            bottom: 50%;
+            left: 50%;
+            transform: translate(-50%, 50%) translateY(100%);
+            width: 90%;
+            max-width: 600px;
+            background: linear-gradient(135deg, rgba(26, 29, 35, 0.99), rgba(2, 6, 23, 0.99));
             backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(96, 165, 250, 0.3);
-            padding: 24px;
-            z-index: 10000;
-            transform: translateY(100%);
+            border: 2px solid rgba(96, 165, 250, 0.5);
+            border-radius: 16px;
+            padding: 32px;
+            z-index: 10001;
             transition: transform 0.4s ease;
             display: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 120px rgba(96, 165, 250, 0.2);
         }
 
         .cookie-popup.show {
-            transform: translateY(0);
+            transform: translate(-50%, 50%) translateY(0);
             display: block;
         }
 
@@ -2328,10 +2350,24 @@
         // Handle login submission
         function handleLogin(event) {
             event.preventDefault();
-            
+
+            // Check if cookies have been accepted or rejected
+            const cookieConsent = localStorage.getItem('cookieConsent');
+            if (!cookieConsent) {
+                // Show cookie popup and prevent login
+                showCookiePopup();
+
+                // Show alert message
+                setTimeout(() => {
+                    alert('Please accept or reject cookies before logging in. This is required for GDPR compliance.');
+                }, 100);
+
+                return; // Stop login process
+            }
+
             const form = event.target;
             const formData = new FormData(form);
-            
+
             // Check if remember me is checked
             const rememberMe = document.getElementById('rememberMe').checked;
             
@@ -2536,7 +2572,21 @@
         function handleRegistration(event) {
             console.log('Registration form submitted!');
             event.preventDefault();
-            
+
+            // Check if cookies have been accepted or rejected
+            const cookieConsent = localStorage.getItem('cookieConsent');
+            if (!cookieConsent) {
+                // Show cookie popup and prevent registration
+                showCookiePopup();
+
+                // Show alert message
+                setTimeout(() => {
+                    alert('Please accept or reject cookies before registering. This is required for GDPR compliance.');
+                }, 100);
+
+                return; // Stop registration process
+            }
+
             // Check if terms checkbox is checked
             const termsCheckbox = document.getElementById('termsCheckbox');
             if (!termsCheckbox.checked) {
@@ -3181,15 +3231,31 @@
             if (!cookieConsent) {
                 // Show cookie popup after a short delay when page loads
                 setTimeout(() => {
-                    document.getElementById('cookiePopup').classList.add('show');
+                    showCookiePopup();
                 }, 1000);
             }
+        }
+
+        function showCookiePopup() {
+            document.getElementById('cookieOverlay').classList.add('show');
+            document.getElementById('cookiePopup').classList.add('show');
+
+            // Prevent scrolling when popup is shown
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideCookiePopup() {
+            document.getElementById('cookieOverlay').classList.remove('show');
+            document.getElementById('cookiePopup').classList.remove('show');
+
+            // Re-enable scrolling
+            document.body.style.overflow = '';
         }
 
         function acceptAllCookies() {
             localStorage.setItem('cookieConsent', 'all');
             localStorage.setItem('cookieConsentDate', new Date().toISOString());
-            document.getElementById('cookiePopup').classList.remove('show');
+            hideCookiePopup();
             // Enable all cookies
             console.log('All cookies accepted');
         }
@@ -3197,7 +3263,7 @@
         function acceptEssentialCookies() {
             localStorage.setItem('cookieConsent', 'essential');
             localStorage.setItem('cookieConsentDate', new Date().toISOString());
-            document.getElementById('cookiePopup').classList.remove('show');
+            hideCookiePopup();
             // Enable only essential cookies
             console.log('Essential cookies only');
         }
@@ -3229,6 +3295,9 @@
         }
 
     </script>
+
+    <!-- Cookie Consent Overlay -->
+    <div id="cookieOverlay" class="cookie-overlay"></div>
 
     <!-- Cookie Consent Popup -->
     <div id="cookiePopup" class="cookie-popup">
