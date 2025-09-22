@@ -4917,12 +4917,41 @@ def manage_series():
         projects[user_email]['series'] = []
     
     if request.method == 'GET':
-        # Return user's series and projects
-        return jsonify({
-            'status': 'success',
-            'series': projects[user_email].get('series', []),
-            'projects': projects[user_email].get('projects', [])
-        })
+        # Check if user is admin
+        account_type = session.get(f'account_type_{ip_address}', 'external')
+        is_admin = account_type == 'admin' or user_email == 'spikemaz8@aol.com'
+
+        if is_admin:
+            # Admin sees all users' projects
+            all_projects = []
+            all_series = []
+
+            for email, user_data in projects.items():
+                if isinstance(user_data, dict):
+                    user_projects = user_data.get('projects', [])
+                    # Add owner email to each project for admin view
+                    for proj in user_projects:
+                        proj['ownerEmail'] = email
+                    all_projects.extend(user_projects)
+
+                    user_series = user_data.get('series', [])
+                    for series in user_series:
+                        series['ownerEmail'] = email
+                    all_series.extend(user_series)
+
+            return jsonify({
+                'status': 'success',
+                'series': all_series,
+                'projects': all_projects,
+                'isAdmin': True
+            })
+        else:
+            # Regular users see only their projects
+            return jsonify({
+                'status': 'success',
+                'series': projects[user_email].get('series', []),
+                'projects': projects[user_email].get('projects', [])
+            })
     
     elif request.method == 'POST':
         try:

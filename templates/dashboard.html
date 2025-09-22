@@ -8810,10 +8810,10 @@ if (window.showSection) {
                     // Always remove from main projectsData array (avoid duplicating the filter)
                     projectsData = projectsData.filter(p => p.id !== pendingDeleteItem.id);
                     console.log('Project deleted. Remaining projects:', projectsData.length);
-                    
-                    renderProjects();
+
+                    // Force reload from server to ensure sync - especially important for admin deletions
+                    await loadProjects(false);  // Reload from server to ensure we have latest data
                     updateProjectStats();
-                    await saveSeriesData();
                     showSaveIndicator('success');
                 } else {
                     console.error('Delete failed:', data);
