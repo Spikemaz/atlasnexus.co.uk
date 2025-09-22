@@ -78,7 +78,10 @@
       "Bash(start https://vercel.com/marcus-moores-projects/atlasnexus-securitization/settings/environment-variables)",
       "Bash(git config:*)",
       "Bash(start https://atlasnexus.co.uk/admin-panel)",
-      "Bash(start cmd /k:*)"
+      "Bash(start cmd /k:*)",
+      "Bash(start C:UsersmarcuDesktopMarcus FolderProject1test_projects_browser.html)",
+      "Bash(start test_projects_browser.html)",
+      "Bash(chcp:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"

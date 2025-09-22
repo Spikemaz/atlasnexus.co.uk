@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Atlas Nexus Project Testing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 0;
+        }
+        .step {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+        }
+        .verify {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .warning {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Atlas Nexus Project CRUD Testing Suite</h1>
+
+    <div class="test-section">
+        <h2>Test Overview</h2>
+        <p>This page will help you systematically test the project CRUD operations to ensure:</p>
+        <ul>
+            <li>✅ Projects can be created and persist</li>
+            <li>✅ Projects can be edited and changes are saved</li>
+            <li>✅ Deleted projects stay deleted (no resurrection)</li>
+            <li>✅ No duplicate projects appear after operations</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 1: Open Atlas Nexus</h2>
+        <div class="step">
+            <p>Click the button below to open Atlas Nexus in a new tab:</p>
+            <button onclick="window.open('https://atlasnexus.co.uk', '_blank')">
+                Open Atlas Nexus
+            </button>
+            <div class="verify">
+                <strong>Login with:</strong><br>
+                Site Password: <code>Nexus2025##</code><br>
+                Email: <code>spikemaz8@aol.com</code><br>
+                Password: <code>Darla123*</code>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 2: Create Test Project</h2>
+        <div class="step">
+            <ol>
+                <li>Navigate to the <strong>Projects</strong> section</li>
+                <li>Click <strong>"New Project"</strong> or the <strong>"+"</strong> button</li>
+                <li>Fill in the following test data:
+                    <ul>
+                        <li>Title: <code>TEST PROJECT - DELETE ME - <span id="timestamp"></span></code></li>
+                        <li>Value: <code>999999</code></li>
+                        <li>Description: <code>Testing CRUD operations</code></li>
+                    </ul>
+                </li>
+                <li>Click <strong>Save</strong></li>
+            </ol>
+            <div class="verify">
+                <strong>VERIFY:</strong> The project appears in the projects list immediately
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 3: Test Persistence</h2>
+        <div class="step">
+            <ol>
+                <li>Note the current number of projects</li>
+                <li>Press <strong>F5</strong> to refresh the page</li>
+            </ol>
+            <div class="verify">
+                <strong>VERIFY:</strong><br>
+                ✓ Your test project is still there<br>
+                ✓ No duplicate projects appeared<br>
+                ✓ The project count is the same
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 4: Edit Project</h2>
+        <div class="step">
+            <ol>
+                <li>Click <strong>Edit</strong> on your test project</li>
+                <li>Change the title to: <code>EDITED - TEST PROJECT</code></li>
+                <li>Change the value to: <code>2000000</code></li>
+                <li>Click <strong>Save</strong></li>
+            </ol>
+            <div class="verify">
+                <strong>VERIFY:</strong> Changes are displayed immediately
+            </div>
+            <ol start="5">
+                <li>Press <strong>F5</strong> to refresh</li>
+            </ol>
+            <div class="verify">
+                <strong>VERIFY:</strong><br>
+                ✓ Edited title and value persist<br>
+                ✓ No duplicates created
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 5: Delete Project</h2>
+        <div class="step">
+            <ol>
+                <li>Click <strong>Delete</strong> on your test project</li>
+                <li>Confirm deletion in the modal</li>
+            </ol>
+            <div class="verify">
+                <strong>VERIFY:</strong> Project disappears from the list
+            </div>
+            <div class="warning">
+                <strong>CRITICAL TEST:</strong> Now refresh multiple times!
+            </div>
+            <ol start="3">
+                <li>Press <strong>F5</strong> to refresh (1st time)</li>
+                <li>Press <strong>F5</strong> to refresh (2nd time)</li>
+                <li>Press <strong>F5</strong> to refresh (3rd time)</li>
+            </ol>
+            <div class="verify">
+                <strong>VERIFY AFTER EACH REFRESH:</strong><br>
+                ✓ Deleted project does NOT reappear<br>
+                ✓ No "ghost" projects are created<br>
+                ✓ Project count remains correct
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 6: Check Browser Console</h2>
+        <div class="step">
+            <ol>
+                <li>Open Developer Tools (F12)</li>
+                <li>Go to the Console tab</li>
+                <li>Look for any of these messages:
+                    <ul>
+                        <li><code>saveProjects is disabled</code> - This is GOOD!</li>
+                        <li><code>Project deleted. Remaining projects:</code> - Should show correct count</li>
+                    </ul>
+                </li>
+                <li>Check Network tab for:
+                    <ul>
+                        <li>DELETE requests to <code>/api/projects/[id]</code></li>
+                        <li>NO POST requests to <code>/api/projects</code> after deletion</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div class="success">
+            <h3>✅ PASS Criteria:</h3>
+            <ul>
+                <li>Created projects persist through refresh</li>
+                <li>Edited projects keep their changes</li>
+                <li>Deleted projects stay deleted permanently</li>
+                <li>No duplicate projects appear at any point</li>
+                <li>Console shows "saveProjects is disabled"</li>
+            </ul>
+        </div>
+        <div class="warning">
+            <h3>❌ FAIL Indicators:</h3>
+            <ul>
+                <li>Deleted projects reappear after refresh</li>
+                <li>Duplicate projects are created</li>
+                <li>Edits don't persist</li>
+                <li>Console shows errors about saving projects</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Add timestamp to test project name
+        document.getElementById('timestamp').textContent = new Date().toISOString().slice(11, 19).replace(/:/g, '');
+
+        // Add a timer to track test duration
+        let startTime = Date.now();
+        setInterval(() => {
+            let elapsed = Math.floor((Date.now() - startTime) / 1000);
+            document.title = `Testing (${elapsed}s) - Atlas Nexus Projects`;
+        }, 1000);
+    </script>
+</body>
+</html>
