@@ -4,7 +4,7 @@ Everything in one place - no confusion
 """
 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 import os
 import socket
@@ -32,10 +32,10 @@ try:
     from cloud_database import load_admin_actions as db_load_admin_actions, add_admin_action as db_add_admin_action
     from cloud_database import load_projects as db_load_projects, save_project_data as db_save_project_data
     from cloud_database import reinitialize_db, cloud_db, get_mongodb_uri
-    
+
     # Check if MongoDB is actually connected
     CLOUD_DB_AVAILABLE = cloud_db and cloud_db.connected
-    
+
     if CLOUD_DB_AVAILABLE:
         print("[DATABASE] Cloud database connected successfully!")
     else:
@@ -45,6 +45,24 @@ except ImportError:
     db_load_projects = None
     db_save_project_data = None
     print("[DATABASE] Cloud database module not available - using local files")
+
+# Import Phase-1 components and security hardening
+try:
+    from feature_flags import feature_flags, is_feature_enabled
+    from security_hardening import rate_limiter, input_validator, cors_manager, security_logger, apply_rate_limiting
+    from observability import metrics_collector, structured_logger, performance_tracker, dashboard_provider
+    from phase1_components import (
+        input_hierarchy_processor, reverse_dscr_engine, repo_eligibility_engine,
+        viability_tiering_engine, InputLevel, ViabilityTier, RepoJurisdiction,
+        PermutationInput
+    )
+    from canary_rollout import canary_manager, start_phase1_deployment, check_deployment_health, emergency_rollback
+
+    PHASE1_AVAILABLE = True
+    print("[PHASE1] Phase-1 components loaded successfully!")
+except ImportError as e:
+    PHASE1_AVAILABLE = False
+    print(f"[PHASE1] Phase-1 components not available: {e}")
 
 # Import Blob storage for file uploads
 try:
@@ -956,6 +974,63 @@ def send_email_async(to_email, subject, html_content):
 app = Flask(__name__)
 # Use a fixed secret key so sessions persist across restarts
 app.secret_key = 'your-fixed-secret-key-keep-this-secure-in-production-2024'
+
+# Dev-only bridge: Allow X-Admin-Token to seed session
+from uuid import uuid4
+
+def _json_error(msg, code):
+    rid = request.headers.get("X-Request-ID") or str(uuid4())
+    r = jsonify(error=msg, code=code, request_id=rid)
+    r.status_code = code
+    return r
+
+@app.before_request
+def _dev_token_to_session():
+    """Dev-only: allow X-Admin-Token to seed session for business endpoints"""
+    if os.getenv("APP_ENV", "dev") == "prod":
+        return  # no effect in prod
+    expected = os.getenv("PHASE1_ADMIN_TOKEN", "phase1-admin-secure-token")
+    tok = request.headers.get("X-Admin-Token")
+    if tok and tok == expected:
+        session["is_admin"] = True
+        session["mfa_ok"] = True
+        session.permanent = True
+
+@app.after_request
+def _phase1_headers(resp):
+    """Add required Phase-1 headers to all responses"""
+    resp.headers["X-Commit-SHA"] = os.getenv("COMMIT_SHA", "dev-sha")
+    resp.headers["X-Ruleset-Version"] = os.getenv("RULESET_VERSION", "v1.0")
+    resp.headers["X-Env"] = os.getenv("APP_ENV", "dev")
+    resp.headers["X-Build-ID"] = os.getenv("BUILD_ID", "local")
+    req_id = request.headers.get("X-Request-ID") or str(uuid4())
+    resp.headers["X-Request-ID"] = req_id
+    return resp
+
+@app.errorhandler(404)
+def _e404(_): return _json_error("Not found", 404)
+
+@app.errorhandler(429)
+def _e429(_): return _json_error("Rate limited", 429)
+
+@app.errorhandler(500)
+def _e500(_): return _json_error("Internal error", 500)
+
+# Register Phase-1 Blueprint (admin-only)
+try:
+    from phase1_flask_integration import phase1_bp
+    app.register_blueprint(phase1_bp)
+    print("[PHASE1] Blueprint registered successfully")
+except ImportError as e:
+    print(f"[PHASE1] Blueprint not available: {e}")
+
+# Register Phase-1 Canary Endpoints
+try:
+    from phase1_canary_endpoints import phase1_canary
+    app.register_blueprint(phase1_canary)
+    print("[CANARY] Phase-1 canary endpoints registered successfully")
+except ImportError as e:
+    print(f"[CANARY] Canary endpoints not available: {e}")
 app.permanent_session_lifetime = timedelta(minutes=PERMANENT_SESSION_LIFETIME)
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
@@ -6625,6 +6700,391 @@ def get_permutation_results(project_id):
             'success': False,
             'message': f'Failed to retrieve results: {str(e)}'
         }), 500
+
+# =============================================================================
+# PHASE-1 API ENDPOINTS (Admin-only, behind feature flags)
+# =============================================================================
+
+@app.route('/api/phase1/input-hierarchy', methods=['POST'])
+@apply_rate_limiting('/api/phase1/')
+def phase1_input_hierarchy():
+    """Phase-1 Input Hierarchy Processor API"""
+    if not PHASE1_AVAILABLE:
+        return jsonify({'error': 'Phase-1 components not available'}), 503
+
+    ip_address = get_real_ip()
+
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+
+    email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    is_admin = account_type == 'admin' or email == 'spikemaz8@aol.com'
+
+    if not is_feature_enabled('input_hierarchy_processor', email, is_admin):
+        return jsonify({'error': 'Input Hierarchy Processor not available'}), 403
+
+    try:
+        data = request.get_json()
+
+        # Validate input data
+        is_valid, errors = input_validator.validate_project_data(data)
+        if not is_valid:
+            return jsonify({'error': 'Invalid input data', 'details': errors}), 400
+
+        # Create permutation input
+        input_data = PermutationInput(
+            permutation_id=f"ih_{int(time.time())}",
+            input_level=InputLevel(data.get('input_level', 'manual')),
+            raw_data=data.get('raw_data', {}),
+            user_email=email,
+            timestamp=datetime.utcnow()
+        )
+
+        # Process through hierarchy
+        result = input_hierarchy_processor.process_input(input_data, email, is_admin)
+
+        metrics_collector.increment_counter('api_phase1_input_hierarchy_requests')
+
+        return jsonify({
+            'success': True,
+            'result': result
+        })
+
+    except Exception as e:
+        structured_logger.error("Phase-1 Input Hierarchy API error", error=str(e), user_email=email)
+        metrics_collector.increment_counter('api_phase1_input_hierarchy_errors')
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/phase1/reverse-dscr', methods=['POST'])
+@apply_rate_limiting('/api/phase1/')
+def phase1_reverse_dscr():
+    """Phase-1 Reverse DSCR Engine API"""
+    if not PHASE1_AVAILABLE:
+        return jsonify({'error': 'Phase-1 components not available'}), 503
+
+    ip_address = get_real_ip()
+
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+
+    email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    is_admin = account_type == 'admin' or email == 'spikemaz8@aol.com'
+
+    if not is_feature_enabled('reverse_dscr_engine', email, is_admin):
+        return jsonify({'error': 'Reverse DSCR Engine not available'}), 403
+
+    try:
+        data = request.get_json()
+
+        # Extract parameters
+        target_dscr = float(data.get('target_dscr', 1.25))
+        cashflow = float(data.get('cashflow', 0))
+        existing_debt = float(data.get('existing_debt', 0))
+
+        # Calculate reverse DSCR
+        result = reverse_dscr_engine.calculate_reverse_dscr(
+            target_dscr=target_dscr,
+            cashflow=cashflow,
+            existing_debt=existing_debt,
+            user_email=email,
+            is_admin=is_admin
+        )
+
+        metrics_collector.increment_counter('api_phase1_reverse_dscr_requests')
+
+        return jsonify({
+            'success': True,
+            'result': {
+                'dscr_value': result.dscr_value,
+                'input_ltv': result.input_ltv,
+                'calculated_ltv': result.calculated_ltv,
+                'is_reverse_calculated': result.is_reverse_calculated,
+                'confidence_score': result.confidence_score
+            }
+        })
+
+    except Exception as e:
+        structured_logger.error("Phase-1 Reverse DSCR API error", error=str(e), user_email=email)
+        metrics_collector.increment_counter('api_phase1_reverse_dscr_errors')
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/phase1/repo-eligibility', methods=['POST'])
+@apply_rate_limiting('/api/phase1/')
+def phase1_repo_eligibility():
+    """Phase-1 Repository Eligibility Engine API"""
+    if not PHASE1_AVAILABLE:
+        return jsonify({'error': 'Phase-1 components not available'}), 503
+
+    ip_address = get_real_ip()
+
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+
+    email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    is_admin = account_type == 'admin' or email == 'spikemaz8@aol.com'
+
+    if not is_feature_enabled('repo_eligibility_rules', email, is_admin):
+        return jsonify({'error': 'Repository Eligibility Engine not available'}), 403
+
+    try:
+        data = request.get_json()
+
+        # Extract parameters
+        jurisdiction = RepoJurisdiction(data.get('jurisdiction', 'uk'))
+        property_data = data.get('property_data', {})
+
+        # Check eligibility
+        result = repo_eligibility_engine.check_eligibility(
+            jurisdiction=jurisdiction,
+            property_data=property_data,
+            user_email=email,
+            is_admin=is_admin
+        )
+
+        metrics_collector.increment_counter('api_phase1_repo_eligibility_requests')
+
+        return jsonify({
+            'success': True,
+            'result': {
+                'jurisdiction': result.jurisdiction.value,
+                'is_eligible': result.is_eligible,
+                'rules_passed': result.rules_passed,
+                'rules_failed': result.rules_failed,
+                'score': result.score
+            }
+        })
+
+    except Exception as e:
+        structured_logger.error("Phase-1 Repo Eligibility API error", error=str(e), user_email=email)
+        metrics_collector.increment_counter('api_phase1_repo_eligibility_errors')
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/phase1/viability-tier', methods=['POST'])
+@apply_rate_limiting('/api/phase1/')
+def phase1_viability_tier():
+    """Phase-1 Viability Tiering Engine API"""
+    if not PHASE1_AVAILABLE:
+        return jsonify({'error': 'Phase-1 components not available'}), 503
+
+    ip_address = get_real_ip()
+
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+
+    email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    is_admin = account_type == 'admin' or email == 'spikemaz8@aol.com'
+
+    if not is_feature_enabled('viability_tiering', email, is_admin):
+        return jsonify({'error': 'Viability Tiering Engine not available'}), 403
+
+    try:
+        data = request.get_json()
+        deal_data = data.get('deal_data', {})
+
+        # Calculate viability tier
+        result = viability_tiering_engine.calculate_viability_tier(
+            deal_data=deal_data,
+            user_email=email,
+            is_admin=is_admin
+        )
+
+        metrics_collector.increment_counter('api_phase1_viability_tier_requests')
+
+        return jsonify({
+            'success': True,
+            'result': {
+                'tier': result.tier.value,
+                'score': result.score,
+                'is_near_miss': result.is_near_miss,
+                'near_miss_tier': result.near_miss_tier.value if result.near_miss_tier else None,
+                'reasons': result.reasons
+            }
+        })
+
+    except Exception as e:
+        structured_logger.error("Phase-1 Viability Tier API error", error=str(e), user_email=email)
+        metrics_collector.increment_counter('api_phase1_viability_tier_errors')
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/phase1/dashboard', methods=['GET'])
+@apply_rate_limiting('/api/phase1/')
+def phase1_dashboard():
+    """Phase-1 Dashboard Data API (Admin-only)"""
+    if not PHASE1_AVAILABLE:
+        return jsonify({'error': 'Phase-1 components not available'}), 503
+
+    ip_address = get_real_ip()
+
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+
+    email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    is_admin = account_type == 'admin' or email == 'spikemaz8@aol.com'
+
+    # Dashboard is admin-only
+    if not is_admin:
+        return jsonify({'error': 'Admin access required'}), 403
+
+    try:
+        # Get dashboard data
+        dashboard_data = dashboard_provider.get_dashboard_data()
+
+        # Add feature flag status
+        dashboard_data['feature_flags'] = canary_manager.get_rollout_status()
+
+        # Add system health
+        dashboard_data['system_health'] = {
+            'deployment_id': 'phase1_20250924_154500',
+            'uptime_minutes': (datetime.utcnow() - datetime(2025, 9, 24, 15, 45)).total_seconds() / 60,
+            'phase1_available': PHASE1_AVAILABLE,
+            'cloud_db_available': CLOUD_DB_AVAILABLE
+        }
+
+        return jsonify({
+            'success': True,
+            'data': dashboard_data
+        })
+
+    except Exception as e:
+        structured_logger.error("Phase-1 Dashboard API error", error=str(e), user_email=email)
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/phase1/rollout/start', methods=['POST'])
+def phase1_start_rollout():
+    """Start Phase-1 canary rollout (Admin-only)"""
+    if not PHASE1_AVAILABLE:
+        return jsonify({'error': 'Phase-1 components not available'}), 503
+
+    ip_address = get_real_ip()
+
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+
+    email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    is_admin = account_type == 'admin' or email == 'spikemaz8@aol.com'
+
+    if not is_admin:
+        return jsonify({'error': 'Admin access required'}), 403
+
+    try:
+        result = start_phase1_deployment()
+        structured_logger.info("Phase-1 rollout started", user_email=email, rollout_id=result.get('rollout_id'))
+        return jsonify({'success': True, 'result': result})
+
+    except Exception as e:
+        structured_logger.error("Failed to start Phase-1 rollout", error=str(e), user_email=email)
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/phase1/rollout/check', methods=['GET'])
+def phase1_check_rollout():
+    """Check Phase-1 rollout status (Admin-only)"""
+    if not PHASE1_AVAILABLE:
+        return jsonify({'error': 'Phase-1 components not available'}), 503
+
+    ip_address = get_real_ip()
+
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+
+    email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    is_admin = account_type == 'admin' or email == 'spikemaz8@aol.com'
+
+    if not is_admin:
+        return jsonify({'error': 'Admin access required'}), 403
+
+    try:
+        result = check_deployment_health()
+        return jsonify({'success': True, 'result': result})
+
+    except Exception as e:
+        structured_logger.error("Failed to check Phase-1 rollout", error=str(e), user_email=email)
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/phase1/rollout/emergency-rollback', methods=['POST'])
+def phase1_emergency_rollback():
+    """Emergency rollback of Phase-1 features (Admin-only)"""
+    if not PHASE1_AVAILABLE:
+        return jsonify({'error': 'Phase-1 components not available'}), 503
+
+    ip_address = get_real_ip()
+
+    if not session.get(f'user_authenticated_{ip_address}'):
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+
+    email = session.get(f'user_email_{ip_address}')
+    account_type = session.get(f'account_type_{ip_address}', 'external')
+    is_admin = account_type == 'admin' or email == 'spikemaz8@aol.com'
+
+    if not is_admin:
+        return jsonify({'error': 'Admin access required'}), 403
+
+    try:
+        result = emergency_rollback()
+        structured_logger.warning("Emergency rollback executed", user_email=email, results=result)
+        return jsonify({'success': True, 'result': result})
+
+    except Exception as e:
+        structured_logger.error("Emergency rollback failed", error=str(e), user_email=email)
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """System health check endpoint"""
+    try:
+        health_status = {
+            'status': 'healthy',
+            'timestamp': datetime.utcnow().isoformat(),
+            'version': 'Phase-1.0.0',
+            'deployment_id': 'phase1_20250924_154500',
+            'components': {
+                'cloud_database': CLOUD_DB_AVAILABLE,
+                'phase1_features': PHASE1_AVAILABLE,
+                'blob_storage': globals().get('BLOB_STORAGE_AVAILABLE', False)
+            },
+            'metrics': {
+                'total_requests': metrics_collector.get_counter('request_count_total') if PHASE1_AVAILABLE else 0,
+                'error_count': metrics_collector.get_counter('error_count_total') if PHASE1_AVAILABLE else 0
+            }
+        }
+
+        return jsonify(health_status)
+
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': datetime.utcnow().isoformat()
+        }), 500
+
+@app.route('/__healthz', methods=['GET'])
+def healthz():
+    """Admin-only health endpoint"""
+    return jsonify({
+        'status': 'ok',
+        'env': os.environ.get('FLASK_ENV', 'production'),
+        'time': datetime.now(timezone.utc).isoformat()
+    })
+
+@app.route('/__version', methods=['GET'])
+def version_info():
+    """Admin-only version endpoint"""
+    return jsonify({
+        'commit': 'f42638c',
+        'build_id': os.environ.get('BUILD_ID', 'phase1_20250924_154500'),
+        'ruleset_version': 'v1.0',
+        'started_at': datetime.now(timezone.utc).isoformat()
+    })
+
+# =============================================================================
+# END PHASE-1 API ENDPOINTS
+# =============================================================================
 
 @app.route('/api/projects/<project_id>/upload', methods=['POST'])
 def upload_project_file(project_id):

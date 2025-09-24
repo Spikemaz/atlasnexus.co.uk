@@ -31,12 +31,119 @@
             animation: spin 1s linear infinite;
         }
 
+        .phase1-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, #1e40af, #3730a3);
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 10000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Phase-1 Specific Styles */
+        .tier-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .tier-diamond {
+            background: linear-gradient(45deg, #60a5fa, #3b82f6);
+            color: white;
+        }
+
+        .tier-gold {
+            background: linear-gradient(45deg, #fbbf24, #f59e0b);
+            color: #1f2937;
+        }
+
+        .tier-silver {
+            background: linear-gradient(45deg, #94a3b8, #64748b);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ccc;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #60a5fa, #3b82f6);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(96, 165, 250, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--steel-blue);
+            color: #ccc;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-secondary:hover {
+            background: var(--slate-grey);
+            color: #fff;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
             background: linear-gradient(135deg, #0a0e27, #020617);
             color: #e0e0e0;
             min-height: 100vh;
             display: flex;
+            padding-top: 32px;
         }
 
         .sidebar {
@@ -659,6 +766,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Phase-1 Admin Banner -->
+    <div class="phase1-banner">
+        ATLAS v1 • Phase-1 BUILD • Commit: f42638c • Date: 2025-09-24 UTC • Admin-Only Mode
+    </div>
+
     <!-- Mobile menu toggle -->
     <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
         <i class="fas fa-bars"></i>
@@ -720,6 +832,30 @@
         </div>
 
         <div class="nav-section">
+            <div class="nav-section-title">Phase-1 Workflow</div>
+            <a class="nav-item" data-page="phase1-projects">
+                <i class="fas fa-building"></i>
+                Projects
+            </a>
+            <a class="nav-item" data-page="phase1-permutations">
+                <i class="fas fa-sliders-h"></i>
+                Permutations
+            </a>
+            <a class="nav-item" data-page="phase1-engine">
+                <i class="fas fa-cogs"></i>
+                Run Engine
+            </a>
+            <a class="nav-item" data-page="phase1-securitisation">
+                <i class="fas fa-trophy"></i>
+                Securitisation
+            </a>
+            <a class="nav-item" data-page="phase1-ops">
+                <i class="fas fa-shield-alt"></i>
+                Ops Monitor
+            </a>
+        </div>
+
+        <div class="nav-section">
             <div class="nav-section-title">Quick Actions</div>
             <a class="nav-item" onclick="refreshData()">
                 <i class="fas fa-sync-alt"></i>
@@ -733,11 +869,13 @@
     </div>
 
     <div class="main-content">
-        <div class="header">
-            <div class="header-top">
-                <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
-                <div class="header-actions">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-right: 1rem;">
+        <!-- Unified Header with Navigation -->
+        <div class="header" style="background: linear-gradient(135deg, #0a0e27, #020617); border-bottom: 1px solid rgba(96, 165, 250, 0.3); padding: 1rem 2rem; position: fixed; top: 0; left: 280px; right: 0; z-index: 99;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <!-- Left side: Page title and live indicator -->
+                <div style="display: flex; align-items: center; gap: 2rem;">
+                    <h1 class="page-title" id="pageTitle" style="color: #ffffff; font-size: 1.5rem; margin: 0;">Dashboard Overview</h1>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
                             <input type="checkbox" id="autoRefreshToggle" checked style="cursor: pointer;">
                             <span style="color: #22c55e; font-size: 0.9rem;">Live</span>
@@ -747,23 +885,46 @@
                             <span id="lastUpdateTime" style="color: #888; font-size: 0.85rem;">Now</span>
                         </span>
                     </div>
-                    <a href="/dashboard" class="btn btn-primary">
-                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                </div>
+
+                <!-- Right side: Navigation buttons -->
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: rgba(255, 255, 255, 0.8);">
+                        <span style="width: 8px; height: 8px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 10px #00ff00;"></span>
+                        Control Panel Active
+                    </span>
+
+                    <a href="/dashboard" style="background: linear-gradient(135deg, #0a0e27, #020617); color: white; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block;">
+                        <i class="fas fa-home"></i> Dashboard
                     </a>
-                    <button class="btn btn-secondary" onclick="manualRefresh()">
+
+                    <!-- Control Panel Button (current page - highlighted) -->
+                    <a href="/admin-panel" style="background: linear-gradient(135deg, #60a5fa, #3b82f6); color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block;">
+                        <i class="fas fa-cog"></i> Control Panel
+                    </a>
+
+                    <a href="/account" style="background: linear-gradient(135deg, #0a0e27, #020617); color: white; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block;">
+                        <i class="fas fa-user"></i> Account
+                    </a>
+
+                    <a href="/logout" style="background: linear-gradient(90deg, #ef4444, #dc2626); color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+
+                    <button class="btn btn-secondary" onclick="manualRefresh()" style="background: linear-gradient(135deg, #0a0e27, #020617); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
                         <i class="fas fa-sync-alt" id="refreshIcon"></i> Refresh
                     </button>
                 </div>
             </div>
-            <div id="alertContainer"></div>
         </div>
+        <div id="alertContainer" style="margin-top: 60px;"></div>
 
         <!-- Toolbar -->
         <div class="toolbar">
         </div>
 
         <!-- Dashboard Content -->
-        <div id="dashboardContent" class="tab-content active">
+        <div id="dashboardContent" class="tab-content active" style="margin-top: 80px;">
             <div class="stats-grid">
                 <div class="stat-card" style="cursor: pointer;" onclick="document.querySelector('[data-page=users]').click()">
                     <div class="stat-icon users">
@@ -1016,6 +1177,316 @@
                 </div>
             </div>
         </div>
+
+        <!-- Phase-1 Projects Content -->
+        <div id="phase1-projectsContent" class="tab-content" style="display: none;">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Phase-1: Project Input & Validation</h2>
+                    <p style="color: #888; margin-top: 0.5rem;">Enter project details and generate derived fields for securitisation analysis</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+                    <!-- Input Form -->
+                    <div class="form-container" style="background: var(--steel-blue); padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="color: #fff; margin-bottom: 1rem;">Project Inputs</h3>
+                        <form id="phase1ProjectForm">
+                            <div class="form-group">
+                                <label>Project Title</label>
+                                <input type="text" id="project_title" placeholder="London DC Alpha" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Country</label>
+                                <select id="project_country" required>
+                                    <option value="UK">United Kingdom</option>
+                                    <option value="DE">Germany</option>
+                                    <option value="FR">France</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Currency</label>
+                                <select id="project_currency" required>
+                                    <option value="GBP">GBP</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="USD">USD</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Gross IT Load (MW)</label>
+                                <input type="number" id="gross_it_load_mw" step="0.1" placeholder="35.0" required>
+                            </div>
+                            <div class="form-group">
+                                <label>PUE</label>
+                                <input type="number" id="pue" step="0.1" placeholder="1.2" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Lease Years</label>
+                                <input type="number" id="lease_years" placeholder="25" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tenant Rating</label>
+                                <select id="tenant_rating" required>
+                                    <option value="AAA">AAA</option>
+                                    <option value="AA">AA</option>
+                                    <option value="A">A</option>
+                                    <option value="BBB">BBB</option>
+                                    <option value="NR">Not Rated</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>OpEx (%)</label>
+                                <input type="number" id="opex_pct" step="0.1" placeholder="15.0" required>
+                            </div>
+                            <div class="form-group">
+                                <label>CapEx Cost per MW (£)</label>
+                                <input type="number" id="capex_cost_per_mw" placeholder="2500000" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Land Fees Total (£)</label>
+                                <input type="number" id="land_fees_total" placeholder="500000" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Gross Monthly Rent (£)</label>
+                                <input type="number" id="gross_monthly_rent" placeholder="300000">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                                Validate & Generate Derived Fields
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Derived Preview -->
+                    <div class="preview-container" style="background: var(--slate-grey); padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="color: #fff; margin-bottom: 1rem;">Derived Fields Preview</h3>
+                        <div id="derivedPreview" style="color: #ccc;">
+                            <p>Complete the project form to see derived fields...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase-1 Permutations Content -->
+        <div id="phase1-permutationsContent" class="tab-content" style="display: none;">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Phase-1: Permutation Ranges</h2>
+                    <p style="color: #888; margin-top: 0.5rem;">Configure permutation ranges using presets or custom values</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-top: 1.5rem;">
+                    <!-- Presets Panel -->
+                    <div style="background: var(--steel-blue); padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="color: #fff; margin-bottom: 1rem;">Preset Bundles</h3>
+                        <div class="preset-buttons" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <button class="btn btn-secondary preset-btn" data-preset="repo_first_aaa_aa">
+                                AAA/AA Repo-First
+                            </button>
+                            <button class="btn btn-secondary preset-btn" data-preset="balanced_a">
+                                A-rated Balanced
+                            </button>
+                            <button class="btn btn-secondary preset-btn" data-preset="value_max_bbb">
+                                BBB Value-Max
+                            </button>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2);">
+                            <h4 style="color: #fff; margin-bottom: 0.5rem;">Expected Cardinality</h4>
+                            <div id="cardinalityPreview" style="color: #22c55e; font-size: 1.5rem; font-weight: bold;">
+                                0 permutations
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Range Configuration -->
+                    <div style="background: var(--slate-grey); padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="color: #fff; margin-bottom: 1rem;">Range Configuration</h3>
+                        <form id="permutationRangesForm">
+                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label>Senior DSCR Min</label>
+                                    <input type="number" id="senior_dscr_min" step="0.05" placeholder="1.15">
+                                </div>
+                                <div class="form-group">
+                                    <label>Senior DSCR Max</label>
+                                    <input type="number" id="senior_dscr_max" step="0.05" placeholder="1.50">
+                                </div>
+                                <div class="form-group">
+                                    <label>Step</label>
+                                    <input type="number" id="senior_dscr_step" step="0.01" placeholder="0.05">
+                                </div>
+                            </div>
+
+                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label>Senior Coupon Min</label>
+                                    <input type="number" id="senior_coupon_min" step="0.0025" placeholder="0.035">
+                                </div>
+                                <div class="form-group">
+                                    <label>Senior Coupon Max</label>
+                                    <input type="number" id="senior_coupon_max" step="0.0025" placeholder="0.065">
+                                </div>
+                                <div class="form-group">
+                                    <label>Step</label>
+                                    <input type="number" id="senior_coupon_step" step="0.0025" placeholder="0.0025">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Senior Tenor (years)</label>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <label style="display: flex; align-items: center; gap: 0.25rem; color: #ccc;">
+                                        <input type="checkbox" value="7" class="tenor-checkbox"> 7y
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.25rem; color: #ccc;">
+                                        <input type="checkbox" value="10" class="tenor-checkbox"> 10y
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.25rem; color: #ccc;">
+                                        <input type="checkbox" value="12" class="tenor-checkbox"> 12y
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.25rem; color: #ccc;">
+                                        <input type="checkbox" value="15" class="tenor-checkbox"> 15y
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.25rem; color: #ccc;">
+                                        <input type="checkbox" value="20" class="tenor-checkbox"> 20y
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; color: #ccc;">
+                                    <input type="checkbox" id="wrap_enabled"> Wrap Enabled
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; color: #ccc;">
+                                    <input type="checkbox" id="mezz_enabled"> Mezzanine Layer
+                                </label>
+                            </div>
+
+                            <button type="button" class="btn btn-primary" onclick="calculateCardinality()" style="width: 100%; margin-top: 1rem;">
+                                Update Cardinality
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase-1 Engine Content -->
+        <div id="phase1-engineContent" class="tab-content" style="display: none;">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Phase-1: Run Engine</h2>
+                    <p style="color: #888; margin-top: 0.5rem;">Execute permutation engine with configured ranges</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-top: 1.5rem;">
+                    <!-- Engine Controls -->
+                    <div style="background: var(--steel-blue); padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="color: #fff; margin-bottom: 1rem;">Engine Configuration</h3>
+
+                        <div class="form-group">
+                            <label>Deterministic Seed</label>
+                            <input type="number" id="engine_seed" placeholder="424242" value="424242">
+                            <small style="color: #888; margin-top: 0.5rem; display: block;">
+                                Use same seed for reproducible results
+                            </small>
+                        </div>
+
+                        <div style="margin-top: 1.5rem;">
+                            <h4 style="color: #fff; margin-bottom: 0.5rem;">Run Summary</h4>
+                            <div style="color: #ccc; font-size: 0.9rem;">
+                                <div>Expected Permutations: <span id="engineCardinality">0</span></div>
+                                <div>Est. Runtime: <span id="engineRuntime">~0s</span></div>
+                                <div>Memory Est: <span id="engineMemory">~0MB</span></div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-primary" onclick="runPhase1Engine()" id="runEngineBtn" style="width: 100%; margin-top: 1.5rem;">
+                            <i class="fas fa-play"></i> Run Engine
+                        </button>
+                    </div>
+
+                    <!-- Engine Status -->
+                    <div style="background: var(--slate-grey); padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="color: #fff; margin-bottom: 1rem;">Engine Status</h3>
+                        <div id="engineStatus">
+                            <div style="text-align: center; color: #888; padding: 2rem;">
+                                <i class="fas fa-cogs fa-2x" style="margin-bottom: 1rem;"></i>
+                                <p>Ready to run permutations...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase-1 Securitisation Content -->
+        <div id="phase1-securitisationContent" class="tab-content" style="display: none;">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Phase-1: Securitisation Results</h2>
+                    <p style="color: #888; margin-top: 0.5rem;">Top-20 optimal structures with export capabilities</p>
+                </div>
+
+                <div id="securitisationResults" style="margin-top: 1.5rem;">
+                    <div style="text-align: center; color: #888; padding: 3rem;">
+                        <i class="fas fa-trophy fa-3x" style="margin-bottom: 1rem;"></i>
+                        <p>Run the engine to see securitisation results...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase-1 Ops Monitor Content -->
+        <div id="phase1-opsContent" class="tab-content" style="display: none;">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Phase-1: Operations Monitor</h2>
+                    <p style="color: #888; margin-top: 0.5rem;">QA metrics and canary monitoring dashboard</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+                    <!-- QA Metrics -->
+                    <div style="background: var(--steel-blue); padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="color: #fff; margin-bottom: 1rem;">QA Metrics</h3>
+                        <div class="metrics-grid" style="display: grid; gap: 1rem;">
+                            <div class="metric-item" style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #ccc;">Throughput (p/s)</span>
+                                <span style="color: #22c55e; font-weight: bold;" id="qa_throughput">0</span>
+                            </div>
+                            <div class="metric-item" style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #ccc;">Error Rate</span>
+                                <span style="color: #22c55e; font-weight: bold;" id="qa_error_rate">0.0%</span>
+                            </div>
+                            <div class="metric-item" style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #ccc;">Memory (MB)</span>
+                                <span style="color: #60a5fa; font-weight: bold;" id="qa_memory">0</span>
+                            </div>
+                            <div class="metric-item" style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #ccc;">P95 Latency (ms)</span>
+                                <span style="color: #60a5fa; font-weight: bold;" id="qa_p95">0.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Canary Monitor -->
+                    <div style="background: var(--slate-grey); padding: 1.5rem; border-radius: 8px;">
+                        <h3 style="color: #fff; margin-bottom: 1rem;">Canary Monitor</h3>
+                        <div class="canary-status">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                                <i class="fas fa-circle" style="color: #22c55e; font-size: 0.5rem;"></i>
+                                <span style="color: #22c55e;">Healthy</span>
+                            </div>
+                            <div style="color: #ccc; font-size: 0.9rem;">
+                                <div>Active Chunks: <span id="canary_chunks">0</span></div>
+                                <div>Queue Size: <span id="canary_queue">0</span></div>
+                                <div>Last Health Check: <span id="canary_last_check">Never</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1095,7 +1566,12 @@
                 'registrations': 'Registration Management',
                 'ip-management': 'IP Address Management',
                 'login-attempts': 'Login Attempts',
-                'projects': 'Projects & Trash'
+                'projects': 'Projects & Trash',
+                'phase1-projects': 'Phase-1: Projects',
+                'phase1-permutations': 'Phase-1: Permutations',
+                'phase1-engine': 'Phase-1: Run Engine',
+                'phase1-securitisation': 'Phase-1: Securitisation',
+                'phase1-ops': 'Phase-1: Ops Monitor'
             };
             document.getElementById('pageTitle').textContent = titles[page] || 'Admin Panel';
         }
@@ -1116,6 +1592,21 @@
                     break;
                 case 'projects':
                     loadProjectsData();
+                    break;
+                case 'phase1-projects':
+                    loadPhase1ProjectsData();
+                    break;
+                case 'phase1-permutations':
+                    loadPhase1PermutationsData();
+                    break;
+                case 'phase1-engine':
+                    loadPhase1EngineData();
+                    break;
+                case 'phase1-securitisation':
+                    loadPhase1SecuritisationData();
+                    break;
+                case 'phase1-ops':
+                    loadPhase1OpsData();
                     break;
             }
         }
@@ -3159,6 +3650,418 @@
                 console.error('Error permanently deleting project:', error);
                 showAlert('Error permanently deleting project', 'danger');
             }
+        }
+
+        // ==================== PHASE-1 JAVASCRIPT FUNCTIONS ====================
+
+        // Phase-1 Projects Functions
+        function loadPhase1ProjectsData() {
+            // Initialize form event listener
+            const form = document.getElementById('phase1ProjectForm');
+            if (form) {
+                form.addEventListener('submit', handleProjectValidation);
+            }
+
+            // Try to load existing derived data
+            loadExistingDerived();
+        }
+
+        async function handleProjectValidation(e) {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // Convert numeric fields
+            data.gross_it_load_mw = parseFloat(data.gross_it_load_mw);
+            data.pue = parseFloat(data.pue);
+            data.lease_years = parseInt(data.lease_years);
+            data.opex_pct = parseFloat(data.opex_pct);
+            data.capex_cost_per_mw = parseFloat(data.capex_cost_per_mw);
+            data.land_fees_total = parseFloat(data.land_fees_total);
+            data.gross_monthly_rent = parseFloat(data.gross_monthly_rent) || null;
+
+            try {
+                const response = await fetch('/api/phase1/projects/validate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayDerivedPreview(result.derived_preview);
+                    showAlert('Project validated successfully!', 'success');
+                } else {
+                    showAlert(result.error || 'Validation failed', 'danger');
+                }
+            } catch (error) {
+                console.error('Validation error:', error);
+                showAlert('Network error during validation', 'danger');
+            }
+        }
+
+        function displayDerivedPreview(derived) {
+            const preview = document.getElementById('derivedPreview');
+            if (preview) {
+                preview.innerHTML = `
+                    <div style="display: grid; gap: 1rem;">
+                        <div><strong>Total Load:</strong> ${derived.total_load}</div>
+                        <div><strong>Net Annual Income:</strong> ${derived.net_annual_income}</div>
+                        <div><strong>Total CapEx:</strong> ${derived.total_capex}</div>
+                        <div><strong>Tenor Cap:</strong> ${derived.tenor_cap}</div>
+                        <div><strong>Base Case DSCR:</strong> ${derived.base_case_dscr}</div>
+                        <div><strong>Max Debt Capacity:</strong> ${derived.max_debt_capacity}</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadExistingDerived() {
+            try {
+                const response = await fetch('/api/phase1/projects/derived');
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        displayDerivedPreview(result.derived);
+                    }
+                }
+            } catch (error) {
+                console.log('No existing derived data');
+            }
+        }
+
+        // Phase-1 Permutations Functions
+        function loadPhase1PermutationsData() {
+            // Setup preset button listeners
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => applyPreset(e.target.dataset.preset));
+            });
+
+            // Setup range form listener
+            const form = document.getElementById('permutationRangesForm');
+            if (form) {
+                form.addEventListener('input', debounce(calculateCardinality, 500));
+            }
+        }
+
+        async function applyPreset(presetName) {
+            try {
+                const response = await fetch('/api/phase1/permutations/apply-preset', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({preset: presetName})
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    populateRangeForm(result.ranges);
+                    updateCardinalityDisplay(result.cardinality);
+                    showAlert(`Applied ${presetName} preset`, 'success');
+                } else {
+                    showAlert(result.error || 'Failed to apply preset', 'danger');
+                }
+            } catch (error) {
+                console.error('Preset error:', error);
+                showAlert('Network error applying preset', 'danger');
+            }
+        }
+
+        function populateRangeForm(ranges) {
+            document.getElementById('senior_dscr_min').value = ranges.senior_dscr.min;
+            document.getElementById('senior_dscr_max').value = ranges.senior_dscr.max;
+            document.getElementById('senior_dscr_step').value = ranges.senior_dscr.step;
+
+            document.getElementById('senior_coupon_min').value = ranges.senior_coupon.min;
+            document.getElementById('senior_coupon_max').value = ranges.senior_coupon.max;
+            document.getElementById('senior_coupon_step').value = ranges.senior_coupon.step;
+
+            // Set tenor checkboxes
+            document.querySelectorAll('.tenor-checkbox').forEach(cb => {
+                cb.checked = ranges.senior_tenor.includes(parseInt(cb.value));
+            });
+
+            document.getElementById('wrap_enabled').checked = ranges.wrap;
+            document.getElementById('mezz_enabled').checked = ranges.mezz_on;
+        }
+
+        async function calculateCardinality() {
+            const ranges = {
+                senior_dscr: {
+                    min: parseFloat(document.getElementById('senior_dscr_min').value) || 1.15,
+                    max: parseFloat(document.getElementById('senior_dscr_max').value) || 1.50,
+                    step: parseFloat(document.getElementById('senior_dscr_step').value) || 0.05
+                },
+                senior_coupon: {
+                    min: parseFloat(document.getElementById('senior_coupon_min').value) || 0.035,
+                    max: parseFloat(document.getElementById('senior_coupon_max').value) || 0.065,
+                    step: parseFloat(document.getElementById('senior_coupon_step').value) || 0.0025
+                },
+                senior_tenor: Array.from(document.querySelectorAll('.tenor-checkbox:checked')).map(cb => parseInt(cb.value)),
+                wrap: document.getElementById('wrap_enabled').checked,
+                mezz_on: document.getElementById('mezz_enabled').checked
+            };
+
+            try {
+                const response = await fetch('/api/phase1/permutations/cardinality', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(ranges)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    updateCardinalityDisplay(result.cardinality);
+                }
+            } catch (error) {
+                console.error('Cardinality calculation error:', error);
+            }
+        }
+
+        function updateCardinalityDisplay(cardinality) {
+            const display = document.getElementById('cardinalityPreview');
+            if (display) {
+                display.textContent = `${cardinality.toLocaleString()} permutations`;
+            }
+
+            // Update engine page too
+            const engineCardinality = document.getElementById('engineCardinality');
+            if (engineCardinality) {
+                engineCardinality.textContent = cardinality.toLocaleString();
+            }
+        }
+
+        // Phase-1 Engine Functions
+        function loadPhase1EngineData() {
+            // Load cardinality from permutations page
+            loadExistingDerived();
+        }
+
+        async function runPhase1Engine() {
+            const seed = parseInt(document.getElementById('engine_seed').value) || 424242;
+            const btn = document.getElementById('runEngineBtn');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+
+            updateEngineStatus('Running permutations...', 'running');
+
+            try {
+                const response = await fetch('/api/phase1/run', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({seed: seed})
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    updateEngineStatus(`Completed ${result.stats.total_permutations} permutations`, 'completed');
+                    showAlert(result.message, 'success');
+
+                    // Update securitisation page
+                    setTimeout(() => switchPage('phase1-securitisation'), 1000);
+                } else {
+                    updateEngineStatus('Engine failed', 'error');
+                    showAlert(result.error || 'Engine failed', 'danger');
+                }
+            } catch (error) {
+                console.error('Engine error:', error);
+                updateEngineStatus('Network error', 'error');
+                showAlert('Network error running engine', 'danger');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-play"></i> Run Engine';
+            }
+        }
+
+        function updateEngineStatus(message, status) {
+            const statusDiv = document.getElementById('engineStatus');
+            if (statusDiv) {
+                let icon, color;
+                switch (status) {
+                    case 'running':
+                        icon = 'fas fa-spinner fa-spin';
+                        color = '#60a5fa';
+                        break;
+                    case 'completed':
+                        icon = 'fas fa-check-circle';
+                        color = '#22c55e';
+                        break;
+                    case 'error':
+                        icon = 'fas fa-exclamation-circle';
+                        color = '#ef4444';
+                        break;
+                    default:
+                        icon = 'fas fa-cogs';
+                        color = '#888';
+                }
+
+                statusDiv.innerHTML = `
+                    <div style="text-align: center; color: ${color}; padding: 2rem;">
+                        <i class="${icon} fa-2x" style="margin-bottom: 1rem;"></i>
+                        <p>${message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Phase-1 Securitisation Functions
+        async function loadPhase1SecuritisationData() {
+            try {
+                const response = await fetch('/api/phase1/securitisation/top20');
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        displaySecuritisationResults(result.top_20, result.stats);
+                    } else {
+                        showEmptySecuritisationMessage(result.error);
+                    }
+                } else {
+                    showEmptySecuritisationMessage('No results available');
+                }
+            } catch (error) {
+                console.error('Securitisation load error:', error);
+                showEmptySecuritisationMessage('Failed to load results');
+            }
+        }
+
+        function displaySecuritisationResults(top20, stats) {
+            const container = document.getElementById('securitisationResults');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Tier</th>
+                                    <th>Senior DSCR</th>
+                                    <th>Total Value (£M)</th>
+                                    <th>Repo Eligible</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${top20.map((structure, index) => `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td><span class="tier-badge tier-${structure.tier.toLowerCase()}">${structure.tier}</span></td>
+                                        <td>${structure.min_dscr_senior.toFixed(2)}x</td>
+                                        <td>£${(structure.day_one_value_total / 1000000).toFixed(1)}M</td>
+                                        <td>${structure.repo_eligible ? '<span style="color: #22c55e;">Yes</span>' : '<span style="color: #ef4444;">No</span>'}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary" onclick="exportStructure(${index + 1})">
+                                                <i class="fas fa-download"></i> Export
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="background: var(--slate-grey); padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: #fff; margin-bottom: 1rem;">Run Statistics</h4>
+                        <div style="color: #ccc; font-size: 0.9rem; display: grid; gap: 0.5rem;">
+                            <div>Total Permutations: <strong>${stats.total_permutations}</strong></div>
+                            <div>Gate A Pruned: <strong>${stats.gate_a_pruned}</strong></div>
+                            <div>Gate B Pruned: <strong>${stats.gate_b_pruned}</strong></div>
+                            <div>Near Misses: <strong>${stats.near_misses}</strong></div>
+                            <div>Diamond: <strong style="color: #60a5fa;">${stats.diamond_count}</strong></div>
+                            <div>Gold: <strong style="color: #fbbf24;">${stats.gold_count}</strong></div>
+                            <div>Silver: <strong style="color: #94a3b8;">${stats.silver_count}</strong></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showEmptySecuritisationMessage(message) {
+            const container = document.getElementById('securitisationResults');
+            if (container) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #888; padding: 3rem;">
+                        <i class="fas fa-trophy fa-3x" style="margin-bottom: 1rem;"></i>
+                        <p>${message}</p>
+                        <button class="btn btn-primary" onclick="switchPage('phase1-engine')" style="margin-top: 1rem;">
+                            Run Engine First
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        async function exportStructure(rank) {
+            try {
+                const response = await fetch(`/api/phase1/securitisation/export/${rank}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    // Create and download JSON file
+                    const blob = new Blob([JSON.stringify(result.export, null, 2)], {type: 'application/json'});
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `structure_rank_${rank}_export.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+
+                    showAlert(`Structure ${rank} exported successfully`, 'success');
+                } else {
+                    showAlert(result.error || 'Export failed', 'danger');
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                showAlert('Network error during export', 'danger');
+            }
+        }
+
+        // Phase-1 Ops Functions
+        async function loadPhase1OpsData() {
+            try {
+                const response = await fetch('/api/phase1/dashboard');
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        updateOpsMetrics(result.dashboard);
+                    }
+                }
+            } catch (error) {
+                console.error('Ops data load error:', error);
+            }
+        }
+
+        function updateOpsMetrics(dashboard) {
+            // Update QA metrics
+            document.getElementById('qa_throughput').textContent = dashboard.throughput.current;
+            document.getElementById('qa_error_rate').textContent = dashboard.error_rate.toFixed(1) + '%';
+            document.getElementById('qa_memory').textContent = dashboard.memory.current_mb;
+            document.getElementById('qa_p95').textContent = dashboard.p95_ms.toFixed(1);
+
+            // Update canary metrics
+            document.getElementById('canary_chunks').textContent = dashboard.active_chunks;
+            document.getElementById('canary_queue').textContent = dashboard.queue_size;
+            document.getElementById('canary_last_check').textContent = new Date(dashboard.timestamp).toLocaleTimeString();
+        }
+
+        // Utility function for debouncing
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
         }
     </script>
     
