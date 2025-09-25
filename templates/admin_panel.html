@@ -3684,6 +3684,7 @@
             try {
                 const response = await fetch('/api/phase1/projects/validate', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(data)
                 });
@@ -3720,7 +3721,9 @@
 
         async function loadExistingDerived() {
             try {
-                const response = await fetch('/api/phase1/projects/derived');
+                const response = await fetch('/api/phase1/projects/derived', {
+                    credentials: 'include'
+                });
                 if (response.ok) {
                     const result = await response.json();
                     if (result.success) {
@@ -3750,6 +3753,7 @@
             try {
                 const response = await fetch('/api/phase1/permutations/apply-preset', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({preset: presetName})
                 });
@@ -3807,6 +3811,7 @@
             try {
                 const response = await fetch('/api/phase1/permutations/cardinality', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(ranges)
                 });
@@ -3852,6 +3857,7 @@
             try {
                 const response = await fetch('/api/phase1/run', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({seed: seed})
                 });
@@ -3912,7 +3918,9 @@
         // Phase-1 Securitisation Functions
         async function loadPhase1SecuritisationData() {
             try {
-                const response = await fetch('/api/phase1/securitisation/top20');
+                const response = await fetch('/api/phase1/securitisation/top20', {
+                    credentials: 'include'
+                });
 
                 if (response.ok) {
                     const result = await response.json();
@@ -3999,7 +4007,9 @@
 
         async function exportStructure(rank) {
             try {
-                const response = await fetch(`/api/phase1/securitisation/export/${rank}`);
+                const response = await fetch(`/api/phase1/securitisation/export/${rank}`, {
+                    credentials: 'include'
+                });
                 const result = await response.json();
 
                 if (result.success) {
@@ -4025,7 +4035,9 @@
         // Phase-1 Ops Functions
         async function loadPhase1OpsData() {
             try {
-                const response = await fetch('/api/phase1/dashboard');
+                const response = await fetch('/api/phase1/dashboard', {
+                    credentials: 'include'
+                });
 
                 if (response.ok) {
                     const result = await response.json();
