@@ -637,8 +637,186 @@ def route_list():
         {"method": "POST", "path": "/api/phase1/run", "auth": "admin+mfa", "flags": ["phase1_core"]},
         {"method": "GET", "path": "/api/phase1/securitisation/top20", "auth": "admin+mfa", "flags": ["phase1_core"]},
         {"method": "GET", "path": "/api/phase1/securitisation/export/<int:structure_rank>", "auth": "admin+mfa", "flags": ["phase1_core"]},
-        {"method": "GET", "path": "/api/phase1/dashboard", "auth": "admin+mfa", "flags": ["phase1_core"]}
+        {"method": "GET", "path": "/api/phase1/dashboard", "auth": "admin+mfa", "flags": ["phase1_core"]},
+        {"method": "POST", "path": "/api/phase1/calc", "auth": "admin+mfa", "flags": ["phase1_core"]}
     ])
+
+# ==================== SINGLE CALCULATOR ====================
+
+@phase1_bp.route('/calc', methods=['POST'])
+@admin_required
+def calc_capital_stack():
+    """
+    Single calculator (no session persistence).
+    Reverse-engineers capital stack from NOI and DSCR requirements.
+    """
+    from math import isfinite
+    try:
+        p = request.get_json(silent=True) or {}
+        cur = p.get('currency', 'GBP')
+        noi_m = float(p.get('noi_monthly') or (float(p.get('noi_annual', 0.0))/12.0))
+        if not isfinite(noi_m) or noi_m <= 0:
+            return jsonify({"success": False, "error": "noi_monthly or noi_annual must be > 0"}), 400
+
+        funding_need = float(p.get('funding_need', 0))
+        if funding_need <= 0:
+            return jsonify({"success": False, "error": "funding_need must be > 0"}), 400
+
+        fees_pct = float(p.get('fees_pct', 0.0))
+        sidecar_haircut_pct = float(p.get('sidecar_haircut_pct', 0.15))
+        af_cap = p.get('advance_factor_cap')  # may be None
+
+        sr = p.get('senior', {}) or {}
+        sr_rate = float(sr.get('coupon_pct', 0.055))
+        sr_tenor_y = int(sr.get('tenor_years', 15))
+        sr_min_dscr = float(sr.get('min_dscr', 1.25))
+        sr_io_m = int(sr.get('io_months', 0))
+
+        mz = p.get('mezz', {}) or {}
+        mezz_enabled = bool(mz.get('enabled', False))
+        mz_rate = float(mz.get('coupon_pct', 0.09))
+        mz_tenor_y = int(mz.get('tenor_years', 7))
+        mz_min_dscr = float(mz.get('min_dscr', 1.10))
+        mz_io_m = int(mz.get('io_months', 0))
+
+        # ---------- helpers ----------
+        def annuity_payment(principal, rate_m, n_months):
+            # level payment per month
+            if rate_m <= 0:
+                return principal / max(1, n_months)
+            return principal * (rate_m / (1 - (1 + rate_m) ** (-n_months)))
+
+        def inverse_principal_from_payment(payment, rate_m, n_months):
+            if rate_m <= 0:
+                return payment * max(1, n_months)
+            return payment * (1 - (1 + rate_m) ** (-n_months)) / rate_m
+
+        def payment_with_io(principal, rate_m, n_total, io_m):
+            io_m = max(0, min(io_m, n_total))
+            if io_m == 0:
+                return annuity_payment(principal, rate_m, n_total)
+            # After IO, re-amortize over (n_total - io_m)
+            post_n = max(1, n_total - io_m)
+            lvl = annuity_payment(principal, rate_m, post_n)
+            # We return the **level** payment used for DSCR sizing (worst steady-state)
+            return lvl
+
+        def wal_years(principal, rate_m, n_total, io_m):
+            # principal-weighted average life
+            out = principal
+            bal = principal
+            wal_num = 0.0
+            months = 0
+            # IO phase
+            for _ in range(io_m):
+                months += 1
+                # no principal reduction
+            # Amort phase
+            pay = annuity_payment(principal, rate_m, max(1, n_total - io_m))
+            for _ in range(n_total - io_m):
+                months += 1
+                interest = bal * rate_m
+                principal_pay = max(0.0, pay - interest)
+                bal -= principal_pay
+                wal_num += (months/12.0) * principal_pay
+            return wal_num / out if out > 0 else float(n_total/12.0)
+
+        # ---------- senior sizing (reverse engineer) ----------
+        n_sr = sr_tenor_y * 12
+        r_sr_m = sr_rate / 12.0
+        # allowable monthly debt service by DSCR
+        sr_ds_allow = noi_m / max(1e-9, sr_min_dscr)
+        # convert debt service to principal (respect IO)
+        sr_payment = sr_ds_allow
+        sr_principal = inverse_principal_from_payment(payment_with_io(1.0, r_sr_m, n_sr, sr_io_m) * 1.0, r_sr_m, n_sr - sr_io_m) * (sr_payment / payment_with_io(1.0, r_sr_m, n_sr, sr_io_m))
+
+        # clamp by advance factor cap if provided
+        if af_cap is not None:
+            sr_principal = min(sr_principal, funding_need * float(af_cap))
+
+        # apply fees (gross up if fees are from proceeds)
+        sr_gross_proceeds = sr_principal * (1 - fees_pct)
+        # senior can't exceed funding need
+        sr_amount = min(sr_gross_proceeds, funding_need)
+
+        # recompute actual level payment based on sr_amount
+        sr_pay_lvl = payment_with_io(sr_amount, r_sr_m, n_sr, sr_io_m)
+        sr_dscr = noi_m / max(1e-9, sr_pay_lvl)
+        sr_wal = round(wal_years(sr_amount, r_sr_m, n_sr, sr_io_m), 2)
+
+        # ---------- mezz sizing (optional) ----------
+        mezz_amount = 0.0
+        mezz_pay_lvl = 0.0
+        mezz_dscr = None
+        mezz_wal = None
+
+        residual_need = max(0.0, funding_need - sr_amount)
+        residual_noi = max(0.0, noi_m - sr_pay_lvl)
+
+        if mezz_enabled and residual_need > 0 and residual_noi > 0:
+            n_mz = mz_tenor_y * 12
+            r_mz_m = mz_rate / 12.0
+            mz_ds_allow = residual_noi / max(1e-9, mz_min_dscr)
+            # map payment to principal
+            mezz_principal = inverse_principal_from_payment(payment_with_io(1.0, r_mz_m, n_mz, mz_io_m) * 1.0, r_mz_m, n_mz - mz_io_m) * (mz_ds_allow / payment_with_io(1.0, r_mz_m, n_mz, mz_io_m))
+            mezz_gross = mezz_principal * (1 - fees_pct)
+            mezz_amount = min(mezz_gross, residual_need)
+
+            mezz_pay_lvl = payment_with_io(mezz_amount, r_mz_m, n_mz, mz_io_m)
+            mezz_dscr = residual_noi / max(1e-9, mezz_pay_lvl) if mezz_amount > 0 else None
+            mezz_wal = round(wal_years(mezz_amount, r_mz_m, n_mz, mz_io_m), 2) if mezz_amount > 0 else None
+
+        equity = max(0.0, funding_need - (sr_amount + mezz_amount))
+
+        # ---------- valuation style outputs (optional, aligns with Phase-1 fields) ----------
+        day_one_core = round(sr_amount * 0.90, 2)
+        sidecar_gross = sr_amount * 0.20
+        day_one_sidecar = round(sidecar_gross * (1 - sidecar_haircut_pct), 2)
+        total_value = round(day_one_core + day_one_sidecar, 2)
+
+        repo_ok = (sr_tenor_y <= 20 and sr_dscr >= 1.15)
+
+        return jsonify({
+            "success": True,
+            "currency": cur,
+            "inputs_echo": p,
+            "capital_stack": {
+                "senior": {
+                    "amount": round(sr_amount, 2),
+                    "coupon_pct": sr_rate,
+                    "tenor_years": sr_tenor_y,
+                    "io_months": sr_io_m,
+                    "dscr": round(sr_dscr, 3),
+                    "monthly_debt_service": round(sr_pay_lvl, 2),
+                    "wal_years": sr_wal,
+                    "fees_pct": fees_pct,
+                    "repo_eligible": repo_ok
+                },
+                "mezz": None if mezz_amount <= 0 else {
+                    "amount": round(mezz_amount, 2),
+                    "coupon_pct": mz_rate,
+                    "tenor_years": mz_tenor_y,
+                    "io_months": mz_io_m,
+                    "dscr": round(mezz_dscr, 3) if mezz_dscr is not None else None,
+                    "monthly_debt_service": round(mezz_pay_lvl, 2),
+                    "wal_years": mezz_wal
+                },
+                "equity": {
+                    "amount": round(equity, 2)
+                }
+            },
+            "economics": {
+                "noi_monthly": round(noi_m, 2),
+                "funding_need": round(funding_need, 2)
+            },
+            "valuation": {
+                "day_one_value_core": day_one_core,
+                "day_one_value_sidecar": day_one_sidecar,
+                "day_one_value_total": total_value
+            }
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # ==================== CATCH-ALL FOR JSON 404s ====================
 
