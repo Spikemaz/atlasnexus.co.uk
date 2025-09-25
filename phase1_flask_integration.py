@@ -614,9 +614,9 @@ def phase1_health():
         'feature_flags': {
             'deterministic_seed': True,
             'perm_chunking': True,
-            'reverse_dscr_engine': False,
+            'reverse_dscr_engine': True,
             'gates_ab': False,
-            'phase1_core': False
+            'phase1_core': True
         },
         'timestamp': datetime.utcnow().isoformat()
     })

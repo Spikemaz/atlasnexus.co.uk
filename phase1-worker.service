@@ -1,0 +1,18 @@
+[Unit]
+Description=Phase-1 Async Worker
+After=network.target redis.service
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/atlasnexus
+Environment="REDIS_URL=redis://localhost:6379/2"
+Environment="PHASE1_CHUNK=10000"
+Environment="PHASE1_MAX_CARD=250000"
+ExecStart=/usr/bin/python3 /srv/atlasnexus/phase1_worker.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

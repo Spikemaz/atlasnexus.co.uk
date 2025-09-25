@@ -81,7 +81,22 @@
       "Bash(start cmd /k:*)",
       "Bash(start C:UsersmarcuDesktopMarcus FolderProject1test_projects_browser.html)",
       "Bash(start test_projects_browser.html)",
-      "Bash(chcp:*)"
+      "Bash(chcp:*)",
+      "Read(//c/Users/marcu/Desktop/**)",
+      "Bash(for:*)",
+      "Bash(git describe:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(echo:*)",
+      "Bash(echo \"VERCEL_ENV=$VERCEL_ENV:-not_set\")",
+      "Bash(export LIVE=\"http://localhost:5000\")",
+      "Bash(bash:*)",
+      "Bash(set APP_ENV=dev)",
+      "Bash(set PHASE1_ADMIN_TOKEN=phase1-admin-secure-token)",
+      "Bash(set LIVE=https://atlasnexus.co.uk)",
+      "Bash(set JAR=%TEMP%phase1.cookie)",
+      "Bash(set JAR=%TEMP%phase1.jar)",
+      "Bash(set JAR=%TEMP%phase1test.jar)",
+      "Bash(start test_phase1_ui.html)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marcu\\Desktop\\Marcus Folder\\FreshProject"

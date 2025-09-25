@@ -64,6 +64,15 @@ class FeatureFlagManager:
                 "description": "Market news service"
             },
 
+            # Phase-1 Core Feature (MUST BE ENABLED)
+            "phase1_core": {
+                "enabled": True,
+                "admin_only": False,
+                "rollout_percentage": 100,
+                "description": "Phase-1 securitization engine core functionality",
+                "implementation_ready": True
+            },
+
             # Phase-1 Week-1 Features (ADMIN-ONLY)
             "input_hierarchy_processor": {
                 "enabled": False,
