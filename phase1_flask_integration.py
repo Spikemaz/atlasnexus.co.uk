@@ -616,3 +616,26 @@ def phase1_health():
         },
         'timestamp': datetime.utcnow().isoformat()
     })
+
+# ==================== ROUTE INVENTORY ====================
+
+@phase1_bp.route('/route-list', methods=['GET'])
+def route_list():
+    """Return Phase-1 route inventory in pinned wire format"""
+    return jsonify([
+        {"method": "GET", "path": "/api/phase1/health", "auth": "public", "flags": []},
+        {"method": "GET", "path": "/api/phase1/route-list", "auth": "public", "flags": []},
+        {"method": "POST", "path": "/api/phase1/flags", "auth": "admin+mfa+allowlist", "flags": ["phase1_core"]},
+        {"method": "POST", "path": "/api/phase1/canary/update", "auth": "admin+mfa+allowlist", "flags": ["phase1_core"]},
+        {"method": "POST", "path": "/api/phase1/rollback", "auth": "admin+mfa+allowlist", "flags": ["phase1_core"]},
+        {"method": "GET", "path": "/api/phase1/status/full", "auth": "admin", "flags": ["phase1_core"]},
+        {"method": "POST", "path": "/api/phase1/projects/validate", "auth": "admin+mfa", "flags": ["phase1_core"]},
+        {"method": "GET", "path": "/api/phase1/projects/derived", "auth": "admin+mfa", "flags": ["phase1_core"]},
+        {"method": "GET", "path": "/api/phase1/permutations/presets", "auth": "admin+mfa", "flags": ["phase1_core"]},
+        {"method": "POST", "path": "/api/phase1/permutations/apply-preset", "auth": "admin+mfa", "flags": ["phase1_core"]},
+        {"method": "POST", "path": "/api/phase1/permutations/cardinality", "auth": "admin+mfa", "flags": ["phase1_core"]},
+        {"method": "POST", "path": "/api/phase1/run", "auth": "admin+mfa", "flags": ["phase1_core"]},
+        {"method": "GET", "path": "/api/phase1/securitisation/top20", "auth": "admin+mfa", "flags": ["phase1_core"]},
+        {"method": "GET", "path": "/api/phase1/securitisation/export/<int:structure_rank>", "auth": "admin+mfa", "flags": ["phase1_core"]},
+        {"method": "GET", "path": "/api/phase1/dashboard", "auth": "admin+mfa", "flags": ["phase1_core"]}
+    ])
