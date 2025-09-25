@@ -639,3 +639,13 @@ def route_list():
         {"method": "GET", "path": "/api/phase1/securitisation/export/<int:structure_rank>", "auth": "admin+mfa", "flags": ["phase1_core"]},
         {"method": "GET", "path": "/api/phase1/dashboard", "auth": "admin+mfa", "flags": ["phase1_core"]}
     ])
+
+# ==================== CATCH-ALL FOR JSON 404s ====================
+
+@phase1_bp.route('/<path:_subpath>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
+def phase1_catch_all(_subpath):
+    """Ensures requests under /api/phase1/* that aren't matched still return JSON"""
+    from flask import jsonify
+    import uuid
+    request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+    return jsonify({"error": "Not found", "code": 404, "request_id": request_id}), 404
