@@ -638,7 +638,10 @@ def route_list():
         {"method": "GET", "path": "/api/phase1/securitisation/top20", "auth": "admin+mfa", "flags": ["phase1_core"]},
         {"method": "GET", "path": "/api/phase1/securitisation/export/<int:structure_rank>", "auth": "admin+mfa", "flags": ["phase1_core"]},
         {"method": "GET", "path": "/api/phase1/dashboard", "auth": "admin+mfa", "flags": ["phase1_core"]},
-        {"method": "POST", "path": "/api/phase1/calc", "auth": "admin+mfa", "flags": ["phase1_core"]}
+        {"method": "POST", "path": "/api/phase1/calc", "auth": "admin+mfa", "flags": ["phase1_core"]},
+        {"method": "POST", "path": "/api/phase1/run/submit", "auth": "admin+mfa", "flags": ["phase1_core"]},
+        {"method": "GET", "path": "/api/phase1/run/progress/<job_id>", "auth": "admin+mfa", "flags": ["phase1_core"]},
+        {"method": "GET", "path": "/api/phase1/run/result/<job_id>", "auth": "admin+mfa", "flags": ["phase1_core"]}
     ])
 
 # ==================== SINGLE CALCULATOR ====================
@@ -817,6 +820,202 @@ def calc_capital_stack():
         })
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+# ==================== ASYNC RUN ENDPOINTS ====================
+
+import os, time, uuid, heapq, itertools as _it, functools, operator, hashlib
+try:
+    import redis
+    rds = redis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379/2"))
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
+    rds = None
+
+QUEUE_KEY = "phase1:queue"
+JOB_KEY = "phase1:job:{job_id}"
+RES_KEY = "phase1:jobres:{job_id}"
+
+def _expand_spec(spec):
+    """Expand range specification to list of values"""
+    if isinstance(spec, dict) and all(k in spec for k in ("min", "max", "step")):
+        mn, mx, st = float(spec["min"]), float(spec["max"]), float(spec["step"])
+        i, out = 0, []
+        while True:
+            v = mn + i*st
+            if v > mx + 1e-12: break
+            out.append(round(v, 10))
+            i += 1
+        return out
+    if isinstance(spec, (list, tuple)):
+        return list(spec)
+    try:
+        return [float(spec)]
+    except Exception:
+        return [spec]
+
+def _canon_ranges(rngs: dict) -> dict:
+    """Canonicalize range names to standard keys"""
+    m = {
+        "senior_tenor": ["senior_tenor", "senior_tenor_years", "tenor_years"],
+        "senior_coupon": ["senior_coupon", "senior_coupon_pct"],
+        "min_dscr_senior": ["min_dscr_senior", "senior_dscr"],
+        "senior_amount": ["senior_amount"],
+        "sidecar_haircut_pct": ["sidecar_haircut_pct", "haircut_pct"],
+        "zcis_tenor_years": ["zcis_tenor_years", "zcis_tenor"],
+        "io_months": ["io_months", "senior_io_months"],
+    }
+    out = {}
+    for ck, aliases in m.items():
+        for a in aliases:
+            if a in rngs:
+                out[ck] = rngs[a]
+                break
+    for k, v in rngs.items():
+        if k not in sum(m.values(), []):
+            out[k] = v
+    return out
+
+def _build_grid(ranges: dict):
+    """Build permutation grid from ranges"""
+    ranges = _canon_ranges(ranges or {})
+    grid = {k: _expand_spec(v) for k, v in ranges.items() if k not in ("seed", "topn")}
+    card = functools.reduce(operator.mul, (max(1, len(v)) for v in grid.values()), 1)
+    keys = sorted(grid.keys())
+    values = [grid[k] for k in keys]
+    return keys, values, card, ranges
+
+def _evaluate_perm(perm_dict, seed):
+    """Evaluate single permutation - mirrors sync evaluator"""
+    tenor = int(perm_dict.get("senior_tenor", 10))
+    coupon = float(perm_dict.get("senior_coupon", 0.05))
+    dscr = float(perm_dict.get("min_dscr_senior", 1.25))
+    amount = float(perm_dict.get("senior_amount", 10_000_000.0))
+    sidecar_haircut = float(perm_dict.get("sidecar_haircut_pct", 0.10))
+    io_m = int(perm_dict.get("io_months", 0))
+
+    # Amortization with optional IO
+    n = tenor * 12
+    r = coupon / 12.0
+    def annuity(P, rm, nmo):
+        return P * (rm / (1 - (1 + rm) ** (-nmo))) if rm > 0 else P / max(1, nmo)
+
+    post_n = max(1, n - io_m)
+    lvl = annuity(amount, r, post_n) if io_m > 0 else annuity(amount, r, n)
+
+    core = amount * 0.90
+    sidecar_gross = amount * 0.20
+    sidecar_net = sidecar_gross * (1 - sidecar_haircut)
+    total = core + sidecar_net
+
+    # WAL calculation
+    outstanding = amount
+    wal_num = 0.0
+    months = 0
+    pay = lvl
+    for _ in range(io_m):
+        months += 1  # No principal during IO
+    for _ in range(post_n):
+        months += 1
+        interest = outstanding * r
+        principal = max(0.0, pay - interest)
+        outstanding -= principal
+        wal_num += (months/12.0) * principal
+    wal = round(wal_num / amount if amount > 0 else tenor, 2)
+
+    tier = "Diamond" if dscr >= 1.35 else ("Gold" if dscr >= 1.25 else "Silver")
+    repo = "Y" if tenor <= 20 and dscr >= 1.15 else "N"
+
+    return {
+        "permutation_id": hashlib.sha1(f"{perm_dict}|{seed}".encode()).hexdigest()[:12],
+        "tier": tier,
+        "senior_tenor": tenor,
+        "senior_coupon": coupon,
+        "senior_amount": amount,
+        "min_dscr_senior": dscr,
+        "wal": wal,
+        "day_one_value_core": round(core, 2),
+        "day_one_value_sidecar": round(sidecar_net, 2),
+        "day_one_value_total": round(total, 2),
+        "repo_eligible": repo,
+        "near_miss": "Y" if 1.23 <= dscr < 1.25 else "N",
+    }
+
+@phase1_bp.route("/run/submit", methods=["POST"])
+@admin_required
+def submit_async_run():
+    """Submit async permutation run, returns job_id immediately"""
+    if not REDIS_AVAILABLE:
+        return jsonify({"success": False, "error": "Redis not available for async runs"}), 503
+
+    payload = request.get_json(silent=True) or {}
+    seed = int(payload.get("seed", 424242))
+    topn = int(payload.get("topn", 20))
+    ranges = payload.get("ranges") or session.get("phase1_ranges") or {}
+    keys, values, card, canon = _build_grid(ranges)
+
+    max_card = int(os.getenv("PHASE1_MAX_CARD", "250000"))
+    if card > max_card:
+        return jsonify({
+            "success": False,
+            "error": f"Cardinality {card:,} exceeds guardrail {max_card:,}"
+        }), 413
+
+    job_id = uuid.uuid4().hex[:16]
+    job_meta = {
+        "job_id": job_id,
+        "seed": seed,
+        "topn": topn,
+        "keys": json.dumps(keys),
+        "ranges": json.dumps(canon),
+        "cardinality": card,
+        "status": "queued",
+        "progress_pct": 0,
+        "created_at": datetime.utcnow().isoformat()
+    }
+
+    rds.hset(JOB_KEY.format(job_id=job_id), mapping=job_meta)
+    rds.rpush(QUEUE_KEY, json.dumps({"job_id": job_id}))
+
+    return jsonify({
+        "success": True,
+        "job_id": job_id,
+        "cardinality": card,
+        "message": f"Job {job_id} queued for {card:,} permutations"
+    })
+
+@phase1_bp.route("/run/progress/<job_id>", methods=["GET"])
+@admin_required
+def async_progress(job_id):
+    """Check progress of async job"""
+    if not REDIS_AVAILABLE:
+        return jsonify({"success": False, "error": "Redis not available"}), 503
+
+    h = rds.hgetall(JOB_KEY.format(job_id=job_id))
+    if not h:
+        return jsonify({"success": False, "error": "job not found"}), 404
+
+    def _load(v):
+        try:
+            return json.loads(v)
+        except:
+            return v
+
+    out = {k.decode(): _load(v.decode()) for k, v in h.items()}
+    return jsonify({"success": True, **out})
+
+@phase1_bp.route("/run/result/<job_id>", methods=["GET"])
+@admin_required
+def async_result(job_id):
+    """Get results of completed async job"""
+    if not REDIS_AVAILABLE:
+        return jsonify({"success": False, "error": "Redis not available"}), 503
+
+    data = rds.get(RES_KEY.format(job_id=job_id))
+    if not data:
+        return jsonify({"success": False, "error": "result not ready"}), 404
+
+    return jsonify({"success": True, **json.loads(data)})
 
 # ==================== CATCH-ALL FOR JSON 404s ====================
 
