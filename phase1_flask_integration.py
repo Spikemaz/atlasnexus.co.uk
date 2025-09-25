@@ -25,8 +25,12 @@ def admin_required(f):
     """Decorator to require admin access"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Check if user is admin
-        if not session.get('is_admin'):
+        # Check if user is admin - handle both session key formats
+        # Try IP-based session key first (production format)
+        ip_address = request.remote_addr or '127.0.0.1'
+        is_admin = session.get(f'is_admin_{ip_address}') or session.get('is_admin')
+
+        if not is_admin:
             return jsonify({
                 'success': False,
                 'error': 'Admin access required'
