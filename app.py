@@ -984,10 +984,15 @@ def _json_error(msg, code):
     r.status_code = code
     return r
 
+# Helper to resolve environment consistently
+def _resolved_env():
+    """Prefer explicit APP_ENV; else infer from Vercel"""
+    return os.getenv("APP_ENV") or ("prod" if os.getenv("VERCEL_ENV") == "production" else "dev")
+
 @app.before_request
 def _dev_token_to_session():
     """Dev-only: allow X-Admin-Token to seed session for business endpoints"""
-    if os.getenv("APP_ENV", "dev") == "prod":
+    if _resolved_env() == "prod":
         return  # no effect in prod
     expected = os.getenv("PHASE1_ADMIN_TOKEN", "phase1-admin-secure-token")
     tok = request.headers.get("X-Admin-Token")
@@ -1001,7 +1006,7 @@ def _phase1_headers(resp):
     """Add required Phase-1 headers to all responses"""
     resp.headers["X-Commit-SHA"] = os.getenv("COMMIT_SHA", "dev-sha")
     resp.headers["X-Ruleset-Version"] = os.getenv("RULESET_VERSION", "v1.0")
-    resp.headers["X-Env"] = os.getenv("APP_ENV", "dev")
+    resp.headers["X-Env"] = _resolved_env()  # Now correct in Vercel prod
     resp.headers["X-Build-ID"] = os.getenv("BUILD_ID", "local")
     req_id = request.headers.get("X-Request-ID") or str(uuid4())
     resp.headers["X-Request-ID"] = req_id
