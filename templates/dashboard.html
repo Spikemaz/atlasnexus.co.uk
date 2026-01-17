@@ -2383,12 +2383,27 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Construction Start Date *</label>
-                                    <input type="date" id="sponsor-constructionStart" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="DD/MM/YYYY">
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Pre-Close Preparation (Months) *</label>
+                                    <input type="number" id="sponsor-preCloseMonths" min="1" max="18" value="1" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="updateSponsorTimeline()">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Deal structuring, documentation, syndication to Day 1 Close</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Construction Start Date (Day 1 Close) *</label>
+                                    <input type="date" id="sponsor-constructionStart" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="updateSponsorTimeline()">
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Construction Duration (Months) *</label>
-                                    <input type="number" id="sponsor-constructionDurationMonths" min="1" max="48" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="e.g., 24">
+                                    <input type="number" id="sponsor-constructionDurationMonths" min="1" max="48" value="24" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="updateSponsorTimeline()">
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Expected Completion Date</label>
+                                    <input type="date" id="sponsor-completionDate" readonly style="width: 100%; padding: 12px; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: #60a5fa; font-weight: 600;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Auto-calculated from start + duration</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Lease Commencement Date</label>
+                                    <input type="date" id="sponsor-leaseCommenceDate" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="updateSponsorTimeline()">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Lease starts at project completion (defaults to completion date)</small>
                                 </div>
                             </div>
                         </div>
@@ -2458,6 +2473,31 @@
                                     <div>
                                         <label style="color: #94a3b8; font-size: 0.9rem;">Main Contractor Margin</label>
                                         <input type="number" id="sponsor-buildMainContractorMargin" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem;">Connection</label>
+                                        <input type="number" id="sponsor-buildConnection" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem;">Land</label>
+                                        <input type="number" id="sponsor-buildLand" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem;">Operations Team</label>
+                                        <input type="number" id="sponsor-buildOperationsTeam" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem;">OS&E</label>
+                                        <input type="number" id="sponsor-buildOSE" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem;">Marketing</label>
+                                        <input type="number" id="sponsor-buildMarketing" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem;">Construction Phase Fee (max 1.5%)</label>
+                                        <input type="number" id="sponsor-buildConstructionPhaseFee" readonly style="width: 100%; padding: 12px; background: rgba(96, 165, 250, 0.05); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8;">
+                                        <small style="color: #64748b; font-size: 0.75rem;">Auto-calculated as 1.5% of subtotal (capped)</small>
                                     </div>
                                 </div>
                             </div>
@@ -2529,6 +2569,31 @@
                                         <label style="color: #94a3b8; font-size: 0.9rem;">Main Contractor Margin</label>
                                         <input type="number" id="sponsor-marketMainContractorMargin" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                     </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem;">Connection</label>
+                                        <input type="number" id="sponsor-marketConnection" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem;">Land</label>
+                                        <input type="number" id="sponsor-marketLand" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem;">Operations Team</label>
+                                        <input type="number" id="sponsor-marketOperationsTeam" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem;">OS&E</label>
+                                        <input type="number" id="sponsor-marketOSE" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem;">Marketing</label>
+                                        <input type="number" id="sponsor-marketMarketing" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.9rem;">Construction Phase Fee (max 1.5%)</label>
+                                        <input type="number" id="sponsor-marketConstructionPhaseFee" readonly style="width: 100%; padding: 12px; background: rgba(96, 165, 250, 0.05); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8;">
+                                        <small style="color: #64748b; font-size: 0.75rem;">Auto-calculated as 1.5% of subtotal (capped)</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2581,8 +2646,20 @@
                                     <small id="sponsor-gridConnectionRate" style="color: #64748b; font-size: 0.75rem;"></small>
                                 </div>
                                 <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Stamp Duty %</label>
-                                    <input type="text" id="sponsor-stampDutyPercent" min="0" max="20" step="0.01" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="0% - 20%">
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Stamp Duty Land Tax (SDLT) Structure</label>
+                                    <select id="sponsor-stampDutyStructure" onchange="updateStampDutyFromStructure()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                        <option value="individual">Individual/Personal (5%)</option>
+                                        <option value="company" selected>Company/Corporate (5%)</option>
+                                        <option value="company_additional">Company + 3% Surcharge (8%)</option>
+                                        <option value="reit">REIT/Institutional (0-5%)</option>
+                                        <option value="custom">Custom Rate</option>
+                                    </select>
+                                    <small style="color: #64748b; font-size: 0.75rem;">UK SDLT rates for non-residential property</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Stamp Duty Rate %</label>
+                                    <input type="text" id="sponsor-stampDutyPercent" value="5%" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="0% - 20%">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Applied to land purchase price</small>
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Stamp Duty Fixed (overrides %)</label>
@@ -8161,6 +8238,60 @@ if (window.showSection) {
         }
 
         calculateSponsorTotals();
+    }
+
+    // Update Stamp Duty based on structure selection
+    function updateStampDutyFromStructure() {
+        const structure = document.getElementById('sponsor-stampDutyStructure')?.value;
+        const stampDutyInput = document.getElementById('sponsor-stampDutyPercent');
+
+        let rate = 5;
+        switch(structure) {
+            case 'individual':
+            case 'company':
+                rate = 5;
+                break;
+            case 'company_additional':
+                rate = 8;
+                break;
+            case 'reit':
+                rate = 2.5;
+                break;
+            case 'custom':
+                return; // Don't change the value
+        }
+
+        if (stampDutyInput) {
+            stampDutyInput.value = rate + '%';
+        }
+
+        calculateSponsorTotals();
+    }
+
+    // Update Construction Timeline calculations
+    function updateSponsorTimeline() {
+        const startDateInput = document.getElementById('sponsor-constructionStart');
+        const durationInput = document.getElementById('sponsor-constructionDurationMonths');
+        const completionInput = document.getElementById('sponsor-completionDate');
+        const leaseCommenceInput = document.getElementById('sponsor-leaseCommenceDate');
+
+        if (startDateInput?.value && durationInput?.value) {
+            const startDate = new Date(startDateInput.value);
+            const duration = parseInt(durationInput.value) || 24;
+
+            // Calculate completion date
+            const completionDate = new Date(startDate);
+            completionDate.setMonth(completionDate.getMonth() + duration);
+
+            if (completionInput) {
+                completionInput.value = completionDate.toISOString().split('T')[0];
+            }
+
+            // Set lease commencement to completion date if not already set
+            if (leaseCommenceInput && !leaseCommenceInput.value) {
+                leaseCommenceInput.value = completionDate.toISOString().split('T')[0];
+            }
+        }
     }
 
     // Add event listener for occupancy slider
