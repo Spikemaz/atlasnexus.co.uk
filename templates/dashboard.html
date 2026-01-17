@@ -2262,7 +2262,56 @@
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Location Country *</label>
-                                    <input type="text" id="sponsor-locationCountry" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <select id="sponsor-locationCountry" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                        <option value="">Select Country</option>
+                                        <option value="Albania">Albania [Tier 3]</option>
+                                        <option value="Andorra">Andorra [Tier 3]</option>
+                                        <option value="Austria">Austria [Tier 2]</option>
+                                        <option value="Belarus">Belarus [Tier 3]</option>
+                                        <option value="Belgium">Belgium [Tier 2]</option>
+                                        <option value="Bosnia and Herzegovina">Bosnia and Herzegovina [Tier 3]</option>
+                                        <option value="Bulgaria">Bulgaria [Tier 3]</option>
+                                        <option value="Croatia">Croatia [Tier 3]</option>
+                                        <option value="Cyprus">Cyprus [Tier 3]</option>
+                                        <option value="Czech Republic">Czech Republic [Tier 2]</option>
+                                        <option value="Denmark">Denmark [Tier 2]</option>
+                                        <option value="Estonia">Estonia [Tier 3]</option>
+                                        <option value="Finland">Finland [Tier 2]</option>
+                                        <option value="France">France [Tier 1 - FLAP]</option>
+                                        <option value="Germany">Germany [Tier 1 - FLAP]</option>
+                                        <option value="Greece">Greece [Tier 2]</option>
+                                        <option value="Hungary">Hungary [Tier 3]</option>
+                                        <option value="Iceland">Iceland [Tier 2]</option>
+                                        <option value="Ireland">Ireland [Tier 1 - FLAP-D]</option>
+                                        <option value="Italy">Italy [Tier 2]</option>
+                                        <option value="Kosovo">Kosovo [Tier 3]</option>
+                                        <option value="Latvia">Latvia [Tier 3]</option>
+                                        <option value="Liechtenstein">Liechtenstein [Tier 3]</option>
+                                        <option value="Lithuania">Lithuania [Tier 3]</option>
+                                        <option value="Luxembourg">Luxembourg [Tier 2]</option>
+                                        <option value="Malta">Malta [Tier 3]</option>
+                                        <option value="Moldova">Moldova [Tier 3]</option>
+                                        <option value="Monaco">Monaco [Tier 3]</option>
+                                        <option value="Montenegro">Montenegro [Tier 3]</option>
+                                        <option value="Netherlands">Netherlands [Tier 1 - FLAP]</option>
+                                        <option value="North Macedonia">North Macedonia [Tier 3]</option>
+                                        <option value="Norway">Norway [Tier 2]</option>
+                                        <option value="Poland">Poland [Tier 2]</option>
+                                        <option value="Portugal">Portugal [Tier 2]</option>
+                                        <option value="Romania">Romania [Tier 3]</option>
+                                        <option value="Russia">Russia [Tier 2]</option>
+                                        <option value="San Marino">San Marino [Tier 3]</option>
+                                        <option value="Serbia">Serbia [Tier 3]</option>
+                                        <option value="Slovakia">Slovakia [Tier 3]</option>
+                                        <option value="Slovenia">Slovenia [Tier 3]</option>
+                                        <option value="Spain">Spain [Tier 2]</option>
+                                        <option value="Sweden">Sweden [Tier 2]</option>
+                                        <option value="Switzerland">Switzerland [Tier 2]</option>
+                                        <option value="Turkey">Turkey [Tier 2]</option>
+                                        <option value="Ukraine">Ukraine [Tier 3]</option>
+                                        <option value="United Kingdom" selected>United Kingdom [Tier 1 - FLAP]</option>
+                                        <option value="Vatican City">Vatican City [Tier 3]</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Status</label>
@@ -2318,6 +2367,20 @@
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">OPEX % *</label>
                                     <input type="text" id="sponsor-opexPercent" min="0" max="100" step="1" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="0% - 100%">
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Lease Type *</label>
+                                    <select id="sponsor-leaseType" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                        <option value="TripleNet" selected>Triple Net (NNN) - Tenant pays utilities</option>
+                                        <option value="Gross">Gross - Landlord pays utilities</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Occupancy at Stabilization % *</label>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="range" id="sponsor-occupancy" min="0" max="100" value="100" step="1" style="flex: 1; accent-color: #60a5fa;">
+                                        <span id="sponsor-occupancy-value" style="color: #60a5fa; font-weight: bold; min-width: 50px;">100%</span>
+                                    </div>
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Construction Start Date *</label>
@@ -2490,12 +2553,32 @@
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                                 <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Land Location Quality</label>
+                                    <select id="sponsor-landLocationQuality" onchange="updateLandPurchaseFromQuality()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                        <option value="rural">Rural (€100k/acre, 1.5 acres/MW)</option>
+                                        <option value="suburban">Suburban (€300k/acre, 1.5 acres/MW)</option>
+                                        <option value="urban" selected>Urban (€800k/acre, 1 acre/MW)</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                </div>
+                                <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Land Purchase</label>
                                     <input type="text" id="sponsor-landPurchase" min="0" max="1000000000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="0 - 1,000,000,000">
+                                    <small id="sponsor-landPurchaseDetails" style="color: #64748b; font-size: 0.75rem;"></small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Grid Connection Quality</label>
+                                    <select id="sponsor-gridConnectionQuality" onchange="updateGridConnectionFromQuality()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                        <option value="good" selected>Good (€200k/MW)</option>
+                                        <option value="medium">Medium (€400k/MW)</option>
+                                        <option value="poor">Poor (€600k/MW)</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Grid Connection Costs</label>
                                     <input type="text" id="sponsor-gridConnectionCosts" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
+                                    <small id="sponsor-gridConnectionRate" style="color: #64748b; font-size: 0.75rem;"></small>
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Stamp Duty %</label>
@@ -7981,7 +8064,7 @@ if (window.showSection) {
     function toggleCapexDetails(type) {
         const detailsDiv = document.getElementById(`capex-${type}-details`);
         const chevron = document.getElementById(`capex-${type}-chevron`);
-        
+
         if (detailsDiv) {
             if (detailsDiv.style.display === 'none' || detailsDiv.style.display === '') {
                 detailsDiv.style.display = 'grid';
@@ -7998,7 +8081,100 @@ if (window.showSection) {
             }
         }
     }
-    
+
+    // Update Land Purchase based on quality selection
+    function updateLandPurchaseFromQuality() {
+        const quality = document.getElementById('sponsor-landLocationQuality')?.value;
+        const grossPower = parseFloat(document.getElementById('sponsor-grossITLoadMW')?.value) || 0;
+        const currency = document.getElementById('sponsor-capex-currency')?.value || 'EUR';
+        const currencySymbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency;
+
+        let pricePerAcre = 800000;
+        let acresPerMW = 1;
+
+        switch(quality) {
+            case 'rural':
+                pricePerAcre = 100000;
+                acresPerMW = 1.5;
+                break;
+            case 'suburban':
+                pricePerAcre = 300000;
+                acresPerMW = 1.5;
+                break;
+            case 'urban':
+                pricePerAcre = 800000;
+                acresPerMW = 1;
+                break;
+            case 'custom':
+                return; // Don't auto-calculate
+        }
+
+        const totalAcres = grossPower * acresPerMW;
+        const landCost = totalAcres * pricePerAcre;
+
+        const landInput = document.getElementById('sponsor-landPurchase');
+        const detailsSpan = document.getElementById('sponsor-landPurchaseDetails');
+
+        if (landInput) {
+            landInput.value = currencySymbol + landCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+        if (detailsSpan) {
+            detailsSpan.textContent = `${totalAcres.toFixed(0)} acres @ ${currencySymbol}${pricePerAcre.toLocaleString('en-US', {minimumFractionDigits: 2})}/acre`;
+        }
+
+        calculateSponsorTotals();
+    }
+
+    // Update Grid Connection based on quality selection
+    function updateGridConnectionFromQuality() {
+        const quality = document.getElementById('sponsor-gridConnectionQuality')?.value;
+        const grossPower = parseFloat(document.getElementById('sponsor-grossITLoadMW')?.value) || 0;
+        const currency = document.getElementById('sponsor-capex-currency')?.value || 'EUR';
+        const currencySymbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency;
+
+        let costPerMW = 200000;
+
+        switch(quality) {
+            case 'good':
+                costPerMW = 200000;
+                break;
+            case 'medium':
+                costPerMW = 400000;
+                break;
+            case 'poor':
+                costPerMW = 600000;
+                break;
+            case 'custom':
+                return; // Don't auto-calculate
+        }
+
+        const gridCost = grossPower * costPerMW;
+
+        const gridInput = document.getElementById('sponsor-gridConnectionCosts');
+        const rateSpan = document.getElementById('sponsor-gridConnectionRate');
+
+        if (gridInput) {
+            gridInput.value = currencySymbol + gridCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+        if (rateSpan) {
+            rateSpan.textContent = `${currencySymbol}${costPerMW.toLocaleString('en-US', {minimumFractionDigits: 2})} per MW`;
+        }
+
+        calculateSponsorTotals();
+    }
+
+    // Add event listener for occupancy slider
+    document.addEventListener('DOMContentLoaded', function() {
+        const occupancySlider = document.getElementById('sponsor-occupancy');
+        const occupancyValue = document.getElementById('sponsor-occupancy-value');
+
+        if (occupancySlider && occupancyValue) {
+            occupancySlider.addEventListener('input', function() {
+                occupancyValue.textContent = this.value + '%';
+            });
+        }
+    });
+
     function calculateCapexFromPerMW(type) {
         const perMWInput = document.getElementById(`sponsor-capex${type === 'internal' ? 'Internal' : 'Market'}PerMW`);
         const mwValue = parseFloat(document.getElementById('sponsor-grossITLoadMW')?.value) || 0;
