@@ -2350,12 +2350,24 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Gross IT Load (MW) *</label>
-                                    <input type="number" id="sponsor-grossITLoadMW" min="0.1" step="0.01" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Gross Facility Power (MW) *</label>
+                                    <input type="number" id="sponsor-grossITLoadMW" min="0.1" step="0.01" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="updateSponsorPowerCalculations()">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Total facility power capacity (grid connection)</small>
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">PUE * (0.95 - 1.5)</label>
-                                    <input type="number" id="sponsor-pue" min="0.95" max="1.5" step="0.01" value="1.25" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <input type="number" id="sponsor-pue" min="0.95" max="1.5" step="0.01" value="1.25" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="updateSponsorPowerCalculations()">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Range: 0.95 - 1.5 (Lower is better)</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">IT Load (Calculated)</label>
+                                    <input type="number" id="sponsor-itLoad" readonly style="width: 100%; padding: 12px; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: #60a5fa; font-weight: 600;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Usable IT capacity = Gross Power / PUE</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Overhead Power (Calculated)</label>
+                                    <input type="number" id="sponsor-overheadPower" readonly style="width: 100%; padding: 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; color: #f59e0b; font-weight: 600;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Cooling, UPS losses, lighting = Gross - IT</small>
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Gross Monthly Rent (per kWh) *</label>
@@ -2682,6 +2694,162 @@
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Management 3%</label>
                                     <input type="text" id="sponsor-feesManagement" readonly style="width: 100%; padding: 12px; background: rgba(10, 14, 39, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8;" placeholder="Auto-calculated">
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Construction Interest Coverage Section -->
+                        <div style="background: rgba(239, 68, 68, 0.05); border: 2px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                            <h3 style="color: #ef4444; margin-bottom: 1rem; font-size: 1.2rem;">
+                                <i class="fas fa-hard-hat"></i> Construction Interest Coverage (Pre-COD)
+                            </h3>
+                            <div style="background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.85rem; line-height: 1.6;">
+                                <strong style="color: #ef4444;">Critical Issue:</strong> <span style="color: #94a3b8;">Debt is drawn on Day 1, but there is <strong>NO revenue</strong> for 24 months during construction. All debt interest MUST be 100% covered.</span><br>
+                                <strong style="color: #f59e0b;">Timeline:</strong> <span style="color: #94a3b8;">Day 1 Close → 24 months construction → COD (Commercial Operations Date) → Revenue begins → Debt service from cash flow</span><br>
+                                <strong style="color: #60a5fa;">Tranche-Specific:</strong> <span style="color: #94a3b8;">Each tranche (Senior/Mezz) can use different coverage methods based on investor requirements.</span>
+                            </div>
+
+                            <!-- Senior Tranche Coverage -->
+                            <div style="background: rgba(0, 212, 255, 0.05); border: 2px solid rgba(0, 212, 255, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                                <h4 style="color: #00d4ff; margin-bottom: 1rem; font-size: 1rem;">💎 SENIOR TRANCHE - Construction Interest Coverage</h4>
+                                <div id="sponsor-seniorCoverageMethods" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.85rem;">Coverage Method</label>
+                                        <select id="sponsor-seniorCoverageMethod" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 6px; color: white;">
+                                            <option value="dsra">DSRA Reserve (Most Common)</option>
+                                            <option value="insurance">Insurance Wrap (Rating Agency Favorite)</option>
+                                            <option value="sponsor_equity">Sponsor Equity Contribution</option>
+                                            <option value="lc">Letter of Credit (LC)</option>
+                                            <option value="mixed">Mixed Methods</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.85rem;">Coverage %</label>
+                                        <input type="number" id="sponsor-seniorCoveragePercent" value="100" min="0" max="100" step="1" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 6px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.85rem;">Method Cost %</label>
+                                        <input type="number" id="sponsor-seniorMethodCost" value="0" min="0" max="10" step="0.1" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 6px; color: white;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mezzanine Tranche Coverage -->
+                            <div style="background: rgba(245, 158, 11, 0.05); border: 2px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 1rem;">
+                                <h4 style="color: #f59e0b; margin-bottom: 1rem; font-size: 1rem;">🔶 MEZZANINE TRANCHE - Construction Interest Coverage</h4>
+                                <div id="sponsor-mezzCoverageMethods" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.85rem;">Coverage Method</label>
+                                        <select id="sponsor-mezzCoverageMethod" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; color: white;">
+                                            <option value="pik">PIK/Capitalization (Most Common for Mezz)</option>
+                                            <option value="dsra">DSRA Reserve</option>
+                                            <option value="sponsor_equity">Sponsor Equity Contribution</option>
+                                            <option value="mixed">Mixed Methods</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.85rem;">Coverage %</label>
+                                        <input type="number" id="sponsor-mezzCoveragePercent" value="100" min="0" max="100" step="1" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; color: white;">
+                                    </div>
+                                    <div>
+                                        <label style="color: #94a3b8; font-size: 0.85rem;">Method Cost %</label>
+                                        <input type="number" id="sponsor-mezzMethodCost" value="2" min="0" max="10" step="0.1" onchange="calculateSponsorTotals()" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; color: white;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upfront ABS Fees Section -->
+                        <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                            <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
+                                <i class="fas fa-file-invoice-dollar"></i> Upfront ABS Fees (Capitalized at Day 1 Close) - <span id="abs-fees-currency">EUR</span>
+                            </h3>
+                            <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 1.5rem;">These fees are paid once at Day 1 Close and capitalized into the capital stack</p>
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Internal Arranger Fee (% of Debt)</label>
+                                    <input type="number" id="sponsor-internalArrangerFee" value="3.0" min="0" max="10" step="0.1" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Internal lead arranger/underwriter fee</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">External Arranger Fee (% of Debt)</label>
+                                    <input type="number" id="sponsor-externalArrangerFee" value="2.0" min="0" max="10" step="0.1" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">External arranger/syndication fee</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Legal Counsel - Issuer</label>
+                                    <input type="text" id="sponsor-legalIssuer" value="750000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Issuer/sponsor legal fees</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Legal Counsel - Underwriter</label>
+                                    <input type="text" id="sponsor-legalUnderwriter" value="500000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Underwriter/investor legal fees</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Rating Agency - Initial Fees</label>
+                                    <input type="text" id="sponsor-ratingAgency" value="350000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Moody's, S&P, Fitch initial rating fees</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Trustee/Security Trustee - Setup</label>
+                                    <input type="text" id="sponsor-trusteeSetup" value="200000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Initial setup and documentation</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Paying Agent/Account Bank - Setup</label>
+                                    <input type="text" id="sponsor-payingAgentSetup" value="150000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Initial setup fees</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Financial/Tax Advisors</label>
+                                    <input type="text" id="sponsor-financialAdvisors" value="400000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Structuring and tax advisory</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Technical/Engineering Advisors</label>
+                                    <input type="text" id="sponsor-technicalAdvisors" value="300000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Independent technical due diligence</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Insurance Advisor</label>
+                                    <input type="text" id="sponsor-insuranceAdvisor" value="100000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Insurance structuring and placement</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Listing/Regulatory Fees</label>
+                                    <input type="text" id="sponsor-listingFees" value="250000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Exchange listing and regulatory compliance</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">SPV Setup & Administration</label>
+                                    <input type="text" id="sponsor-spvSetup" value="150000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Special purpose vehicle incorporation</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Swap Execution Fee</label>
+                                    <input type="text" id="sponsor-swapFee" value="250000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Interest rate swap setup and execution</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Green Bond/ESG Verification Fee</label>
+                                    <input type="text" id="sponsor-greenBondFee" value="100000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Environmental/ESG consultant for green bond certification</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Other Transaction Costs</label>
+                                    <input type="text" id="sponsor-otherTransactionCosts" value="200000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Printing, marketing, roadshow, misc.</small>
+                                </div>
+                            </div>
+
+                            <!-- Total Day 1 Close Fees -->
+                            <div style="background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(59, 130, 246, 0.1)); border: 2px solid #60a5fa; border-radius: 8px; padding: 1rem; margin-top: 1.5rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: #60a5fa; font-weight: 600;">Total Day 1 Close Fees (Capitalized):</span>
+                                    <span id="sponsor-totalDay1Fees" style="color: white; font-size: 1.5rem; font-weight: 700;">€0</span>
+                                </div>
+                                <small style="color: #64748b;">Paid once at financial close • Capitalized into debt sizing</small>
                             </div>
                         </div>
 
@@ -8157,6 +8325,39 @@ if (window.showSection) {
                 }
             }
         }
+    }
+
+    // Update Power Calculations (IT Load and Overhead Power)
+    function updateSponsorPowerCalculations() {
+        const grossPower = parseFloat(document.getElementById('sponsor-grossITLoadMW')?.value) || 0;
+        const pue = parseFloat(document.getElementById('sponsor-pue')?.value) || 1.25;
+
+        const itLoad = grossPower / pue;
+        const overheadPower = grossPower - itLoad;
+
+        const itLoadInput = document.getElementById('sponsor-itLoad');
+        const overheadPowerInput = document.getElementById('sponsor-overheadPower');
+
+        if (itLoadInput) {
+            itLoadInput.value = itLoad.toFixed(2);
+        }
+        if (overheadPowerInput) {
+            overheadPowerInput.value = overheadPower.toFixed(2);
+        }
+
+        // Update MW displays in CapEx sections
+        const internalMWSpan = document.getElementById('capex-internal-mw');
+        const marketMWSpan = document.getElementById('capex-market-mw');
+        if (internalMWSpan) internalMWSpan.textContent = grossPower.toFixed(2);
+        if (marketMWSpan) marketMWSpan.textContent = grossPower.toFixed(2);
+
+        // Recalculate CapEx based on new MW
+        calculateCapexFromPerMW('internal');
+        calculateCapexFromPerMW('market');
+
+        // Recalculate land and grid costs based on new MW
+        updateLandPurchaseFromQuality();
+        updateGridConnectionFromQuality();
     }
 
     // Update Land Purchase based on quality selection
