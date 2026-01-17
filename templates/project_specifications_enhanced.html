@@ -575,52 +575,212 @@
                 <!-- Project Details Tab -->
                 <div id="details-tab" class="tab-content active">
                     <form id="projectForm">
+                        <!-- SECTION 1: PROJECT METADATA -->
                         <div class="form-section">
-                            <h3 class="section-title">Basic Information</h3>
+                            <h3 class="section-title">Project Metadata</h3>
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label>Project Code</label>
-                                    <input type="text" name="project_code" placeholder="DAR001" onchange="updateProgress()">
+                                    <label>Project Title *</label>
+                                    <input type="text" name="project_title" required placeholder="Enter project name" onchange="updateProgress()">
                                 </div>
                                 <div class="form-group">
-                                    <label>Project Name *</label>
-                                    <input type="text" name="project_name" required onchange="updateProgress()">
-                                </div>
-                                <div class="form-group">
-                                    <label>Deal Type *</label>
-                                    <select name="deal_type" required onchange="updateProgress()">
-                                        <option value="">Select Type</option>
-                                        <option value="Data Centre">Data Centre</option>
-                                        <option value="Renewable Energy">Renewable Energy</option>
-                                        <option value="Infrastructure">Infrastructure</option>
-                                        <option value="Logistics">Logistics</option>
+                                    <label>Location Country *</label>
+                                    <select name="location_country" required onchange="handleCountryChange(); updateProgress()">
+                                        <option value="">Select Country</option>
+                                        <option value="AL">Albania [Tier 3]</option>
+                                        <option value="AD">Andorra [Tier 3]</option>
+                                        <option value="AT">Austria [Tier 2]</option>
+                                        <option value="BY">Belarus [Tier 3]</option>
+                                        <option value="BE">Belgium [Tier 2]</option>
+                                        <option value="BA">Bosnia and Herzegovina [Tier 3]</option>
+                                        <option value="BG">Bulgaria [Tier 3]</option>
+                                        <option value="HR">Croatia [Tier 3]</option>
+                                        <option value="CY">Cyprus [Tier 3]</option>
+                                        <option value="CZ">Czech Republic [Tier 2]</option>
+                                        <option value="DK">Denmark [Tier 2]</option>
+                                        <option value="EE">Estonia [Tier 3]</option>
+                                        <option value="FI">Finland [Tier 2]</option>
+                                        <option value="FR">France [Tier 1 - FLAP]</option>
+                                        <option value="DE">Germany [Tier 1 - FLAP]</option>
+                                        <option value="GR">Greece [Tier 2]</option>
+                                        <option value="HU">Hungary [Tier 3]</option>
+                                        <option value="IS">Iceland [Tier 2]</option>
+                                        <option value="IE">Ireland [Tier 1 - FLAP-D]</option>
+                                        <option value="IT">Italy [Tier 2]</option>
+                                        <option value="XK">Kosovo [Tier 3]</option>
+                                        <option value="LV">Latvia [Tier 3]</option>
+                                        <option value="LI">Liechtenstein [Tier 3]</option>
+                                        <option value="LT">Lithuania [Tier 3]</option>
+                                        <option value="LU">Luxembourg [Tier 2]</option>
+                                        <option value="MT">Malta [Tier 3]</option>
+                                        <option value="MD">Moldova [Tier 3]</option>
+                                        <option value="MC">Monaco [Tier 3]</option>
+                                        <option value="ME">Montenegro [Tier 3]</option>
+                                        <option value="NL">Netherlands [Tier 1 - FLAP]</option>
+                                        <option value="MK">North Macedonia [Tier 3]</option>
+                                        <option value="NO">Norway [Tier 2]</option>
+                                        <option value="PL">Poland [Tier 2]</option>
+                                        <option value="PT">Portugal [Tier 2]</option>
+                                        <option value="RO">Romania [Tier 3]</option>
+                                        <option value="RU">Russia [Tier 2]</option>
+                                        <option value="SM">San Marino [Tier 3]</option>
+                                        <option value="RS">Serbia [Tier 3]</option>
+                                        <option value="SK">Slovakia [Tier 3]</option>
+                                        <option value="SI">Slovenia [Tier 3]</option>
+                                        <option value="ES">Spain [Tier 2]</option>
+                                        <option value="SE">Sweden [Tier 2]</option>
+                                        <option value="CH">Switzerland [Tier 2]</option>
+                                        <option value="TR">Turkey [Tier 2]</option>
+                                        <option value="UA">Ukraine [Tier 3]</option>
+                                        <option value="UK" selected>United Kingdom [Tier 1 - FLAP]</option>
+                                        <option value="VA">Vatican City [Tier 3]</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>Location *</label>
-                                    <input type="text" name="project_location" required onchange="updateProgress()">
+                                    <label>Project Status</label>
+                                    <select name="project_status" onchange="updateProgress()">
+                                        <option value="Planning" selected>Planning</option>
+                                        <option value="Construction">Under Construction</option>
+                                        <option value="Operational">Operational</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>CapEx Currency *</label>
+                                    <select name="capex_currency" required onchange="handleCurrencyChange(); updateProgress()">
+                                        <option value="GBP" selected>GBP (£)</option>
+                                        <option value="EUR">EUR (€)</option>
+                                        <option value="USD">USD ($)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Revenue Currency *</label>
+                                    <select name="revenue_currency" required onchange="handleCurrencyChange(); updateProgress()">
+                                        <option value="GBP" selected>GBP (£)</option>
+                                        <option value="EUR">EUR (€)</option>
+                                        <option value="USD">USD ($)</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- SECTION 2: POWER & CAPACITY -->
                         <div class="form-section">
-                            <h3 class="section-title">Site Information</h3>
+                            <h3 class="section-title">Power & Capacity</h3>
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label>Site Address</label>
-                                    <input type="text" name="site_address" onchange="updateProgress()">
+                                    <label>Gross Facility Power (MW) *</label>
+                                    <input type="number" name="gross_facility_power" value="100.00" step="0.01" min="0" required onchange="updatePowerCalculations(); updateProgress()">
+                                    <small style="color: var(--silver-mist);">Total facility power capacity (grid connection)</small>
                                 </div>
                                 <div class="form-group">
-                                    <label>Site Size (sqm)</label>
-                                    <input type="number" name="site_size_sqm" onchange="updateProgress()">
+                                    <label>PUE (Power Usage Effectiveness) *</label>
+                                    <input type="number" name="pue" value="1.20" step="0.01" min="0.95" max="1.5" required onchange="updatePowerCalculations(); updateProgress()">
+                                    <small style="color: var(--silver-mist);">Range: 0.95 - 1.5 (Lower is better)</small>
                                 </div>
                                 <div class="form-group">
-                                    <label>Data Centre Capacity (MW)</label>
-                                    <input type="number" name="data_centre_capacity_mw" step="0.1" onchange="updateProgress()">
+                                    <label>IT Load (Calculated)</label>
+                                    <input type="number" name="it_load" value="83.33" step="0.1" readonly style="background: rgba(96, 165, 250, 0.1); color: var(--platinum-gold); font-weight: 700;">
+                                    <small style="color: var(--silver-mist);">Usable IT capacity = Gross Power / PUE</small>
                                 </div>
                                 <div class="form-group">
-                                    <label>Expected PUE</label>
-                                    <input type="number" name="expected_pue" value="1.3" step="0.01" onchange="updateProgress()">
+                                    <label>Overhead Power (Calculated)</label>
+                                    <input type="number" name="overhead_power" value="16.67" step="0.1" readonly style="background: rgba(245, 158, 11, 0.1); color: var(--warning); font-weight: 700;">
+                                    <small style="color: var(--silver-mist);">Cooling, UPS losses, lighting = Gross - IT</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 3: REVENUE & LEASE -->
+                        <div class="form-section">
+                            <h3 class="section-title">Revenue & Lease Terms</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Occupancy at Stabilization (%) *</label>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="range" name="occupancy" min="0" max="100" value="100" step="1" style="flex: 1;" oninput="document.getElementById('occupancyValue').textContent = this.value + '%'; updateProgress();">
+                                        <span id="occupancyValue" style="min-width: 50px; font-weight: bold; color: var(--platinum-gold);">100%</span>
+                                    </div>
+                                    <small style="color: var(--silver-mist);">Target occupancy percentage of IT capacity</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Monthly Rent (per IT kW) *</label>
+                                    <input type="text" name="monthly_rent_per_kw" value="£130.00" required onchange="updateProgress()">
+                                    <small style="color: var(--silver-mist);">Rent charged per kW of IT load (not facility load)</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Lease Type *</label>
+                                    <select name="lease_type" required onchange="handleLeaseTypeChange(); updateProgress()">
+                                        <option value="TripleNet" selected>Triple Net (NNN) - Tenant pays utilities</option>
+                                        <option value="Gross">Gross - Landlord pays utilities</option>
+                                    </select>
+                                    <small style="color: var(--silver-mist);">Who pays for electricity costs</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Other OPEX (% of Revenue) *</label>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="range" name="other_opex_percent" min="0" max="50" value="5" step="0.5" style="flex: 1;" oninput="document.getElementById('otherOpexValue').textContent = this.value + '%'; updateProgress();">
+                                        <span id="otherOpexValue" style="min-width: 50px; font-weight: bold; color: var(--platinum-gold);">5%</span>
+                                    </div>
+                                    <small style="color: var(--silver-mist);">Property tax, insurance, maintenance, security (excluding electricity)</small>
+                                </div>
+                                <div class="form-group" id="electricityRateGroup" style="display: none;">
+                                    <label>Electricity Rate (per MWh) *</label>
+                                    <input type="text" name="electricity_rate" value="£100.00" onchange="updateProgress()">
+                                    <small style="color: var(--silver-mist);">Average electricity cost (Gross lease only)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 4: LAND & INFRASTRUCTURE -->
+                        <div class="form-section">
+                            <h3 class="section-title">Land & Infrastructure</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Land Location Quality</label>
+                                    <select name="land_location_quality" onchange="updateLandPurchase(); updateProgress()">
+                                        <option value="rural">Rural (£100k/acre, 1.5 acres/MW)</option>
+                                        <option value="suburban">Suburban (£300k/acre, 1.5 acres/MW)</option>
+                                        <option value="urban" selected>Urban (£800k/acre, 1 acre/MW)</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Land Purchase</label>
+                                    <input type="text" name="land_purchase" value="£80,000,000.00" onchange="updateProgress()">
+                                    <small id="landPurchaseDetails" style="color: var(--silver-mist);">100 acres @ £800,000.00/acre</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Grid Connection Quality</label>
+                                    <select name="grid_connection_quality" onchange="updateGridConnection(); updateProgress()">
+                                        <option value="good" selected>Good (£200k/MW)</option>
+                                        <option value="medium">Medium (£400k/MW)</option>
+                                        <option value="poor">Poor (£600k/MW)</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Grid Connection Costs</label>
+                                    <input type="text" name="grid_connection" value="£20,000,000.00" onchange="updateProgress()">
+                                    <small id="gridConnectionRate" style="color: var(--silver-mist);">£200,000.00 per MW</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Stamp Duty Land Tax (SDLT) Structure</label>
+                                    <select name="stamp_duty_structure" onchange="updateStampDutyRate(); updateProgress()">
+                                        <option value="individual">Individual/Personal (5%)</option>
+                                        <option value="company" selected>Company/Corporate (5%)</option>
+                                        <option value="company_additional">Company + 3% Surcharge (8%)</option>
+                                        <option value="reit">REIT/Institutional (0-5%)</option>
+                                        <option value="custom">Custom Rate</option>
+                                    </select>
+                                    <small style="color: var(--silver-mist);">UK SDLT rates for non-residential property</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Stamp Duty Rate %</label>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="range" name="stamp_duty_percent" min="0" max="20" value="5" step="0.5" style="flex: 1;" oninput="document.getElementById('stampDutyValue').textContent = this.value + '%'; updateProgress();">
+                                        <span id="stampDutyValue" style="min-width: 50px; font-weight: bold; color: var(--platinum-gold);">5%</span>
+                                    </div>
+                                    <small style="color: var(--silver-mist);">Applied to land purchase price</small>
                                 </div>
                             </div>
                         </div>
@@ -629,58 +789,267 @@
 
                 <!-- Financial Information Tab -->
                 <div id="financial-tab" class="tab-content">
+                    <!-- BUILD CAPEX SECTION -->
                     <div class="form-section">
-                        <h3 class="section-title">Capital Expenditure (CapEx)</h3>
+                        <h3 class="section-title">Build CapEx</h3>
+
+                        <!-- CapEx Internal (Cost Basis) -->
+                        <div style="background: rgba(96, 165, 250, 0.05); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; margin-bottom: 1.5rem; overflow: hidden;">
+                            <div style="background: rgba(96, 165, 250, 0.1); padding: 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleCapexSection('internal')">
+                                <span style="font-weight: 600; color: var(--platinum-gold);">CapEx Internal (Cost Basis)</span>
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <span id="capexInternalTotal" style="font-weight: 700; color: var(--pearl-grey);">£0</span>
+                                    <span id="capexInternalIcon">▼</span>
+                                </div>
+                            </div>
+                            <div id="capexInternalContent" style="padding: 1rem; display: none;">
+                                <!-- Toggle between Per MW and Detailed -->
+                                <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                                    <button type="button" class="capex-mode-btn active" id="internalOption1" onclick="setCapexMode('internal', 'perMW')" style="flex: 1; padding: 10px; background: var(--platinum-gold); color: var(--dark); border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Per MW Costing</button>
+                                    <button type="button" class="capex-mode-btn" id="internalOption2" onclick="setCapexMode('internal', 'detailed')" style="flex: 1; padding: 10px; background: var(--slate-grey); color: var(--silver-light); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: 600;">Detailed Breakdown</button>
+                                </div>
+
+                                <!-- Per MW Costing -->
+                                <div id="internalPerMW">
+                                    <div class="form-group">
+                                        <label>Cost per Gross MW</label>
+                                        <input type="text" name="internal_per_mw_cost" value="£7,500,000.00" onchange="updateCapexInternal()">
+                                        <small style="color: var(--silver-mist);">£7.5m per Gross MW</small>
+                                    </div>
+                                    <div style="background: rgba(96, 165, 250, 0.1); padding: 10px; border-radius: 5px; text-align: center;">
+                                        <strong id="internalPerMWCalc" style="color: var(--platinum-gold);">£7.5m × 100 MW = £750,000,000</strong>
+                                    </div>
+                                </div>
+
+                                <!-- Detailed Breakdown -->
+                                <div id="internalDetailed" style="display: none;">
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Architectural</label>
+                                            <input type="text" name="internal_architectural" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Civil and Structural</label>
+                                            <input type="text" name="internal_civil" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Substations</label>
+                                            <input type="text" name="internal_substations" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Underground Utilities</label>
+                                            <input type="text" name="internal_utilities" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Crusader Modules (Incl surveys and design)</label>
+                                            <input type="text" name="internal_crusader" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Bess (Incl surveys and design)</label>
+                                            <input type="text" name="internal_bess" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Main Contractor Installation</label>
+                                            <input type="text" name="internal_main_contractor" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Photo Voltaic System</label>
+                                            <input type="text" name="internal_photo_voltaic" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Landscaping</label>
+                                            <input type="text" name="internal_landscaping" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Preliminaries - General</label>
+                                            <input type="text" name="internal_preliminaries" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Main Contractor Margin</label>
+                                            <input type="text" name="internal_margin" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Connection</label>
+                                            <input type="text" name="internal_connection" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Land</label>
+                                            <input type="text" name="internal_land" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Operations Team</label>
+                                            <input type="text" name="internal_operations" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>OS&E</label>
+                                            <input type="text" name="internal_ose" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Marketing</label>
+                                            <input type="text" name="internal_marketing" value="£0.00" onchange="updateCapexInternal()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Construction Phase Fee (max 1.5%)</label>
+                                            <input type="text" name="internal_dark_fee" value="£0.00" readonly style="background: rgba(96, 165, 250, 0.05);">
+                                            <small style="color: var(--silver-mist);">Auto-calculated as 1.5% of subtotal (capped)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CapEx Market (Debt Basis) -->
+                        <div style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 8px; margin-bottom: 1.5rem; overflow: hidden;">
+                            <div style="background: rgba(245, 158, 11, 0.1); padding: 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleCapexSection('market')">
+                                <span style="font-weight: 600; color: var(--warning);">CapEx Market (Debt Basis)</span>
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <span id="capexMarketTotal" style="font-weight: 700; color: var(--pearl-grey);">£0</span>
+                                    <span id="capexMarketIcon">▼</span>
+                                </div>
+                            </div>
+                            <div id="capexMarketContent" style="padding: 1rem; display: none;">
+                                <!-- Toggle between Per MW and Detailed -->
+                                <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                                    <button type="button" class="capex-mode-btn active" id="marketOption1" onclick="setCapexMode('market', 'perMW')" style="flex: 1; padding: 10px; background: var(--warning); color: var(--dark); border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Per MW Costing</button>
+                                    <button type="button" class="capex-mode-btn" id="marketOption2" onclick="setCapexMode('market', 'detailed')" style="flex: 1; padding: 10px; background: var(--slate-grey); color: var(--silver-light); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: 600;">Detailed Breakdown</button>
+                                </div>
+
+                                <!-- Per MW Costing -->
+                                <div id="marketPerMW">
+                                    <div class="form-group">
+                                        <label>Cost per Gross MW</label>
+                                        <input type="text" name="market_per_mw_cost" value="£10,000,000.00" onchange="updateCapexMarket()">
+                                        <small style="color: var(--silver-mist);">£10m per Gross MW</small>
+                                    </div>
+                                    <div style="background: rgba(245, 158, 11, 0.1); padding: 10px; border-radius: 5px; text-align: center;">
+                                        <strong id="marketPerMWCalc" style="color: var(--warning);">£10m × 100 MW = £1,000,000,000</strong>
+                                    </div>
+                                </div>
+
+                                <!-- Detailed Breakdown -->
+                                <div id="marketDetailed" style="display: none;">
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Architectural</label>
+                                            <input type="text" name="market_architectural" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Civil and Structural</label>
+                                            <input type="text" name="market_civil" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Substations</label>
+                                            <input type="text" name="market_substations" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Underground Utilities</label>
+                                            <input type="text" name="market_utilities" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Crusader Modules (Incl surveys and design)</label>
+                                            <input type="text" name="market_crusader" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Bess (Incl surveys and design)</label>
+                                            <input type="text" name="market_bess" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Main Contractor Installation</label>
+                                            <input type="text" name="market_main_contractor" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Photo Voltaic System</label>
+                                            <input type="text" name="market_photo_voltaic" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Landscaping</label>
+                                            <input type="text" name="market_landscaping" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Preliminaries - General</label>
+                                            <input type="text" name="market_preliminaries" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Main Contractor Margin</label>
+                                            <input type="text" name="market_margin" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Connection</label>
+                                            <input type="text" name="market_connection" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Land</label>
+                                            <input type="text" name="market_land" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Operations Team</label>
+                                            <input type="text" name="market_operations" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>OS&E</label>
+                                            <input type="text" name="market_ose" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Marketing</label>
+                                            <input type="text" name="market_marketing" value="£0.00" onchange="updateCapexMarket()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Construction Phase Fee (max 1.5%)</label>
+                                            <input type="text" name="market_dark_fee" value="£0.00" readonly style="background: rgba(245, 158, 11, 0.05);">
+                                            <small style="color: var(--silver-mist);">Auto-calculated as 1.5% of subtotal (capped)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contingency -->
+                        <div class="form-group">
+                            <label>Contingency Percent</label>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="range" name="contingency_percent" min="0" max="30" value="0" step="0.5" style="flex: 1;" oninput="document.getElementById('contingencyValue').textContent = this.value + '%'; updateCapexTotals();">
+                                <span id="contingencyValue" style="min-width: 50px; font-weight: bold; color: var(--platinum-gold);">0%</span>
+                            </div>
+                            <small style="color: var(--silver-mist);">Applied to each CapEx individually</small>
+                        </div>
+                    </div>
+
+                    <!-- CONSTRUCTION TIMELINE SECTION -->
+                    <div class="form-section">
+                        <h3 class="section-title">Construction Timeline</h3>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>Land Purchase (£)</label>
-                                <input type="number" name="capex_land_purchase" onchange="calculateTotalCapex()">
+                                <label>Pre-Close Preparation (Months) *</label>
+                                <input type="number" name="pre_close_months" value="1" step="1" min="1" max="18" required onchange="updateConstructionTimeline()">
+                                <small style="color: var(--silver-mist);">Deal structuring, documentation, syndication to Day 1 Close</small>
                             </div>
                             <div class="form-group">
-                                <label>Building & Construction (£)</label>
-                                <input type="number" name="capex_building" onchange="calculateTotalCapex()">
+                                <label>Construction Start Date (Day 1 Close) *</label>
+                                <input type="date" name="construction_start" required onchange="updateConstructionTimeline()">
                             </div>
                             <div class="form-group">
-                                <label>Infrastructure (£)</label>
-                                <input type="number" name="capex_infrastructure" onchange="calculateTotalCapex()">
+                                <label>Construction Duration (Months) *</label>
+                                <input type="number" name="construction_duration" value="24" step="1" min="1" required onchange="updateConstructionTimeline()">
                             </div>
                             <div class="form-group">
-                                <label>IT Equipment (£)</label>
-                                <input type="number" name="capex_it_equipment" onchange="calculateTotalCapex()">
+                                <label>Expected Completion Date</label>
+                                <input type="date" name="completion_date" readonly style="background: rgba(96, 165, 250, 0.1); color: var(--platinum-gold); font-weight: 700;">
                             </div>
                             <div class="form-group">
-                                <label>Professional Fees (£)</label>
-                                <input type="number" name="capex_professional_fees" onchange="calculateTotalCapex()">
-                            </div>
-                            <div class="form-group">
-                                <label>Contingency (£)</label>
-                                <input type="number" name="capex_contingency" onchange="calculateTotalCapex()">
-                            </div>
-                            <div class="form-group" style="background: #f0f9ff; padding: 1rem; border-radius: 5px;">
-                                <label style="font-weight: bold;">Total CapEx (£)</label>
-                                <input type="number" name="capex_total" readonly style="font-weight: bold; font-size: 1.2rem;">
-                            </div>
-                            <div class="form-group">
-                                <label>Market CapEx Estimate (£)</label>
-                                <input type="number" name="market_capex_estimate" onchange="updateProgress()">
+                                <label>Lease Commencement Date</label>
+                                <input type="date" name="lease_commence_date" onchange="updateConstructionTimeline()">
+                                <small style="color: var(--silver-mist);">Lease starts at project completion</small>
                             </div>
                         </div>
                     </div>
 
+                    <!-- LEGACY REVENUE & COSTS SECTION -->
                     <div class="form-section">
-                        <h3 class="section-title">Revenue & Costs</h3>
+                        <h3 class="section-title">Additional Revenue & Costs</h3>
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Offtaker Name</label>
                                 <input type="text" name="offtaker_name" onchange="updateProgress()">
-                            </div>
-                            <div class="form-group">
-                                <label>Rent per kWh (£) *</label>
-                                <input type="number" name="offtaker_rent_per_kwh" step="0.001" required onchange="updateProgress()">
-                            </div>
-                            <div class="form-group">
-                                <label>Power Cost per kWh (£) *</label>
-                                <input type="number" name="power_cost_per_kwh" step="0.001" required onchange="updateProgress()">
                             </div>
                             <div class="form-group">
                                 <label>Lease Term (Years)</label>
@@ -925,7 +1294,237 @@
             loadProjects();
             initializeCharts();
             setupAutoSave();
+            updatePowerCalculations();
+            updateCapexInternal();
+            updateCapexMarket();
         });
+
+        // ==================== NEW CALCULATOR FUNCTIONS ====================
+
+        // Power Calculations
+        function updatePowerCalculations() {
+            const grossPower = parseFloat(document.querySelector('[name="gross_facility_power"]').value) || 100;
+            const pue = parseFloat(document.querySelector('[name="pue"]').value) || 1.2;
+
+            const itLoad = grossPower / pue;
+            const overheadPower = grossPower - itLoad;
+
+            document.querySelector('[name="it_load"]').value = itLoad.toFixed(2);
+            document.querySelector('[name="overhead_power"]').value = overheadPower.toFixed(2);
+
+            // Update CapEx calculations based on new power
+            updateCapexInternal();
+            updateCapexMarket();
+        }
+
+        // Handle Country Change
+        function handleCountryChange() {
+            // Could adjust default currency based on country
+            updateProgress();
+        }
+
+        // Handle Currency Change
+        function handleCurrencyChange() {
+            updateProgress();
+        }
+
+        // Handle Lease Type Change
+        function handleLeaseTypeChange() {
+            const leaseType = document.querySelector('[name="lease_type"]').value;
+            const electricityGroup = document.getElementById('electricityRateGroup');
+            if (electricityGroup) {
+                electricityGroup.style.display = leaseType === 'Gross' ? 'block' : 'none';
+            }
+            updateProgress();
+        }
+
+        // Update Land Purchase based on quality selection
+        function updateLandPurchase() {
+            const quality = document.querySelector('[name="land_location_quality"]').value;
+            const grossPower = parseFloat(document.querySelector('[name="gross_facility_power"]').value) || 100;
+
+            let pricePerAcre = 800000;
+            let acresPerMW = 1;
+
+            switch(quality) {
+                case 'rural':
+                    pricePerAcre = 100000;
+                    acresPerMW = 1.5;
+                    break;
+                case 'suburban':
+                    pricePerAcre = 300000;
+                    acresPerMW = 1.5;
+                    break;
+                case 'urban':
+                    pricePerAcre = 800000;
+                    acresPerMW = 1;
+                    break;
+                case 'custom':
+                    return; // Don't auto-calculate
+            }
+
+            const totalAcres = grossPower * acresPerMW;
+            const landCost = totalAcres * pricePerAcre;
+
+            document.querySelector('[name="land_purchase"]').value = '£' + landCost.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('landPurchaseDetails').textContent = `${totalAcres.toFixed(0)} acres @ £${pricePerAcre.toLocaleString('en-GB', {minimumFractionDigits: 2})}/acre`;
+        }
+
+        // Update Grid Connection based on quality selection
+        function updateGridConnection() {
+            const quality = document.querySelector('[name="grid_connection_quality"]').value;
+            const grossPower = parseFloat(document.querySelector('[name="gross_facility_power"]').value) || 100;
+
+            let costPerMW = 200000;
+
+            switch(quality) {
+                case 'good':
+                    costPerMW = 200000;
+                    break;
+                case 'medium':
+                    costPerMW = 400000;
+                    break;
+                case 'poor':
+                    costPerMW = 600000;
+                    break;
+                case 'custom':
+                    return; // Don't auto-calculate
+            }
+
+            const gridCost = grossPower * costPerMW;
+
+            document.querySelector('[name="grid_connection"]').value = '£' + gridCost.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('gridConnectionRate').textContent = `£${costPerMW.toLocaleString('en-GB', {minimumFractionDigits: 2})} per MW`;
+        }
+
+        // Update Stamp Duty Rate
+        function updateStampDutyRate() {
+            const structure = document.querySelector('[name="stamp_duty_structure"]').value;
+
+            let rate = 5;
+            switch(structure) {
+                case 'individual':
+                case 'company':
+                    rate = 5;
+                    break;
+                case 'company_additional':
+                    rate = 8;
+                    break;
+                case 'reit':
+                    rate = 2.5;
+                    break;
+                case 'custom':
+                    return; // Don't change
+            }
+
+            document.querySelector('[name="stamp_duty_percent"]').value = rate;
+            document.getElementById('stampDutyValue').textContent = rate + '%';
+        }
+
+        // Toggle CapEx Section
+        function toggleCapexSection(section) {
+            const content = document.getElementById(`capex${section.charAt(0).toUpperCase() + section.slice(1)}Content`);
+            const icon = document.getElementById(`capex${section.charAt(0).toUpperCase() + section.slice(1)}Icon`);
+
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.textContent = '▲';
+            } else {
+                content.style.display = 'none';
+                icon.textContent = '▼';
+            }
+        }
+
+        // Set CapEx Mode (Per MW or Detailed)
+        function setCapexMode(type, mode) {
+            const perMWDiv = document.getElementById(`${type}PerMW`);
+            const detailedDiv = document.getElementById(`${type}Detailed`);
+            const option1 = document.getElementById(`${type}Option1`);
+            const option2 = document.getElementById(`${type}Option2`);
+
+            if (mode === 'perMW') {
+                perMWDiv.style.display = 'block';
+                detailedDiv.style.display = 'none';
+                option1.style.background = type === 'internal' ? 'var(--platinum-gold)' : 'var(--warning)';
+                option1.style.color = 'var(--dark)';
+                option2.style.background = 'var(--slate-grey)';
+                option2.style.color = 'var(--silver-light)';
+            } else {
+                perMWDiv.style.display = 'none';
+                detailedDiv.style.display = 'block';
+                option2.style.background = type === 'internal' ? 'var(--platinum-gold)' : 'var(--warning)';
+                option2.style.color = 'var(--dark)';
+                option1.style.background = 'var(--slate-grey)';
+                option1.style.color = 'var(--silver-light)';
+            }
+        }
+
+        // Parse currency string to number
+        function parseCurrency(str) {
+            if (!str) return 0;
+            return parseFloat(str.replace(/[£€$,]/g, '')) || 0;
+        }
+
+        // Format number as currency
+        function formatCurrency(num, currency = 'GBP') {
+            const symbols = { GBP: '£', EUR: '€', USD: '$' };
+            const symbol = symbols[currency] || '£';
+            return symbol + num.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        // Update CapEx Internal
+        function updateCapexInternal() {
+            const grossPower = parseFloat(document.querySelector('[name="gross_facility_power"]').value) || 100;
+            const perMWCost = parseCurrency(document.querySelector('[name="internal_per_mw_cost"]').value);
+            const total = grossPower * perMWCost;
+
+            document.getElementById('capexInternalTotal').textContent = formatCurrency(total);
+            document.getElementById('internalPerMWCalc').textContent = `${formatCurrency(perMWCost/1000000)}m × ${grossPower} MW = ${formatCurrency(total)}`;
+
+            updateCapexTotals();
+        }
+
+        // Update CapEx Market
+        function updateCapexMarket() {
+            const grossPower = parseFloat(document.querySelector('[name="gross_facility_power"]').value) || 100;
+            const perMWCost = parseCurrency(document.querySelector('[name="market_per_mw_cost"]').value);
+            const total = grossPower * perMWCost;
+
+            document.getElementById('capexMarketTotal').textContent = formatCurrency(total);
+            document.getElementById('marketPerMWCalc').textContent = `${formatCurrency(perMWCost/1000000)}m × ${grossPower} MW = ${formatCurrency(total)}`;
+
+            updateCapexTotals();
+        }
+
+        // Update CapEx Totals with Contingency
+        function updateCapexTotals() {
+            const contingency = parseFloat(document.querySelector('[name="contingency_percent"]').value) || 0;
+            // Apply contingency if needed
+            updateProgress();
+        }
+
+        // Update Construction Timeline
+        function updateConstructionTimeline() {
+            const startDate = document.querySelector('[name="construction_start"]').value;
+            const duration = parseInt(document.querySelector('[name="construction_duration"]').value) || 24;
+
+            if (startDate) {
+                const start = new Date(startDate);
+                const completion = new Date(start);
+                completion.setMonth(completion.getMonth() + duration);
+
+                document.querySelector('[name="completion_date"]').value = completion.toISOString().split('T')[0];
+
+                // Set lease commencement to completion date if not already set
+                if (!document.querySelector('[name="lease_commence_date"]').value) {
+                    document.querySelector('[name="lease_commence_date"]').value = completion.toISOString().split('T')[0];
+                }
+            }
+
+            updateProgress();
+        }
+
+        // ==================== END NEW CALCULATOR FUNCTIONS ====================
 
         // Industry Selection
         function selectIndustry(industry) {
