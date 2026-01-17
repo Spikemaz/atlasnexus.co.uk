@@ -3690,6 +3690,75 @@ def admin_unlock_ip():
         </html>
         """
 
+@app.route('/admin/emergency-unlock-all')
+def emergency_unlock_all():
+    """Emergency endpoint to clear ALL IP lockouts - no authentication required
+
+    This is an emergency recovery endpoint for when the admin gets locked out.
+    It clears all lockouts from the /tmp file on Vercel.
+
+    Access: https://atlasnexus.co.uk/admin/emergency-unlock-all?key=MASTER_UNLOCK_KEY
+    """
+    # Require a secret key for security
+    unlock_key = request.args.get('key', '')
+    expected_key = os.environ.get('MASTER_UNLOCK_KEY', 'atlas-master-unlock-2024')
+
+    if unlock_key != expected_key:
+        return """
+        <html>
+        <head><title>Access Denied</title></head>
+        <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+            <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px;">
+                <h1 style="color: #ef4444;">🔒 Access Denied</h1>
+                <p>Invalid unlock key.</p>
+            </div>
+        </body>
+        </html>
+        """, 403
+
+    # Clear all lockouts
+    lockouts = load_lockouts()
+    cleared_count = len(lockouts)
+    cleared_ips = list(lockouts.keys())
+
+    # Save empty lockouts file
+    save_lockouts({})
+
+    # Clear all attempt logs too
+    save_attempt_logs({})
+
+    # Log this emergency action
+    try:
+        log_event('emergency_unlock', {
+            'cleared_ips': cleared_ips,
+            'cleared_count': cleared_count,
+            'timestamp': datetime.now().isoformat(),
+            'requester_ip': get_real_ip()
+        })
+    except:
+        pass
+
+    return f"""
+    <html>
+    <head>
+        <title>Emergency Unlock Complete</title>
+        <meta http-equiv="refresh" content="5;url=/">
+    </head>
+    <body style="font-family: Arial; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+        <div style="text-align: center; background: #2a2a2a; padding: 40px; border-radius: 10px; border: 2px solid #22c55e; max-width: 600px;">
+            <h1 style="color: #22c55e;">✅ Emergency Unlock Complete</h1>
+            <p style="font-size: 18px;">All IP lockouts have been cleared.</p>
+            <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; color: #22c55e;"><strong>Cleared {cleared_count} lockout(s)</strong></p>
+                <p style="margin: 10px 0 0 0; color: #94a3b8; font-size: 14px;">IPs: {', '.join(cleared_ips) if cleared_ips else 'None'}</p>
+            </div>
+            <p style="color: #94a3b8;">Redirecting to login in 5 seconds...</p>
+            <a href="/" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin-top: 15px;">Go to Login Now</a>
+        </div>
+    </body>
+    </html>
+    """
+
 @app.route('/admin/ban-ip-email')
 def admin_ban_ip_email():
     """Permanently ban an IP address via email link with token authentication"""
