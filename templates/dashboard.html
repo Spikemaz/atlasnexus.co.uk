@@ -2986,31 +2986,203 @@
                             </div>
                         </div>
 
-                        <!-- Totals Display -->
+                        <!-- COMPREHENSIVE CALCULATED TOTALS SECTION -->
                         <div style="background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(59, 130, 246, 0.1)); border: 2px solid #60a5fa; border-radius: 12px; padding: 1.5rem;">
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.3rem;">
                                 <i class="fas fa-calculator"></i> Calculated Totals
                             </h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                                <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
-                                    <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">CapEx Internal (incl. contingency)</div>
-                                    <div id="sponsor-capexInternalTotal" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
+
+                            <!-- Investment Timeline -->
+                            <div style="margin-top: 15px; margin-bottom: 20px; position: relative; background: rgba(10, 14, 39, 0.6); padding: 15px; border-radius: 8px;">
+                                <div style="font-size: 14px; margin-bottom: 15px; text-align: center; color: #00d4ff; font-weight: 600;">Investment Timeline</div>
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                                    <!-- Today -->
+                                    <div style="flex: 0 0 auto; text-align: center;">
+                                        <div style="width: 12px; height: 12px; background: #ffa726; box-shadow: 0 0 10px #ffa726; border-radius: 50%; margin: 0 auto 8px;"></div>
+                                        <div style="font-size: 10px; color: #94a3b8; font-weight: 600;">Today</div>
+                                        <div style="font-size: 11px; color: #60a5fa; font-weight: 700;" id="sponsor-timeline-today">Jan 2026</div>
+                                    </div>
+
+                                    <!-- Arrow: Preparation -->
+                                    <div style="flex: 1; text-align: center; border-top: 2px dashed rgba(96, 165, 250, 0.3); position: relative;">
+                                        <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #0a0e27; padding: 2px 8px; font-size: 10px; color: #94a3b8;">1 months</div>
+                                    </div>
+
+                                    <!-- Day 1 Close -->
+                                    <div style="flex: 0 0 auto; text-align: center;">
+                                        <div style="width: 12px; height: 12px; background: #60a5fa; box-shadow: 0 0 10px #60a5fa; border-radius: 50%; margin: 0 auto 8px;"></div>
+                                        <div style="font-size: 10px; color: #94a3b8; font-weight: 600;">Day 1<br>Close</div>
+                                        <div style="font-size: 11px; color: #60a5fa; font-weight: 700;" id="sponsor-timeline-day1">Jan 2026</div>
+                                    </div>
+
+                                    <!-- Arrow: Construction -->
+                                    <div style="flex: 2; text-align: center; border-top: 2px dashed rgba(96, 165, 250, 0.3); position: relative;">
+                                        <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #0a0e27; padding: 2px 8px; font-size: 10px; color: #94a3b8;" id="sponsor-timeline-duration">24 months</div>
+                                    </div>
+
+                                    <!-- Complete -->
+                                    <div style="flex: 0 0 auto; text-align: center;">
+                                        <div style="width: 12px; height: 12px; background: #4caf50; box-shadow: 0 0 10px #4caf50; border-radius: 50%; margin: 0 auto 8px;"></div>
+                                        <div style="font-size: 10px; color: #94a3b8; font-weight: 600;">Complete</div>
+                                        <div style="font-size: 11px; color: #60a5fa; font-weight: 700;" id="sponsor-timeline-complete">Jan 2028</div>
+                                    </div>
+
+                                    <!-- Arrow: to Revenue -->
+                                    <div style="flex: 0 0 35px; text-align: center;">
+                                        <div style="font-size: 14px; color: #94a3b8;">→</div>
+                                    </div>
+
+                                    <!-- Revenue Begins -->
+                                    <div style="flex: 0 0 auto; text-align: center;">
+                                        <div style="width: 12px; height: 12px; background: #ffd700; box-shadow: 0 0 10px #ffd700; border-radius: 50%; margin: 0 auto 8px;"></div>
+                                        <div style="font-size: 10px; color: #94a3b8; font-weight: 600;">Revenue<br>Begins</div>
+                                        <div style="font-size: 11px; color: #60a5fa; font-weight: 700;" id="sponsor-timeline-revenue">Jan 2028</div>
+                                    </div>
+
+                                    <!-- Arrow: Operating Period -->
+                                    <div style="flex: 1; text-align: center; border-top: 2px dashed rgba(96, 165, 250, 0.3); position: relative;">
+                                        <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #0a0e27; padding: 2px 8px; font-size: 10px; color: #94a3b8;" id="sponsor-timeline-operating">15 years</div>
+                                    </div>
+
+                                    <!-- Maturity -->
+                                    <div style="flex: 0 0 auto; text-align: center;">
+                                        <div style="width: 12px; height: 12px; background: #9c27b0; box-shadow: 0 0 10px #9c27b0; border-radius: 50%; margin: 0 auto 8px;"></div>
+                                        <div style="font-size: 10px; color: #94a3b8; font-weight: 600;">Maturity</div>
+                                        <div style="font-size: 11px; color: #60a5fa; font-weight: 700;" id="sponsor-timeline-maturity">Jan 2043</div>
+                                    </div>
                                 </div>
-                                <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
-                                    <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">CapEx Market (incl. contingency)</div>
-                                    <div id="sponsor-capexMarketTotal" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
+                            </div>
+
+                            <!-- PROJECT COSTS BREAKDOWN -->
+                            <div style="margin-top: 25px; padding-top: 20px; border-top: 2px solid rgba(96, 165, 250, 0.2);">
+                                <h4 style="margin: 0 0 15px 0; color: #00d4ff; font-size: 13px; font-weight: 700;">📊 Project Costs Breakdown</h4>
+
+                                <!-- Internal CapEx Section -->
+                                <div style="background: rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #00d4ff;">
+                                    <div style="font-size: 13px; font-weight: 700; color: #00d4ff; margin-bottom: 10px;">Internal CapEx (DARK Cost)</div>
+                                    <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                        <span style="color: #94a3b8; font-size: 12px;">Base</span>
+                                        <span style="color: white; font-size: 12px; font-weight: 600;" id="sponsor-capexInternalBase">€0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                        <span style="color: #94a3b8; font-size: 12px;">Contingency</span>
+                                        <span style="color: white; font-size: 12px; font-weight: 600;" id="sponsor-contingencyInternal">€0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 8px 0; margin-top: 8px; border-top: 1px solid rgba(0, 212, 255, 0.3);">
+                                        <span style="color: #00d4ff; font-size: 13px; font-weight: 700;">Total</span>
+                                        <span style="color: #00d4ff; font-size: 14px; font-weight: 700;" id="sponsor-capexInternalTotal">€0</span>
+                                    </div>
                                 </div>
-                                <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
-                                    <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Land Total</div>
-                                    <div id="sponsor-landTotal" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
+
+                                <!-- Market CapEx Section -->
+                                <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #ffd700;">
+                                    <div style="font-size: 13px; font-weight: 700; color: #ffd700; margin-bottom: 10px;">Market CapEx (Debt Raised)</div>
+                                    <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                        <span style="color: #94a3b8; font-size: 12px;">Base</span>
+                                        <span style="color: white; font-size: 12px; font-weight: 600;" id="sponsor-capexMarketBase">€0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                        <span style="color: #94a3b8; font-size: 12px;">Contingency</span>
+                                        <span style="color: white; font-size: 12px; font-weight: 600;" id="sponsor-contingencyMarket">€0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 8px 0; margin-top: 8px; border-top: 1px solid rgba(255, 215, 0, 0.3);">
+                                        <span style="color: #ffd700; font-size: 13px; font-weight: 700;">Total</span>
+                                        <span style="color: #ffd700; font-size: 14px; font-weight: 700;" id="sponsor-capexMarketTotal">€0</span>
+                                    </div>
                                 </div>
-                                <div style="background: #0a0e27; padding: 1rem; border-radius: 8px;">
-                                    <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Fees Total</div>
-                                    <div id="sponsor-feesTotal" style="color: white; font-size: 1.5rem; font-weight: 600;">€0</div>
+
+                                <!-- Site Acquisition Section -->
+                                <div style="background: rgba(255, 167, 38, 0.1); padding: 15px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #ffa726;">
+                                    <div style="font-size: 13px; font-weight: 700; color: #ffa726; margin-bottom: 10px;">Site Acquisition</div>
+                                    <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                        <span style="color: #94a3b8; font-size: 12px;">Land Purchase</span>
+                                        <span style="color: white; font-size: 12px; font-weight: 600;" id="sponsor-landBreakdownPurchase">€0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                        <span style="color: #94a3b8; font-size: 12px;">Grid Connection</span>
+                                        <span style="color: white; font-size: 12px; font-weight: 600;" id="sponsor-landBreakdownGrid">€0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                                        <span style="color: #94a3b8; font-size: 12px;">Stamp Duty</span>
+                                        <span style="color: white; font-size: 12px; font-weight: 600;" id="sponsor-landBreakdownStamp">€0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 8px 0; margin-top: 8px; border-top: 1px solid rgba(255, 167, 38, 0.3);">
+                                        <span style="color: #ffa726; font-size: 13px; font-weight: 700;">Site Purchase Amount</span>
+                                        <span style="color: #ffa726; font-size: 14px; font-weight: 700;" id="sponsor-landTotal">€0</span>
+                                    </div>
                                 </div>
-                                <div style="background: linear-gradient(135deg, #60a5fa, #3b82f6); padding: 1rem; border-radius: 8px;">
-                                    <div style="color: white; font-size: 0.875rem; margin-bottom: 0.5rem; font-weight: 600;">GRAND TOTAL</div>
-                                    <div id="sponsor-grandTotal" style="color: white; font-size: 2rem; font-weight: 700;">€0</div>
+
+                                <!-- Day 1 Close Fees Section -->
+                                <div style="background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #4caf50;">
+                                    <div style="font-size: 13px; font-weight: 700; color: #4caf50; margin-bottom: 10px;">Day 1 Close Fees</div>
+                                    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                                        <span style="color: #4caf50; font-size: 13px; font-weight: 700;">Upfront Fees</span>
+                                        <span style="color: #4caf50; font-size: 14px; font-weight: 700;" id="sponsor-feesTotal">€0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- GRAND TOTALS -->
+                            <div style="margin-top: 20px;">
+                                <div style="background: rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #00d4ff;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                        <span style="color: #00d4ff; font-size: 14px; font-weight: 700;">INTERNAL GRAND TOTAL</span>
+                                        <span id="sponsor-grandTotal" style="font-size: 20px; color: #00d4ff; font-weight: 700;">€0</span>
+                                    </div>
+                                    <div style="font-size: 11px; color: #94a3b8;">
+                                        Internal CapEx + Land + Upfront Fees (DARK's actual cost)
+                                    </div>
+                                </div>
+
+                                <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #ffd700;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                        <span style="color: #ffd700; font-size: 14px; font-weight: 700;">MARKET GRAND TOTAL</span>
+                                        <span id="sponsor-grandTotalMarket" style="font-size: 20px; color: #ffd700; font-weight: 700;">€0</span>
+                                    </div>
+                                    <div style="font-size: 11px; color: #94a3b8;">
+                                        Total debt raised at Day 1 Close
+                                    </div>
+                                </div>
+
+                                <div style="background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #4caf50;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                        <span style="color: #4caf50; font-size: 14px; font-weight: 700;">DARK Development Profit</span>
+                                        <span id="sponsor-darkProfit" style="font-size: 20px; color: #4caf50; font-weight: 700;">€0</span>
+                                    </div>
+                                    <div style="font-size: 11px; color: #94a3b8;">
+                                        Market Total - Internal Total (Paid on completion)
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- REVENUE & NOI WATERFALL -->
+                            <div style="margin-top: 20px; background: rgba(0, 212, 255, 0.1); border: 1px solid #00d4ff; border-radius: 8px; padding: 15px;">
+                                <div style="color: #00d4ff; font-size: 13px; font-weight: 700; margin-bottom: 15px;">💰 Revenue & NOI Waterfall (Year 1)</div>
+                                <div style="font-size: 13px; line-height: 1.8;">
+                                    <div style="display: flex; justify-content: space-between; padding: 6px 0;">
+                                        <span style="font-weight: 700;">Gross Annual Revenue</span>
+                                        <span id="sponsor-noiGrossRevenue" style="font-weight: 700; color: #4caf50; font-size: 16px;">€0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 6px 0; padding-left: 15px;">
+                                        <span style="color: #94a3b8; font-size: 12px;">Less: Electricity (if Gross lease)</span>
+                                        <span id="sponsor-noiElectricity" style="color: #94a3b8; font-size: 14px; font-weight: 600;">€0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 6px 0; padding-left: 15px; border-bottom: 1px solid rgba(96, 165, 250, 0.2);">
+                                        <span style="color: #94a3b8; font-size: 12px;">Less: Other OpEx</span>
+                                        <span id="sponsor-noiOtherOpex" style="color: #94a3b8; font-size: 14px; font-weight: 600;">€0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 8px 0; background: rgba(0, 212, 255, 0.05); margin: 5px -10px; padding-left: 25px; padding-right: 10px; border-radius: 4px;">
+                                        <span style="font-weight: 700;">= Net Operating Income (NOI)</span>
+                                        <span id="sponsor-noiBeforeAMF" style="font-weight: 700; color: #00d4ff; font-size: 16px;">€0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 6px 0; padding-left: 15px; border-bottom: 1px solid rgba(96, 165, 250, 0.2);">
+                                        <span style="color: #94a3b8; font-size: 12px;">Less: Asset Mgmt Fee (1% of NOI)</span>
+                                        <span id="sponsor-noiAMF" style="color: #ffa726; font-size: 14px; font-weight: 600;">€0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 10px 0; background: rgba(76, 175, 80, 0.1); margin: 5px -10px; padding-left: 25px; padding-right: 10px; border-radius: 4px;">
+                                        <span style="font-weight: 700; color: #4caf50; font-size: 13px;">= NOI for Debt Service</span>
+                                        <span id="sponsor-noiForDebtService" style="font-weight: 700; color: #4caf50; font-size: 18px;">€0</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -8940,6 +9112,41 @@ if (window.showSection) {
         if (feesTotalEl) feesTotalEl.textContent = currencySymbol + feesTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
         if (grandTotalEl) grandTotalEl.textContent = currencySymbol + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
 
+        // Update COMPREHENSIVE TOTALS SECTION - New Breakdown Elements
+
+        // Internal CapEx Breakdown
+        const capexInternalBaseEl = document.getElementById('sponsor-capexInternalBase');
+        const contingencyInternalEl = document.getElementById('sponsor-contingencyInternal');
+        if (capexInternalBaseEl) capexInternalBaseEl.textContent = currencySymbol + internalCapexBase.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (contingencyInternalEl) contingencyInternalEl.textContent = currencySymbol + internalCapexContingency.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+        // Market CapEx Breakdown
+        const capexMarketBaseEl = document.getElementById('sponsor-capexMarketBase');
+        const contingencyMarketEl = document.getElementById('sponsor-contingencyMarket');
+        if (capexMarketBaseEl) capexMarketBaseEl.textContent = currencySymbol + marketCapexBase.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (contingencyMarketEl) contingencyMarketEl.textContent = currencySymbol + marketCapexContingency.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+        // Land Breakdown
+        const landBreakdownPurchaseEl = document.getElementById('sponsor-landBreakdownPurchase');
+        const landBreakdownGridEl = document.getElementById('sponsor-landBreakdownGrid');
+        const landBreakdownStampEl = document.getElementById('sponsor-landBreakdownStamp');
+        if (landBreakdownPurchaseEl) landBreakdownPurchaseEl.textContent = currencySymbol + landPurchase.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (landBreakdownGridEl) landBreakdownGridEl.textContent = currencySymbol + gridConnection.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (landBreakdownStampEl) landBreakdownStampEl.textContent = currencySymbol + stampDuty.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+        // Grand Totals - Market and DARK Profit
+        const grandTotalMarketEl = document.getElementById('sponsor-grandTotalMarket');
+        const darkProfitEl = document.getElementById('sponsor-darkProfit');
+
+        const grandTotalMarket = marketCapexTotal + landTotal + feesTotal;
+        const darkProfit = grandTotalMarket - grandTotal;
+
+        if (grandTotalMarketEl) grandTotalMarketEl.textContent = currencySymbol + grandTotalMarket.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (darkProfitEl) darkProfitEl.textContent = currencySymbol + darkProfit.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+        // Calculate NOI Waterfall
+        calculateNOIWaterfall();
+
         // Calculate Developer Economics
         calculateDeveloperProfit();
     }
@@ -8980,6 +9187,59 @@ if (window.showSection) {
 
         if (profitCurrencyDisplay) profitCurrencyDisplay.textContent = currency;
         if (developerCurrencyHeader) developerCurrencyHeader.textContent = currency;
+    }
+
+    // Calculate NOI Waterfall for Year 1
+    function calculateNOIWaterfall() {
+        // Get revenue inputs
+        const grossMonthlyRent = parseCurrencyValue(document.getElementById('sponsor-grossMonthlyRent')?.value) || 0;
+        const occupancy = parseFloat(document.getElementById('sponsor-occupancy')?.value) || 0;
+        const leaseType = document.getElementById('sponsor-leaseType')?.value || 'TripleNet';
+
+        // Calculate Gross Annual Revenue
+        const grossAnnualRevenue = grossMonthlyRent * 12 * (occupancy / 100);
+
+        // Calculate Electricity Cost (only for Gross lease)
+        let electricityCost = 0;
+        if (leaseType === 'Gross') {
+            const electricityRate = parseFloat(document.getElementById('sponsor-electricityRate')?.value) || 0;
+            const itLoad = parseFloat(document.getElementById('sponsor-itLoad')?.value) || 0;
+            // Annual electricity = IT Load (MW) × 8760 hours × Rate per MWh
+            electricityCost = itLoad * 8760 * electricityRate;
+        }
+
+        // Calculate Other OpEx
+        const opexPercentValue = document.getElementById('sponsor-opexPercent')?.value || '0';
+        const opexPercent = parseFloat(opexPercentValue.replace('%', '')) / 100 || 0;
+        const otherOpex = grossAnnualRevenue * opexPercent;
+
+        // Calculate NOI before AMF
+        const noiBeforeAMF = grossAnnualRevenue - electricityCost - otherOpex;
+
+        // Calculate Asset Management Fee (1% of NOI)
+        const assetMgmtFee = noiBeforeAMF * 0.01;
+
+        // Calculate NOI for Debt Service
+        const noiForDebtService = noiBeforeAMF - assetMgmtFee;
+
+        // Get currency
+        const currency = document.getElementById('sponsor-kwh-currency')?.value || 'GBP';
+        const currencySymbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency === 'JPY' ? '¥' : currency === 'AED' ? 'د.إ' : '';
+
+        // Update display elements
+        const noiGrossRevenueEl = document.getElementById('sponsor-noiGrossRevenue');
+        const noiElectricityEl = document.getElementById('sponsor-noiElectricity');
+        const noiOtherOpexEl = document.getElementById('sponsor-noiOtherOpex');
+        const noiBeforeAMFEl = document.getElementById('sponsor-noiBeforeAMF');
+        const noiAMFEl = document.getElementById('sponsor-noiAMF');
+        const noiForDebtServiceEl = document.getElementById('sponsor-noiForDebtService');
+
+        if (noiGrossRevenueEl) noiGrossRevenueEl.textContent = currencySymbol + grossAnnualRevenue.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (noiElectricityEl) noiElectricityEl.textContent = currencySymbol + electricityCost.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (noiOtherOpexEl) noiOtherOpexEl.textContent = currencySymbol + otherOpex.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (noiBeforeAMFEl) noiBeforeAMFEl.textContent = currencySymbol + noiBeforeAMF.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (noiAMFEl) noiAMFEl.textContent = currencySymbol + assetMgmtFee.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        if (noiForDebtServiceEl) noiForDebtServiceEl.textContent = currencySymbol + noiForDebtService.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
     }
 
     // Update currency displays in Land & Infrastructure section
