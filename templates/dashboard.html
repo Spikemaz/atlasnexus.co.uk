@@ -2351,7 +2351,7 @@
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Gross Facility Power (MW) *</label>
-                                    <input type="number" id="sponsor-grossITLoadMW" min="0.1" step="0.01" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="updateSponsorPowerCalculations()">
+                                    <input type="number" id="sponsor-grossFacilityPower" min="0.1" step="0.01" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="updateSponsorPowerCalculations()">
                                     <small style="color: #64748b; font-size: 0.75rem;">Total facility power capacity (grid connection)</small>
                                 </div>
                                 <div>
@@ -2382,10 +2382,22 @@
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Lease Type *</label>
-                                    <select id="sponsor-leaseType" required style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <select id="sponsor-leaseType" required onchange="toggleElectricityRate()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                         <option value="TripleNet" selected>Triple Net (NNN) - Tenant pays utilities</option>
                                         <option value="Gross">Gross - Landlord pays utilities</option>
                                     </select>
+                                    <small style="color: #64748b; font-size: 0.75rem;">Triple Net: Tenant pays all utilities | Gross: Landlord pays electricity</small>
+                                </div>
+                                <div id="sponsor-electricityRateGroup" style="display: none;">
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+                                        Electricity Rate (per MWh)
+                                        <span style="color: #f59e0b; font-size: 0.75rem; font-weight: 600;">⚠ Gross Lease Only</span>
+                                    </label>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <input type="number" id="sponsor-electricityRate" min="0" step="0.01" value="100" style="flex: 1; padding: 12px; background: #0a0e27; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; color: white;" placeholder="e.g., 100.00">
+                                        <span id="sponsor-electricity-currency-display" style="padding: 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; color: #f59e0b; min-width: 60px; text-align: center;">GBP</span>
+                                    </div>
+                                    <small style="color: #f59e0b; font-size: 0.75rem;">Average electricity cost (impacts OPEX for Gross leases)</small>
                                 </div>
                                 <div>
                                     <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Occupancy at Stabilization % *</label>
@@ -2425,23 +2437,31 @@
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
                                 <i class="fas fa-building"></i> Build (CapEx Internal) - <span id="capex-internal-currency">EUR</span>
                             </h3>
-                            
-                            <!-- Per MW Option -->
-                            <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(96, 165, 250, 0.05); border-radius: 8px;">
-                                <label style="color: #60a5fa; font-weight: 600; display: block; margin-bottom: 0.5rem;">Option 1: Per MW Costing</label>
+
+                            <!-- Toggle Tabs -->
+                            <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
+                                <button type="button" id="internal-tab-permw" onclick="switchCapexTab('internal', 'permw')" style="flex: 1; padding: 12px; background: #60a5fa; color: #0a0a0a; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">
+                                    Per MW Costing
+                                </button>
+                                <button type="button" id="internal-tab-detailed" onclick="switchCapexTab('internal', 'detailed')" style="flex: 1; padding: 12px; background: rgba(96, 165, 250, 0.1); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">
+                                    Detailed Breakdown
+                                </button>
+                            </div>
+
+                            <!-- Per MW Section -->
+                            <div id="internal-permw-section" style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(96, 165, 250, 0.05); border-radius: 8px;">
+                                <label style="color: #60a5fa; font-weight: 600; display: block; margin-bottom: 0.5rem;">Cost per Gross MW</label>
                                 <div style="display: flex; gap: 1rem; align-items: center;">
                                     <input type="text" id="sponsor-capexInternalPerMW" min="0" max="25000000" placeholder="0 - 25,000,000" style="flex: 1; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="calculateCapexFromPerMW('internal')">
                                     <span style="color: #94a3b8;">× <span id="capex-internal-mw">0</span> MW =</span>
                                     <span id="capex-internal-permw-total" style="color: #60a5fa; font-weight: 600; font-size: 1.2rem;">0</span>
                                 </div>
+                                <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 0.5rem;">Simplified costing based on per-megawatt rate</small>
                             </div>
-                            
-                            <!-- Expandable Details Option -->
-                            <div>
-                                <button type="button" onclick="toggleCapexDetails('internal')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-bottom: 1rem;">
-                                    <i class="fas fa-chevron-down" id="capex-internal-chevron"></i> Option 2: Detailed Breakdown
-                                </button>
-                                <div id="capex-internal-details" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+
+                            <!-- Detailed Breakdown Section -->
+                            <div id="internal-detailed-section" style="display: none;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                                     <div>
                                         <label style="color: #94a3b8; font-size: 0.9rem;">Architectural</label>
                                         <input type="number" id="sponsor-buildArchitectural" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
@@ -2507,9 +2527,9 @@
                                         <input type="number" id="sponsor-buildMarketing" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
                                     </div>
                                     <div>
-                                        <label style="color: #94a3b8; font-size: 0.9rem;">Construction Phase Fee (max 1.5%)</label>
-                                        <input type="number" id="sponsor-buildConstructionPhaseFee" readonly style="width: 100%; padding: 12px; background: rgba(96, 165, 250, 0.05); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8;">
-                                        <small style="color: #64748b; font-size: 0.75rem;">Auto-calculated as 1.5% of subtotal (capped)</small>
+                                        <label style="color: #94a3b8; font-size: 0.9rem;">Construction Phase Fee (%)</label>
+                                        <input type="number" id="sponsor-buildConstructionFeePercent" min="0" max="5" step="0.1" value="1.5" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                        <small style="color: #64748b; font-size: 0.75rem;">Typically 1.5% (editable)</small>
                                     </div>
                                 </div>
                             </div>
@@ -2520,23 +2540,31 @@
                             <h3 style="color: #60a5fa; margin-bottom: 1.5rem; font-size: 1.2rem;">
                                 <i class="fas fa-chart-line"></i> Build (CapEx Market) - <span id="capex-market-currency">EUR</span>
                             </h3>
-                            
-                            <!-- Per MW Option -->
-                            <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(96, 165, 250, 0.05); border-radius: 8px;">
-                                <label style="color: #60a5fa; font-weight: 600; display: block; margin-bottom: 0.5rem;">Option 1: Per MW Costing</label>
+
+                            <!-- Toggle Tabs -->
+                            <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
+                                <button type="button" id="market-tab-permw" onclick="switchCapexTab('market', 'permw')" style="flex: 1; padding: 12px; background: #60a5fa; color: #0a0a0a; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">
+                                    Per MW Costing
+                                </button>
+                                <button type="button" id="market-tab-detailed" onclick="switchCapexTab('market', 'detailed')" style="flex: 1; padding: 12px; background: rgba(96, 165, 250, 0.1); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">
+                                    Detailed Breakdown
+                                </button>
+                            </div>
+
+                            <!-- Per MW Section -->
+                            <div id="market-permw-section" style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(96, 165, 250, 0.05); border-radius: 8px;">
+                                <label style="color: #60a5fa; font-weight: 600; display: block; margin-bottom: 0.5rem;">Cost per Gross MW</label>
                                 <div style="display: flex; gap: 1rem; align-items: center;">
                                     <input type="text" id="sponsor-capexMarketPerMW" min="0" max="25000000" placeholder="0 - 25,000,000" style="flex: 1; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" onchange="calculateCapexFromPerMW('market')">
                                     <span style="color: #94a3b8;">× <span id="capex-market-mw">0</span> MW =</span>
                                     <span id="capex-market-permw-total" style="color: #60a5fa; font-weight: 600; font-size: 1.2rem;">0</span>
                                 </div>
+                                <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 0.5rem;">Simplified costing based on per-megawatt rate</small>
                             </div>
-                            
-                            <!-- Expandable Details Option -->
-                            <div>
-                                <button type="button" onclick="toggleCapexDetails('market')" style="background: transparent; color: #60a5fa; border: 1px solid #60a5fa; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-bottom: 1rem;">
-                                    <i class="fas fa-chevron-down" id="capex-market-chevron"></i> Option 2: Detailed Breakdown
-                                </button>
-                                <div id="capex-market-details" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+
+                            <!-- Detailed Breakdown Section -->
+                            <div id="market-detailed-section" style="display: none;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                                     <div>
                                         <label style="color: #94a3b8; font-size: 0.9rem;">Architectural</label>
                                         <input type="number" id="sponsor-marketArchitectural" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
@@ -2629,54 +2657,153 @@
                                 <i class="fas fa-map-marked-alt"></i> Land & Infrastructure - <span id="land-currency">EUR</span>
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                                <!-- Land Location Quality -->
                                 <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Land Location Quality</label>
-                                    <select id="sponsor-landLocationQuality" onchange="updateLandPurchaseFromQuality()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <label style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; display: block; margin-bottom: 0.5rem;">
+                                        Land Location Quality
+                                        <span class="help-icon" style="display: inline-block; width: 16px; height: 16px; background: #00d4ff; border-radius: 50%; text-align: center; line-height: 16px; font-size: 11px; color: #0a0a0a; cursor: help; margin-left: 6px; font-weight: 700; transition: all 0.3s;" onmouseover="this.style.background='#ffd700'; this.style.boxShadow='0 0 10px rgba(255, 215, 0, 0.5)';" onmouseout="this.style.background='#00d4ff'; this.style.boxShadow='none';" title="Select land quality tier: Rural, Suburban, Urban, or Custom. Each preset has different cost per acre and acres per MW requirements.">?</span>
+                                    </label>
+                                    <select id="sponsor-landLocationQuality" onchange="updateLandPurchaseFromQuality()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; transition: all 0.3s;">
                                         <option value="rural">Rural (€100k/acre, 1.5 acres/MW)</option>
                                         <option value="suburban">Suburban (€300k/acre, 1.5 acres/MW)</option>
                                         <option value="urban" selected>Urban (€800k/acre, 1 acre/MW)</option>
                                         <option value="custom">Custom</option>
                                     </select>
+                                    <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px; line-height: 1.4;">
+                                        Preset calculations based on industry averages
+                                    </small>
                                 </div>
+
+                                <!-- Land Purchase -->
                                 <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Land Purchase</label>
-                                    <input type="text" id="sponsor-landPurchase" min="0" max="1000000000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="0 - 1,000,000,000">
-                                    <small id="sponsor-landPurchaseDetails" style="color: #64748b; font-size: 0.75rem;"></small>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; display: block; margin-bottom: 0.5rem;">
+                                        Land Purchase <span style="color: #ef4444;">*</span>
+                                        <span class="help-icon" style="display: inline-block; width: 16px; height: 16px; background: #00d4ff; border-radius: 50%; text-align: center; line-height: 16px; font-size: 11px; color: #0a0a0a; cursor: help; margin-left: 6px; font-weight: 700; transition: all 0.3s;" onmouseover="this.style.background='#ffd700'; this.style.boxShadow='0 0 10px rgba(255, 215, 0, 0.5)';" onmouseout="this.style.background='#00d4ff'; this.style.boxShadow='none';" title="Total cost to acquire land for the data center. Auto-populated based on Location Quality selection, or enter custom amount.">?</span>
+                                    </label>
+                                    <div style="position: relative;">
+                                        <input type="text" id="sponsor-landPurchase" min="0" max="1000000000" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; padding-right: 60px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; transition: all 0.3s;" onfocus="this.style.borderColor='#60a5fa'; this.style.boxShadow='0 0 10px rgba(96, 165, 250, 0.3)';" onblur="this.style.borderColor='rgba(96, 165, 250, 0.3)'; this.style.boxShadow='none';" placeholder="Enter amount">
+                                        <span id="land-currency-display" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #60a5fa; font-weight: 600; pointer-events: none;">EUR</span>
+                                    </div>
+                                    <small id="sponsor-landPurchaseDetails" style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px; line-height: 1.4;"></small>
                                 </div>
+
+                                <!-- Grid Connection Quality -->
                                 <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Grid Connection Quality</label>
-                                    <select id="sponsor-gridConnectionQuality" onchange="updateGridConnectionFromQuality()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <label style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; display: block; margin-bottom: 0.5rem;">
+                                        Grid Connection Quality
+                                        <span class="help-icon" style="display: inline-block; width: 16px; height: 16px; background: #00d4ff; border-radius: 50%; text-align: center; line-height: 16px; font-size: 11px; color: #0a0a0a; cursor: help; margin-left: 6px; font-weight: 700; transition: all 0.3s;" onmouseover="this.style.background='#ffd700'; this.style.boxShadow='0 0 10px rgba(255, 215, 0, 0.5)';" onmouseout="this.style.background='#00d4ff'; this.style.boxShadow='none';" title="Select grid infrastructure quality: Good = existing substation nearby, Medium = upgrades needed, Poor = new substation required. Affects cost per MW.">?</span>
+                                    </label>
+                                    <select id="sponsor-gridConnectionQuality" onchange="updateGridConnectionFromQuality()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; transition: all 0.3s;">
                                         <option value="good" selected>Good (€200k/MW)</option>
                                         <option value="medium">Medium (€400k/MW)</option>
                                         <option value="poor">Poor (€600k/MW)</option>
                                         <option value="custom">Custom</option>
                                     </select>
+                                    <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px; line-height: 1.4;">
+                                        Infrastructure quality affects connection costs per MW
+                                    </small>
                                 </div>
+
+                                <!-- Grid Connection Costs -->
                                 <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Grid Connection Costs</label>
-                                    <input type="text" id="sponsor-gridConnectionCosts" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
-                                    <small id="sponsor-gridConnectionRate" style="color: #64748b; font-size: 0.75rem;"></small>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; display: block; margin-bottom: 0.5rem;">
+                                        Grid Connection Costs <span style="color: #ef4444;">*</span>
+                                        <span class="help-icon" style="display: inline-block; width: 16px; height: 16px; background: #00d4ff; border-radius: 50%; text-align: center; line-height: 16px; font-size: 11px; color: #0a0a0a; cursor: help; margin-left: 6px; font-weight: 700; transition: all 0.3s;" onmouseover="this.style.background='#ffd700'; this.style.boxShadow='0 0 10px rgba(255, 215, 0, 0.5)';" onmouseout="this.style.background='#00d4ff'; this.style.boxShadow='none';" title="Total cost to connect facility to electrical grid. Includes substations, transformers, cabling. Auto-populated based on Grid Quality, or enter custom amount.">?</span>
+                                    </label>
+                                    <div style="position: relative;">
+                                        <input type="text" id="sponsor-gridConnectionCosts" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; padding-right: 60px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; transition: all 0.3s;" onfocus="this.style.borderColor='#60a5fa'; this.style.boxShadow='0 0 10px rgba(96, 165, 250, 0.3)';" onblur="this.style.borderColor='rgba(96, 165, 250, 0.3)'; this.style.boxShadow='none';" placeholder="Enter amount">
+                                        <span id="grid-currency-display" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #60a5fa; font-weight: 600; pointer-events: none;">EUR</span>
+                                    </div>
+                                    <small id="sponsor-gridConnectionRate" style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px; line-height: 1.4;"></small>
                                 </div>
+
+                                <!-- Stamp Duty Structure -->
                                 <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Stamp Duty Land Tax (SDLT) Structure</label>
-                                    <select id="sponsor-stampDutyStructure" onchange="updateStampDutyFromStructure()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;">
+                                    <label style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; display: block; margin-bottom: 0.5rem;">
+                                        Stamp Duty Land Tax (SDLT) Structure
+                                        <span class="help-icon" style="display: inline-block; width: 16px; height: 16px; background: #00d4ff; border-radius: 50%; text-align: center; line-height: 16px; font-size: 11px; color: #0a0a0a; cursor: help; margin-left: 6px; font-weight: 700; transition: all 0.3s;" onmouseover="this.style.background='#ffd700'; this.style.boxShadow='0 0 10px rgba(255, 215, 0, 0.5)';" onmouseout="this.style.background='#00d4ff'; this.style.boxShadow='none';" title="UK stamp duty structure for land purchases. Individual/Company = 5%, Company with additional properties = 8%, REIT/Institutional = 0-5% (often exempt). Affects tax on land purchase.">?</span>
+                                    </label>
+                                    <select id="sponsor-stampDutyStructure" onchange="updateStampDutyFromStructure()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; transition: all 0.3s;">
                                         <option value="individual">Individual/Personal (5%)</option>
                                         <option value="company" selected>Company/Corporate (5%)</option>
                                         <option value="company_additional">Company + 3% Surcharge (8%)</option>
                                         <option value="reit">REIT/Institutional (0-5%)</option>
                                         <option value="custom">Custom Rate</option>
                                     </select>
-                                    <small style="color: #64748b; font-size: 0.75rem;">UK SDLT rates for non-residential property</small>
+                                    <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px; line-height: 1.4;">
+                                        UK SDLT rates for non-residential property (corporate structures typically 5%)
+                                    </small>
+                                </div>
+
+                                <!-- Stamp Duty Rate % -->
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; display: block; margin-bottom: 0.5rem;">
+                                        Stamp Duty Rate (%) <span style="color: #ef4444;">*</span>
+                                        <span class="help-icon" style="display: inline-block; width: 16px; height: 16px; background: #00d4ff; border-radius: 50%; text-align: center; line-height: 16px; font-size: 11px; color: #0a0a0a; cursor: help; margin-left: 6px; font-weight: 700; transition: all 0.3s;" onmouseover="this.style.background='#ffd700'; this.style.boxShadow='0 0 10px rgba(255, 215, 0, 0.5)';" onmouseout="this.style.background='#00d4ff'; this.style.boxShadow='none';" title="Stamp duty percentage applied to land purchase. Auto-populated from Structure selection (0-20% range). Calculated as: Land Purchase × Rate %.">?</span>
+                                    </label>
+                                    <input type="text" id="sponsor-stampDutyPercent" value="5%" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; transition: all 0.3s;" onfocus="this.style.borderColor='#60a5fa'; this.style.boxShadow='0 0 10px rgba(96, 165, 250, 0.3)';" onblur="this.style.borderColor='rgba(96, 165, 250, 0.3)'; this.style.boxShadow='none';" placeholder="e.g., 5%">
+                                    <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px; line-height: 1.4;">
+                                        Applied to land purchase price (typical range: 0-20%)
+                                    </small>
+                                </div>
+
+                                <!-- Stamp Duty Fixed -->
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; display: block; margin-bottom: 0.5rem;">
+                                        Stamp Duty Fixed (Overrides %)
+                                        <span class="help-icon" style="display: inline-block; width: 16px; height: 16px; background: #00d4ff; border-radius: 50%; text-align: center; line-height: 16px; font-size: 11px; color: #0a0a0a; cursor: help; margin-left: 6px; font-weight: 700; transition: all 0.3s;" onmouseover="this.style.background='#ffd700'; this.style.boxShadow='0 0 10px rgba(255, 215, 0, 0.5)';" onmouseout="this.style.background='#00d4ff'; this.style.boxShadow='none';" title="Enter a fixed stamp duty amount to override the percentage calculation. Leave blank to use the percentage rate. Use this for negotiated or capped duty amounts.">?</span>
+                                    </label>
+                                    <div style="position: relative;">
+                                        <input type="text" id="sponsor-stampDutyFixed" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; padding-right: 60px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white; transition: all 0.3s;" onfocus="this.style.borderColor='#60a5fa'; this.style.boxShadow='0 0 10px rgba(96, 165, 250, 0.3)';" onblur="this.style.borderColor='rgba(96, 165, 250, 0.3)'; this.style.boxShadow='none';" placeholder="Optional fixed amount">
+                                        <span id="stamp-currency-display" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #60a5fa; font-weight: 600; pointer-events: none;">EUR</span>
+                                    </div>
+                                    <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px; line-height: 1.4;">
+                                        Optional: Enter fixed amount to override percentage calculation
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Developer Economics -->
+                        <div style="background: rgba(10, 14, 39, 0.6); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                            <h3 style="color: #00d4ff; margin-bottom: 1.5rem; font-size: 1.2rem;">
+                                <i class="fas fa-chart-line"></i> Developer Economics - <span id="developer-currency">EUR</span>
+                            </h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; display: block; margin-bottom: 0.5rem;">
+                                        Developer Profit (Market - Internal)
+                                        <span class="help-icon" style="display: inline-block; width: 16px; height: 16px; background: #00d4ff; border-radius: 50%; text-align: center; line-height: 16px; font-size: 11px; color: #0a0a0a; cursor: help; margin-left: 6px; font-weight: 700; transition: all 0.3s;" onmouseover="this.style.background='#ffd700'; this.style.boxShadow='0 0 10px rgba(255, 215, 0, 0.5)';" onmouseout="this.style.background='#00d4ff'; this.style.boxShadow='none';" title="Spread between Market CapEx (bank valuation) and Internal CapEx (actual build costs). Represents potential developer returns and equity value creation.">?</span>
+                                    </label>
+                                    <div style="position: relative;">
+                                        <input type="text" id="sponsor-developerProfit" disabled style="width: 100%; padding: 12px; padding-right: 60px; background: rgba(0, 212, 255, 0.1); border: 1px solid #00d4ff; border-radius: 8px; color: #00d4ff; font-weight: 700; font-size: 1.2rem; cursor: not-allowed;">
+                                        <span id="developer-profit-currency-display" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #00d4ff; font-weight: 600; pointer-events: none;">EUR</span>
+                                    </div>
+                                    <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px; line-height: 1.4;">
+                                        Spread between market value and actual costs (auto-calculated)
+                                    </small>
                                 </div>
                                 <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Stamp Duty Rate %</label>
-                                    <input type="text" id="sponsor-stampDutyPercent" value="5%" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="0% - 20%">
-                                    <small style="color: #64748b; font-size: 0.75rem;">Applied to land purchase price</small>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; display: block; margin-bottom: 0.5rem;">
+                                        Developer Margin (%)
+                                        <span class="help-icon" style="display: inline-block; width: 16px; height: 16px; background: #00d4ff; border-radius: 50%; text-align: center; line-height: 16px; font-size: 11px; color: #0a0a0a; cursor: help; margin-left: 6px; font-weight: 700; transition: all 0.3s;" onmouseover="this.style.background='#ffd700'; this.style.boxShadow='0 0 10px rgba(255, 215, 0, 0.5)';" onmouseout="this.style.background='#00d4ff'; this.style.boxShadow='none';" title="Developer profit as percentage of Internal CapEx. Formula: (Developer Profit / Internal CapEx) × 100. Typical range: 10-30% for data center projects.">?</span>
+                                    </label>
+                                    <input type="text" id="sponsor-developerMarginPercent" disabled style="width: 100%; padding: 12px; background: rgba(0, 212, 255, 0.1); border: 1px solid #00d4ff; border-radius: 8px; color: #00d4ff; font-weight: 700; font-size: 1.2rem; cursor: not-allowed;">
+                                    <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px; line-height: 1.4;">
+                                        Profit as percentage of Internal CapEx (auto-calculated)
+                                    </small>
                                 </div>
-                                <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Stamp Duty Fixed (overrides %)</label>
-                                    <input type="text" id="sponsor-stampDutyFixed" min="0" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter fixed amount">
-                                </div>
+                            </div>
+                            <div style="margin-top: 1rem; padding: 1rem; background: rgba(0, 212, 255, 0.05); border-left: 3px solid #00d4ff; border-radius: 4px;">
+                                <small style="color: #94a3b8; font-size: 0.8rem; line-height: 1.6;">
+                                    <i class="fas fa-info-circle" style="color: #00d4ff;"></i>
+                                    <strong>How Developer Economics Work:</strong><br>
+                                    • <strong>Internal CapEx</strong> = Actual construction costs (what you spend)<br>
+                                    • <strong>Market CapEx</strong> = Market/appraisal value (what banks value it at)<br>
+                                    • <strong>Developer Profit</strong> = Market - Internal (your equity value creation)<br>
+                                    • Banks use Market CapEx for loan-to-value (LTV) calculations<br>
+                                    • Higher margin = better returns for equity investors
+                                </small>
                             </div>
                         </div>
 
@@ -7851,7 +7978,7 @@ if (window.showSection) {
                         </div>
                         <div>
                             <label style="color: #94a3b8; font-size: 0.9rem;">Gross IT Load (MW) *</label>
-                            <input type="number" id="sponsor-grossITLoadMW" min="0.1" step="0.01" required value="${project?.grossITLoad || ''}" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
+                            <input type="number" id="sponsor-grossFacilityPower" min="0.1" step="0.01" required value="${project?.grossITLoad || ''}" style="width: 100%; padding: 10px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 6px; color: white;">
                         </div>
                         <div>
                             <label style="color: #94a3b8; font-size: 0.9rem;">PUE *</label>
@@ -8185,6 +8312,9 @@ if (window.showSection) {
                 const feesCurrencySpan = document.getElementById('fees-currency');
                 if (landCurrencySpan) landCurrencySpan.textContent = this.value;
                 if (feesCurrencySpan) feesCurrencySpan.textContent = this.value;
+
+                // Update Land & Infrastructure currency displays
+                updateLandInfrastructureCurrencyDisplays();
             });
         }
         
@@ -8239,7 +8369,7 @@ if (window.showSection) {
         addPercentageFormatting('sponsor-contingencyPercent');
         
         // Update MW displays when gross IT load changes
-        const grossITLoadInput = document.getElementById('sponsor-grossITLoadMW');
+        const grossITLoadInput = document.getElementById('sponsor-grossFacilityPower');
         if (grossITLoadInput) {
             grossITLoadInput.addEventListener('input', function() {
                 const mw = parseFloat(this.value) || 0;
@@ -8304,32 +8434,61 @@ if (window.showSection) {
                 }
             });
         }
+
+        // Initialize Land & Infrastructure currency displays on page load
+        updateLandInfrastructureCurrencyDisplays();
     });
     
-    function toggleCapexDetails(type) {
-        const detailsDiv = document.getElementById(`capex-${type}-details`);
-        const chevron = document.getElementById(`capex-${type}-chevron`);
+    // Switch between Per MW and Detailed tabs for CapEx sections
+    function switchCapexTab(section, tab) {
+        // section: 'internal' or 'market'
+        // tab: 'permw' or 'detailed'
 
-        if (detailsDiv) {
-            if (detailsDiv.style.display === 'none' || detailsDiv.style.display === '') {
-                detailsDiv.style.display = 'grid';
-                if (chevron) {
-                    chevron.classList.remove('fa-chevron-down');
-                    chevron.classList.add('fa-chevron-up');
-                }
-            } else {
-                detailsDiv.style.display = 'none';
-                if (chevron) {
-                    chevron.classList.remove('fa-chevron-up');
-                    chevron.classList.add('fa-chevron-down');
-                }
+        const permwSection = document.getElementById(`${section}-permw-section`);
+        const detailedSection = document.getElementById(`${section}-detailed-section`);
+        const permwTab = document.getElementById(`${section}-tab-permw`);
+        const detailedTab = document.getElementById(`${section}-tab-detailed`);
+
+        if (tab === 'permw') {
+            // Show Per MW, Hide Detailed
+            if (permwSection) permwSection.style.display = 'block';
+            if (detailedSection) detailedSection.style.display = 'none';
+
+            // Style active tab (Per MW)
+            if (permwTab) {
+                permwTab.style.background = '#60a5fa';
+                permwTab.style.color = '#0a0a0a';
+                permwTab.style.border = 'none';
+            }
+            // Style inactive tab (Detailed)
+            if (detailedTab) {
+                detailedTab.style.background = 'rgba(96, 165, 250, 0.1)';
+                detailedTab.style.color = '#60a5fa';
+                detailedTab.style.border = '1px solid rgba(96, 165, 250, 0.3)';
+            }
+        } else if (tab === 'detailed') {
+            // Hide Per MW, Show Detailed
+            if (permwSection) permwSection.style.display = 'none';
+            if (detailedSection) detailedSection.style.display = 'block';
+
+            // Style inactive tab (Per MW)
+            if (permwTab) {
+                permwTab.style.background = 'rgba(96, 165, 250, 0.1)';
+                permwTab.style.color = '#60a5fa';
+                permwTab.style.border = '1px solid rgba(96, 165, 250, 0.3)';
+            }
+            // Style active tab (Detailed)
+            if (detailedTab) {
+                detailedTab.style.background = '#60a5fa';
+                detailedTab.style.color = '#0a0a0a';
+                detailedTab.style.border = 'none';
             }
         }
     }
 
     // Update Power Calculations (IT Load and Overhead Power)
     function updateSponsorPowerCalculations() {
-        const grossPower = parseFloat(document.getElementById('sponsor-grossITLoadMW')?.value) || 0;
+        const grossPower = parseFloat(document.getElementById('sponsor-grossFacilityPower')?.value) || 0;
         const pue = parseFloat(document.getElementById('sponsor-pue')?.value) || 1.25;
 
         const itLoad = grossPower / pue;
@@ -8360,10 +8519,31 @@ if (window.showSection) {
         updateGridConnectionFromQuality();
     }
 
+    // Toggle Electricity Rate field visibility based on Lease Type
+    function toggleElectricityRate() {
+        const leaseType = document.getElementById('sponsor-leaseType')?.value;
+        const electricityGroup = document.getElementById('sponsor-electricityRateGroup');
+
+        if (electricityGroup) {
+            if (leaseType === 'Gross') {
+                electricityGroup.style.display = 'block';
+            } else {
+                electricityGroup.style.display = 'none';
+            }
+        }
+
+        // Update currency display
+        const currency = document.getElementById('sponsor-kwh-currency')?.value || 'EUR';
+        const currencyDisplay = document.getElementById('sponsor-electricity-currency-display');
+        if (currencyDisplay) {
+            currencyDisplay.textContent = currency;
+        }
+    }
+
     // Update Land Purchase based on quality selection
     function updateLandPurchaseFromQuality() {
         const quality = document.getElementById('sponsor-landLocationQuality')?.value;
-        const grossPower = parseFloat(document.getElementById('sponsor-grossITLoadMW')?.value) || 0;
+        const grossPower = parseFloat(document.getElementById('sponsor-grossFacilityPower')?.value) || 0;
         const currency = document.getElementById('sponsor-capex-currency')?.value || 'EUR';
         const currencySymbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency;
 
@@ -8406,7 +8586,7 @@ if (window.showSection) {
     // Update Grid Connection based on quality selection
     function updateGridConnectionFromQuality() {
         const quality = document.getElementById('sponsor-gridConnectionQuality')?.value;
-        const grossPower = parseFloat(document.getElementById('sponsor-grossITLoadMW')?.value) || 0;
+        const grossPower = parseFloat(document.getElementById('sponsor-grossFacilityPower')?.value) || 0;
         const currency = document.getElementById('sponsor-capex-currency')?.value || 'EUR';
         const currencySymbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency;
 
@@ -8509,7 +8689,7 @@ if (window.showSection) {
 
     function calculateCapexFromPerMW(type) {
         const perMWInput = document.getElementById(`sponsor-capex${type === 'internal' ? 'Internal' : 'Market'}PerMW`);
-        const mwValue = parseFloat(document.getElementById('sponsor-grossITLoadMW')?.value) || 0;
+        const mwValue = parseFloat(document.getElementById('sponsor-grossFacilityPower')?.value) || 0;
         const totalSpan = document.getElementById(`capex-${type}-permw-total`);
         const currency = document.getElementById('sponsor-capex-currency')?.value || 'EUR';
         
@@ -8609,7 +8789,7 @@ if (window.showSection) {
         });
         
         // Get MW value
-        const mwValue = parseFloat(document.getElementById('sponsor-grossITLoadMW')?.value) || 0;
+        const mwValue = parseFloat(document.getElementById('sponsor-grossFacilityPower')?.value) || 0;
         const currency = document.getElementById('sponsor-capex-currency')?.value || 'EUR';
         
         // Override Internal Cost per MW if individual build fields are filled
@@ -8743,6 +8923,63 @@ if (window.showSection) {
         if (landTotalEl) landTotalEl.textContent = currencySymbol + landTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
         if (feesTotalEl) feesTotalEl.textContent = currencySymbol + feesTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
         if (grandTotalEl) grandTotalEl.textContent = currencySymbol + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+        // Calculate Developer Economics
+        calculateDeveloperProfit();
+    }
+
+    // Calculate Developer Profit and Margin
+    function calculateDeveloperProfit() {
+        // Get Internal CapEx total
+        const internalTotalText = document.getElementById('sponsor-capexInternalTotal')?.textContent || '0';
+        const internalTotal = parseFloat(internalTotalText.replace(/[^0-9.-]/g, '')) || 0;
+
+        // Get Market CapEx total
+        const marketTotalText = document.getElementById('sponsor-capexMarketTotal')?.textContent || '0';
+        const marketTotal = parseFloat(marketTotalText.replace(/[^0-9.-]/g, '')) || 0;
+
+        // Calculate Developer Profit and Margin
+        const developerProfit = marketTotal - internalTotal;
+        const developerMarginPercent = internalTotal > 0 ? (developerProfit / internalTotal) * 100 : 0;
+
+        // Get currency info
+        const currency = document.getElementById('sponsor-capex-currency')?.value || 'EUR';
+        const currencySymbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency === 'JPY' ? '¥' : currency === 'AED' ? 'د.إ' : '';
+
+        // Update Developer Profit field
+        const profitField = document.getElementById('sponsor-developerProfit');
+        if (profitField) {
+            profitField.value = currencySymbol + developerProfit.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        }
+
+        // Update Developer Margin field
+        const marginField = document.getElementById('sponsor-developerMarginPercent');
+        if (marginField) {
+            marginField.value = developerMarginPercent.toFixed(2) + '%';
+        }
+
+        // Update currency displays
+        const profitCurrencyDisplay = document.getElementById('developer-profit-currency-display');
+        const developerCurrencyHeader = document.getElementById('developer-currency');
+
+        if (profitCurrencyDisplay) profitCurrencyDisplay.textContent = currency;
+        if (developerCurrencyHeader) developerCurrencyHeader.textContent = currency;
+    }
+
+    // Update currency displays in Land & Infrastructure section
+    function updateLandInfrastructureCurrencyDisplays() {
+        const currency = document.getElementById('sponsor-capex-currency')?.value || 'EUR';
+
+        // Update currency displays
+        const landCurrencyDisplay = document.getElementById('land-currency-display');
+        const gridCurrencyDisplay = document.getElementById('grid-currency-display');
+        const stampCurrencyDisplay = document.getElementById('stamp-currency-display');
+        const landCurrencyHeader = document.getElementById('land-currency');
+
+        if (landCurrencyDisplay) landCurrencyDisplay.textContent = currency;
+        if (gridCurrencyDisplay) gridCurrencyDisplay.textContent = currency;
+        if (stampCurrencyDisplay) stampCurrencyDisplay.textContent = currency;
+        if (landCurrencyHeader) landCurrencyHeader.textContent = currency;
     }
 
     async function handleSponsorFileSelect(event) {
@@ -8818,7 +9055,7 @@ if (window.showSection) {
                     status: document.getElementById('sponsor-status').value,
                     capexCurrency: document.getElementById('sponsor-capex-currency').value,
                     kwhCurrency: document.getElementById('sponsor-kwh-currency').value,
-                    grossITLoadMW: parseFloat(document.getElementById('sponsor-grossITLoadMW').value) || 0,
+                    grossITLoadMW: parseFloat(document.getElementById('sponsor-grossFacilityPower').value) || 0,
                     pue: parseFloat(document.getElementById('sponsor-pue').value) || 1.25,
                     grossMonthlyRent: parseCurrencyValue(document.getElementById('sponsor-grossMonthlyRent').value) || 0,
                     opexPercent: parsePercentageValue(document.getElementById('sponsor-opexPercent').value) || 0,
@@ -9510,7 +9747,7 @@ if (window.showSection) {
         if (capexCurrency) capexCurrency.value = project.capexCurrency || project.meta?.capexCurrency || project.currency || 'EUR';
         if (kwhCurrency) kwhCurrency.value = project.kwhCurrency || project.meta?.kwhCurrency || project.currency || 'EUR';
         
-        document.getElementById('sponsor-grossITLoadMW').value = project.grossITLoad || project.meta?.grossITLoadMW || '';
+        document.getElementById('sponsor-grossFacilityPower').value = project.grossITLoad || project.meta?.grossITLoadMW || '';
         document.getElementById('sponsor-pue').value = project.pue || project.meta?.pue || '1.25';
         
         // Populate new fields with formatting
@@ -9617,7 +9854,7 @@ if (window.showSection) {
         }
         
         // Trigger MW calculations
-        const grossITInput = document.getElementById('sponsor-grossITLoadMW');
+        const grossITInput = document.getElementById('sponsor-grossFacilityPower');
         if (grossITInput) {
             const event = new Event('input');
             grossITInput.dispatchEvent(event);
