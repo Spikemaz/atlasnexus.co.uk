@@ -3114,21 +3114,9 @@
 
                                 <!-- Day 1 Close Fees Section -->
                                 <div style="background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #4caf50;">
-                                    <div style="font-size: 13px; font-weight: 700; color: #4caf50; margin-bottom: 10px;">Fees Breakdown</div>
-                                    <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(76, 175, 80, 0.2);">
-                                        <span style="color: #94a3b8; font-size: 12px;">Development Management</span>
-                                        <span style="color: #fff; font-size: 12px;" id="sponsor-feesBreakdownDM">€0</span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(76, 175, 80, 0.2);">
-                                        <span style="color: #94a3b8; font-size: 12px;">Management Fee</span>
-                                        <span style="color: #fff; font-size: 12px;" id="sponsor-feesBreakdownMgmt">€0</span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(76, 175, 80, 0.2);">
-                                        <span style="color: #94a3b8; font-size: 12px;">Day 1 Close Fees</span>
-                                        <span style="color: #fff; font-size: 12px;" id="sponsor-feesBreakdownDay1">€0</span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; padding: 8px 0; margin-top: 6px;">
-                                        <span style="color: #4caf50; font-size: 13px; font-weight: 700;">Total Fees</span>
+                                    <div style="font-size: 13px; font-weight: 700; color: #4caf50; margin-bottom: 10px;">Day 1 Close Fees</div>
+                                    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                                        <span style="color: #4caf50; font-size: 13px; font-weight: 700;">Upfront Fees</span>
                                         <span style="color: #4caf50; font-size: 14px; font-weight: 700;" id="sponsor-feesTotal">€0</span>
                                     </div>
                                 </div>
@@ -8521,22 +8509,7 @@ if (window.showSection) {
         // Apply formatting to fees fields
         addCurrencyFormatting('sponsor-feesDM', 'sponsor-capex-currency');
         addCurrencyFormatting('sponsor-feesManagement', 'sponsor-capex-currency');
-
-        // Apply formatting to ABS Day 1 Close fee fields
-        addCurrencyFormatting('sponsor-legalIssuer', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-legalUnderwriter', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-ratingAgency', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-trusteeSetup', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-payingAgentSetup', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-financialAdvisors', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-technicalAdvisors', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-insuranceAdvisor', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-listingFees', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-spvSetup', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-swapFee', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-greenBondFee', 'sponsor-capex-currency');
-        addCurrencyFormatting('sponsor-otherTransactionCosts', 'sponsor-capex-currency');
-
+        
         // Apply formatting to all build/capex fields
         const capexFields = [
             'sponsor-buildArchitectural', 'sponsor-buildCivilStructural',
@@ -9119,55 +9092,7 @@ if (window.showSection) {
             }
         }
 
-        // Calculate Day 1 Close ABS Fees
-        // First, get debt amount for percentage-based arranger fees (need to calculate debt from LTV if available)
-        const internalArrangerPercent = parseFloat(document.getElementById('sponsor-internalArrangerFee')?.value) || 0;
-        const externalArrangerPercent = parseFloat(document.getElementById('sponsor-externalArrangerFee')?.value) || 0;
-
-        // For now, calculate arranger fees as 0 until we have debt amount
-        // TODO: Wire this to capital stack when debt amount is calculated
-        const debtAmount = 0; // Placeholder - will be calculated from capital stack
-        const internalArrangerFee = debtAmount * (internalArrangerPercent / 100);
-        const externalArrangerFee = debtAmount * (externalArrangerPercent / 100);
-
-        // Fixed ABS fees
-        const legalIssuer = parseCurrencyValue(document.getElementById('sponsor-legalIssuer')?.value) || 0;
-        const legalUnderwriter = parseCurrencyValue(document.getElementById('sponsor-legalUnderwriter')?.value) || 0;
-        const ratingAgency = parseCurrencyValue(document.getElementById('sponsor-ratingAgency')?.value) || 0;
-        const trusteeSetup = parseCurrencyValue(document.getElementById('sponsor-trusteeSetup')?.value) || 0;
-        const payingAgentSetup = parseCurrencyValue(document.getElementById('sponsor-payingAgentSetup')?.value) || 0;
-        const financialAdvisors = parseCurrencyValue(document.getElementById('sponsor-financialAdvisors')?.value) || 0;
-        const technicalAdvisors = parseCurrencyValue(document.getElementById('sponsor-technicalAdvisors')?.value) || 0;
-        const insuranceAdvisor = parseCurrencyValue(document.getElementById('sponsor-insuranceAdvisor')?.value) || 0;
-        const listingFees = parseCurrencyValue(document.getElementById('sponsor-listingFees')?.value) || 0;
-        const spvSetup = parseCurrencyValue(document.getElementById('sponsor-spvSetup')?.value) || 0;
-        const swapFee = parseCurrencyValue(document.getElementById('sponsor-swapFee')?.value) || 0;
-        const greenBondFee = parseCurrencyValue(document.getElementById('sponsor-greenBondFee')?.value) || 0;
-        const otherTransactionCosts = parseCurrencyValue(document.getElementById('sponsor-otherTransactionCosts')?.value) || 0;
-
-        // Total Day 1 Close Fees
-        const totalDay1Fees = internalArrangerFee + externalArrangerFee + legalIssuer + legalUnderwriter +
-                              ratingAgency + trusteeSetup + payingAgentSetup + financialAdvisors +
-                              technicalAdvisors + insuranceAdvisor + listingFees + spvSetup +
-                              swapFee + greenBondFee + otherTransactionCosts;
-
-        // Update Day 1 Fees display
-        const totalDay1FeesEl = document.getElementById('sponsor-totalDay1Fees');
-        if (totalDay1FeesEl) {
-            totalDay1FeesEl.textContent = currencySymbol + totalDay1Fees.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        }
-
-        // Update Fees Breakdown in Comprehensive Totals section
-        const feesBreakdownDMEl = document.getElementById('sponsor-feesBreakdownDM');
-        const feesBreakdownMgmtEl = document.getElementById('sponsor-feesBreakdownMgmt');
-        const feesBreakdownDay1El = document.getElementById('sponsor-feesBreakdownDay1');
-
-        if (feesBreakdownDMEl) feesBreakdownDMEl.textContent = currencySymbol + feesDM.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        if (feesBreakdownMgmtEl) feesBreakdownMgmtEl.textContent = currencySymbol + managementFee.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        if (feesBreakdownDay1El) feesBreakdownDay1El.textContent = currencySymbol + totalDay1Fees.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-
-        // Total fees = Development fees + Day 1 Close fees
-        const feesTotal = feesDM + managementFee + totalDay1Fees;
+        const feesTotal = feesDM + managementFee;
 
         // Calculate grand total (using internal capex for the total)
         const grandTotal = internalCapexTotal + landTotal + feesTotal;
@@ -9520,30 +9445,9 @@ if (window.showSection) {
             projectsData.push(project);
         }
 
-        // Save to backend
-        try {
-            const response = await fetch(`/api/projects/${project.id}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify(projectData)
-            });
-
-            if (!response.ok) {
-                console.error('Failed to save project:', response.status);
-                alert('Warning: Project saved locally but failed to sync with server. Changes may be lost on refresh.');
-            } else {
-                console.log('Project saved successfully to backend');
-            }
-        } catch (error) {
-            console.error('Error saving project:', error);
-            alert('Warning: Project saved locally but failed to sync with server. Changes may be lost on refresh.');
-        }
-
         renderProjects();
         closeSponsorModal();
+        // await saveProjects(); // DISABLED - causes duplicate projects
     }
 
     function generateProjectId() {
