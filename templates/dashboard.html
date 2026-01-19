@@ -9092,7 +9092,44 @@ if (window.showSection) {
             }
         }
 
-        const feesTotal = feesDM + managementFee;
+        // Calculate Day 1 Close ABS Fees (13 fixed fees + 2 percentage-based fees)
+        const internalArrangerPercent = parseFloat(document.getElementById('sponsor-internalArrangerFee')?.value) || 0;
+        const externalArrangerPercent = parseFloat(document.getElementById('sponsor-externalArrangerFee')?.value) || 0;
+
+        // For now, arranger fees are 0 until we have debt amount from capital stack
+        // TODO: Wire this to capital stack when debt amount is calculated
+        const debtAmount = 0; // Placeholder - will be calculated from capital stack
+        const internalArrangerFee = debtAmount * (internalArrangerPercent / 100);
+        const externalArrangerFee = debtAmount * (externalArrangerPercent / 100);
+
+        // Fixed ABS fees
+        const legalIssuer = parseCurrencyValue(document.getElementById('sponsor-legalIssuer')?.value) || 0;
+        const legalUnderwriter = parseCurrencyValue(document.getElementById('sponsor-legalUnderwriter')?.value) || 0;
+        const ratingAgency = parseCurrencyValue(document.getElementById('sponsor-ratingAgency')?.value) || 0;
+        const trusteeSetup = parseCurrencyValue(document.getElementById('sponsor-trusteeSetup')?.value) || 0;
+        const payingAgentSetup = parseCurrencyValue(document.getElementById('sponsor-payingAgentSetup')?.value) || 0;
+        const financialAdvisors = parseCurrencyValue(document.getElementById('sponsor-financialAdvisors')?.value) || 0;
+        const technicalAdvisors = parseCurrencyValue(document.getElementById('sponsor-technicalAdvisors')?.value) || 0;
+        const insuranceAdvisor = parseCurrencyValue(document.getElementById('sponsor-insuranceAdvisor')?.value) || 0;
+        const listingFees = parseCurrencyValue(document.getElementById('sponsor-listingFees')?.value) || 0;
+        const spvSetup = parseCurrencyValue(document.getElementById('sponsor-spvSetup')?.value) || 0;
+        const swapFee = parseCurrencyValue(document.getElementById('sponsor-swapFee')?.value) || 0;
+        const greenBondFee = parseCurrencyValue(document.getElementById('sponsor-greenBondFee')?.value) || 0;
+        const otherTransactionCosts = parseCurrencyValue(document.getElementById('sponsor-otherTransactionCosts')?.value) || 0;
+
+        // Total Day 1 Close Fees
+        const totalDay1Fees = internalArrangerFee + externalArrangerFee + legalIssuer + legalUnderwriter +
+                              ratingAgency + trusteeSetup + payingAgentSetup + financialAdvisors +
+                              technicalAdvisors + insuranceAdvisor + listingFees + spvSetup +
+                              swapFee + greenBondFee + otherTransactionCosts;
+
+        // Update Day 1 Fees display
+        const totalDay1FeesEl = document.getElementById('sponsor-totalDay1Fees');
+        if (totalDay1FeesEl) {
+            totalDay1FeesEl.textContent = currencySymbol + totalDay1Fees.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        }
+
+        const feesTotal = feesDM + managementFee + totalDay1Fees;
 
         // Calculate grand total (using internal capex for the total)
         const grandTotal = internalCapexTotal + landTotal + feesTotal;
@@ -9446,8 +9483,42 @@ if (window.showSection) {
         }
 
         renderProjects();
+
+        // Save to backend API
+        try {
+            const response = await fetch(`/api/projects/${currentSponsorProjectId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(projectData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log('[PROJECT] Project saved successfully:', result.projectId);
+                // Show success message briefly
+                const saveBtn = document.querySelector('#sponsor-editor-section button[onclick*="saveSponsorProject"]');
+                if (saveBtn) {
+                    const originalText = saveBtn.textContent;
+                    saveBtn.textContent = '✓ Saved';
+                    saveBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                    setTimeout(() => {
+                        saveBtn.textContent = originalText;
+                        saveBtn.style.background = '';
+                    }, 2000);
+                }
+            } else {
+                console.error('[PROJECT] Failed to save:', result.message);
+                alert('Failed to save project: ' + result.message);
+            }
+        } catch (error) {
+            console.error('[PROJECT] Error saving project:', error);
+            alert('Error saving project. Please try again.');
+        }
+
         closeSponsorModal();
-        // await saveProjects(); // DISABLED - causes duplicate projects
     }
 
     function generateProjectId() {
