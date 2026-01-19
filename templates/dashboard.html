@@ -2818,8 +2818,14 @@
                                     <input type="text" id="sponsor-feesDM" onchange="calculateSponsorTotals()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount">
                                 </div>
                                 <div>
-                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Management 3%</label>
-                                    <input type="text" id="sponsor-feesManagement" readonly style="width: 100%; padding: 12px; background: rgba(10, 14, 39, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 8px; color: #94a3b8;" placeholder="Auto-calculated">
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Management Fee %</label>
+                                    <input type="number" id="sponsor-feesManagementPercent" min="0" max="10" step="0.1" value="3" onchange="calculateManagementFromPercent()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="0-10%">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Default: 3% (editable)</small>
+                                </div>
+                                <div>
+                                    <label style="color: #94a3b8; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Management Fee Amount</label>
+                                    <input type="text" id="sponsor-feesManagement" onchange="calculateManagementPercent()" style="width: 100%; padding: 12px; background: #0a0e27; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; color: white;" placeholder="Enter amount or auto-calculate from %">
+                                    <small style="color: #64748b; font-size: 0.75rem;">Editable (overrides % calculation)</small>
                                 </div>
                             </div>
                         </div>
@@ -8893,17 +8899,27 @@ if (window.showSection) {
 
         // Calculate fees total
         const feesDM = parseCurrencyValue(document.getElementById('sponsor-feesDM')?.value) || 0;
-        
-        // Calculate Management 3% based on total build costs (without contingency)
-        const managementFeeBase = internalCapexBase + landPurchase + gridConnection;
-        const managementFee = managementFeeBase * 0.03;
-        
-        // Update Management 3% display
+
+        // Get management fee (use manual entry if exists, otherwise calculate from %)
         const managementFeeInput = document.getElementById('sponsor-feesManagement');
-        if (managementFeeInput) {
-            managementFeeInput.value = formatCurrencyInput(managementFee, currency);
+        const managementFeeManual = parseCurrencyValue(managementFeeInput?.value);
+
+        let managementFee;
+        if (managementFeeManual && managementFeeManual > 0) {
+            // User has entered a manual amount - use it
+            managementFee = managementFeeManual;
+        } else {
+            // Calculate from percentage
+            const managementFeeBase = internalCapexBase + landPurchase + gridConnection;
+            const managementPercent = parseFloat(document.getElementById('sponsor-feesManagementPercent')?.value) || 3;
+            managementFee = managementFeeBase * (managementPercent / 100);
+
+            // Update the amount field with calculated value
+            if (managementFeeInput) {
+                managementFeeInput.value = formatCurrencyInput(managementFee, currency);
+            }
         }
-        
+
         const feesTotal = feesDM + managementFee;
 
         // Calculate grand total (using internal capex for the total)
@@ -8980,6 +8996,56 @@ if (window.showSection) {
         if (gridCurrencyDisplay) gridCurrencyDisplay.textContent = currency;
         if (stampCurrencyDisplay) stampCurrencyDisplay.textContent = currency;
         if (landCurrencyHeader) landCurrencyHeader.textContent = currency;
+    }
+
+    // Calculate Management Fee Amount from Percentage (% → €)
+    function calculateManagementFromPercent() {
+        const managementPercent = parseFloat(document.getElementById('sponsor-feesManagementPercent')?.value) || 0;
+
+        // Get the base for calculation (Internal CapEx + Land + Grid)
+        const internalCapexBase = parseFloat(document.getElementById('sponsor-capexInternalTotal')?.textContent?.replace(/[^0-9.-]/g, '')) || 0;
+        const landPurchase = parseCurrencyValue(document.getElementById('sponsor-landPurchase')?.value) || 0;
+        const gridConnection = parseCurrencyValue(document.getElementById('sponsor-gridConnectionCosts')?.value) || 0;
+
+        const managementFeeBase = internalCapexBase + landPurchase + gridConnection;
+        const managementFeeAmount = managementFeeBase * (managementPercent / 100);
+
+        // Update the amount field
+        const currency = document.getElementById('sponsor-capex-currency')?.value || 'EUR';
+        const managementFeeInput = document.getElementById('sponsor-feesManagement');
+        if (managementFeeInput) {
+            managementFeeInput.value = formatCurrencyInput(managementFeeAmount, currency);
+        }
+
+        // Recalculate totals
+        calculateSponsorTotals();
+    }
+
+    // Calculate Management Fee Percentage from Amount (€ → %)
+    function calculateManagementPercent() {
+        const managementFeeAmount = parseCurrencyValue(document.getElementById('sponsor-feesManagement')?.value) || 0;
+
+        // Get the base for calculation (Internal CapEx + Land + Grid)
+        const internalCapexBase = parseFloat(document.getElementById('sponsor-capexInternalTotal')?.textContent?.replace(/[^0-9.-]/g, '')) || 0;
+        const landPurchase = parseCurrencyValue(document.getElementById('sponsor-landPurchase')?.value) || 0;
+        const gridConnection = parseCurrencyValue(document.getElementById('sponsor-gridConnectionCosts')?.value) || 0;
+
+        const managementFeeBase = internalCapexBase + landPurchase + gridConnection;
+
+        // Calculate reverse percentage
+        let managementPercent = 0;
+        if (managementFeeBase > 0) {
+            managementPercent = (managementFeeAmount / managementFeeBase) * 100;
+        }
+
+        // Update the percentage field
+        const percentInput = document.getElementById('sponsor-feesManagementPercent');
+        if (percentInput) {
+            percentInput.value = managementPercent.toFixed(2);
+        }
+
+        // Recalculate totals
+        calculateSponsorTotals();
     }
 
     async function handleSponsorFileSelect(event) {
