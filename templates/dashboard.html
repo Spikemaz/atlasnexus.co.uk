@@ -9520,9 +9520,30 @@ if (window.showSection) {
             projectsData.push(project);
         }
 
+        // Save to backend
+        try {
+            const response = await fetch(`/api/projects/${project.id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(projectData)
+            });
+
+            if (!response.ok) {
+                console.error('Failed to save project:', response.status);
+                alert('Warning: Project saved locally but failed to sync with server. Changes may be lost on refresh.');
+            } else {
+                console.log('Project saved successfully to backend');
+            }
+        } catch (error) {
+            console.error('Error saving project:', error);
+            alert('Warning: Project saved locally but failed to sync with server. Changes may be lost on refresh.');
+        }
+
         renderProjects();
         closeSponsorModal();
-        // await saveProjects(); // DISABLED - causes duplicate projects
     }
 
     function generateProjectId() {
